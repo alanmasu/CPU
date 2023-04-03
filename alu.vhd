@@ -35,6 +35,7 @@ entity alu is
     Port ( rs1 : in STD_LOGIC_VECTOR (31 downto 0);
            rs2 : in STD_LOGIC_VECTOR (31 downto 0);
            alu_out : out STD_LOGIC_VECTOR (31 downto 0);
+           --alu_out : signed(31 downto 0);
            opcode : in STD_LOGIC_VECTOR (3 downto 0));
 end alu;
 
@@ -64,14 +65,14 @@ begin
         arithm_logicn => arithm_logicn
     );
     
-    alu_comb: process(rs1, rs2, opcode) begin
+    alu_comb: process(rs1, rs2, opcode, a, b, au, bu)  begin
+        right_leftn <= '0';
         case (opcode) is
             when "0000" => --ADD
                 alu_out <= std_logic_vector(a + b);
             when "1000" => --SUB
                 alu_out <= std_logic_vector(a - b);
             when "0001" => --SLL
-                right_leftn <= '0';
                 alu_out <= barrell_out;
             when "0010" => --SLT
                 if a < b then
@@ -95,10 +96,7 @@ begin
             when "0111" => --ADD
                 alu_out <= rs1 and rs2;
             when others =>
-                alu_out <= (others => '0');            
+                alu_out <= (others => 'U');            
         end case;
-        
     end process;
-    
-    
 end Behavioral;
