@@ -55,7 +55,7 @@ begin
     
     --Shifter
     shamt <= rs2(4 downto 0);
-    arithm_logicn <= rs2(11);
+    arithm_logicn <= opcode(3);
     shifter : entity work.barrell_shifter
     port map(
         data_in => rs1,
@@ -65,8 +65,7 @@ begin
         arithm_logicn => arithm_logicn
     );
     
-    alu_comb: process(rs1, rs2, opcode, a, b, au, bu)  begin
-        right_leftn <= '0';
+    alu_comb: process(rs1, rs2, opcode, a, b, au, bu, barrell_out)  begin
         case (opcode) is
             when "0000" => --ADD
                 alu_out <= std_logic_vector(a + b);
@@ -88,8 +87,9 @@ begin
                 end if;
             when "0100" => --XOR
                 alu_out <= rs1 xor rs2;
-            when "0101" => --SR[L|A]
-                right_leftn <= '1';
+            when "0101" => --SRL
+                alu_out <= barrell_out;
+            when "1101" => --SRA
                 alu_out <= barrell_out;
             when "0110" => --OR
                 alu_out <= rs1 or rs2;
@@ -99,4 +99,7 @@ begin
                 alu_out <= (others => 'U');            
         end case;
     end process;
+    
+    right_leftn <= '1' when opcode(2 downto 0) = "101" else '0';
+    
 end Behavioral;

@@ -49,23 +49,47 @@ begin
     test_process : process begin
         rs1 <= (0 => '1', others => '0');
         rs2 <= (0 => '1', others => '0'); 
-        opcode <= "0000";
+        
+        opcode <= "0000"; --ADD
         wait for 10 ns;
-        opcode <= "1000";
+        
+        opcode <= "1000"; --SUB
         wait for 10 ns;
+        
         opcode <= "0001"; --SLL
         rs1 <= std_logic_vector(TO_UNSIGNED(1, 32));
         rs2 <= std_logic_vector(TO_UNSIGNED(1, 32)); 
         wait for 10 ns;
-        --SR[A|L]
-        opcode <= "0101"; 
-        rs1 <= std_logic_vector(TO_UNSIGNED(-1, 32));
-        rs2 <= std_logic_vector(TO_UNSIGNED(1, 32)); 
+        
+        opcode <= "0101"; --SRL
+        rs1 <= std_logic_vector(TO_SIGNED(-1, 32)); 
+        rs2 <= std_logic_vector(TO_SIGNED(1, 32));
+        wait for 10 ns; 
+        
+        opcode <= "1101"; --SRA
         wait for 10 ns;
         rs1 <= (31 => '1', others => '0');--std_logic_vector(TO_UNSIGNED(-1, 32));
-        rs2 <= std_logic_vector(TO_UNSIGNED(1, 32)); 
-        rs2(11) <= '1';   --SRA
         wait for 10 ns;
+        
+        opcode <= "0010"; --SLT
+        rs1 <= std_logic_vector(TO_SIGNED(-13, 32)); 
+        rs2 <= std_logic_vector(TO_SIGNED(1, 32));
+        wait for 10 ns; 
+        
+        opcode <= "0011"; --SLTU
+        wait for 10 ns;
+        
+        opcode <= "0100"; --XOR
+        rs1 <= "00000000000000000000000000001010"; 
+        rs2 <= "00000000000000000000000000001100";
+        wait for 10 ns; 
+        
+        opcode <= "0110"; --OR
+        wait for 10 ns;
+        
+        opcode <= "0111"; --AND
+        wait for 10 ns;
+        
         wait;
     end process;
 end Behavioral;
