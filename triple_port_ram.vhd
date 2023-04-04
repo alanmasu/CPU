@@ -1,0 +1,67 @@
+----------------------------------------------------------------------------------
+-- Company: 
+-- Engineer: 
+-- 
+-- Create Date: 28.03.2023 10:33:22
+-- Design Name: 
+-- Module Name: triple_port_ram - Behavioral
+-- Project Name: 
+-- Target Devices: 
+-- Tool Versions: 
+-- Description: 
+-- 
+-- Dependencies: 
+-- 
+-- Revision:
+-- Revision 0.01 - File Created
+-- Additional Comments:
+-- 
+----------------------------------------------------------------------------------
+
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+entity triple_port_ram is
+    Port ( addr_in : in STD_LOGIC_VECTOR (4 downto 0);
+           d_in : in STD_LOGIC_VECTOR (31 downto 0);
+           we : in STD_LOGIC;
+           addr_out1 : in STD_LOGIC_VECTOR (4 downto 0);
+           d_out1 : out STD_LOGIC_VECTOR (31 downto 0);
+           addr_out2 : in STD_LOGIC_VECTOR (4 downto 0);
+           d_out2 : out STD_LOGIC_VECTOR (31 downto 0);
+           clk : in STD_LOGIC;
+           res : in STD_LOGIC);
+end triple_port_ram;
+
+architecture Behavioral of triple_port_ram is
+    type ram_array is array (30 downto 0) of std_logic_vector (31 downto 0);
+begin
+    process(clk, res) is
+        variable mem: ram_array;
+    begin
+        if res = '0' then
+            res_mem : for i in 0 to 30 loop
+                mem(i) := (others => '0');
+            end loop res_mem;
+        elsif rising_edge(clk) then
+            if addr_out1 /= (addr_out1'range => '0') then
+                d_out1 <= mem(to_integer(unsigned(addr_out1)) - 1);
+            else
+                d_out1 <= (others => '0');
+            end if;
+            if addr_out2 /= (addr_out2'range => '0') then
+                d_out2 <= mem(to_integer(unsigned(addr_out2)) - 1);
+            else
+                d_out2 <= (others => '0');
+            end if;
+            if we = '1' and addr_in /= (addr_in'range => '0') then
+                mem(to_integer(unsigned(addr_in)) - 1) := d_in;
+            end if;
+        end if;
+    end process;
+
+end architecture Behavioral;
+
+
