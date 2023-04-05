@@ -87,7 +87,7 @@ begin
                     cond <= '0';
                 end if;
             when others => 
-                cond <= 'U';               
+                cond <= '0';               
         end case;
     end process;
     

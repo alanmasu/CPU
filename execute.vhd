@@ -32,31 +32,50 @@ use IEEE.STD_LOGIC_1164.ALL;
 --use UNISIM.VComponents.all;
 
 entity execute is
-    Port ( rs1_value : in STD_LOGIC_VECTOR (31 downto 0);
+    Port ( clk, res: in STD_LOGIC;
+           rs1_value : in STD_LOGIC_VECTOR (31 downto 0);
            rs2_value : in STD_LOGIC_VECTOR (31 downto 0);
            immediate : in STD_LOGIC_VECTOR (31 downto 0);
            npc : in STD_LOGIC_VECTOR(9 downto 0);
-           instruction : in STD_LOGIC_VECTOR (21 downto 0)
+           a_npcn, b_immn: in STD_LOGIC;
+           alu_opcode : in STD_LOGIC_VECTOR(3 downto 0);
+           comparator_opcode: in STD_LOGIC_VECTOR(2 downto 0);
+           jmp: out STD_LOGIC;
+           resoult, address: out STD_LOGIC_VECTOR(31 downto 0)
     );
 end execute;
 
 architecture Behavioral of execute is
     signal val1, val2, alu_resoult : std_logic_vector(31 downto 0);
-    signal alu_opcode : std_logic_vector(3 downto 0);
-    signal opcode : std_logic_vector(6 downto 0);
+    signal cond : std_logic;
 begin
     --ALU
-    alu_opcode <= instruction(30) & instruction(14 downto 12);
     alu : entity work.alu
     port map(
         rs1 => val1,
         rs2 => val2, 
         alu_out => alu_resoult,
         opcode => alu_opcode
+    );  
+    --Comparator:
+    cmp : entity work.comparator
+    port map(
+        rs1 => rs1_value,
+        rs2 => rs2_value,
+        opcode => comparator_opcode,
+        cond => cond
     );
     
-    --Opcode
-    opcode <= instruction(6 downto 0);
-
-
+    registers : process (clk, res) begin
+        if res = '0' then
+            resoult <= (others => '0');
+            address <= (others => '0');
+            jmp <= '0';
+        elsif rising_edge(clk) then
+            resoult <= alu_resoult;
+            address <= rs2_value;
+            jmp <= cond;
+        end if;
+    end process;
+    
 end Behavioral;
