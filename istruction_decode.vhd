@@ -32,24 +32,35 @@ use IEEE.STD_LOGIC_1164.ALL;
 --use UNISIM.VComponents.all;
 
 entity istruction_decode is
-    Port ( re : in STD_LOGIC;
+    Port ( clk, res : in STD_LOGIC;
            we : in STD_LOGIC;
            instruction : in STD_LOGIC_VECTOR (31 downto 0);
-           npc : in STD_LOGIC_VECTOR (9 downto 0);
-           write_data : in STD_LOGIC_VECTOR (31 downto 0);
-           write_add : in STD_LOGIC_VECTOR (4 downto 0);
-           rs1_value : out STD_LOGIC_VECTOR (31 downto 0);
-           rs2_value : out STD_LOGIC_VECTOR (31 downto 0);
+           pc, npc : in STD_LOGIC_VECTOR (9 downto 0);
+           rd_value : in STD_LOGIC_VECTOR (31 downto 0);
+           rd_addr : in STD_LOGIC_VECTOR (4 downto 0);
+           rs1_value, rs2_value: out STD_LOGIC_VECTOR (31 downto 0);
            immediate : out STD_LOGIC_VECTOR (31 downto 0);
-           alu_opcode : out STD_LOGIC_VECTOR (0 downto 0)
+           alu_opcode : out STD_LOGIC_VECTOR (3 downto 0);
+           comparator_opcode : out std_logic_vector(2 downto 0)
      );
 end istruction_decode;
 
 architecture Behavioral of istruction_decode is
-
-
-
+    signal rs1, rs2: std_logic_vector(31 downto 0);
+    signal rs1_addr, rs2_addr : STD_LOGIC_VECTOR (4 downto 0);
 begin
+    register_file: entity work.triple_port_ram
+    port map(
+        addr_in => rd_addr,
+        d_in => rd_value,
+        d_out1 => rs1_value,
+        d_out2 => rs2_value,
+        addr_out1 => rs1_addr,
+        addr_out2 => rs2_addr, 
+        clk => clk,
+        res => res,
+        we => we
+    );
 
 
 end Behavioral;

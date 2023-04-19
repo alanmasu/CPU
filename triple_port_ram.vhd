@@ -42,9 +42,12 @@ begin
         variable mem: ram_array;
     begin
         if res = '0' then
-            res_mem : for i in 0 to 30 loop
-                mem(i) := (others => '0');
-            end loop res_mem;
+--            res_mem : for i in 0 to 30 loop
+--                mem(i) := (others => '0');
+--            end loop res_mem;
+            mem := (others => (others => '0'));
+            d_out1 <= (others => '0');
+            d_out2 <= (others => '0');
         elsif rising_edge(clk) then
             if addr_out1 /= (addr_out1'range => '0') then
                 d_out1 <= mem(to_integer(unsigned(addr_out1)) - 1);
