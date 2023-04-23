@@ -35,7 +35,9 @@ entity comparator is
     Port ( rs1 : in STD_LOGIC_VECTOR (31 downto 0);
            rs2 : in STD_LOGIC_VECTOR (31 downto 0);
            opcode : in STD_LOGIC_VECTOR (2 downto 0);
-           cond : out STD_LOGIC);
+           jal: in STD_LOGIC;
+           cond : out STD_LOGIC
+        );
 end comparator;
 
 architecture Behavioral of comparator is
@@ -48,47 +50,54 @@ begin
     au <= unsigned(rs1);
     bu <= unsigned(rs2);
     
-    comb_process: process(a, au, b, bu, opcode) begin
-        case(opcode) is
-            when "000" => --BEQ
-                if a = b then
-                    cond <= '1';
-                else 
-                    cond <= '0';
-                end if;
-            when "001" => --BNE
-                if a /= b then
-                    cond <= '1';
-                else 
-                    cond <= '0';
-                end if; 
-            when "100" => --BLT
-                if a < b then
-                    cond <= '1';
-                else 
-                    cond <= '0';
-                end if ;
-            when "101" => --BGE
-                if a >= b then
-                    cond <= '1';
-                else 
-                    cond <= '0';
-                end if ;
-            when "110" => --BLTU
-                if au < bu then
-                    cond <= '1';
-                else 
-                    cond <= '0';
-                end if;
-            when "111" => --BGEU
-                if au >= bu then
-                    cond <= '1';
-                else 
-                    cond <= '0';
-                end if;
-            when others => 
-                cond <= '0';               
-        end case;
+    comb_process: process(a, au, b, bu, opcode, jal) begin
+        if jal = '0' then
+            case(opcode) is
+                when "000" => --BEQ
+                    if a = b then
+                        cond <= '1';
+                    else 
+                        cond <= '0';
+                    end if;
+                when "001" => --BNE
+                    if a /= b then
+                        cond <= '1';
+                    else 
+                        cond <= '0';
+                    end if; 
+                when "100" => --BLT
+                    if a < b then
+                        cond <= '1';
+                    else 
+                        cond <= '0';
+                    end if ;
+                when "101" => --BGE
+                    if a >= b then
+                        cond <= '1';
+                    else 
+                        cond <= '0';
+                    end if ;
+                when "110" => --BLTU
+                    if au < bu then
+                        cond <= '1';
+                    else 
+                        cond <= '0';
+                    end if;
+                when "111" => --BGEU
+                    if au >= bu then
+                        cond <= '1';
+                    else 
+                        cond <= '0';
+                    end if;
+                when others => 
+                    cond <= 'X';               
+            end case;
+        elsif jal = '1' then
+            cond <= '1';
+        else
+            cond <= 'X';
+        end if;
+
     end process;
     
 end Behavioral;

@@ -38,6 +38,7 @@ end test_comparator;
 architecture Behavioral of test_comparator is
     signal a, b : std_logic_vector(31 downto 0);
     signal opcode, opcode2: std_logic_vector(2 downto 0);
+    signal jal: std_logic := '0';
     signal cond, cond2: std_logic;
 begin
     dut: entity work.comparator
@@ -45,13 +46,15 @@ begin
         rs1 => a, 
         rs2 => b,
         cond => cond,
-        opcode => opcode
+        opcode => opcode,
+        jal => jal
     );
     dut2: entity work.comparator
     port map(
         rs1 => a, 
         rs2 => b,
         cond => cond2,
+        jal => jal,
         opcode => opcode2
     );
     
@@ -107,6 +110,10 @@ begin
         a <= (1 => '1', others => '0');             -- (A)2 <  (B)2
         wait for 10 ns;
         a <= (1 => '0', 0 => '1', others => '0');   -- (A)1 <  (B)2
+        wait for 10 ns;
+        
+        --if jal == 1 then cont <= 1;
+        jal <= '1';
         wait for 10 ns;
         
         wait;

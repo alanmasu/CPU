@@ -96,7 +96,7 @@ begin
             when "0111" => --ADD
                 alu_out <= rs1 and rs2;
             when others =>
-                alu_out <= (others => 'U');            
+                alu_out <= (others => 'X');            
         end case;
     end process;
     
