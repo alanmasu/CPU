@@ -24,7 +24,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
+use IEEE.NUMERIC_STD.ALL;
 
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx leaf cells in this code.
@@ -36,18 +36,22 @@ entity execute is
            rs1_value : in STD_LOGIC_VECTOR (31 downto 0);
            rs2_value : in STD_LOGIC_VECTOR (31 downto 0);
            immediate : in STD_LOGIC_VECTOR (31 downto 0);
-           npc : in STD_LOGIC_VECTOR(9 downto 0);
-           a_npcn, b_immn: in STD_LOGIC;
+           npc_in : in UNSIGNED(31 downto 0);
+           pc_in : in UNSIGNED(31 downto 0);
+           a_pcn, b_immn : in STD_LOGIC;
            alu_opcode : in STD_LOGIC_VECTOR(3 downto 0);
            comparator_opcode: in STD_LOGIC_VECTOR(2 downto 0);
-           jmp: out STD_LOGIC;
-           resoult, address: out STD_LOGIC_VECTOR(31 downto 0)
+           op_class_in : in STD_LOGIC_VECTOR(4 downto 0);
+           resoult_reg, resoult, address: out STD_LOGIC_VECTOR(31 downto 0);
+           npc_out : out UNSIGNED(31 downto 0);
+           op_class_out : out STD_LOGIC_VECTOR(4 downto 0);
+           jmp : out std_logic
     );
 end execute;
 
 architecture Behavioral of execute is
     signal val1, val2, alu_resoult : std_logic_vector(31 downto 0);
-    signal cond : std_logic;
+    signal cond, jal: std_logic;
 begin
     --ALU
     alu : entity work.alu
@@ -63,19 +67,32 @@ begin
         rs1 => rs1_value,
         rs2 => rs2_value,
         opcode => comparator_opcode,
-        cond => cond
+        cond => cond,
+        jal => jal
     );
     
     registers : process (clk, res) begin
         if res = '0' then
-            resoult <= (others => '0');
+            resoult_reg <= (others => '0');
             address <= (others => '0');
             jmp <= '0';
+            npc_out <= (others => '0');
+            op_class_out <= (others => '0');
         elsif rising_edge(clk) then
-            resoult <= alu_resoult;
+            resoult_reg <= alu_resoult;
             address <= rs2_value;
             jmp <= cond;
+            npc_out <= npc_in;
+            op_class_out <= op_class_in;
         end if;
     end process;
-    
+
+    --Equation
+    resoult <= alu_resoult;
+    jal <= op_class_in(0);
+    -- MUXs
+    val1 <= std_logic_vector(pc_in) when a_pcn = '0' else 
+            rs1_value;
+    val2 <= immediate when b_immn = '0' else
+            rs2_value;
 end Behavioral;
