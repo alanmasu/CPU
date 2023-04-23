@@ -38,12 +38,14 @@ entity execute is
            immediate : in STD_LOGIC_VECTOR (31 downto 0);
            npc_in : in UNSIGNED(31 downto 0);
            pc_in : in UNSIGNED(31 downto 0);
+           rd_addr_in : in std_logic_vector(4 downto 0);
            a_pcn, b_immn : in STD_LOGIC;
            alu_opcode : in STD_LOGIC_VECTOR(3 downto 0);
            comparator_opcode: in STD_LOGIC_VECTOR(2 downto 0);
            op_class_in : in STD_LOGIC_VECTOR(4 downto 0);
-           resoult_reg, resoult, address: out STD_LOGIC_VECTOR(31 downto 0);
+           resoult_reg, resoult: out STD_LOGIC_VECTOR (31 downto 0);
            npc_out : out UNSIGNED(31 downto 0);
+           rd_addr_out : out std_logic_vector(4 downto 0);
            op_class_out : out STD_LOGIC_VECTOR(4 downto 0);
            jmp : out std_logic
     );
@@ -74,16 +76,16 @@ begin
     registers : process (clk, res) begin
         if res = '0' then
             resoult_reg <= (others => '0');
-            address <= (others => '0');
             jmp <= '0';
             npc_out <= (others => '0');
             op_class_out <= (others => '0');
+            rd_addr_out <= (others => '0');
         elsif rising_edge(clk) then
             resoult_reg <= alu_resoult;
-            address <= rs2_value;
             jmp <= cond;
             npc_out <= npc_in;
             op_class_out <= op_class_in;
+            rd_addr_out <= rd_addr_in;
         end if;
     end process;
 
