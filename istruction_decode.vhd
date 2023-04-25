@@ -24,7 +24,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
+use IEEE.NUMERIC_STD.ALL;
 
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx leaf cells in this code.
@@ -35,19 +35,23 @@ entity istruction_decode is
     Port ( clk, res : in STD_LOGIC;
            we : in STD_LOGIC;
            instruction : in STD_LOGIC_VECTOR (31 downto 0);
-           pc, npc : in STD_LOGIC_VECTOR (9 downto 0);
-           rd_value : in STD_LOGIC_VECTOR (31 downto 0);
-           rd_addr : in STD_LOGIC_VECTOR (4 downto 0);
+           pc_in, npc_in : in UNSIGNED (11 downto 0);
+           rd_value : in STD_LOGIC_VECTOR (31 downto 0);            --Reg Destination val
+           rd_addr : in STD_LOGIC_VECTOR (4 downto 0);              --Reg Destination addr
            rs1_value, rs2_value: out STD_LOGIC_VECTOR (31 downto 0);
            immediate : out STD_LOGIC_VECTOR (31 downto 0);
+           rd_addr_out: out std_logic_vector(4 downto 0);
+           pc_out, npc_out : out UNSIGNED (11 downto 0);
            alu_opcode : out STD_LOGIC_VECTOR (3 downto 0);
-           comparator_opcode : out std_logic_vector(2 downto 0)
+           comparator_opcode : out STD_LOGIC_VECTOR(2 downto 0);
+           op_class : out STD_LOGIC_VECTOR(4 downto 0)
      );
 end istruction_decode;
 
 architecture Behavioral of istruction_decode is
     signal rs1, rs2: std_logic_vector(31 downto 0);
     signal rs1_addr, rs2_addr : STD_LOGIC_VECTOR (4 downto 0);
+    signal op, store, load, branch, jump : STD_LOGIC;
 begin
     register_file: entity work.triple_port_ram
     port map(
@@ -61,6 +65,22 @@ begin
         res => res,
         we => we
     );
+    
 
+    register_process : process( clk, res )
+    begin
+        if res = '0' then
+            npc_out <= (others => '0');
+            pc_out <= (others => '0');
+            op_class <= (others => '0');
+        elsif rising_edge(clk) then
+            npc_out <= resize(npc_in, 32);
+            pc_out <= resize(pc_in, 32);
+            op_class <= (4 => op, 3 => store, 2 => load, 1 => branch, 0 => jump);
+        end if ;
+        
+    end process ; -- register_process
+    
+    --Equations
 
 end Behavioral;

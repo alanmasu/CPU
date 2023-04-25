@@ -32,11 +32,12 @@ use IEEE.NUMERIC_STD.ALL;
 --use UNISIM.VComponents.all;
 
 entity instruction_fetch is
-    Port ( pc_in : in STD_LOGIC_VECTOR (9 downto 0);
+    Port ( pc_in : in STD_LOGIC_VECTOR (11 downto 0);
            pc_load,  clk, res : in STD_LOGIC;
-           instruction : out std_logic_vector(31 downto 0);
-           npc : out std_logic_vector(9 downto 0)
-          );
+           instruction : out STD_LOGIC_VECTOR(31 downto 0);
+           npc : out UNSIGNED(11 downto 0);
+           pc: buffer UNSIGNED(11 downto 0)
+        );
 end instruction_fetch;
 
 architecture Behavioral of instruction_fetch is
@@ -46,25 +47,23 @@ architecture Behavioral of instruction_fetch is
             spo : OUT STD_LOGIC_VECTOR(31 DOWNTO 0) 
         );
     END COMPONENT;
-
-    signal pc : unsigned(9 downto 0);
-    signal mem_out: std_logic_vector(31 downto 0);
+    signal mem_out: STD_LOGIC_VECTOR(31 downto 0);
 begin
 
     instruction_mem : instruction_memory
     PORT MAP (
-        a => std_logic_vector(pc),
+        a => STD_LOGIC_VECTOR(pc(11 downto 2)),
         spo => mem_out
     );
     
     counter_process : process(clk, res) begin
         if res = '0' then
-            pc <= to_unsigned(0, 10);
+            pc <= to_unsigned(0, 12);
             npc <= (0 => '1', others => '0');
         elsif rising_edge(clk) then
             if pc_load = '1' then
                 pc <= unsigned(pc_in);
-                npc <= std_logic_vector(unsigned(pc_in) + 1);
+                npc <= unsigned(pc_in) + 4;
             end if;
         end if;
     end process;
