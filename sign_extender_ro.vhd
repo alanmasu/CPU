@@ -36,21 +36,20 @@ use work.constant_package.all;
 entity sign_extender_ro is
     Port ( clk, res : in STD_LOGIC;
            instruction : in STD_LOGIC_VECTOR (31 downto 0);
-           opcode : in STD_LOGIC_VECTOR (6 downto 0);
            imm_out : out STD_LOGIC_VECTOR (31 downto 0));
 end sign_extender_ro;
 
 architecture Behavioral of sign_extender_ro is
-    signal imm : std_logic_vector (31 downto 0) := (others => '0');
     signal opcode : std_logic_vector (6 downto 0);
+    signal imm : std_logic_vector (31 downto 0) := (others => '0');
     signal imm12 : std_logic_vector(11 downto 0);
     signal imm20 : std_logic_vector(19 downto 0);
 begin
-    process (instruction, opcode) is
-    begin
+    opcode(6 downto 0) <= instruction(6 downto 0);
+    process (instruction, opcode) begin
         imm12 <= (others => '0');
         imm20 <= (others => '0');
-        imm <= (others => 'X');
+        imm <= (others => 'X');  -- da rivedere nel caso
         if opcode = opcode_jal then
             imm20(19) <= instruction(31);
             imm20(18 downto 0) <= instruction(18 downto 12);
