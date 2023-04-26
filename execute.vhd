@@ -41,12 +41,13 @@ entity execute is
            rd_addr_in : in std_logic_vector(4 downto 0);
            a_pcn, b_immn : in STD_LOGIC;
            alu_opcode : in STD_LOGIC_VECTOR(3 downto 0);
-           comparator_opcode: in STD_LOGIC_VECTOR(2 downto 0);
+           comparator_opcode, mem_opcode_in: in STD_LOGIC_VECTOR(2 downto 0);
            op_class_in : in STD_LOGIC_VECTOR(4 downto 0);
            resoult_reg, resoult: out STD_LOGIC_VECTOR (31 downto 0);
            npc_out : out UNSIGNED(31 downto 0);
            rd_addr_out : out std_logic_vector(4 downto 0);
            op_class_out : out STD_LOGIC_VECTOR(4 downto 0);
+           mem_opcode_out : out std_logic_vector(2 downto 0);
            jmp : out std_logic
     );
 end execute;
@@ -80,12 +81,14 @@ begin
             npc_out <= (others => '0');
             op_class_out <= (others => '0');
             rd_addr_out <= (others => '0');
+            mem_opcode_out <= (others => '0');
         elsif rising_edge(clk) then
             resoult_reg <= alu_resoult;
             jmp <= cond;
             npc_out <= npc_in;
             op_class_out <= op_class_in;
             rd_addr_out <= rd_addr_in;
+            mem_opcode_out <= mem_opcode_in;
         end if;
     end process;
 

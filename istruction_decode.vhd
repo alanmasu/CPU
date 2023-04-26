@@ -43,7 +43,7 @@ entity istruction_decode is
            rd_addr_out: out std_logic_vector(4 downto 0);
            pc_out, npc_out : out UNSIGNED (11 downto 0);
            alu_opcode : out STD_LOGIC_VECTOR (3 downto 0);
-           comparator_opcode : out STD_LOGIC_VECTOR(2 downto 0);
+           comparator_opcode, mem_opcode : out STD_LOGIC_VECTOR(2 downto 0);
            op_class : out STD_LOGIC_VECTOR(4 downto 0)
      );
 end istruction_decode;
@@ -75,11 +75,13 @@ begin
             npc_out <= (others => '0');
             pc_out <= (others => '0');
             op_class <= (others => '0');
+            mem_opcode <= (others => '0');
         elsif rising_edge(clk) then
             npc_out <= resize(npc_in, 32);
             pc_out <= resize(pc_in, 32);
             op_class <= (4 => op, 3 => store, 2 => load, 1 => branch, 0 => jump);
             rd_addr_out <= rd_addr;
+            mem_opcode <= func3;
             
         end if ;
         

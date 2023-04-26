@@ -40,7 +40,7 @@ architecture Behavioral of test_execute is
     signal rs1, rs2, imm, resoult, res_reg : std_logic_vector(31 downto 0) := (others => '0');
     signal pc_in, npc_in, npc_out : unsigned(31 downto 0) := (others => '0');
     signal alu_opcode : std_logic_vector(3 downto 0) := (others => '0');
-    signal cmp_opcode : std_logic_vector(2 downto 0) := (others => '0');
+    signal cmp_opcode, mem_opcode_in, mem_opcode_out: std_logic_vector(2 downto 0) := (others => '0');
     signal op_class, op_class_reg, rd_in, rd_out : std_logic_vector(4 downto 0) := (others => '0');
 
 begin
@@ -64,7 +64,9 @@ begin
         a_pcn => a_pcn,
         b_immn => b_immn,
         rd_addr_in => rd_in,
-        rd_addr_out => rd_out
+        rd_addr_out => rd_out,
+        mem_opcode_in => mem_opcode_in,
+        mem_opcode_out => mem_opcode_out
     );
 
     clock_gen : process
@@ -91,6 +93,7 @@ begin
         rs2 <= (2 => '0', 1 => '0', 0 => '1', others => '0'); --rs2 = 1
         imm <= (2 => '1', 1 => '0', 0 => '1', others => '0'); --imm = 5
         rd_in <= (1 => '1', others => '0');                   --rd_addr = 1
+        mem_opcode_in <= (1 => '1', others => '0');
         pc_in <= (others => '0');
 
         --Imposto la classe dell'operazione:
