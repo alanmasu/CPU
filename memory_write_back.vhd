@@ -55,7 +55,7 @@ architecture Behavioral of memory_write_back is
             douta : OUT STD_LOGIC_VECTOR(31 DOWNTO 0) 
         );
     END COMPONENT;
-    signal mem_out : std_logic_vector(31 downto 0);
+    signal mem_out, mem_out_extended : std_logic_vector(31 downto 0);
     signal mem_wea : std_logic_vector(3 downto 0);
 begin
     memory : data_memory
@@ -67,7 +67,7 @@ begin
         douta => mem_out
     );
     
-    mem_wea_combinatory : process( op_class, mem_opcode, mem_we )
+    mem_wea_combinational : process( op_class, mem_opcode, mem_we )
     begin
         mem_wea <= "0000";      
         if mem_we = '1' then
@@ -84,6 +84,52 @@ begin
         end if ;
     end process ; -- mem_wea_combinatory
 
+    sign_extension : process( mem_out, mem_opcode, op_class)
+    begin
+        mem_out_extended <= mem_out;
+        if op_class = "00100" then   --LOAD
+            case( mem_opcode ) is
+                when => "001"   --LH
+                    mem_out_extended(31 downto 16) <= (others => mem_out(15));
+                    mem_out_extended(15 downto 0)  <= mem_out(15 downto 0);
+                when => "101"   --LHU
+                    mem_out_extended(31 downto 16) <= (others => '0');
+                    mem_out_extended(15 downto 0)  <= mem_out(15 downto 0);
+                when => "000"   --LB
+                    mem_out_extended(31 downto 8) <= (others => mem_out(8));
+                    mem_out_extended(7 downto 0)  <= mem_out(7 downto 0);
+                when => "100"   --LBU
+                    mem_out_extended(31 downto 8) <= (others => mem_out(15));
+                    mem_out_extended(7 downto 0)  <= mem_out(7 downto 0);
+            end case ;
+        end if ;
+        
+    end process ; -- sign_extension
     
+    register_process : process( clk, res )
+    begin
+        if res = '0' then
+            pc_out <= (others => '0');
+            rd_value <= (others => '0');
+            rd_addr_out <= (others => '0');
+        elsif rising_edge(clk) then
+            --Rd_addr
+            rd_addr_out <= rd_addr_in;
+
+            --pc_out
+            if jmp = '1' and (op_class = "00010" or op_class = "00001") then
+                pc_out <= alu_resoult_reg;
+            elsif jmp = '0' then
+                pc_out <= npc_in;
+            end if ;
+
+            --rd_value
+            if op_class = "00100" then      --LOAD
+                rd_value <= mem_out_extended;
+            elsif op_class = "00001" then   --JAL
+                rd_value <= npc_in;
+            end if ;
+        end if ;
+    end process ; -- register_process
     
 end Behavioral;
