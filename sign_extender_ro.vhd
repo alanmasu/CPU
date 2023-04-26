@@ -17,39 +17,74 @@
 -- Additional Comments:
 -- 
 ----------------------------------------------------------------------------------
-
+--                  Sign. extenction
+-- Alu op                   signed
+-- Brench                   signed
+-- JAL/JALR                 signed
+-- LUI                    unsigned
+-- AUIPC                  unsigned 
+-- Store                    signed
+-- Load                     signed
+-- 
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
 entity sign_extender_ro is
     Port ( clk, res : in STD_LOGIC;
-           imm_in : in STD_LOGIC_VECTOR (19 downto 0);
+           instruction : in STD_LOGIC_VECTOR (31 downto 0);
            opcode : in STD_LOGIC_VECTOR (6 downto 0);
            imm_out : out STD_LOGIC_VECTOR (31 downto 0));
 end sign_extender_ro;
 
 architecture Behavioral of sign_extender_ro is
-    signal buff_s : std_logic_vector (31 downto 0) := (others => '0');
+    signal imm : std_logic_vector (31 downto 0) := (others => '0');
+    signal opcode : std_logic_vector (6 downto 0);
+    signal imm12 : std_logic_vector(11 downto 0);
+    signal imm20 : std_logic_vector(19 downto 0);
+
+    constant opcode_lui : std_logic_vector(5 downto 0) :=    "0110111"; 
+    constant opcode_auipc : std_logic_vector(5 downto 0) :=  "0010111"; 
+    constant opcode_jal : std_logic_vector(5 downto 0) :=    "1101111"; 
+    constant opcode_jalr : std_logic_vector(5 downto 0) :=   "1100111"; 
+    constant opcode_branch : std_logic_vector(5 downto 0) := "1100011"; 
+    constant opcode_load : std_logic_vector(5 downto 0) :=   "0000011"; 
+    constant opcode_store : std_logic_vector(5 downto 0) :=  "0100011"; 
+    constant opcode_alu_imm_op : std_logic_vector(5 downto 0) := "0010011";
+
 begin
     process (imm_in, opcode) is
         variable buf: std_logic_vector (31 downto 0) := (others => '0');
     begin
-        if opcode = "1101111" then
-            buf := (others => imm_in(19));
-            buf := buf(11 downto 0) & imm_in(19 downto 0);
-        else
-            buf := (others => imm_in(11));
-            buf := buf(19 downto 0) & imm_in(11 downto 0);
+        imm12 <= (others => '0');
+        imm20 <= (others => '0');
+        imm <= (others => 'X');
+        if opcode = opcode_jal then
+            imm20(19) <= instruction(31);
+            imm20(18 downto 0) <= instruction(18 downto 12);
+            imm20(12) <= instruction(19);
+            imm20(11 downto 0) <= instruction(30 downto 20);
+            imm12 <= (others => imm20(19));
+            imm(31 downto 21) <= imm12(11 downto 1);
+            imm(20 downto 1) <= imm20;
+            imm(0) <= '0';
+        elsif opcode = opcode_store then
+            imm20 <= (others => instruction(31));
+            imm12(11 downto 5) <= instruction(31 downto 25);
+            imm12(4 downto 0) <= instruction(11 downto 7);            
+            imm <= imm12 & imm20;
+        elsif opcode = opcode_jalr or opcode = opcode_alu_imm_op or opcode = opcode_load then   -- sign ext a 12 bit
+            imm20 <= (others => instruction(31));
+            imm12 <= instruction(31 downto 20);
+            imm <= imm12 & imm20;
         end if;
-    buff_s <= buf;
     end process;
     
     process (clk, res) begin
         if res = '0' then
             imm_out <= (others => '0');
         elsif rising_edge (clk) then
-            imm_out <= buff_s;
+            imm_out <= imm;
         end if;
     end process;
 end Behavioral;
