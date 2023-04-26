@@ -37,7 +37,7 @@ entity memory_write_back is
            op_class : in STD_LOGIC_VECTOR (4 downto 0);
            npc_in : in STD_LOGIC_VECTOR (11 downto 0);
            alu_resoult : in STD_LOGIC_VECTOR (31 downto 0);
-           alu_resoulr_reg : in STD_LOGIC_VECTOR (31 downto 0);
+           alu_resoult_reg : in STD_LOGIC_VECTOR (31 downto 0);
            rs2_value : in STD_LOGIC_VECTOR (31 downto 0);
            rd_addr_in : in STD_LOGIC_VECTOR (4 downto 0);
            rd_value : out STD_LOGIC_VECTOR (31 downto 0);
@@ -73,11 +73,11 @@ begin
         if mem_we = '1' then
             if op_class = "01000" then  --STORE
                 case (mem_opcode) is
-                    when => "010"  --SW
+                    when "010" => --SW
                         mem_wea <= "1111";
-                    when => "001"  --SH (16 bits)
+                    when "001" => --SH (16 bits)
                         mem_wea <= "0011";
-                    when => "000"  --SB (8 bits)
+                    when "000" => --SB (8 bits)
                         mem_wea <= "0001";
                 end case;
             end if ;
@@ -89,16 +89,16 @@ begin
         mem_out_extended <= mem_out;
         if op_class = "00100" then   --LOAD
             case( mem_opcode ) is
-                when => "001"   --LH
+                when "001" =>   --LH
                     mem_out_extended(31 downto 16) <= (others => mem_out(15));
                     mem_out_extended(15 downto 0)  <= mem_out(15 downto 0);
-                when => "101"   --LHU
+                when "101" =>   --LHU
                     mem_out_extended(31 downto 16) <= (others => '0');
                     mem_out_extended(15 downto 0)  <= mem_out(15 downto 0);
-                when => "000"   --LB
+                when "000" =>   --LB
                     mem_out_extended(31 downto 8) <= (others => mem_out(8));
                     mem_out_extended(7 downto 0)  <= mem_out(7 downto 0);
-                when => "100"   --LBU
+                when "100" =>   --LBU
                     mem_out_extended(31 downto 8) <= (others => mem_out(15));
                     mem_out_extended(7 downto 0)  <= mem_out(7 downto 0);
             end case ;
