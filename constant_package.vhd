@@ -1,3 +1,6 @@
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
 package constant_package is
     constant opcode_lui : std_logic_vector(5 downto 0) :=    "0110111"; 
     constant opcode_auipc : std_logic_vector(5 downto 0) :=  "0010111"; 
