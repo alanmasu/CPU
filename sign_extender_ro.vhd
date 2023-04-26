@@ -30,6 +30,9 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
+library work;
+use work.constant_package.all;
+
 entity sign_extender_ro is
     Port ( clk, res : in STD_LOGIC;
            instruction : in STD_LOGIC_VECTOR (31 downto 0);
@@ -42,16 +45,6 @@ architecture Behavioral of sign_extender_ro is
     signal opcode : std_logic_vector (6 downto 0);
     signal imm12 : std_logic_vector(11 downto 0);
     signal imm20 : std_logic_vector(19 downto 0);
-
-    constant opcode_lui : std_logic_vector(5 downto 0) :=    "0110111"; 
-    constant opcode_auipc : std_logic_vector(5 downto 0) :=  "0010111"; 
-    constant opcode_jal : std_logic_vector(5 downto 0) :=    "1101111"; 
-    constant opcode_jalr : std_logic_vector(5 downto 0) :=   "1100111"; 
-    constant opcode_branch : std_logic_vector(5 downto 0) := "1100011"; 
-    constant opcode_load : std_logic_vector(5 downto 0) :=   "0000011"; 
-    constant opcode_store : std_logic_vector(5 downto 0) :=  "0100011"; 
-    constant opcode_alu_imm_op : std_logic_vector(5 downto 0) := "0010011";
-
 begin
     process (imm_in, opcode) is
         variable buf: std_logic_vector (31 downto 0) := (others => '0');
