@@ -46,8 +46,7 @@ architecture Behavioral of sign_extender_ro is
     signal imm12 : std_logic_vector(11 downto 0);
     signal imm20 : std_logic_vector(19 downto 0);
 begin
-    process (imm_in, opcode) is
-        variable buf: std_logic_vector (31 downto 0) := (others => '0');
+    process (instruction, opcode) is
     begin
         imm12 <= (others => '0');
         imm20 <= (others => '0');
@@ -70,6 +69,10 @@ begin
             imm20 <= (others => instruction(31));
             imm12 <= instruction(31 downto 20);
             imm <= imm12 & imm20;
+		elsif opcode = opcode_lui or opcode = opcode_auipc then
+			imm20 <= instruction(31 downto 12);
+			imm12 <= (others => '0');
+			imm <= imm12 & imm20;
         end if;
     end process;
     
