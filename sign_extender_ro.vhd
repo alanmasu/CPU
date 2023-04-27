@@ -42,36 +42,44 @@ end sign_extender_ro;
 architecture Behavioral of sign_extender_ro is
     signal opcode : std_logic_vector (6 downto 0);
     signal imm : std_logic_vector (31 downto 0) := (others => '0');
-    signal imm12 : std_logic_vector(11 downto 0);
-    signal imm20 : std_logic_vector(19 downto 0);
 begin
     opcode(6 downto 0) <= instruction(6 downto 0);
-    process (instruction, opcode) begin
-        imm12 <= (others => '0');
-        imm20 <= (others => '0');
+    process (instruction, opcode) 
+        variable imm12 : std_logic_vector(11 downto 0);
+        variable imm20 : std_logic_vector(19 downto 0);
+    begin
+        imm12 := (others => '0');
+        imm20 := (others => '0');
         imm <= (others => 'X');  -- da rivedere nel caso
         if opcode = opcode_jal then
-            imm20(19) <= instruction(31);
-            imm20(18 downto 0) <= instruction(18 downto 12);
-            imm20(12) <= instruction(19);
-            imm20(11 downto 0) <= instruction(30 downto 20);
-            imm12 <= (others => imm20(19));
-            imm(31 downto 21) <= imm12(11 downto 1);
-            imm(20 downto 1) <= imm20;
-            imm(0) <= '0';
+            imm20(19) := instruction(31);
+            imm20(18 downto 11) := instruction(19 downto 12);
+            imm20(10 downto 1) := instruction(30 downto 21);
+            imm20(0) := '0';
+            imm12 := (others => imm20(19));
+            imm(31 downto 20) <= imm12(11 downto 0);
+            imm(19 downto 0) <= imm20;
         elsif opcode = opcode_store then
-            imm20 <= (others => instruction(31));
-            imm12(11 downto 5) <= instruction(31 downto 25);
-            imm12(4 downto 0) <= instruction(11 downto 7);            
-            imm <= imm12 & imm20;
-        elsif opcode = opcode_jalr or opcode = opcode_alu_imm_op or opcode = opcode_load then   -- sign ext a 12 bit
-            imm20 <= (others => instruction(31));
-            imm12 <= instruction(31 downto 20);
-            imm <= imm12 & imm20;
-		elsif opcode = opcode_lui or opcode = opcode_auipc then
-			imm20 <= instruction(31 downto 12);
-			imm12 <= (others => '0');
-			imm <= imm12 & imm20;
+            imm20 := (others => instruction(31));
+            imm12(11 downto 5) := instruction(31 downto 25);
+            imm12(4 downto 0) := instruction(11 downto 7);            
+            imm <= imm20 & imm12;
+        elsif (opcode = opcode_jalr) or (opcode = opcode_alu_imm_op) or (opcode = opcode_load) then   -- sign ext a 12 bit
+            imm20 := (others => instruction(31));
+            imm12 := instruction(31 downto 20);
+            imm <= imm20 & imm12;
+			--imm <= imm12 & imm20;
+		elsif (opcode = opcode_lui) or (opcode = opcode_auipc) then
+			imm20 := instruction(31 downto 12);
+			imm12 := (others => '0');
+			imm <= imm20 & imm12;
+		elsif opcode = opcode_brench then
+		    imm20 := (others => instruction(31));
+            imm12(11) := instruction(7);
+			imm12(10 downto 5) := instruction(30 downto 25);
+            imm12(4 downto 1) := instruction(11 downto 8);
+            imm12(0) := '0';
+			imm <= imm20 & imm12;
         end if;
     end process;
     

@@ -26,53 +26,60 @@ entity test_sign_extender_ro is
 end test_sign_extender_ro;
 
 architecture Behavioral of test_sign_extender_ro is
-    component sign_extender_ro is
-        Port ( clk, res : in STD_LOGIC;
-           imm_in : in STD_LOGIC_VECTOR (19 downto 0);
-           opcode : in STD_LOGIC_VECTOR (6 downto 0);
-           imm_out : out STD_LOGIC_VECTOR (31 downto 0));
-    end component sign_extender_ro;
-    
-    signal imm_in : STD_LOGIC_VECTOR (19 downto 0);
-    signal opcode : STD_LOGIC_VECTOR (6 downto 0);
-    signal imm_out : STD_LOGIC_VECTOR (31 downto 0);
+    signal instruction : STD_LOGIC_VECTOR (31 downto 0) := (others => '0');
+    signal imm_out : STD_LOGIC_VECTOR (31 downto 0) := (others => '0');
     signal clk, res : STD_LOGIC;
-    
+    signal s1, s2 : std_logic_vector(1 downto 0) := "00";
+    signal s3 :std_logic_vector(3 downto 0) := "0000";
 begin
-    dut : sign_extender_ro port map (
-        clk => clk, res => res, imm_in => imm_in, 
-        imm_out => imm_out, opcode => opcode);
+    dut : entity work.sign_extender_ro 
+    port map (
+        clk => clk, 
+        res => res,
+        imm_out => imm_out, 
+        instruction => instruction
+    );
 
-process begin
-    clk <= '0';
-    wait for 10 ns;
-    clk <= '1';
-    wait for 10 ns;
-end process;      
-
-process is
-    constant jal_instr : std_logic_vector (6 downto 0) := "1101111";
-    constant generic_imm_instr : std_logic_vector (6 downto 0) := "1101001";
-    constant sign_extending_12bit : std_logic_vector (11 downto 0) := x"3BB";
-    constant sign_extending_20bit : std_logic_vector (19 downto 0) := x"B89E9";
-begin
-    imm_in <= (others => '0');
-    res <= '0';
-    wait for 105 ns;
-    res <= '1';
+    process begin
+        clk <= '1';
+        wait for 5 ns;
+        clk <= '0';
+        wait for 5 ns;
+    end process;      
     
-    opcode <= jal_instr;
-    wait for 5 ns;
-    imm_in <= sign_extending_20bit;
-    wait for 3 ns;
-    wait for 100 ns;
+    res_prcess : process
+    begin
+        res <= '0';
+        wait for 10 ns;
+        res <= '1';
+        wait;
+    end process ; -- res_prcess
     
-    opcode <= generic_imm_instr;
-    wait for 5 ns;
-    imm_in <= imm_in(19 downto 12) & sign_extending_12bit;
-    wait for 3 ns;
-    
-    wait;
-end process;
-
+    process is
+        constant n_instr : natural := 11;
+        type array_of_costants is array (0 to n_instr) of std_logic_vector(31 downto 0);
+        constant instructions : array_of_costants := (
+            x"00a08013",
+            x"fe208013",
+            x"00001037",
+            x"80000037",
+            x"00001117",
+            x"80000117",
+            x"fe2084e3",
+            x"00208663",
+            x"fe222ea3",
+            x"0041a123",
+            x"fd9ff0ef",
+            x"0040016f"
+        );
+    begin      
+        wait for 9 ns;
+        test_for : for i in 0 to n_instr loop
+            instruction <= instructions(i);
+            wait for 10 ns;
+        end loop ; -- test_for  
+        wait for 10 ns;  
+        wait;
+    end process;
+    s3 <= s1 & s2;
 end Behavioral;
