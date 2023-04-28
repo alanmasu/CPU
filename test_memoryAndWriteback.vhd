@@ -86,7 +86,6 @@ begin
         npc_in <= (2 => '1', 1 => '0', 0 => '0', others => '0');
         rs2_value <= (2 => '1', 1 => '1', 0 => '1', others => '0');
         alu_resoult <= (2 => '1', 1 => '1', 0 => '0', others => '0');
-        alu_resoult_reg <= (2 => '0', 1 => '1', 0 => '0', others => '0');
         rd_addr_in <= "00101";
         
         --OP
@@ -151,5 +150,13 @@ begin
         wait for 10 ns;
         wait;
     end process ; -- test_process
+    
+    process (clk, res) begin
+        if res = '0' then
+            alu_resoult_reg <= (others => '0');
+        elsif rising_edge(clk) then
+            alu_resoult_reg <= alu_resoult;
+        end if;
+    end process;
 
 end Behavioral;
