@@ -42,7 +42,8 @@ entity memory_write_back is
            rd_addr_in : in STD_LOGIC_VECTOR (4 downto 0);
            rd_value : out STD_LOGIC_VECTOR (31 downto 0);
            rd_addr_out : out STD_LOGIC_VECTOR (4 downto 0);
-           pc_out : out STD_LOGIC_VECTOR (11 downto 0));
+           pc_out : out STD_LOGIC_VECTOR (11 downto 0)
+    );
 end memory_write_back;
 
 architecture Behavioral of memory_write_back is
@@ -62,7 +63,7 @@ begin
     PORT MAP (
         clka => clk,
         wea => mem_wea,
-        addra => alu_resoult,
+        addra => alu_resoult(10 downto 0),
         dina => rs2_value,
         douta => mem_out
     );
@@ -79,6 +80,8 @@ begin
                         mem_wea <= "0011";
                     when "000" => --SB (8 bits)
                         mem_wea <= "0001";
+                    when others =>
+                        mem_wea <= "0000";
                 end case;
             end if ;
         end if ;
@@ -101,6 +104,8 @@ begin
                 when "100" =>   --LBU
                     mem_out_extended(31 downto 8) <= (others => mem_out(15));
                     mem_out_extended(7 downto 0)  <= mem_out(7 downto 0);
+                when others =>
+                    mem_out_extended <= mem_out;
             end case ;
         end if ;
         
@@ -117,17 +122,17 @@ begin
             rd_addr_out <= rd_addr_in;
 
             --pc_out
+            pc_out <= npc_in;
             if jmp = '1' and (op_class = "00010" or op_class = "00001") then
-                pc_out <= alu_resoult_reg;
-            elsif jmp = '0' then
-                pc_out <= npc_in;
+                pc_out <= alu_resoult_reg(11 downto 0);
             end if ;
 
             --rd_value
             if op_class = "00100" then      --LOAD
                 rd_value <= mem_out_extended;
             elsif op_class = "00001" then   --JAL
-                rd_value <= npc_in;
+                rd_value(11 downto 0 ) <= npc_in;
+                rd_value(31 downto 12) <= (others => '0');
             end if ;
         end if ;
     end process ; -- register_process
