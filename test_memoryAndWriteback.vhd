@@ -15,7 +15,7 @@
 -- Revision:
 -- Revision 0.01 - File Created
 -- Additional Comments:
--- 
+-- To Test for at least for 260ns
 ----------------------------------------------------------------------------------
 
 
@@ -140,12 +140,20 @@ begin
             alu_resoult <= std_logic_vector(to_unsigned(i,32));  --rd = i
             wait for 10 ns;
         end loop ;
-
-
-        alu_resoult <= std_logic_vector(to_signed(100000,32));
+        alu_resoult <= std_logic_vector(to_signed(45,32));
+        wait for 10 ns;
+        
         op_class <= "00010"; --Brench
         wait for 10 ns;
 
+        op_class <= "00001"; --JAL
+        wait for 10 ns;
+        
+        jmp <= '1';
+        op_class <= "00010"; --Brench
+        alu_resoult <= std_logic_vector(to_signed(34,32));
+        wait for 10 ns;
+        
         op_class <= "00001"; --JAL
         wait for 10 ns;
         wait;
