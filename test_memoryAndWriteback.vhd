@@ -79,7 +79,7 @@ begin
     end process ; -- res_gen
 
     test_process : process begin
-        wait for 9 ns; --Waiting reset
+        wait for 11 ns; --Waiting reset
         
         --Setto i valori di ingresso:
         jmp <= '0';

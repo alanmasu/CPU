@@ -99,10 +99,10 @@ begin
                     mem_out_extended(31 downto 16) <= (others => '0');
                     mem_out_extended(15 downto 0)  <= mem_out(15 downto 0);
                 when "000" =>   --LB
-                    mem_out_extended(31 downto 8) <= (others => mem_out(8));
+                    mem_out_extended(31 downto 8) <= (others => mem_out(7));
                     mem_out_extended(7 downto 0)  <= mem_out(7 downto 0);
                 when "100" =>   --LBU
-                    mem_out_extended(31 downto 8) <= (others => mem_out(15));
+                    mem_out_extended(31 downto 8) <= (others => '0');
                     mem_out_extended(7 downto 0)  <= mem_out(7 downto 0);
                 when others =>
                     mem_out_extended <= mem_out;
