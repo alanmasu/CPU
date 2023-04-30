@@ -39,12 +39,13 @@ entity istruction_decode is
            rd_value : in STD_LOGIC_VECTOR (31 downto 0);            --Reg Destination val
            rd_addr : in STD_LOGIC_VECTOR (4 downto 0);              --Reg Destination addr
            rs1_value, rs2_value: out STD_LOGIC_VECTOR (31 downto 0);
-           immediate : out STD_LOGIC_VECTOR (31 downto 0);
+           immediate_out : out STD_LOGIC_VECTOR (31 downto 0);
            rd_addr_out: out std_logic_vector(4 downto 0);
            pc_out, npc_out : out UNSIGNED (11 downto 0);
-           alu_opcode : out STD_LOGIC_VECTOR (3 downto 0);
-           comparator_opcode, mem_opcode : out STD_LOGIC_VECTOR(2 downto 0);
-           op_class : out STD_LOGIC_VECTOR(4 downto 0)
+           alu_opcode_out : out STD_LOGIC_VECTOR (3 downto 0);
+           comparator_opcode_out, mem_opcode_out : out STD_LOGIC_VECTOR(2 downto 0);
+           a_pcn, b_immn : out STD_LOGIC;
+           op_class : out STD_LOGIC_VECTOR(4 downto 0);
      );
 end istruction_decode;
 
@@ -53,6 +54,7 @@ architecture Behavioral of istruction_decode is
     signal rs1_addr, rs2_addr, rd_addr: STD_LOGIC_VECTOR (4 downto 0);
     signal func3 : std_logic_vector(2 downto 0);
     signal opcode, func7 : std_logic_vector(6 downto 0);
+    signal alu_opcode_in : STD_LOGIC_VECTOR (3 downto 0);
     signal op, store, load, branch, jump : STD_LOGIC;
 begin
     register_file: entity work.triple_port_ram
@@ -67,7 +69,13 @@ begin
         res => res,
         we => we
     );
-    
+    sign_extender: entity work.sign_extender_ro
+    port map(
+        clk => clk,
+        res => res,
+        instruction => instruction,
+        imm_out => immediate
+    );
 
     register_process : process( clk, res )
     begin
@@ -86,6 +94,40 @@ begin
         end if ;
         
     end process ; -- register_process
+
+    op_class_process : process(opcode)
+    begin
+        if func7 = "0000000" or func7 = "0100000" then
+            alu_opcode(3) <= func7(5);
+            alu_opcode(2 downto 0) <= func3; 
+        else 
+            alu_opcode <= (others => '0');
+        end if ;
+        case( opcode ) is
+            when opcode_op => 
+                op <= '1';
+            when opcode_store => 
+                store <= '1';
+
+            when opcode_load =>
+                load <= '1';
+            
+            when opcode_branch =>
+                branch <= '1';
+
+            when opcode_jalr =>
+                jump <= '1';
+            when opcode_jal =>
+                jump <= '1';
+            
+            when others =>
+                op <= '0';
+                store <= '0';
+                load <= '0';
+                branch <= '0';
+                jump <= '0';
+        end case ;
+    end process ; -- op_class_process
     
     --Equations
     opcode <= instruction(6 downto 0);
@@ -93,7 +135,6 @@ begin
     func3 <= instruction(14 downto 12);
     rs1_addr <= instruction(19 downto 15);
     rs2_addr <= instruction(24 downto 20);
-    -- imm <= instruction(31 downto 20)  --Da rivedere
     func7 <= instruction(31 downto 25);
 
 end Behavioral;
