@@ -49,6 +49,9 @@ begin
             d_out1 <= (others => '0');
             d_out2 <= (others => '0');
         elsif rising_edge(clk) then
+            if we = '1' and addr_in /= (addr_in'range => '0') then
+                mem(to_integer(unsigned(addr_in)) - 1) := d_in;
+            end if;
             if addr_out1 /= (addr_out1'range => '0') then
                 d_out1 <= mem(to_integer(unsigned(addr_out1)) - 1);
             else
@@ -58,9 +61,6 @@ begin
                 d_out2 <= mem(to_integer(unsigned(addr_out2)) - 1);
             else
                 d_out2 <= (others => '0');
-            end if;
-            if we = '1' and addr_in /= (addr_in'range => '0') then
-                mem(to_integer(unsigned(addr_in)) - 1) := d_in;
             end if;
         end if;
     end process;

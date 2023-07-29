@@ -16,6 +16,7 @@ Costruzione di una CPU basata su RISC-V in VHDL divisa in 5 stadi:
   - [x] Da testare 
 - [ ] Testare il file register
 - [ ] Creare il decoder
+- [ ] Aggiungere il load_enable
 
 ## Execute [DONE]
 - [x] Inserire i multiplaxer
