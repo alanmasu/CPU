@@ -48,6 +48,7 @@ entity execute is
            rd_addr_out : out std_logic_vector(4 downto 0);
            op_class_out : out STD_LOGIC_VECTOR(4 downto 0);
            mem_opcode_out : out std_logic_vector(2 downto 0);
+           rs2_out : out std_logic_vector(31 downto 0);
            jmp : out std_logic
     );
 end execute;
@@ -82,6 +83,7 @@ begin
             op_class_out <= (others => '0');
             rd_addr_out <= (others => '0');
             mem_opcode_out <= (others => '0');
+            rs2_out <= (others => '0');
         elsif rising_edge(clk) then
             resoult_reg <= alu_resoult;
             jmp <= cond;
@@ -89,6 +91,7 @@ begin
             op_class_out <= op_class_in;
             rd_addr_out <= rd_addr_in;
             mem_opcode_out <= mem_opcode_in;
+            rs2_out <= rs2_value;
         end if;
     end process;
 
