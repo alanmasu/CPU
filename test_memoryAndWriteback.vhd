@@ -79,13 +79,12 @@ begin
     end process ; -- res_gen
 
     test_process : process begin
-        wait for 11 ns; --Waiting reset
+        wait for 9 ns; --Waiting reset
         
         --Setto i valori di ingresso:
         jmp <= '0';
-        npc_in <= (2 => '1', 1 => '0', 0 => '0', others => '0');
-        rs2_value <= (2 => '1', 1 => '1', 0 => '1', others => '0');
-        alu_resoult <= (2 => '1', 1 => '1', 0 => '0', others => '0');
+        rs2_value <= (2 => '1', 1 => '1', 0 => '1', others => '0');     --rs2 = 7
+        alu_resoult <= (2 => '1', 1 => '1', 0 => '0', others => '0');   --rd  = 3
         rd_addr_in <= "00101";
         
         --OP
@@ -95,8 +94,8 @@ begin
         --Store
         op_class <= "01000"; 
         mem_we <= '1';
-        alu_resoult <= std_logic_vector(to_unsigned(1,32));  --rd = x1
-        rs2_value <= std_logic_vector(to_signed(300000,32));  --rs2 = 3000000
+        alu_resoult <= std_logic_vector(to_unsigned(1,32));     --rd = x1
+        rs2_value <= std_logic_vector(to_signed(300000,32));    --rs2 = 3000000
         mem_opcode <= "010"; --SW
         wait for 10 ns;
 
@@ -167,4 +166,5 @@ begin
         end if;
     end process;
 
+    npc_in <= STD_LOGIC_VECTOR(unsigned(pc_out) + 1) when res = '1' else (others => '0');   
 end Behavioral;
