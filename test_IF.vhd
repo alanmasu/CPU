@@ -24,7 +24,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
+use IEEE.NUMERIC_STD.ALL;
 
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx leaf cells in this code.
@@ -36,12 +36,14 @@ end test_IF;
 
 architecture Behavioral of test_IF is
     signal clk, res, pc_load : std_logic := '0';
-    signal pc_in, npc_out : std_logic_vector(9 downto 0) := (others => '0');
+    signal pc_in : std_logic_vector(11 downto 0) := (others => '0');
+    signal npc_out : unsigned(11 downto 0) := (others => '0');
     signal instruction : std_logic_vector(31 downto 0):= (others => '0');
-    
+    signal wea : std_logic_vector(0 downto 0) := "0";
+
     -- Test signals
     signal sel: std_logic :='0';
-    signal val : std_logic_vector(9 downto 0) := "0010001101";
+    signal val : std_logic_vector(11 downto 0) := "000001000000"; --"InstrMem[16] = 3e800093"
 begin
     dut: entity work.instruction_fetch
     port map(
@@ -50,7 +52,10 @@ begin
         pc_in => pc_in,
         pc_load => pc_load,
         npc => npc_out,
-        instruction => instruction
+        instruction => instruction,
+        --For programming
+        instruction_in => x"00000100",
+        wea => wea
     );
     
     clk_gen: process begin
@@ -59,16 +64,35 @@ begin
     end process;
 
     test_process : process begin
-        res <= '0'; 
+        res <= '0';
         wait for 19 ns;
         pc_load <= '1';
         res <= '1';
-        wait for 70 ns;
+        wait for 180 ns;
         sel <= '1';
         wait for 10 ns;
         sel <= '0';
+        wait for 40 ns;
+        --Scrittura
+          -- reimposto PC
+        sel <= '1';
+        val <= "000000000000";
+        wait for 10 ns;
+          -- scrivo
+        sel <= '0';
+        wea <= "1";
+        wait for 70 ns;
+        --Lettura
+          -- reimposto PC
+        wea <= "0";
+        sel <= '1';
+        val <= "000000000000";
+        wait for 10 ns;
+          -- leggo
+        sel <= '0';
+        wait for 70 ns;
         wait;
     end process;
     
-    pc_in <= npc_out when sel = '0' else val;
+    pc_in <= std_logic_vector(npc_out) when sel = '0' else val;
 end Behavioral;

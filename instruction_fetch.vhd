@@ -34,6 +34,8 @@ use IEEE.NUMERIC_STD.ALL;
 entity instruction_fetch is
     Port ( pc_in : in STD_LOGIC_VECTOR (11 downto 0);
            pc_load,  clk, res : in STD_LOGIC;
+           instruction_in : in STD_LOGIC_VECTOR(31 downto 0);
+           wea : in STD_LOGIC_VECTOR(0 downto 0);
            instruction : out STD_LOGIC_VECTOR(31 downto 0);
            npc : out UNSIGNED(11 downto 0);
            pc: buffer UNSIGNED(11 downto 0)
@@ -41,19 +43,27 @@ entity instruction_fetch is
 end instruction_fetch;
 
 architecture Behavioral of instruction_fetch is
-    COMPONENT instruction_memory
-        PORT (
-            a : IN STD_LOGIC_VECTOR(9 DOWNTO 0);
-            spo : OUT STD_LOGIC_VECTOR(31 DOWNTO 0) 
-        );
+    COMPONENT instruction_mem
+      PORT (
+        clka : IN STD_LOGIC;
+        ena : IN STD_LOGIC;
+        wea : IN STD_LOGIC_VECTOR(0 DOWNTO 0);
+        addra : IN STD_LOGIC_VECTOR(9 DOWNTO 0);
+        dina : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+        douta : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
+      );
     END COMPONENT;
     signal mem_out: STD_LOGIC_VECTOR(31 downto 0);
 begin
 
-    instruction_mem : instruction_memory
+    memoria_istruzioni: instruction_mem
     PORT MAP (
-        a => STD_LOGIC_VECTOR(pc(11 downto 2)),
-        spo => mem_out
+        clka => clk,
+        ena => pc_load,
+        wea => wea,
+        addra => std_logic_vector(pc_in(11 downto 2)),
+        dina => instruction_in,
+        douta => mem_out
     );
     
     counter_process : process(clk, res) begin
@@ -68,14 +78,14 @@ begin
         end if;
     end process;
     
-    register_process: process( clk, res) begin
-        if res = '0' then
-            instruction <= (others => '0');
-        elsif rising_edge(clk) then
-            if pc_load = '1' then
-                instruction <= mem_out;
-            end if;
-        end if;
-    end process;
-    
+    -- register_process: process( clk, res) begin
+    --     if res = '0' then
+    --         instruction <= (others => '0');
+    --     elsif rising_edge(clk) then
+    --         if pc_load = '1' then
+    --             --instruction <= mem_out;
+    --         end if;
+    --     end if;
+    -- end process;
+    instruction <= mem_out;
 end Behavioral;
