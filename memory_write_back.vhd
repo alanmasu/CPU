@@ -128,9 +128,11 @@ begin
             end if ;
 
             --rd_value
-            if op_class = "00100" then      --LOAD
+            if op_class = "10000" then          --ALU_OP
+                rd_value <= alu_resoult_reg;
+            elsif op_class = "00100" then       --LOAD
                 rd_value <= mem_out_extended;
-            elsif op_class = "00001" then   --JAL
+            elsif op_class = "00001" then       --JAL
                 rd_value(11 downto 0 ) <= npc_in;
                 rd_value(31 downto 12) <= (others => '0');
             end if ;

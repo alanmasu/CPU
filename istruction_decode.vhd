@@ -56,7 +56,7 @@ architecture Behavioral of istruction_decode is
     signal rs1_addr, rs2_addr, rd_addr: STD_LOGIC_VECTOR (4 downto 0);
     signal func3 : std_logic_vector(2 downto 0);
     signal opcode, func7 : std_logic_vector(6 downto 0);
-    signal alu_opcode_in : STD_LOGIC_VECTOR (3 downto 0);
+    --signal alu_opcode_in : STD_LOGIC_VECTOR (3 downto 0);
     signal op, store, load, branch, jump : STD_LOGIC;
 begin
     register_file: entity work.triple_port_ram
@@ -85,12 +85,14 @@ begin
             npc_out <= (others => '0');
             pc_out <= (others => '0');
             op_class <= (others => '0');
+            alu_opcode <= (others => '0');
             mem_opcode <= (others => '0');
             comparator_opcode <= (others => '0');
             rs1_value <= (others =>'0');
             rs2_value <= (others =>'0');
-            a_pcn <= '0';
-            b_immn <= '0';
+            rd_addr_out <= (others => '0');
+            a_pcn <= '1';
+            b_immn <= '1';
             op <= '0';
             store <= '0';
             load <= '0';

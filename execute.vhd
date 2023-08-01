@@ -98,6 +98,7 @@ begin
     --Equation
     resoult <= alu_resoult;
     jal <= op_class_in(0);
+    
     -- MUXs
     val1 <= std_logic_vector(pc_in) when a_pcn = '0' else 
             rs1_value;
