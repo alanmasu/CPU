@@ -68,8 +68,8 @@ begin
     
     counter_process : process(clk, res) begin
         if res = '0' then
-            pc <= to_unsigned(0, 12);
-            npc <= (0 => '1', others => '0');
+            pc  <= (others => '0');
+            npc <= (others => '0');
         elsif rising_edge(clk) then
             if pc_load = '1' then
                 pc <= unsigned(pc_in);
@@ -83,7 +83,7 @@ begin
     --         instruction <= (others => '0');
     --     elsif rising_edge(clk) then
     --         if pc_load = '1' then
-    --             --instruction <= mem_out;
+    --             instruction <= mem_out;
     --         end if;
     --     end if;
     -- end process;
