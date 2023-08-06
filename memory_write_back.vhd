@@ -24,7 +24,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
+use IEEE.NUMERIC_STD.ALL;
 
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx leaf cells in this code.
@@ -35,11 +35,12 @@ entity memory_write_back is
     Port ( clk, res, jmp, mem_we: in STD_LOGIC;
            mem_opcode : in STD_LOGIC_VECTOR(2 downto 0);
            op_class : in STD_LOGIC_VECTOR (4 downto 0);
-           npc_in : in STD_LOGIC_VECTOR (11 downto 0);
+           npc_in : in UNSIGNED (31 downto 0);
            alu_resoult : in STD_LOGIC_VECTOR (31 downto 0);
            alu_resoult_reg : in STD_LOGIC_VECTOR (31 downto 0);
            rs2_value : in STD_LOGIC_VECTOR (31 downto 0);
            rd_addr_in : in STD_LOGIC_VECTOR (4 downto 0);
+           mem_ena : in STD_LOGIC;
            rd_value : out STD_LOGIC_VECTOR (31 downto 0);
            rd_addr_out : out STD_LOGIC_VECTOR (4 downto 0);
            pc_out : out STD_LOGIC_VECTOR (11 downto 0)
@@ -51,6 +52,7 @@ architecture Behavioral of memory_write_back is
         PORT (
             clka : IN STD_LOGIC;
             wea : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
+            ena : IN STD_LOGIC;
             addra : IN STD_LOGIC_VECTOR(10 DOWNTO 0);
             dina : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
             douta : OUT STD_LOGIC_VECTOR(31 DOWNTO 0) 
@@ -63,6 +65,7 @@ begin
     PORT MAP (
         clka => clk,
         wea => mem_wea,
+        ena => mem_ena,
         addra => alu_resoult(10 downto 0),
         dina => rs2_value,
         douta => mem_out
@@ -111,32 +114,55 @@ begin
         
     end process ; -- sign_extension
     
-    register_process : process( clk, res )
+    -- register_process : process( clk, res )
+    -- begin
+    --     if res = '0' then
+    --         --pc_out <= (others => '0');
+    --         --rd_value <= (others => '0');
+    --         --rd_addr_out <= (others => '0');
+    --     elsif rising_edge(clk) then
+    --         --Rd_addr
+            
+
+    --         --pc_out
+    --         -- pc_out <= npc_in;
+    --         -- if jmp = '1' and (op_class = "00010" or op_class = "00001") then
+    --         --     pc_out <= alu_resoult_reg(11 downto 0);
+    --         -- end if ;
+
+    --         -- --rd_value
+    --         -- if op_class = "10000" then          --ALU_OP
+    --         --     rd_value <= alu_resoult_reg;
+    --         -- elsif op_class = "00100" then       --LOAD
+    --         --     rd_value <= mem_out_extended;
+    --         -- elsif op_class = "00001" then       --JAL
+    --         --     rd_value(11 downto 0 ) <= npc_in;
+    --         --     rd_value(31 downto 12) <= (others => '0');
+    --         -- end if ;
+    --     end if ;
+    -- end process ; -- register_process
+
+    pc_out_comb : process( jmp, op_class, alu_resoult_reg, npc_in )
     begin
-        if res = '0' then
-            pc_out <= (others => '0');
-            rd_value <= (others => '0');
-            rd_addr_out <= (others => '0');
-        elsif rising_edge(clk) then
-            --Rd_addr
-            rd_addr_out <= rd_addr_in;
+        pc_out <= std_logic_vector(npc_in(11 downto 0));
+        if jmp = '1' and (op_class = "00010" or op_class = "00001") then
+            pc_out <= alu_resoult_reg(11 downto 0);
+        end if ;
+    end process ; -- pc_out
 
-            --pc_out
-            pc_out <= npc_in;
-            if jmp = '1' and (op_class = "00010" or op_class = "00001") then
-                pc_out <= alu_resoult_reg(11 downto 0);
-            end if ;
-
-            --rd_value
+    rd_value_comb: process(op_class, alu_resoult_reg, mem_out_extended, npc_in, res) 
+    begin
+        rd_value <= (others => '0');
+        if res = '1' then                   
             if op_class = "10000" then          --ALU_OP
                 rd_value <= alu_resoult_reg;
             elsif op_class = "00100" then       --LOAD
                 rd_value <= mem_out_extended;
             elsif op_class = "00001" then       --JAL
-                rd_value(11 downto 0 ) <= npc_in;
+                rd_value(11 downto 0 ) <= std_logic_vector(npc_in(11 downto 0));
                 rd_value(31 downto 12) <= (others => '0');
             end if ;
         end if ;
-    end process ; -- register_process
-    
+    end process ; -- rd_value
+    rd_addr_out <= rd_addr_in;
 end Behavioral;

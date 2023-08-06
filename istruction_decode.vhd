@@ -84,12 +84,12 @@ begin
         if res = '0' then
             npc_out <= (others => '0');
             pc_out <= (others => '0');
-            op_class <= (others => '0');
+            --op_class <= (others => '0');
             alu_opcode <= (others => '0');
             mem_opcode <= (others => '0');
             comparator_opcode <= (others => '0');
-            rs1_value <= (others =>'0');
-            rs2_value <= (others =>'0');
+            -- rs1_value <= (others =>'0');
+            -- rs2_value <= (others =>'0');
             rd_addr_out <= (others => '0');
             a_pcn <= '1';
             b_immn <= '1';
@@ -102,17 +102,13 @@ begin
             --Registri semplici
             npc_out <= resize(npc_in, 32);
             pc_out <= resize(pc_in, 32);
-            op_class <= (4 => op, 3 => store, 2 => load, 1 => branch, 0 => jump);
+            --op_class <= (4 => op, 3 => store, 2 => load, 1 => branch, 0 => jump);
             rd_addr_out <= rd_addr;
             mem_opcode <= func3;
             comparator_opcode <= func3;
-            rs1_value <= rs1;
-            rs2_value <= rs2;
+            
             
             --Decodifica
-            --Defaults
-            a_pcn <= '1';
-            b_immn <= '1';
             if func7 = "0000000" or func7 = "0100000" then
                 alu_opcode(3) <= func7(5);
                 alu_opcode(2 downto 0) <= func3; 
@@ -120,6 +116,14 @@ begin
                 alu_opcode <= (others => '0');     --ADD
             end if ;
             --Calcolo della control word
+            --Defaults
+            op <= '0';
+            store <= '0';
+            load <= '0';
+            branch <= '0';
+            jump <= '0';
+            a_pcn <= '1';
+            b_immn <= '1';
             case( opcode ) is
                 when opcode_alu_op => 
                     op <= '1';
@@ -150,7 +154,7 @@ begin
                 when opcode_lui => 
                     op <= '1';
                     b_immn <= '0';
-                    rs1_value <= (others => '0');
+                    --rs1_value <= (others => '0');
                 when others =>
                     op <= op;
                     store <= store;
@@ -166,11 +170,14 @@ begin
     -- end process ; -- op_class_process
     
     --Equations
+    rs1_value <= (others => '0') when opcode = opcode_lui else rs1;
+    rs2_value <= rs2;
     opcode <= instruction(6 downto 0);
     rd_addr <= instruction(11 downto 7);
     func3 <= instruction(14 downto 12);
     rs1_addr <= instruction(19 downto 15);
     rs2_addr <= instruction(24 downto 20);
     func7 <= instruction(31 downto 25);
+    op_class <= (4 => op, 3 => store, 2 => load, 1 => branch, 0 => jump);
 
 end Behavioral;

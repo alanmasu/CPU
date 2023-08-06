@@ -63,36 +63,45 @@ begin
         clk <= '0'; wait for 5 ns;
     end process;
 
+    -- test_process : process begin
+    --     res <= '0';
+    --     wait for 19 ns;
+    --     pc_load <= '1';
+    --     res <= '1';
+    --     wait for 180 ns;
+    --     sel <= '1';
+    --     wait for 10 ns;
+    --     sel <= '0';
+    --     wait for 40 ns;
+    --     --Scrittura
+    --       -- reimposto PC
+    --     sel <= '1';
+    --     val <= "000000000000";
+    --     wait for 10 ns;
+    --       -- scrivo
+    --     sel <= '0';
+    --     wea <= "1";
+    --     wait for 70 ns;
+    --     --Lettura
+    --       -- reimposto PC
+    --     wea <= "0";
+    --     sel <= '1';
+    --     val <= "000000000000";
+    --     wait for 10 ns;
+    --       -- leggo
+    --     sel <= '0';
+    --     wait for 70 ns;
+    --     wait;
+    -- end process;
     test_process : process begin
         res <= '0';
-        wait for 19 ns;
-        pc_load <= '1';
+        wait for 10 ns;
         res <= '1';
-        wait for 180 ns;
-        sel <= '1';
+        pc_load <= '1';
         wait for 10 ns;
-        sel <= '0';
-        wait for 40 ns;
-        --Scrittura
-          -- reimposto PC
-        sel <= '1';
-        val <= "000000000000";
-        wait for 10 ns;
-          -- scrivo
-        sel <= '0';
-        wea <= "1";
-        wait for 70 ns;
-        --Lettura
-          -- reimposto PC
-        wea <= "0";
-        sel <= '1';
-        val <= "000000000000";
-        wait for 10 ns;
-          -- leggo
-        sel <= '0';
-        wait for 70 ns;
+        pc_load <= '0';
+        wait for 30 ns;
         wait;
     end process;
-    
     pc_in <= std_logic_vector(npc_out) when sel = '0' else val;
 end Behavioral;

@@ -38,7 +38,7 @@ entity CPU is
 end CPU;
 
 architecture Behavioral of CPU is
-    type state_type is (fetch, decode, execute, memory_writeback);
+    type state_type is (idle, fetch, decode, execute, memory_writeback);
     signal state : state_type := fetch;
 
     --Memory - OUT Fetch - IN
@@ -77,6 +77,7 @@ architecture Behavioral of CPU is
 
     --Execute - MSF
     signal mem_we : std_logic := '0';
+    signal mem_ena : std_logic := '0';
 begin
     --Fetch
     instr_fetch : entity work.instruction_fetch
@@ -167,9 +168,10 @@ begin
         --IN
         jmp => jmp_executed,
         mem_we => mem_we,
+        mem_ena => mem_ena,
         mem_opcode => mem_opcode_executed,
         op_class => op_class_executed,
-        npc_in => std_logic_vector(npc_executed(11 downto 0)),
+        npc_in => npc_executed,
         alu_resoult => result,
         alu_resoult_reg => result_reg,
         rs2_value => rs2_value_executed,
@@ -182,7 +184,7 @@ begin
     begin
 
         if(res = '0') then
-            state <= fetch;
+            state <= idle;
             regFile_we <= '0';
             pc_load <= '1';
             mem_we <= '0';
@@ -190,7 +192,11 @@ begin
             regFile_we <= '0';
             pc_load <= '0';
             mem_we <= '0';
+            --Next state and control signals for next state
             case state is
+                when idle =>
+                    state <= fetch;
+                    pc_load <= '1';
                 when fetch =>
                     state <= decode;
                 when decode =>
@@ -199,9 +205,9 @@ begin
                     state <= memory_writeback;
                     regFile_we <= '1';
                     mem_we <= '1';
+                    pc_load <= '1';
                 when memory_writeback =>
                     state <= fetch;
-                    pc_load <= '1';
             end case;
         end if;
     end process;

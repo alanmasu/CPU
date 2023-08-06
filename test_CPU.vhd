@@ -51,7 +51,7 @@ begin
     end process;
 
     res_gen: process begin
-        wait for 11 ns;
+        wait for 9 ns;
         res <= '1';
         wait;
     end process;

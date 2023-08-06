@@ -50,7 +50,7 @@ begin
     begin
         imm12 := (others => '0');
         imm20 := (others => '0');
-        imm <= (others => 'X');  -- da rivedere nel caso
+        imm <= (others => '0');
         if opcode = opcode_jal then
             imm20(19) := instruction(31);
             imm20(18 downto 11) := instruction(19 downto 12);

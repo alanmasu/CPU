@@ -78,14 +78,15 @@ begin
         end if;
     end process;
     
-    -- register_process: process( clk, res) begin
-    --     if res = '0' then
-    --         instruction <= (others => '0');
-    --     elsif rising_edge(clk) then
-    --         if pc_load = '1' then
-    --             instruction <= mem_out;
-    --         end if;
-    --     end if;
-    -- end process;
-    instruction <= mem_out;
+    register_process: process( clk, res) begin
+        if res = '0' then
+            instruction <= (others => '0');
+        elsif rising_edge(clk) then
+            -- if pc_load = '1' then
+            --     instruction <= mem_out;
+            -- end if;
+            instruction <= mem_out;
+        end if;
+    end process;
+    -- instruction <= mem_out;
 end Behavioral;
