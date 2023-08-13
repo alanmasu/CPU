@@ -203,9 +203,24 @@ begin
                     state <= execute;
                 when execute =>
                     state <= memory_writeback;
-                    regFile_we <= '1';
-                    mem_we <= '1';
                     pc_load <= '1';
+                    case (op_class_decoded) is
+                        when "10000" => --OP
+                            regFile_we <= '1';
+                        when "01000" => --Store
+                            mem_we <= '1';
+                            mem_ena <= '1';
+                        when "00100" => --Load
+                            mem_ena <= '1';
+                            regFile_we <= '1';
+                        when "00001" => --Jump 
+                            regFile_we <= '1';   
+                        when others =>
+                            regFile_we <= '0';
+                            mem_we <= '0';
+                            mem_ena <= '0';                                   
+                    end case;
+                    
                 when memory_writeback =>
                     state <= fetch;
             end case;
