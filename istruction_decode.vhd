@@ -145,7 +145,7 @@ begin
                     alu_opcode <= "0000";   --ADD
                 when opcode_jalr =>
                     jump <= '1';
-                    a_pcn <= '0';
+                    b_immn <= '0';
                     alu_opcode <= "0000";   --ADD
                 when opcode_jal =>
                     jump <= '1';
