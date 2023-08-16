@@ -58,6 +58,7 @@ Note:
 - [x] Da Testare
 - [ ] Provare a simulare il comportamento della RAM nel caso in cui l'indirizzo arrivi in un ciclo di clock, mentre il dato arrivi al fronte successivo!
 - [x] Probabilmente bisogna togliere i registri in uscita per PC, per i dati; va verificato
+- [ ] Indirizzamento a BYTE
 
 ## Macchina a stati di controllo
 **Test flow**
