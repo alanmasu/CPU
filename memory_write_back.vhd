@@ -32,7 +32,7 @@ use IEEE.NUMERIC_STD.ALL;
 --use UNISIM.VComponents.all;
 
 entity memory_write_back is
-    Port ( clk, res, jmp, mem_we: in STD_LOGIC;
+    Port ( clk, res, jmp, mem_we, mem_ena: in STD_LOGIC;
            mem_opcode : in STD_LOGIC_VECTOR(2 downto 0);
            op_class : in STD_LOGIC_VECTOR (4 downto 0);
            npc_in : in UNSIGNED (31 downto 0);
@@ -40,7 +40,6 @@ entity memory_write_back is
            alu_resoult_reg : in STD_LOGIC_VECTOR (31 downto 0);
            rs2_value : in STD_LOGIC_VECTOR (31 downto 0);
            rd_addr_in : in STD_LOGIC_VECTOR (4 downto 0);
-           mem_ena : in STD_LOGIC;
            rd_value : out STD_LOGIC_VECTOR (31 downto 0);
            rd_addr_out : out STD_LOGIC_VECTOR (4 downto 0);
            pc_out : out STD_LOGIC_VECTOR (11 downto 0)
@@ -58,58 +57,80 @@ architecture Behavioral of memory_write_back is
             douta : OUT STD_LOGIC_VECTOR(31 DOWNTO 0) 
         );
     END COMPONENT;
-    signal mem_out, mem_out_extended : std_logic_vector(31 downto 0);
+    signal mem_in, mem_out, mem_out_extended : std_logic_vector(31 downto 0);
     signal mem_wea : std_logic_vector(3 downto 0);
+    signal byte_address : std_logic_vector(1 downto 0);
 begin
     memory : data_memory
     PORT MAP (
         clka => clk,
         wea => mem_wea,
         ena => mem_ena,
-        addra => alu_resoult(10 downto 0),
-        dina => rs2_value,
+        addra => alu_resoult(12 downto 2),
+        dina => mem_in,
         douta => mem_out
     );
     
+    --Equation
+    byte_address <= alu_resoult(1 downto 0);
+
+    data_in_comb : process( op_class,mem_opcode, rs2_value) is
+        variable dato : unsigned(31 downto 0);
+    begin
+        dato := unsigned(rs2_value);
+        if mem_we = '1' then
+            if op_class = "01000" then  --STORE
+                case( mem_opcode ) is
+                    when "001" =>   --LH
+                        dato := dato sll to_integer((2 - unsigned(byte_address)) * 8);
+                    when "101" =>   --LHU
+                        dato := dato sll to_integer((2 - unsigned(byte_address)) * 8);
+                    when "000" =>   --LB
+                        dato := dato sll to_integer((3 - unsigned(byte_address)) * 8);
+                    when "100" =>   --LBU
+                        dato := dato sll to_integer((3 - unsigned(byte_address)) * 8);
+                end case ;
+                mem_in <= std_logic_vector(dato);
+            end if ;
+        end if ;
+        
+    end process ; -- data_in_combinatory
+
+
     mem_wea_combinational : process( op_class, mem_opcode, mem_we )
     begin
         mem_wea <= "0000";      
         if mem_we = '1' then
             if op_class = "01000" then  --STORE
                 case (mem_opcode) is
-                    when "010" => --SW
-                        mem_wea <= "1111";
+                    when "010" => --SW (32 bits)
+                        mem_wea <= unsigned("1111") sll to_integer(unsigned(byte_address)); 
                     when "001" => --SH (16 bits)
-                        mem_wea <= "0011";
+                        mem_wea <= unsigned("1100") sll to_integer(unsigned(byte_address));
                     when "000" => --SB (8 bits)
-                        mem_wea <= "0001";
-                    when others =>
-                        mem_wea <= "0000";
+                        mem_wea <= unsigned("1000") sll to_integer(unsigned(byte_address));
                 end case;
             end if ;
         end if ;
     end process ; -- mem_wea_combinatory
 
-    sign_extension : process( mem_out, mem_opcode, op_class)
+    sign_extension : process( mem_out, mem_opcode, op_class) is
+        variable dato : unsigned(31 downto 0);
     begin
-        mem_out_extended <= mem_out;
+        dato := unsigned(mem_out);
+        --mem_out_extended <= mem_out;
         if op_class = "00100" then   --LOAD
             case( mem_opcode ) is
                 when "001" =>   --LH
-                    mem_out_extended(31 downto 16) <= (others => mem_out(15));
-                    mem_out_extended(15 downto 0)  <= mem_out(15 downto 0);
+                    dato := dato sra to_integer((2 - unsigned(byte_address)) * 8);
                 when "101" =>   --LHU
-                    mem_out_extended(31 downto 16) <= (others => '0');
-                    mem_out_extended(15 downto 0)  <= mem_out(15 downto 0);
+                    dato := dato srl to_integer((2 - unsigned(byte_address)) * 8);
                 when "000" =>   --LB
-                    mem_out_extended(31 downto 8) <= (others => mem_out(7));
-                    mem_out_extended(7 downto 0)  <= mem_out(7 downto 0);
+                    dato := dato sra to_integer((3 - unsigned(byte_address)) * 8);
                 when "100" =>   --LBU
-                    mem_out_extended(31 downto 8) <= (others => '0');
-                    mem_out_extended(7 downto 0)  <= mem_out(7 downto 0);
-                when others =>
-                    mem_out_extended <= mem_out;
+                    dato := dato srl to_integer((3 - unsigned(byte_address)) * 8);
             end case ;
+            mem_out_extended <= std_logic_vector(dato);
         end if ;
         
     end process ; -- sign_extension
