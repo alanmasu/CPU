@@ -22,6 +22,9 @@ Contiene la ALU ed il Comparatore, legge la control word ed esegue effettivament
 ---
 ## Memory & Write back
 Contiene la RAM ed il circuito di selezione del prossimo valore di PC.
+Permette l'indirizzamento a BYTE
+
+> **Attenzione**: l'accesso non allineato in memoria non è pienamente supportato per il momento, questo potrebbe comportare ad errori nel calcolo!
 
 Configurazione BRAM 
   * Single port ram, 32x2048
@@ -58,7 +61,8 @@ Note:
 - [x] Da Testare
 - [ ] Provare a simulare il comportamento della RAM nel caso in cui l'indirizzo arrivi in un ciclo di clock, mentre il dato arrivi al fronte successivo!
 - [x] Probabilmente bisogna togliere i registri in uscita per PC, per i dati; va verificato
-- [ ] Indirizzamento a BYTE
+- [x] Indirizzamento a BYTE
+- [ ] Unaligned memory access
 
 ## Macchina a stati di controllo
 **Test flow**

@@ -57,9 +57,9 @@ architecture Behavioral of memory_write_back is
             douta : OUT STD_LOGIC_VECTOR(31 DOWNTO 0) 
         );
     END COMPONENT;
-    signal mem_in, mem_out, mem_out_extended : std_logic_vector(31 downto 0);
-    signal mem_wea : std_logic_vector(3 downto 0);
-    signal byte_address : std_logic_vector(1 downto 0);
+    signal mem_in, mem_out, mem_out_extended : std_logic_vector(31 downto 0) := (others => '0');
+    signal mem_wea : std_logic_vector(3 downto 0) := (others => '0');
+    signal byte_address : std_logic_vector(1 downto 0) := (others => '0');
 begin
     memory : data_memory
     PORT MAP (
@@ -74,63 +74,76 @@ begin
     --Equation
     byte_address <= alu_resoult(1 downto 0);
 
-    data_in_comb : process( op_class,mem_opcode, rs2_value) is
-        variable dato : unsigned(31 downto 0);
+    data_in_comb : process( op_class,mem_opcode, rs2_value, byte_address ) is
+        variable dato : std_logic_vector(95 downto 0) := (others => '0');
     begin
-        dato := unsigned(rs2_value);
+        dato(63 downto 32) := rs2_value;
         if mem_we = '1' then
             if op_class = "01000" then  --STORE
+                
                 case( mem_opcode ) is
-                    when "001" =>   --LH
-                        dato := dato sll to_integer((2 - unsigned(byte_address)) * 8);
-                    when "101" =>   --LHU
-                        dato := dato sll to_integer((2 - unsigned(byte_address)) * 8);
-                    when "000" =>   --LB
-                        dato := dato sll to_integer((3 - unsigned(byte_address)) * 8);
-                    when "100" =>   --LBU
-                        dato := dato sll to_integer((3 - unsigned(byte_address)) * 8);
+                    when "010" =>   --SW
+                        dato := dato sll (0 - to_integer(unsigned(byte_address))) * 8;
+                    when "001" =>   --SH
+                        dato := dato sll (2 - to_integer(unsigned(byte_address))) * 8;
+                    when "000" =>   --SB
+                        dato := dato sll (3 - to_integer(unsigned(byte_address))) * 8;
+                    when others =>
+                        dato := dato;
                 end case ;
-                mem_in <= std_logic_vector(dato);
+                mem_in <= dato(63 downto 32);
             end if ;
         end if ;
         
     end process ; -- data_in_combinatory
 
 
-    mem_wea_combinational : process( op_class, mem_opcode, mem_we )
+    mem_wea_combinational : process( op_class, mem_opcode, mem_we, byte_address ) is 
+        variable wea : std_logic_vector(3 downto 0) := "0000";
     begin
         mem_wea <= "0000";      
         if mem_we = '1' then
             if op_class = "01000" then  --STORE
                 case (mem_opcode) is
-                    when "010" => --SW (32 bits)
-                        mem_wea <= unsigned("1111") sll to_integer(unsigned(byte_address)); 
-                    when "001" => --SH (16 bits)
-                        mem_wea <= unsigned("1100") sll to_integer(unsigned(byte_address));
-                    when "000" => --SB (8 bits)
-                        mem_wea <= unsigned("1000") sll to_integer(unsigned(byte_address));
+                    when "010" => --SW (32 bits) "1111"
+                        wea := "1111" srl to_integer(unsigned(byte_address)); 
+                    when "001" => --SH (16 bits) "1100"
+                        wea := "1100" srl to_integer(unsigned(byte_address));
+                    when "000" => --SB (8 bits)  "1000"
+                        wea := "1000" srl to_integer(unsigned(byte_address));
+                    when others => 
+                        wea := "0000";
                 end case;
+                mem_wea <= wea;
             end if ;
         end if ;
     end process ; -- mem_wea_combinatory
 
-    sign_extension : process( mem_out, mem_opcode, op_class) is
+    sign_extension : process( mem_out, mem_opcode, op_class, byte_address ) is
         variable dato : unsigned(31 downto 0);
     begin
         dato := unsigned(mem_out);
         --mem_out_extended <= mem_out;
         if op_class = "00100" then   --LOAD
             case( mem_opcode ) is
+                when "010" =>   --LW
+                    dato := dato sll to_integer(unsigned(byte_address)) * 8;
                 when "001" =>   --LH
-                    dato := dato sra to_integer((2 - unsigned(byte_address)) * 8);
+                    dato := dato srl (2 - to_integer(unsigned(byte_address))) * 8;
+                    dato(31 downto 16) := (others => dato(15));
                 when "101" =>   --LHU
-                    dato := dato srl to_integer((2 - unsigned(byte_address)) * 8);
+                    dato := dato srl (2 - to_integer(unsigned(byte_address))) * 8;
                 when "000" =>   --LB
-                    dato := dato sra to_integer((3 - unsigned(byte_address)) * 8);
+                    dato := dato srl (3 - to_integer(unsigned(byte_address))) * 8;
+                    dato(31 downto 8) := (others => dato(7));
                 when "100" =>   --LBU
-                    dato := dato srl to_integer((3 - unsigned(byte_address)) * 8);
+                    dato := dato srl (3 - to_integer(unsigned(byte_address))) * 8;
+                when others =>
+                    dato := dato;
             end case ;
             mem_out_extended <= std_logic_vector(dato);
+        else 
+            mem_out_extended <= mem_out_extended;
         end if ;
         
     end process ; -- sign_extension
@@ -173,7 +186,7 @@ begin
 
     rd_value_comb: process(op_class, alu_resoult_reg, mem_out_extended, npc_in, res) 
     begin
-        rd_value <= (others => '0');
+        rd_value <= rd_value;
         if res = '1' then                   
             if op_class = "10000" then          --ALU_OP
                 rd_value <= alu_resoult_reg;
@@ -181,9 +194,9 @@ begin
                 rd_value <= mem_out_extended;
             elsif op_class = "00001" then       --JAL
                 rd_value(11 downto 0 ) <= std_logic_vector(npc_in(11 downto 0));
-                rd_value(31 downto 12) <= (others => '0');
+                rd_value(31 downto 12) <= (others => '0');                
             end if ;
         end if ;
     end process ; -- rd_value
-    rd_addr_out <= rd_addr_in;
+    rd_addr_out <= rd_addr_out when op_class = "00100" else rd_addr_in;
 end Behavioral;

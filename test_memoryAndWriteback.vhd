@@ -36,10 +36,10 @@ entity test_memoryAndWriteback is
 end test_memoryAndWriteback;
 
 architecture Behavioral of test_memoryAndWriteback is
-    signal clk, res, jmp, mem_we: STD_LOGIC := '0';
+    signal clk, res, jmp, mem_we, mem_en: STD_LOGIC := '0';
     signal mem_opcode : STD_LOGIC_VECTOR(2 downto 0) := (others => '0');
     signal op_class : STD_LOGIC_VECTOR (4 downto 0):= (others => '0');
-    signal npc_in : unsigned (31 downto 0):= (others => '0');
+    signal pc, npc_in : unsigned (31 downto 0):= (others => '0');
     signal alu_resoult : STD_LOGIC_VECTOR (31 downto 0):= (others => '0');
     signal alu_resoult_reg : STD_LOGIC_VECTOR (31 downto 0):= (others => '0');
     signal rs2_value : STD_LOGIC_VECTOR (31 downto 0):= (others => '0');
@@ -54,7 +54,7 @@ begin
         res => res,
         jmp => jmp,
         mem_we => mem_we,
-        mem_ena => '1',
+        mem_ena => mem_en,
         mem_opcode => mem_opcode,
         op_class => op_class,
         rs2_value => rs2_value,
@@ -84,37 +84,37 @@ begin
         
         --Setto i valori di ingresso:
         jmp <= '0';
-        rs2_value <= (2 => '1', 1 => '1', 0 => '1', others => '0');     --rs2 = 7
-        alu_resoult <= (2 => '1', 1 => '1', 0 => '0', others => '0');   --rd  = 3
         rd_addr_in <= "00101";
-        
+
         --OP
         op_class <= "10000"; 
         wait for 10 ns;
 
         --Store
+        mem_en <= '1';
         mem_we <= '1';
+        op_class <= "01000";
         --Scrive 4 WORD shiftate di un byte ciascuna
         mem_opcode <= "010"; --SW
+        rs2_value <= std_logic_vector(to_signed(274877688, 32));
         for i in 0 to 3 loop
-            alu_resoult <= std_logic_vector(unsigned(i) * 4 + unsigned(i));
-            rs2_value <= std_logic_vector(unsigned(i) + 65535 * unsigned(i));
+            alu_resoult <= std_logic_vector(to_unsigned(i * 4 + i, 32));
             wait for 10 ns;
         end loop;
         
         --Scrive 4 HALFWORD shiftate di un byte ciascuna
         mem_opcode <= "001"; --SH
+        rs2_value <= std_logic_vector(to_unsigned(35535,32));
         for i in 0 to 3 loop
-            alu_resoult <= std_logic_vector((unsigned(i) * 2) + unsigned(i) + 16);
-            rs2_value <= std_logic_vector(unsigned(i) + 256 * unsigned(i));
+            alu_resoult <= std_logic_vector(to_unsigned(i * 4 + i + 16, 32));
             wait for 10 ns;
         end loop;
 
         --Scrive 4 BYTE shiftate di un byte ciascuna
         mem_opcode <= "000"; --SB
+        rs2_value <= std_logic_vector(to_unsigned(207, 32));
         for i in 0 to 3 loop
-            alu_resoult <= std_logic_vector((unsigned(i)) + unsigned(i) + 32);
-            rs2_value <= std_logic_vector(unsigned(i));
+            alu_resoult <= std_logic_vector(to_unsigned(i * 4 + i + 32, 32));
             wait for 10 ns;
         end loop;
 
@@ -122,34 +122,36 @@ begin
         mem_we <= '0';
         op_class <= "00100"; 
         mem_opcode <= "010"; --LW
-        mem_read_LW : for i in 1 to 3 loop
-            alu_resoult <= std_logic_vector(unsigned(i) * 4 + unsigned(i));  --rd = i
+        mem_read_LW : for i in 0 to 3 loop
+            alu_resoult <= std_logic_vector(to_unsigned(i * 4 + i, 32));  --rd = i
             wait for 10 ns;
         end loop ;
 
         mem_opcode <= "001"; --LH
-        mem_read_LH : for i in 1 to 3 loop
-            alu_resoult <= std_logic_vector(unsigned(i) * 2 + unsigned(i) + 16);  --rd = i
+        mem_read_LH : for i in 0 to 3 loop
+            alu_resoult <= std_logic_vector(to_unsigned(i * 4 + i + 16, 32));  --rd = i
             wait for 10 ns;
         end loop ;
 
         mem_opcode <= "101"; --LHU
-        mem_read_LHU : for i in 1 to 3 loop
-            alu_resoult <= std_logic_vector(unsigned(i) * 2 + unsigned(i) + 16);  --rd = i
+        mem_read_LHU : for i in 0 to 3 loop
+            alu_resoult <= std_logic_vector(to_unsigned(i * 4 + i + 16, 32));  --rd = i
             wait for 10 ns;
         end loop ;
 
         mem_opcode <= "000"; --LB
-        mem_read_LB : for i in 1 to 3 loop
-            alu_resoult <= std_logic_vector(unsigned(i) + unsigned(i) + 32);  --rd = i
+        mem_read_LB : for i in 0 to 3 loop
+            alu_resoult <= std_logic_vector(to_unsigned(i * 4 + i + 32, 32));  --rd = i
             wait for 10 ns;
         end loop ;
 
         mem_opcode <= "100"; --LBU
-        mem_read_LBU : for i in 1 to 3 loop
-            alu_resoult <= std_logic_vector(unsigned(i) + unsigned(i) + 32);  --rd = i
+        mem_read_LBU : for i in 0 to 3 loop
+            alu_resoult <= std_logic_vector(to_unsigned(i * 4 + i + 32, 32));  --rd = i
             wait for 10 ns;
         end loop ;
+        mem_en <= '0';
+
         alu_resoult <= std_logic_vector(to_signed(45,32));
         wait for 10 ns;
         
@@ -164,6 +166,7 @@ begin
         alu_resoult <= std_logic_vector(to_signed(34,32));
         wait for 10 ns;
         
+        alu_resoult <= std_logic_vector(to_signed(142,32));
         op_class <= "00001"; --JAL
         wait for 10 ns;
         wait;
@@ -172,10 +175,12 @@ begin
     process (clk, res) begin
         if res = '0' then
             alu_resoult_reg <= (others => '0');
+            pc <= (others => '0');
         elsif rising_edge(clk) then
             alu_resoult_reg <= alu_resoult;
+            pc <= resize(unsigned(pc_out), 32);
         end if;
     end process;
-
-    npc_in <= STD_LOGIC_VECTOR(unsigned(pc_out) + 1) when res = '1' else (others => '0');   
+    
+    npc_in <= pc + 4 when res = '1' else (others => '0');   
 end Behavioral;
