@@ -6,7 +6,7 @@
 `define BD_WRAPPER test_design_wrapper
 
 import axi_vip_pkg::*;
-import test_design_axi_vip_0_0_pkg::*;
+import test_design_axi_vip_0_2_pkg::*;
 
 module test_CPU_wh_AXI();
 //slave vip agent
@@ -22,12 +22,12 @@ module test_CPU_wh_AXI();
 //   bit init_0;
 //   bit [31:0] S00_AXI_test_data[3:0]; 
 
-  axi_transaction                         wr_transaction;   
-  xil_axi_uint                            mst_agent_verbosity = 0;  
   bit                                     clock;
   bit                                     reset;
    
 //Master vip agent
+  axi_transaction                         wr_transaction;   
+  xil_axi_uint                            mst_agent_verbosity = 0;  
   xil_axi_uint                            mtestID;  
   xil_axi_ulong                           mtestADDR;  
   xil_axi_len_t                           mtestBurstLength;  
@@ -42,7 +42,7 @@ module test_CPU_wh_AXI();
   xil_axi_resp_t[255:0]                   mtestRresp;  
   bit [63:0]                              mtestWDataL; 
   bit [63:0]                              mtestRDataL; 
-  test_design_axi_vip_0_0_mst_t           mst_agent_0;
+  test_design_axi_vip_0_2_mst_t           mst_agent_0;
 
   `BD_WRAPPER DUT(
     .reset_rtl(reset),
@@ -60,7 +60,7 @@ module test_CPU_wh_AXI();
     
     //Master vip agent initialization
 
-    mst_agent_0 = new("master vip agent",DUT.`BD_INST_NAME.axi_vip_0.inst.IF);//ms  
+    mst_agent_0 = new("master vip agent",test_CPU_wh_AXI.DUT.test_design_i.axi_vip_0.inst.IF);//ms  
     mst_agent_0.vif_proxy.set_dummy_drive_type(XIL_AXI_VIF_DRIVE_NONE); 
     mst_agent_0.set_agent_tag("Master VIP"); 
     mst_agent_0.set_verbosity(mst_agent_verbosity); 
@@ -71,7 +71,7 @@ module test_CPU_wh_AXI();
 
   initial begin
     reset <= 1'b0;
-    #200ns;
+    #10ns;
     reset <= 1'b1;
     repeat (5) @(negedge clock); 
   end
@@ -81,7 +81,7 @@ module test_CPU_wh_AXI();
   initial begin
     S_AXI_TEST ( );
     #200ns;
-    $finish;
+    //$finish;
   end
 
 //   initial begin
@@ -95,6 +95,7 @@ module test_CPU_wh_AXI();
 
   //Modificare questo task qui per il testbench
   task automatic S_AXI_TEST;  
+    integer i;
     begin   
       #1; 
       $display("Init testing of IP, simulating a ZynqPS to vrite & read memory trougth the IP "); 
@@ -109,80 +110,70 @@ module test_CPU_wh_AXI();
       mtestQOS = 0; 
 
       //Scrittura in memoria
-      $display("Imposto l'indirizzo nel slv_reg_2");
-      mtestADDR = 32'd08; 
-      mtestWDataL[31:0] = 32'h1028CC;   
-      mst_agent_0.AXI4_WRITE_BURST( 
-        mtestADDR, 
-        mtestProtectionType, 
-        mtestWDataL, 
-        mtestBresp 
-      );  
+      // $display("Imposto l'indirizzo nel slv_reg_2");
+      // mtestADDR = 32'd08; 
+      // mtestWDataL[31:0] = 32'h1028CC;   
+      // mst_agent_0.AXI4LITE_WRITE_BURST( 
+      //   mtestADDR, 
+      //   mtestProtectionType, 
+      //   mtestWDataL, 
+      //   mtestBresp 
+      // );  
 
-      $display("fine impostazione indirizzo");
-      $display("Imposto i dati nel slv_reg_3");
-      mtestADDR = 32'd12; 
-      mtestWDataL[31:0] = 32'd17;    
-      mst_agent_0.AXI4_WRITE_BURST( 
-        mtestADDR, 
-        mtestProtectionType, 
-        mtestWDataL, 
-        mtestBresp 
-      );  
-      $display("fine scrittura dati");
-      $display("start writing at 0x1028CC");
-      mtestADDR = 32'd00; 
-      mtestWDataL[31:0] = 32'd01;   
-      mst_agent_0.AXI4_WRITE_BURST( 
-        mtestADDR, 
-        mtestProtectionType, 
-        mtestWDataL, 
-        mtestBresp 
-      );  
+      // $display("fine impostazione indirizzo");
+      // $display("Imposto i dati nel slv_reg_3");
+      // mtestADDR = 32'd12; 
+      // mtestWDataL[31:0] = 32'd17;    
+      // mst_agent_0.AXI4LITE_WRITE_BURST( 
+      //   mtestADDR, 
+      //   mtestProtectionType, 
+      //   mtestWDataL, 
+      //   mtestBresp 
+      // );  
+      // $display("fine scrittura dati");
+      // $display("start writing at 0x1028CC");
+      // mtestADDR = 32'd00; 
+      // mtestWDataL[31:0] = 32'd01;   
+      // mst_agent_0.AXI4LITE_WRITE_BURST( 
+      //   mtestADDR, 
+      //   mtestProtectionType, 
+      //   mtestWDataL, 
+      //   mtestBresp 
+      // );  
 
-      $display("Reading BRESP");
-      do begin
-        mtestADDR = 32'd20; 
-        mst_agent_0.AXI4_READ_BURST( 
-          mtestADDR, 
-          mtestProtectionType, 
-          mtestRDataL, 
-          mtestRresp 
-        );
-      end
-      while (mtestRDataL[2] != 1);
+      // $display("Reading BRESP");
+      // do begin
+      //   mtestADDR = 32'd20; 
+      //   mst_agent_0.AXI4LITE_READ_BURST( 
+      //     mtestADDR, 
+      //     mtestProtectionType, 
+      //     mtestRDataL, 
+      //     mtestRresp 
+      //   );
+      // end
+      // while (mtestRDataL[2] != 1);
 
           
       //Lettura in memoria
       $display("start reading");
       mtestADDR = 32'd00; 
       mtestWDataL[31:0] = 32'd02;    
-      mst_agent_0.AXI4_WRITE_BURST( 
+      mst_agent_0.AXI4LITE_WRITE_BURST( 
         mtestADDR, 
         mtestProtectionType, 
         mtestWDataL, 
         mtestBresp 
       );
       $display("Reading RRESP");
-      do begin
-        mtestADDR = 32'd16;    
-        mst_agent_0.AXI4_READ_BURST( 
+      for(int i = 32'h44A00000; i < 32'h44A00000 + 40; i+=4) begin
+        mtestADDR = i; 
+        mst_agent_0.AXI4LITE_READ_BURST( 
           mtestADDR, 
           mtestProtectionType, 
           mtestRDataL, 
           mtestRresp 
         );
       end
-      while(mtestRDataL[2] != 1);
-
-      $display("Reading Data");
-      mtestADDR = 32'd04;  
-      mst_agent_0.AXI4_READ_BURST( 
-        mtestADDR, 
-        mtestProtectionType, 
-        mtestRDataL, 
-        mtestRresp 
-      );
     end 
   endtask  
 

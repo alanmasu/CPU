@@ -40,34 +40,22 @@ entity CPU is
         -- s_axi_aclk : IN STD_LOGIC;
         -- s_axi_aresetn : IN STD_LOGIC;
         s_axi_awaddr : IN STD_LOGIC_VECTOR(11 DOWNTO 0);
-        s_axi_awlen : IN STD_LOGIC_VECTOR(7 DOWNTO 0);
-        s_axi_awsize : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
-        s_axi_awburst : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
-        s_axi_awlock : IN STD_LOGIC;
-        s_axi_awcache : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
         s_axi_awprot : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
         s_axi_awvalid : IN STD_LOGIC;
         s_axi_awready : OUT STD_LOGIC;
         s_axi_wdata : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
         s_axi_wstrb : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
-        s_axi_wlast : IN STD_LOGIC;
         s_axi_wvalid : IN STD_LOGIC;
         s_axi_wready : OUT STD_LOGIC;
         s_axi_bresp : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
         s_axi_bvalid : OUT STD_LOGIC;
         s_axi_bready : IN STD_LOGIC;
         s_axi_araddr : IN STD_LOGIC_VECTOR(11 DOWNTO 0);
-        s_axi_arlen : IN STD_LOGIC_VECTOR(7 DOWNTO 0);
-        s_axi_arsize : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
-        s_axi_arburst : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
-        s_axi_arlock : IN STD_LOGIC;
-        s_axi_arcache : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
         s_axi_arprot : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
         s_axi_arvalid : IN STD_LOGIC;
         s_axi_arready : OUT STD_LOGIC;
         s_axi_rdata : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
         s_axi_rresp : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
-        s_axi_rlast : OUT STD_LOGIC;
         s_axi_rvalid : OUT STD_LOGIC;
         s_axi_rready : IN STD_LOGIC
     );
@@ -133,34 +121,22 @@ begin
         s_axi_aclk => clk,
         s_axi_aresetn => res,
         s_axi_awaddr => s_axi_awaddr,
-        s_axi_awlen => s_axi_awlen,
-        s_axi_awsize => s_axi_awsize,
-        s_axi_awburst => s_axi_awburst,
-        s_axi_awlock => s_axi_awlock,
-        s_axi_awcache => s_axi_awcache,
         s_axi_awprot => s_axi_awprot,
         s_axi_awvalid => s_axi_awvalid,
         s_axi_awready => s_axi_awready,
         s_axi_wdata => s_axi_wdata,
         s_axi_wstrb => s_axi_wstrb,
-        s_axi_wlast => s_axi_wlast,
         s_axi_wvalid => s_axi_wvalid,
         s_axi_wready => s_axi_wready,
         s_axi_bresp => s_axi_bresp,
         s_axi_bvalid => s_axi_bvalid,
         s_axi_bready => s_axi_bready,
         s_axi_araddr => s_axi_araddr,
-        s_axi_arlen => s_axi_arlen,
-        s_axi_arsize => s_axi_arsize,
-        s_axi_arburst => s_axi_arburst,
-        s_axi_arlock => s_axi_arlock,
-        s_axi_arcache => s_axi_arcache,
         s_axi_arprot => s_axi_arprot,
         s_axi_arvalid => s_axi_arvalid,
         s_axi_arready => s_axi_arready,
         s_axi_rdata => s_axi_rdata,
         s_axi_rresp => s_axi_rresp,
-        s_axi_rlast => s_axi_rlast,
         s_axi_rvalid => s_axi_rvalid,
         s_axi_rready => s_axi_rready
     );
