@@ -54,8 +54,11 @@ begin
         npc => npc_out,
         instruction => instruction,
         --For programming
-        instruction_in => x"00000100",
-        wea => wea
+        clkb => clk,
+        enb => '0',
+        web => (others => '0'),
+        addrb => (others => '0'),
+        dinb => (others => '0')
     );
     
     clk_gen: process begin

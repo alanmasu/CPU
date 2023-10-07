@@ -65,8 +65,51 @@ architecture Behavioral of CPU is
     type state_type is (idle, fetch, decode, execute, memory_writeback);
     signal state : state_type := fetch;
 
+    COMPONENT axi_bram_ctrl_0
+    PORT (
+        s_axi_aclk : IN STD_LOGIC;
+        s_axi_aresetn : IN STD_LOGIC;
+        s_axi_awaddr : IN STD_LOGIC_VECTOR(11 DOWNTO 0);
+        s_axi_awprot : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
+        s_axi_awvalid : IN STD_LOGIC;
+        s_axi_awready : OUT STD_LOGIC;
+        s_axi_wdata : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+        s_axi_wstrb : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
+        s_axi_wvalid : IN STD_LOGIC;
+        s_axi_wready : OUT STD_LOGIC;
+        s_axi_bresp : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
+        s_axi_bvalid : OUT STD_LOGIC;
+        s_axi_bready : IN STD_LOGIC;
+        s_axi_araddr : IN STD_LOGIC_VECTOR(11 DOWNTO 0);
+        s_axi_arprot : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
+        s_axi_arvalid : IN STD_LOGIC;
+        s_axi_arready : OUT STD_LOGIC;
+        s_axi_rdata : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+        s_axi_rresp : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
+        s_axi_rvalid : OUT STD_LOGIC;
+        s_axi_rready : IN STD_LOGIC;
+        bram_rst_a : OUT STD_LOGIC;
+        bram_clk_a : OUT STD_LOGIC;
+        bram_en_a : OUT STD_LOGIC;
+        bram_we_a : OUT STD_LOGIC_VECTOR(3 DOWNTO 0);
+        bram_addr_a : OUT STD_LOGIC_VECTOR(11 DOWNTO 0);
+        bram_wrdata_a : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+        bram_rddata_a : IN STD_LOGIC_VECTOR(31 DOWNTO 0)
+    );
+    END COMPONENT;
+
     --Memory - OUT Fetch - IN
     signal pc_in : std_logic_vector(11 downto 0) := (others => '0');
+    --BRAM Controller
+    signal mem_out: STD_LOGIC_VECTOR(31 downto 0);
+    signal bram_rst_a : STD_LOGIC;
+    signal bram_clk_a : STD_LOGIC;
+    signal bram_en_a : STD_LOGIC;
+    signal bram_we_a : STD_LOGIC_VECTOR(3 DOWNTO 0);
+    signal bram_addr_a : STD_LOGIC_VECTOR(11 DOWNTO 0);
+    signal bram_wrdata_a : STD_LOGIC_VECTOR(31 DOWNTO 0);
+    signal bram_rddata_a : STD_LOGIC_VECTOR(31 DOWNTO 0);
+
     --Fetch - MSF
     signal pc_load : std_logic := '0';
     
@@ -104,20 +147,8 @@ architecture Behavioral of CPU is
     signal mem_ena : std_logic := '0';
 begin
     --Fetch
-    instr_fetch : entity work.instruction_fetch
-    port map(
-        clk => clk, 
-        res => res,
-        pc_load => pc_load,
-        pc => pc_fetched,
-        npc => npc_fetched,
-        pc_in => pc_in,
-        instruction => instruction_fetched,
-        --For programming the instruction memory [NOT IN USE]
-        wea => "0",
-        instruction_in => (others => '0'),
-
-        --S_AXI interface
+    axi_bram_instr: axi_bram_ctrl_0
+    PORT MAP (
         s_axi_aclk => clk,
         s_axi_aresetn => res,
         s_axi_awaddr => s_axi_awaddr,
@@ -138,7 +169,33 @@ begin
         s_axi_rdata => s_axi_rdata,
         s_axi_rresp => s_axi_rresp,
         s_axi_rvalid => s_axi_rvalid,
-        s_axi_rready => s_axi_rready
+        s_axi_rready => s_axi_rready,
+        --BRAM
+        bram_rst_a => bram_rst_a,
+        bram_clk_a => bram_clk_a,
+        bram_en_a => bram_en_a,
+        bram_we_a => bram_we_a,
+        bram_addr_a => bram_addr_a,
+        bram_wrdata_a => bram_wrdata_a,
+        bram_rddata_a => bram_rddata_a
+    );
+    instr_fetch : entity work.instruction_fetch
+    port map(
+        clk => clk, 
+        res => res,
+        pc_load => pc_load,
+        pc => pc_fetched,
+        npc => npc_fetched,
+        pc_in => pc_in,
+        instruction => instruction_fetched,
+
+        --BRAM interface
+        clkb => bram_clk_a,
+        enb => bram_en_a,
+        web => bram_we_a,
+        addrb => bram_addr_a(11 downto 2),
+        dinb => bram_wrdata_a,
+        doutb => bram_rddata_a
     );
 
     --Decode
