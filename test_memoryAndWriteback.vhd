@@ -64,7 +64,12 @@ begin
         rd_addr_in => rd_addr_in,
         rd_value => rd_value,
         rd_addr_out => rd_addr_out,
-        pc_out => pc_out
+        pc_out => pc_out,
+        clkb => clk,
+        enb => '0',
+        web => (others => '0'),
+        addrb => (others => '0'),
+        dinb => (others => '0')
     );
 
     clk_gen : process begin

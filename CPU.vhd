@@ -36,28 +36,47 @@ entity CPU is
         clk : IN std_logic;
         res : IN std_logic;
 
-        --S_AXI interface
-        -- s_axi_aclk : IN STD_LOGIC;
-        -- s_axi_aresetn : IN STD_LOGIC;
-        s_axi_awaddr : IN STD_LOGIC_VECTOR(11 DOWNTO 0);
-        s_axi_awprot : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
-        s_axi_awvalid : IN STD_LOGIC;
-        s_axi_awready : OUT STD_LOGIC;
-        s_axi_wdata : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-        s_axi_wstrb : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
-        s_axi_wvalid : IN STD_LOGIC;
-        s_axi_wready : OUT STD_LOGIC;
-        s_axi_bresp : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
-        s_axi_bvalid : OUT STD_LOGIC;
-        s_axi_bready : IN STD_LOGIC;
-        s_axi_araddr : IN STD_LOGIC_VECTOR(11 DOWNTO 0);
-        s_axi_arprot : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
-        s_axi_arvalid : IN STD_LOGIC;
-        s_axi_arready : OUT STD_LOGIC;
-        s_axi_rdata : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
-        s_axi_rresp : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
-        s_axi_rvalid : OUT STD_LOGIC;
-        s_axi_rready : IN STD_LOGIC
+        --S_AXI_I interface
+        s_axi_i_awaddr : IN STD_LOGIC_VECTOR(12 DOWNTO 0);
+        s_axi_i_awprot : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
+        s_axi_i_awvalid : IN STD_LOGIC;
+        s_axi_i_awready : OUT STD_LOGIC;
+        s_axi_i_wdata : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+        s_axi_i_wstrb : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
+        s_axi_i_wvalid : IN STD_LOGIC;
+        s_axi_i_wready : OUT STD_LOGIC;
+        s_axi_i_bresp : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
+        s_axi_i_bvalid : OUT STD_LOGIC;
+        s_axi_i_bready : IN STD_LOGIC;
+        s_axi_i_araddr : IN STD_LOGIC_VECTOR(12 DOWNTO 0);
+        s_axi_i_arprot : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
+        s_axi_i_arvalid : IN STD_LOGIC;
+        s_axi_i_arready : OUT STD_LOGIC;
+        s_axi_i_rdata : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+        s_axi_i_rresp : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
+        s_axi_i_rvalid : OUT STD_LOGIC;
+        s_axi_i_rready : IN STD_LOGIC;
+
+        --S_AXI_D interface
+        s_axi_d_awaddr : IN STD_LOGIC_VECTOR(12 DOWNTO 0);
+        s_axi_d_awprot : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
+        s_axi_d_awvalid : IN STD_LOGIC;
+        s_axi_d_awready : OUT STD_LOGIC;
+        s_axi_d_wdata : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+        s_axi_d_wstrb : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
+        s_axi_d_wvalid : IN STD_LOGIC;
+        s_axi_d_wready : OUT STD_LOGIC;
+        s_axi_d_bresp : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
+        s_axi_d_bvalid : OUT STD_LOGIC;
+        s_axi_d_bready : IN STD_LOGIC;
+        s_axi_d_araddr : IN STD_LOGIC_VECTOR(12 DOWNTO 0);
+        s_axi_d_arprot : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
+        s_axi_d_arvalid : IN STD_LOGIC;
+        s_axi_d_arready : OUT STD_LOGIC;
+        s_axi_d_rdata : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+        s_axi_d_rresp : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
+        s_axi_d_rvalid : OUT STD_LOGIC;
+        s_axi_d_rready : IN STD_LOGIC
     );
 end CPU;
 
@@ -69,7 +88,7 @@ architecture Behavioral of CPU is
     PORT (
         s_axi_aclk : IN STD_LOGIC;
         s_axi_aresetn : IN STD_LOGIC;
-        s_axi_awaddr : IN STD_LOGIC_VECTOR(11 DOWNTO 0);
+        s_axi_awaddr : IN STD_LOGIC_VECTOR(12 DOWNTO 0);
         s_axi_awprot : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
         s_axi_awvalid : IN STD_LOGIC;
         s_axi_awready : OUT STD_LOGIC;
@@ -80,7 +99,7 @@ architecture Behavioral of CPU is
         s_axi_bresp : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
         s_axi_bvalid : OUT STD_LOGIC;
         s_axi_bready : IN STD_LOGIC;
-        s_axi_araddr : IN STD_LOGIC_VECTOR(11 DOWNTO 0);
+        s_axi_araddr : IN STD_LOGIC_VECTOR(12 DOWNTO 0);
         s_axi_arprot : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
         s_axi_arvalid : IN STD_LOGIC;
         s_axi_arready : OUT STD_LOGIC;
@@ -92,7 +111,7 @@ architecture Behavioral of CPU is
         bram_clk_a : OUT STD_LOGIC;
         bram_en_a : OUT STD_LOGIC;
         bram_we_a : OUT STD_LOGIC_VECTOR(3 DOWNTO 0);
-        bram_addr_a : OUT STD_LOGIC_VECTOR(11 DOWNTO 0);
+        bram_addr_a : OUT STD_LOGIC_VECTOR(12 DOWNTO 0);
         bram_wrdata_a : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
         bram_rddata_a : IN STD_LOGIC_VECTOR(31 DOWNTO 0)
     );
@@ -102,13 +121,13 @@ architecture Behavioral of CPU is
     signal pc_in : std_logic_vector(11 downto 0) := (others => '0');
     --BRAM Controller
     signal mem_out: STD_LOGIC_VECTOR(31 downto 0);
-    signal bram_rst_a : STD_LOGIC;
-    signal bram_clk_a : STD_LOGIC;
-    signal bram_en_a : STD_LOGIC;
-    signal bram_we_a : STD_LOGIC_VECTOR(3 DOWNTO 0);
-    signal bram_addr_a : STD_LOGIC_VECTOR(11 DOWNTO 0);
-    signal bram_wrdata_a : STD_LOGIC_VECTOR(31 DOWNTO 0);
-    signal bram_rddata_a : STD_LOGIC_VECTOR(31 DOWNTO 0);
+    signal bram_rst_a_i : STD_LOGIC;
+    signal bram_clk_a_i : STD_LOGIC;
+    signal bram_en_a_i : STD_LOGIC;
+    signal bram_we_a_i : STD_LOGIC_VECTOR(3 DOWNTO 0);
+    signal bram_addr_a_i : STD_LOGIC_VECTOR(12 DOWNTO 0);
+    signal bram_wrdata_a_i : STD_LOGIC_VECTOR(31 DOWNTO 0);
+    signal bram_rddata_a_i : STD_LOGIC_VECTOR(31 DOWNTO 0);
 
     --Fetch - MSF
     signal pc_load : std_logic := '0';
@@ -141,43 +160,50 @@ architecture Behavioral of CPU is
     signal mem_opcode_executed : std_logic_vector(2 downto 0) := (others => '0');
     signal rs2_value_executed : std_logic_vector(31 downto 0) := (others => '0');
     signal jmp_executed : std_logic := '0';
-
+    --BRAM 
+    signal bram_rst_a_d : STD_LOGIC;
+    signal bram_clk_a_d : STD_LOGIC;
+    signal bram_en_a_d : STD_LOGIC;
+    signal bram_we_a_d : STD_LOGIC_VECTOR(3 DOWNTO 0);
+    signal bram_addr_a_d : STD_LOGIC_VECTOR(12 DOWNTO 0);
+    signal bram_wrdata_a_d : STD_LOGIC_VECTOR(31 DOWNTO 0);
+    signal bram_rddata_a_d : STD_LOGIC_VECTOR(31 DOWNTO 0);
     --Execute - MSF
     signal mem_we : std_logic := '0';
     signal mem_ena : std_logic := '0';
 begin
     --Fetch
-    axi_bram_instr: axi_bram_ctrl_0
+    axi_bram_instr_i: axi_bram_ctrl_0
     PORT MAP (
-        s_axi_aclk => clk,
-        s_axi_aresetn => res,
-        s_axi_awaddr => s_axi_awaddr,
-        s_axi_awprot => s_axi_awprot,
-        s_axi_awvalid => s_axi_awvalid,
-        s_axi_awready => s_axi_awready,
-        s_axi_wdata => s_axi_wdata,
-        s_axi_wstrb => s_axi_wstrb,
-        s_axi_wvalid => s_axi_wvalid,
-        s_axi_wready => s_axi_wready,
-        s_axi_bresp => s_axi_bresp,
-        s_axi_bvalid => s_axi_bvalid,
-        s_axi_bready => s_axi_bready,
-        s_axi_araddr => s_axi_araddr,
-        s_axi_arprot => s_axi_arprot,
-        s_axi_arvalid => s_axi_arvalid,
-        s_axi_arready => s_axi_arready,
-        s_axi_rdata => s_axi_rdata,
-        s_axi_rresp => s_axi_rresp,
-        s_axi_rvalid => s_axi_rvalid,
-        s_axi_rready => s_axi_rready,
+        s_axi_aclk      => clk,
+        s_axi_aresetn   => res,
+        s_axi_awaddr    => s_axi_i_awaddr,
+        s_axi_awprot    => s_axi_i_awprot,
+        s_axi_awvalid   => s_axi_i_awvalid,
+        s_axi_awready   => s_axi_i_awready,
+        s_axi_wdata     => s_axi_i_wdata,
+        s_axi_wstrb     => s_axi_i_wstrb,
+        s_axi_wvalid    => s_axi_i_wvalid,
+        s_axi_wready    => s_axi_i_wready,
+        s_axi_bresp     => s_axi_i_bresp,
+        s_axi_bvalid    => s_axi_i_bvalid,
+        s_axi_bready    => s_axi_i_bready,
+        s_axi_araddr    => s_axi_i_araddr,
+        s_axi_arprot    => s_axi_i_arprot,
+        s_axi_arvalid   => s_axi_i_arvalid,
+        s_axi_arready   => s_axi_i_arready,
+        s_axi_rdata     => s_axi_i_rdata,
+        s_axi_rresp     => s_axi_i_rresp,
+        s_axi_rvalid    => s_axi_i_rvalid,
+        s_axi_rready    => s_axi_i_rready,
         --BRAM
-        bram_rst_a => bram_rst_a,
-        bram_clk_a => bram_clk_a,
-        bram_en_a => bram_en_a,
-        bram_we_a => bram_we_a,
-        bram_addr_a => bram_addr_a,
-        bram_wrdata_a => bram_wrdata_a,
-        bram_rddata_a => bram_rddata_a
+        bram_rst_a      => bram_rst_a_i,
+        bram_clk_a      => bram_clk_a_i,
+        bram_en_a       => bram_en_a_i,
+        bram_we_a       => bram_we_a_i,
+        bram_addr_a     => bram_addr_a_i,
+        bram_wrdata_a   => bram_wrdata_a_i,
+        bram_rddata_a   => bram_rddata_a_i
     );
     instr_fetch : entity work.instruction_fetch
     port map(
@@ -190,12 +216,12 @@ begin
         instruction => instruction_fetched,
 
         --BRAM interface
-        clkb => bram_clk_a,
-        enb => bram_en_a,
-        web => bram_we_a,
-        addrb => bram_addr_a(11 downto 2),
-        dinb => bram_wrdata_a,
-        doutb => bram_rddata_a
+        clkb => bram_clk_a_i,
+        enb => bram_en_a_i,
+        web => bram_we_a_i,
+        addrb => bram_addr_a_i(11 downto 2),
+        dinb => bram_wrdata_a_i,
+        doutb => bram_rddata_a_i
     );
 
     --Decode
@@ -259,6 +285,38 @@ begin
     );
 
     --Memory Writeback 
+    axi_bram_instr_d: axi_bram_ctrl_0
+    PORT MAP (
+        s_axi_aclk      => clk,
+        s_axi_aresetn   => res,
+        s_axi_awaddr    => s_axi_d_awaddr,
+        s_axi_awprot    => s_axi_d_awprot,
+        s_axi_awvalid   => s_axi_d_awvalid,
+        s_axi_awready   => s_axi_d_awready,
+        s_axi_wdata     => s_axi_d_wdata,
+        s_axi_wstrb     => s_axi_d_wstrb,
+        s_axi_wvalid    => s_axi_d_wvalid,
+        s_axi_wready    => s_axi_d_wready,
+        s_axi_bresp     => s_axi_d_bresp,
+        s_axi_bvalid    => s_axi_d_bvalid,
+        s_axi_bready    => s_axi_d_bready,
+        s_axi_araddr    => s_axi_d_araddr,
+        s_axi_arprot    => s_axi_d_arprot,
+        s_axi_arvalid   => s_axi_d_arvalid,
+        s_axi_arready   => s_axi_d_arready,
+        s_axi_rdata     => s_axi_d_rdata,
+        s_axi_rresp     => s_axi_d_rresp,
+        s_axi_rvalid    => s_axi_d_rvalid,
+        s_axi_rready    => s_axi_d_rready,
+        --BRAM
+        bram_rst_a      => bram_rst_a_d,
+        bram_clk_a      => bram_clk_a_d,
+        bram_en_a       => bram_en_a_d,
+        bram_we_a       => bram_we_a_d,
+        bram_addr_a     => bram_addr_a_d,
+        bram_wrdata_a   => bram_wrdata_a_d,
+        bram_rddata_a   => bram_rddata_a_d
+    );
     instr_memory_writeback : entity work.memory_write_back
     port map(
         clk => clk,
@@ -279,7 +337,15 @@ begin
         alu_resoult => result,
         alu_resoult_reg => result_reg,
         rs2_value => rs2_value_executed,
-        rd_addr_in => rd_addr_executed
+        rd_addr_in => rd_addr_executed,
+
+        --BRAM interface
+        clkb => bram_clk_a_d,
+        enb => bram_en_a_d,
+        web => bram_we_a_d,
+        addrb => bram_addr_a_d(12 downto 2),
+        dinb => bram_wrdata_a_d,
+        doutb => bram_rddata_a_d
     );
 
 

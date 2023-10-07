@@ -165,7 +165,7 @@ module test_CPU_wh_AXI();
         mtestBresp 
       );
       $display("Reading RRESP");
-      for(int i = 32'h44A00000; i < 32'h44A00000 + 40; i+=4) begin
+      for(int i = 32'h40000000; i < 32'h40000000 + 40; i+=4) begin
         mtestADDR = i; 
         mst_agent_0.AXI4LITE_READ_BURST( 
           mtestADDR, 

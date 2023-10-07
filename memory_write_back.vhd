@@ -32,17 +32,24 @@ use IEEE.NUMERIC_STD.ALL;
 --use UNISIM.VComponents.all;
 
 entity memory_write_back is
-    Port ( clk, res, jmp, mem_we, mem_ena: in STD_LOGIC;
-           mem_opcode : in STD_LOGIC_VECTOR(2 downto 0);
-           op_class : in STD_LOGIC_VECTOR (4 downto 0);
-           npc_in : in UNSIGNED (31 downto 0);
-           alu_resoult : in STD_LOGIC_VECTOR (31 downto 0);
-           alu_resoult_reg : in STD_LOGIC_VECTOR (31 downto 0);
-           rs2_value : in STD_LOGIC_VECTOR (31 downto 0);
-           rd_addr_in : in STD_LOGIC_VECTOR (4 downto 0);
-           rd_value : out STD_LOGIC_VECTOR (31 downto 0);
-           rd_addr_out : out STD_LOGIC_VECTOR (4 downto 0);
-           pc_out : out STD_LOGIC_VECTOR (11 downto 0)
+    Port ( 
+        clk, res, jmp, mem_we, mem_ena: in STD_LOGIC;
+        mem_opcode : in STD_LOGIC_VECTOR(2 downto 0);
+        op_class : in STD_LOGIC_VECTOR (4 downto 0);
+        npc_in : in UNSIGNED (31 downto 0);
+        alu_resoult : in STD_LOGIC_VECTOR (31 downto 0);
+        alu_resoult_reg : in STD_LOGIC_VECTOR (31 downto 0);
+        rs2_value : in STD_LOGIC_VECTOR (31 downto 0);
+        rd_addr_in : in STD_LOGIC_VECTOR (4 downto 0);
+        rd_value : out STD_LOGIC_VECTOR (31 downto 0);
+        rd_addr_out : out STD_LOGIC_VECTOR (4 downto 0);
+        pc_out : out STD_LOGIC_VECTOR (11 downto 0);
+        clkb : IN STD_LOGIC;
+        enb : IN STD_LOGIC;
+        web : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
+        addrb : IN STD_LOGIC_VECTOR(10 DOWNTO 0);
+        dinb : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+        doutb : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
     );
 end memory_write_back;
 
@@ -54,7 +61,13 @@ architecture Behavioral of memory_write_back is
             ena : IN STD_LOGIC;
             addra : IN STD_LOGIC_VECTOR(10 DOWNTO 0);
             dina : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-            douta : OUT STD_LOGIC_VECTOR(31 DOWNTO 0) 
+            douta : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+            clkb : IN STD_LOGIC;
+            enb : IN STD_LOGIC;
+            web : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
+            addrb : IN STD_LOGIC_VECTOR(10 DOWNTO 0);
+            dinb : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+            doutb : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
         );
     END COMPONENT;
     signal mem_in, mem_out, mem_out_extended : std_logic_vector(31 downto 0) := (others => '0');
@@ -68,7 +81,13 @@ begin
         ena => mem_ena,
         addra => alu_resoult(12 downto 2),
         dina => mem_in,
-        douta => mem_out
+        douta => mem_out,
+        clkb => clkb,
+        enb => enb,
+        web => web,
+        addrb => addrb,
+        dinb => dinb,
+        doutb => doutb
     );
     
     --Equation
