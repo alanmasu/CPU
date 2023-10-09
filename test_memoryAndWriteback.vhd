@@ -31,6 +31,9 @@ use IEEE.NUMERIC_STD.ALL;
 --library UNISIM;
 --use UNISIM.VComponents.all;
 
+library work;
+use work.memory_pkg.all;
+
 entity test_memoryAndWriteback is
 --  Port ( );
 end test_memoryAndWriteback;
@@ -47,14 +50,18 @@ architecture Behavioral of test_memoryAndWriteback is
     signal rd_value : STD_LOGIC_VECTOR (31 downto 0):= (others => '0');
     signal rd_addr_out : STD_LOGIC_VECTOR (4 downto 0):= (others => '0');
     signal pc_out : STD_LOGIC_VECTOR (11 downto 0):= (others => '0');
+    signal en_out : STD_LOGIC_VECTOR (0 downto 0);
+    signal we_out : STD_LOGIC_VECTOR (3 downto 0);
+    signal d_in : peripheral_data_t := (axi_data => (1 => '1', others => '0'));
+    constant address_shift : unsigned(31 downto 0) := x"40010000";
 begin
     dut : entity work.memory_write_back
     port map(
         clk => clk,
         res => res,
         jmp => jmp,
-        mem_we => mem_we,
-        mem_ena => mem_en,
+        we_in => mem_we,
+        en_in => mem_en,
         mem_opcode => mem_opcode,
         op_class => op_class,
         rs2_value => rs2_value,
@@ -65,6 +72,12 @@ begin
         rd_value => rd_value,
         rd_addr_out => rd_addr_out,
         pc_out => pc_out,
+        --PERIPHERAL interface
+        en_out => en_out,
+        we_out => we_out,
+        d_in => d_in,
+
+        --BRAM interface
         clkb => clk,
         enb => '0',
         web => (others => '0'),
@@ -103,7 +116,7 @@ begin
         mem_opcode <= "010"; --SW
         rs2_value <= std_logic_vector(to_signed(274877688, 32));
         for i in 0 to 3 loop
-            alu_resoult <= std_logic_vector(to_unsigned(i * 4 + i, 32));
+            alu_resoult <= std_logic_vector(address_shift + to_unsigned(i * 4 + i, 32));
             wait for 10 ns;
         end loop;
         
@@ -111,7 +124,7 @@ begin
         mem_opcode <= "001"; --SH
         rs2_value <= std_logic_vector(to_unsigned(35535,32));
         for i in 0 to 3 loop
-            alu_resoult <= std_logic_vector(to_unsigned(i * 4 + i + 16, 32));
+            alu_resoult <= std_logic_vector(address_shift + to_unsigned(i * 4 + i + 16, 32));
             wait for 10 ns;
         end loop;
 
@@ -119,7 +132,7 @@ begin
         mem_opcode <= "000"; --SB
         rs2_value <= std_logic_vector(to_unsigned(207, 32));
         for i in 0 to 3 loop
-            alu_resoult <= std_logic_vector(to_unsigned(i * 4 + i + 32, 32));
+            alu_resoult <= std_logic_vector(address_shift + to_unsigned(i * 4 + i + 32, 32));
             wait for 10 ns;
         end loop;
 
@@ -128,31 +141,31 @@ begin
         op_class <= "00100"; 
         mem_opcode <= "010"; --LW
         mem_read_LW : for i in 0 to 3 loop
-            alu_resoult <= std_logic_vector(to_unsigned(i * 4 + i, 32));  --rd = i
+            alu_resoult <= std_logic_vector(address_shift + to_unsigned(i * 4 + i, 32));  --rd = i
             wait for 10 ns;
         end loop ;
 
         mem_opcode <= "001"; --LH
         mem_read_LH : for i in 0 to 3 loop
-            alu_resoult <= std_logic_vector(to_unsigned(i * 4 + i + 16, 32));  --rd = i
+            alu_resoult <= std_logic_vector(address_shift + to_unsigned(i * 4 + i + 16, 32));  --rd = i
             wait for 10 ns;
         end loop ;
 
         mem_opcode <= "101"; --LHU
         mem_read_LHU : for i in 0 to 3 loop
-            alu_resoult <= std_logic_vector(to_unsigned(i * 4 + i + 16, 32));  --rd = i
+            alu_resoult <= std_logic_vector(address_shift + to_unsigned(i * 4 + i + 16, 32));  --rd = i
             wait for 10 ns;
         end loop ;
 
         mem_opcode <= "000"; --LB
         mem_read_LB : for i in 0 to 3 loop
-            alu_resoult <= std_logic_vector(to_unsigned(i * 4 + i + 32, 32));  --rd = i
+            alu_resoult <= std_logic_vector(address_shift + to_unsigned(i * 4 + i + 32, 32));  --rd = i
             wait for 10 ns;
         end loop ;
 
         mem_opcode <= "100"; --LBU
         mem_read_LBU : for i in 0 to 3 loop
-            alu_resoult <= std_logic_vector(to_unsigned(i * 4 + i + 32, 32));  --rd = i
+            alu_resoult <= std_logic_vector(address_shift + to_unsigned(i * 4 + i + 32, 32));  --rd = i
             wait for 10 ns;
         end loop ;
         mem_en <= '0';
@@ -173,7 +186,61 @@ begin
         
         alu_resoult <= std_logic_vector(to_signed(142,32));
         op_class <= "00001"; --JAL
+        wait for 20 ns;
+
+
+        --I/O test
+        --MEM test
+        op_class <= "01000"; --Store
+        mem_opcode <= "010"; --SW
+        rs2_value <= x"00000001";
+        alu_resoult <= x"40010000"; --Memory access, so en[0] = '1'
         wait for 10 ns;
+
+        op_class <= "00100"; --Load
+        mem_opcode <= "010"; --LW
+        alu_resoult <= x"40010000"; --Memory access, so en[0] = '1'
+        wait for 10 ns;
+
+        --AXI test
+        op_class <= "01000"; --Store
+        mem_opcode <= "010"; --SW
+        rs2_value <= x"00000001";
+        alu_resoult <= x"E0000000";
+        wait for 10 ns;
+
+        op_class <= "00100"; --Load
+        mem_opcode <= "010"; --LW
+        wait for 10 ns;
+
+
+        --EN = 1
+        mem_en <= '1';
+        mem_we <= '1';
+
+        op_class <= "01000"; --Store
+        mem_opcode <= "010"; --SW
+        rs2_value <= x"00000001";
+        alu_resoult <= x"40010000"; --Memory access, so en[0] = '1'
+        wait for 10 ns;
+
+        op_class <= "00100"; --Load
+        mem_opcode <= "010"; --LW
+        alu_resoult <= x"40010000"; --Memory access, so en[0] = '1'
+        wait for 10 ns;
+
+        --AXI test
+        op_class <= "01000"; --Store
+        mem_opcode <= "010"; --SW
+        rs2_value <= x"00000001";
+        alu_resoult <= x"E0000000";
+        wait for 10 ns;
+
+        op_class <= "00100"; --Load
+        mem_opcode <= "010"; --LW
+        
+        wait for 10 ns;
+
         wait;
     end process ; -- test_process
     

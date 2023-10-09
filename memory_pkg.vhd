@@ -4,6 +4,7 @@ use IEEE.NUMERIC_STD.ALL;
 
 
 package memory_pkg is
+    --MEMORY model
     type memory_space_type_t is (ROM, RAM, IO, AXI, RESERVED);
     type memory_addr_space_t is record
         lower_bound : unsigned(31 downto 0);
@@ -35,6 +36,11 @@ package memory_pkg is
     );
 
     function is_in_space(addr : std_logic_vector(31 downto 0); space_type: memory_space_type_t) return std_logic;
+
+    --PERIPHERALS 
+    type peripheral_data_t is record
+        AXI_data : unsigned(31 downto 0);
+    end record peripheral_data_t;
 end package ;
 
 package body memory_pkg is

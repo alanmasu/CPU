@@ -44,10 +44,10 @@ module test_CPU_wh_AXI();
   bit [63:0]                              mtestRDataL; 
   test_design_axi_vip_0_2_mst_t           mst_agent_0;
 
-  `BD_WRAPPER DUT(
-    .reset_rtl(reset),
-    .sys_clock(clock) 
-  ); 
+//  `BD_WRAPPER DUT(
+//    .reset_rtl(reset),
+//    .sys_clock(clock) 
+//  ); 
     
   initial begin
     //Slave vip agent initialization

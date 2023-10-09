@@ -51,7 +51,7 @@ begin
     begin
         if en_in = '1' then
             en_out(0) <= is_in_space(address, RAM);
-            en_out(1) <= is_in_space(address, AXI);
+            en_out(1) <= is_in_space(address, AXI) or is_in_space(address, ROM);
         else 
             en_out <= (others => '0');
         end if ;
