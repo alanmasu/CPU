@@ -39,7 +39,7 @@ package memory_pkg is
 
     --PERIPHERALS 
     type peripheral_data_t is record
-        AXI_data : unsigned(31 downto 0);
+        AXI_data : std_logic_vector(31 downto 0);
     end record peripheral_data_t;
 end package ;
 

@@ -48,10 +48,10 @@ entity memory_write_back is
         pc_out : out STD_LOGIC_VECTOR (11 downto 0);
         --Estesioni per I/O [combinatori]
         en_out : out STD_LOGIC_VECTOR (0 downto 0);
+        we_out : out STD_LOGIC_VECTOR (3 downto 0);
         address_out : out STD_LOGIC_VECTOR (31 downto 0);
         d_out : out STD_LOGIC_VECTOR (31 downto 0);
-        we_out : out STD_LOGIC_VECTOR (3 downto 0);
-        d_in : peripheral_data_t;
+        d_in : in peripheral_data_t;
 
         --BRAM interface
         clkb : IN STD_LOGIC;
@@ -198,6 +198,7 @@ begin
         else 
             mem_out_extended <= mem_out_extended;
         end if ;
+        
     end process ; -- sign_extension
 
     pc_out_comb : process( jmp, op_class, alu_resoult_reg, npc_in )
