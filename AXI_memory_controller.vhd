@@ -150,6 +150,8 @@ architecture implementation of AXI_memory_controller is
 
 	signal read_response, write_response: std_logic_vector(1 downto 0);
 
+	signal stall_int : std_logic;
+
 begin
 	-- I/O Connections assignments
 
@@ -171,9 +173,28 @@ begin
 	M_AXI_ARPROT	<= "001";
 	--Read and Read Response (R)
 	M_AXI_RREADY	<= axi_rready;
-                                               
+
+	stall <= stall_int;
+                                    
+    --Signal to indicate that the values are not ready                                
+    --stall <= '0' when read_state = idle and awrite_state = idle and dwrite_state = idle else '1';
+    stall_pro : process( M_AXI_ACLK, M_AXI_ARESETN ) begin
+		if M_AXI_ARESETN = '0' then
+			stall_int <= '0';
+		elsif rising_edge(M_AXI_ACLK) then
+			if stall_int = '0' then
+				stall_int <= en;
+			elsif stall_int = '1' then
+				if read_state = idle and awrite_state = idle and dwrite_state = idle then
+					stall_int <= '0';
+				end if ;
+			end if ;
+		end if ;
+		
+	end process ; -- stall_pro
+	
+
 	-- Add user logic here
-	-- Nuova macchina a stati
 	read_process : process( M_AXI_ACLK )
 	begin
 		if rising_edge(M_AXI_ACLK) then
@@ -187,7 +208,7 @@ begin
 			else
 				case( read_state ) is
 					when IDLE =>
-						if en = '1' and we = "0000" then
+						if en = '1' and we = "0000" and stall_int = '0' then
 							read_state <= write_addr;
 						end if ;	
 					when write_addr => 
@@ -229,19 +250,21 @@ begin
 
 				case( awrite_state ) is
 					when IDLE =>
-						if en = '1' and we /= "0000" then
+						if en = '1' and we /= "0000" and stall_int = '0' then
 							awrite_state <= write;
 						end if ;	
 					when write => 
 						axi_awaddr <= address;
-						axi_awvalid <= '1';	
-						awrite_state <= wait_end;	
+						axi_awvalid <= '1';
+						if(M_AXI_AWREADY = '1')	then
+							awrite_state <= wait_end;	
+						end if ;
 					when wait_end =>
 					   	awrite_end <= '1';
 						if dwrite_end = '1' then
-							awrite_state <= wait_return;
+							awrite_state <= idle;
 						end if ;
-					when wait_return => 
+					when wait_return => --[DEPRECATED]
 						if en = '0' then
 							awrite_state <= idle;
 						end if ;						
@@ -266,13 +289,15 @@ begin
 
 				case( dwrite_state ) is
 					when IDLE =>
-						if en = '1' and we /= "0000" then
+						if en = '1' and we /= "0000" and stall_int = '0' then
 							dwrite_state <= write;
 						end if ;	
 					when write => 
 						axi_wdata <= write_data;
 						axi_wvalid <= '1';
-						dwrite_state <= wait_end;
+						if M_AXI_WREADY = '1' then
+							dwrite_state <= wait_end;
+						end if ;
 					when wait_end =>
 					   dwrite_end <= '1';
 						if awrite_end = '1' then

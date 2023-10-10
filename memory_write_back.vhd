@@ -116,6 +116,8 @@ begin
     rd_addr_out <= rd_addr_out when op_class = "00100" else rd_addr_in;
     address_out <= alu_resoult(31 downto 0);
     d_out <= mem_in;
+    
+    en_out <= en_bus(1 downto 1);
     we_out <= we;
     mem_wea <= we_out ;--when en_bus(0) = '1' else "0000";
 

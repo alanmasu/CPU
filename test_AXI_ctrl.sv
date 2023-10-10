@@ -227,7 +227,20 @@ module test_AXI_ctrl( );
         #10;
 
         //IO test
+        alu_resoult = 32'h00100000;
+        rs2_value = 32'd274877688;
+        //AXI WRITE
+        op_class = 5'b01000;
+        en_in = 1'b1;
+        we_in = 1'b1;
+        mem_opcode = 3'b010; //SW
+        #10;
 
+        //AXI READ
+        op_class = 5'b00100;
+        en_in = 1'b1;
+        we_in = 1'b0;
+        mem_opcode = 3'b010; //LW
     end
 
 

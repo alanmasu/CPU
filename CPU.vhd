@@ -31,6 +31,9 @@ use IEEE.NUMERIC_STD.ALL;
 --library UNISIM;
 --use UNISIM.VComponents.all;
 
+library work;
+use work.memory_pkg.all;
+
 entity CPU is
     Port ( 
         clk : IN std_logic;
@@ -160,6 +163,16 @@ architecture Behavioral of CPU is
     signal mem_opcode_executed : std_logic_vector(2 downto 0) := (others => '0');
     signal rs2_value_executed : std_logic_vector(31 downto 0) := (others => '0');
     signal jmp_executed : std_logic := '0';
+
+    --Memory Writeback - IN
+    signal d_bus_in : peripheral_data_t;
+
+    --Memory Writeback - OUT | Peripheral - IN
+    signal mem_wb_en_out : std_logic_vector(0 downto 0) := (others => '0');
+    signal mem_wb_we_out : std_logic_vector(3 downto 0) := (others => '0');
+    signal mem_wb_addr_out : std_logic_vector(31 downto 0) := (others => '0');
+    signal mem_wb_data_out : std_logic_vector(31 downto 0) := (others => '0');
+
     --BRAM 
     signal bram_rst_a_d : STD_LOGIC;
     signal bram_clk_a_d : STD_LOGIC;
@@ -329,8 +342,8 @@ begin
 
         --IN
         jmp => jmp_executed,
-        mem_we => mem_we,
-        mem_ena => mem_ena,
+        we_in => mem_we,
+        en_in => mem_ena,
         mem_opcode => mem_opcode_executed,
         op_class => op_class_executed,
         npc_in => npc_executed,
@@ -338,6 +351,13 @@ begin
         alu_resoult_reg => result_reg,
         rs2_value => rs2_value_executed,
         rd_addr_in => rd_addr_executed,
+
+        --Peripheral
+        en_out => mem_wb_en_out,
+        we_out => mem_wb_we_out,
+        address_out => mem_wb_addr_out,
+        d_out => mem_wb_data_out,
+        d_in => d_bus_in,
 
         --BRAM interface
         clkb => bram_clk_a_d,
