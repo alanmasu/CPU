@@ -103,10 +103,10 @@ architecture implementation of AXI_memory_controller is
 				count := 1;                                                      
 			else                                                               
 				if(depth <= 1) then                                              
-				count := count;                                                
+					count := count;                                                
 				else                                                             
-				depth := depth / 2;                                            
-				count := count + 1;                                            
+					depth := depth / 2;                                            
+					count := count + 1;                                            
 				end if;                                                          
 			end if;                                                            
 		end loop;                                                             
@@ -126,37 +126,37 @@ architecture implementation of AXI_memory_controller is
 
 	-- AXI4LITE signals
 	--write address valid
-	signal axi_awvalid	: std_logic;
+	signal axi_awvalid	: std_logic := '0';
 	--write data valid
-	signal axi_wvalid	: std_logic;
+	signal axi_wvalid	: std_logic := '0';
 	--write data byte enables
-	signal axi_wstrb	: std_logic_vector(C_M_AXI_DATA_WIDTH/8-1 downto 0);
+	signal axi_wstrb	: std_logic_vector(C_M_AXI_DATA_WIDTH/8-1 downto 0) := (others => '0');
 	--read address valid
-	signal axi_arvalid	: std_logic;
+	signal axi_arvalid	: std_logic	:= '0';
 	--read data acceptance
-	signal axi_rready	: std_logic;
+	signal axi_rready	: std_logic	:= '0';
 	--write response acceptance
-	signal axi_bready	: std_logic;
+	signal axi_bready	: std_logic := '0';
 	--write address
-	signal axi_awaddr	: std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
+	signal axi_awaddr	: std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0) := (others => '0');
 	--write data
-	signal axi_wdata	: std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
+	signal axi_wdata	: std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0) := (others => '0');
 	--read addresss
-	signal axi_araddr	: std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
+	signal axi_araddr	: std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0) := (others => '0');
 	--END AXI4LITE
 	
 	--Write MFS sync signals
-	signal awrite_end, dwrite_end : std_logic;
+	signal awrite_end, dwrite_end : std_logic := '0';
 
-	signal read_response, write_response: std_logic_vector(1 downto 0);
+	signal read_response, write_response: std_logic_vector(1 downto 0) := (others => '0');
 
-	signal stall_int : std_logic;
+	signal stall_int : std_logic := '0';
 
 begin
 	-- I/O Connections assignments
 
 	--Adding the offset address to the base addr of the slave
-	M_AXI_AWADDR	<= std_logic_vector (unsigned(C_M_TARGET_SLAVE_BASE_ADDR) + unsigned(axi_awaddr));
+	M_AXI_AWADDR	<= std_logic_vector(unsigned(axi_awaddr));
 	--AXI 4 write data
 	M_AXI_WDATA		<= axi_wdata;
 	M_AXI_AWPROT	<= "000";
@@ -168,7 +168,7 @@ begin
 	--Write Response (B)
 	M_AXI_BREADY	<= axi_bready;
 	--Read Address (AR)
-	M_AXI_ARADDR	<= std_logic_vector(unsigned(C_M_TARGET_SLAVE_BASE_ADDR) + unsigned(axi_araddr));
+	M_AXI_ARADDR	<= std_logic_vector(unsigned(axi_araddr));
 	M_AXI_ARVALID	<= axi_arvalid;
 	M_AXI_ARPROT	<= "001";
 	--Read and Read Response (R)
@@ -201,14 +201,14 @@ begin
 			axi_arvalid <= '0';
 			axi_rready <= '0';
 			read_response <= (others => '0');
-			read_data <= (others => '0');
-
 			if M_AXI_ARESETN = '0' then
 				read_state <= idle;
+				read_data <= (others => '0');
 			else
 				case( read_state ) is
 					when IDLE =>
 						if en = '1' and we = "0000" and stall_int = '0' then
+							--read_data <= (others => '0');
 							read_state <= write_addr;
 						end if ;	
 					when write_addr => 
@@ -252,9 +252,9 @@ begin
 					when IDLE =>
 						if en = '1' and we /= "0000" and stall_int = '0' then
 							awrite_state <= write;
+							axi_awaddr <= address;
 						end if ;	
 					when write => 
-						axi_awaddr <= address;
 						axi_awvalid <= '1';
 						if(M_AXI_AWREADY = '1')	then
 							awrite_state <= wait_end;	
@@ -286,14 +286,13 @@ begin
 				axi_wvalid <= '0';
 				dwrite_state <= dwrite_state;
 				dwrite_end <= '0';
-
 				case( dwrite_state ) is
 					when IDLE =>
 						if en = '1' and we /= "0000" and stall_int = '0' then
 							dwrite_state <= write;
+							axi_wdata <= write_data;
 						end if ;	
 					when write => 
-						axi_wdata <= write_data;
 						axi_wvalid <= '1';
 						if M_AXI_WREADY = '1' then
 							dwrite_state <= wait_end;

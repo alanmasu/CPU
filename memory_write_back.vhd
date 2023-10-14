@@ -165,7 +165,7 @@ begin
     end process ; -- mem_wea_combinatory
 
     --Source selection and sign extension
-    sign_extension : process( en_bus, mem_out, mem_opcode, op_class, byte_address ) is
+    sign_extension : process( en_bus, mem_out, mem_opcode, op_class, byte_address, d_in ) is
         variable dato : unsigned(31 downto 0);
     begin
         --Source seletion

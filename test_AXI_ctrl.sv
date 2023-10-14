@@ -40,9 +40,9 @@ module test_AXI_ctrl( );
     bit[31:0] address_out;
     bit[31:0] d_out;
 
-    bit[31:0] axi_data_out;
+    bit[31:0] axi_data_out = 32'h00000000;
     bit stall;
-    peripheral_data_t d_in;
+    peripheral_data_t d_in  = '{axi_data: 32'h00000000};
 
     const bit[31:0] address_shift = 32'h40010000;
 
@@ -71,6 +71,7 @@ module test_AXI_ctrl( );
     bit [63:0]                              mtestWDataL; 
     bit [63:0]                              mtestRDataL; 
     mem_ctrl_test_axi_vip_0_0_slv_mem_t     slv_mem_t;
+    //mem_ctrl_test_axi_vip_0_0_slv_t         slv_mem_t;
 
     memory_write_back mem(
         .clk(clock),
@@ -130,16 +131,19 @@ module test_AXI_ctrl( );
     
     initial begin
         reset = 1'b0;
-        #9;
+        #18;
         reset = 1'b1;
     end
 
 
     initial begin
         slv_mem_t = new( "slv_mem_t", test_AXI_ctrl.DUT.mem_ctrl_test_i.axi_vip_0.inst.IF );
+        slv_mem_t.vif_proxy.set_dummy_drive_type(XIL_AXI_VIF_DRIVE_NONE);
+        slv_mem_t.mem_model.set_memory_fill_policy(XIL_AXI_MEMORY_FILL_FIXED);
         slv_mem_t.start_slave();
         $timeformat (-12, 1, " ps", 1);
         #1;
+        slv_monitor_transaction = new("slv_monitor_transaction");
         forever begin
           slv_mem_t.monitor.item_collected_port.get(slv_monitor_transaction);
           slave_moniter_transaction_queue.push_back(slv_monitor_transaction);
@@ -148,7 +152,7 @@ module test_AXI_ctrl( );
     end
     
     initial begin
-        #9;
+        #19;
 
         //Setup the memory controller
         jmp = 1'b0;
@@ -227,20 +231,104 @@ module test_AXI_ctrl( );
         #10;
 
         //IO test
-        alu_resoult = 32'h00100000;
-        rs2_value = 32'd274877688;
-        //AXI WRITE
         op_class = 5'b01000;
         en_in = 1'b1;
         we_in = 1'b1;
-        mem_opcode = 3'b010; //SW
-        #10;
 
-        //AXI READ
+        //Scrivo 4 WORDS shiftate di un byte ciascuna
+        mem_opcode = 3'b010; //SW
+        rs2_value = 32'd274877688;
+        for(int i = 0; i <= 3; i++) begin
+            alu_resoult = 32'h00000000 + i*4 + i; 
+            wait(stall == 1'b1); //Wait transaction starts
+            wait(stall == 1'b0); //Wait reatransactiond ends
+        end
+
+        //Scrivo 4 HALF WORDS shiftate di un byte ciascuna
+        mem_opcode = 3'b001; //SH
+        rs2_value = 32'd35535;
+        for(int i = 0; i <= 3; i++) begin
+            alu_resoult = 32'h00000000 + i*4 + i + 16; 
+            wait(stall == 1'b1); //Wait transaction starts
+            wait(stall == 1'b0); //Wait reatransactiond ends
+        end
+
+        //Scrivo 4 BYTE shiftate di un byte ciascuna
+        mem_opcode = 3'b000; //SB
+        rs2_value = 32'd207;
+        for(int i = 0; i <= 3; i++) begin
+            alu_resoult = 32'h00000000 + i*4 + i + 32; 
+            wait(stall == 1'b1); //Wait transaction starts
+            wait(stall == 1'b0); //Wait reatransactiond ends
+        end
+
+        //Carico 4 WORDS shiftate di un byte ciascuna
         op_class = 5'b00100;
         en_in = 1'b1;
         we_in = 1'b0;
         mem_opcode = 3'b010; //LW
+        for(int i = 0; i <= 3; i++) begin
+            alu_resoult = 32'h00000000 + i*4 + i; 
+            wait(stall == 1'b1); //Wait transaction starts
+            wait(stall == 1'b0); //Wait reatransactiond ends
+        end
+        
+        //Carico 4 HALF WORDS shiftate di un byte ciascuna
+        mem_opcode = 3'b001; //LH
+        for(int i = 0; i <= 3; i++) begin
+            alu_resoult = 32'h00000000 + i*4 + i + 16; 
+            wait(stall == 1'b1); //Wait transaction starts
+            wait(stall == 1'b0); //Wait reatransactiond ends
+        end
+
+        mem_opcode = 3'b101; //LHU
+        for(int i = 0; i <= 3; i++) begin
+            alu_resoult = 32'h00000000 + i*4 + i + 16; 
+            wait(stall == 1'b1); //Wait transaction starts
+            wait(stall == 1'b0); //Wait reatransactiond ends
+        end
+
+        //Carico 4 BYTE shiftate di un byte ciascuna
+        mem_opcode = 3'b000; //LB
+        for(int i = 0; i <= 3; i++) begin
+            alu_resoult = 32'h00000000 + i*4 + i + 32; 
+            wait(stall == 1'b1); //Wait transaction starts
+            wait(stall == 1'b0); //Wait reatransactiond ends
+        end
+
+        mem_opcode = 3'b100; //LBU
+        for(int i = 0; i <= 3; i++) begin
+            alu_resoult = 32'h00000000 + i*4 + i + 32; 
+            wait(stall == 1'b1); //Wait transaction starts
+            wait(stall == 1'b0); //Wait reatransactiond ends
+        end
+
+        #10;
+
+        // alu_resoult = 32'h00100000;
+        // rs2_value = 32'd274877688;
+        // //AXI WRITE
+        // op_class = 5'b01000;
+        // en_in = 1'b1;
+        // we_in = 1'b1;
+        // mem_opcode = 3'b010; //SW
+
+        // wait(stall == 1'b1); //Wait write starts
+        // we_in = 1'b0;
+        // wait(stall == 1'b0); //Wait write ends
+
+        // //AXI READ
+        // op_class = 5'b00100;
+        // en_in = 1'b1;
+        // we_in = 1'b0;
+        // mem_opcode = 3'b010; //LW
+
+        // wait(stall == 1'b1); //Wait read starts
+        // en_in = 1'b0;
+        // wait(stall == 1'b0); //Wait read ends
+        // #40;
+        $finish;
+
     end
 
 
