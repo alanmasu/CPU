@@ -35,6 +35,10 @@ library work;
 use work.memory_pkg.all;
 
 entity CPU is
+    generic (
+		C_M_AXI_ADDR_WIDTH	: integer	:= 32;
+		C_M_AXI_DATA_WIDTH	: integer	:= 32
+	);
     Port ( 
         clk : IN std_logic;
         res : IN std_logic;
@@ -79,7 +83,28 @@ entity CPU is
         s_axi_d_rdata : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
         s_axi_d_rresp : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
         s_axi_d_rvalid : OUT STD_LOGIC;
-        s_axi_d_rready : IN STD_LOGIC
+        s_axi_d_rready : IN STD_LOGIC;
+
+        --M_AXI interface
+        M_AXI_AWADDR	: out std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
+		M_AXI_AWPROT	: out std_logic_vector(2 downto 0);
+		M_AXI_AWVALID	: out std_logic;
+		M_AXI_AWREADY	: in std_logic;
+		M_AXI_WDATA	    : out std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
+		M_AXI_WSTRB	    : out std_logic_vector(C_M_AXI_DATA_WIDTH/8-1 downto 0);
+		M_AXI_WVALID	: out std_logic;
+		M_AXI_WREADY	: in std_logic;
+		M_AXI_BRESP	    : in std_logic_vector(1 downto 0);
+		M_AXI_BVALID	: in std_logic;
+		M_AXI_BREADY	: out std_logic;
+		M_AXI_ARADDR	: out std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
+		M_AXI_ARPROT	: out std_logic_vector(2 downto 0);
+		M_AXI_ARVALID	: out std_logic;
+		M_AXI_ARREADY	: in std_logic;
+		M_AXI_RDATA	    : in std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
+		M_AXI_RRESP	    : in std_logic_vector(1 downto 0);
+		M_AXI_RVALID	: in std_logic;
+		M_AXI_RREADY	: out std_logic
     );
 end CPU;
 
@@ -184,6 +209,10 @@ architecture Behavioral of CPU is
     --Execute - MSF
     signal mem_we : std_logic := '0';
     signal mem_ena : std_logic := '0';
+
+    --AXI Memory Controller
+    signal AXI_read_data : std_logic_vector(31 downto 0) := (others => '0');
+    signal AXI_stall : std_logic := '0';
 begin
     --Fetch
     axi_bram_instr_i: axi_bram_ctrl_0
@@ -330,7 +359,8 @@ begin
         bram_wrdata_a   => bram_wrdata_a_d,
         bram_rddata_a   => bram_rddata_a_d
     );
-    instr_memory_writeback : entity work.memory_write_back
+
+    memory_writeback : entity work.memory_write_back
     port map(
         clk => clk,
         res => res,
@@ -368,10 +398,40 @@ begin
         doutb => bram_rddata_a_d
     );
 
+    d_bus_in.AXI_data <= AXI_read_data;
 
-    process(clk, res)
-        
-    begin
+    axi_mem_ctrl : entity work.AXI_memory_controller
+    port map(
+        en => mem_wb_en_out(0), 
+        we => mem_wb_we_out,
+        address => mem_wb_addr_out,
+        write_data => mem_wb_data_out,
+        read_data => AXI_read_data,
+        stall => AXI_stall,
+        M_AXI_ACLK => clk,
+        M_AXI_ARESETN => res,
+        M_AXI_AWADDR => M_AXI_AWADDR,
+		M_AXI_AWPROT => M_AXI_AWPROT,
+		M_AXI_AWVALID => M_AXI_AWVALID,
+		M_AXI_AWREADY => M_AXI_AWREADY,
+		M_AXI_WDATA => M_AXI_WDATA,
+		M_AXI_WSTRB	 => M_AXI_WSTRB,
+		M_AXI_WVALID => M_AXI_WVALID,
+		M_AXI_WREADY => M_AXI_WREADY,
+		M_AXI_BRESP => M_AXI_BRESP,
+		M_AXI_BVALID => M_AXI_BVALID,
+		M_AXI_BREADY => M_AXI_BREADY,
+		M_AXI_ARADDR => M_AXI_ARADDR,
+		M_AXI_ARPROT => M_AXI_ARPROT,
+		M_AXI_ARVALID => M_AXI_ARVALID,
+		M_AXI_ARREADY => M_AXI_ARREADY,
+		M_AXI_RDATA => M_AXI_RDATA,
+		M_AXI_RRESP => M_AXI_RRESP,
+		M_AXI_RVALID => M_AXI_RVALID,
+		M_AXI_RREADY => M_AXI_RREADY
+    );
+
+    process(clk, res) begin
 
         if(res = '0') then
             state <= idle;
