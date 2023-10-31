@@ -452,7 +452,19 @@ begin
                 when decode =>
                     state <= execute;
                 when execute =>
-                    state <= memory_writeback;
+                    state <= memory_writeback;               
+                when memory_writeback =>
+                    state <= fetch;
+            end case;
+        end if;
+    end process;
+
+    ena_mealy : process( state, AXI_stall ) begin
+        case state is
+            when idle =>
+                pc_load <= '1';
+            when memory_writeback =>
+                if AXI_stall = '0' then       
                     pc_load <= '1';
                     case (op_class_decoded) is
                         when "10000" => --OP
@@ -470,12 +482,17 @@ begin
                             mem_we <= '0';
                             mem_ena <= '0';                                   
                     end case;
-                    
-                when memory_writeback =>
-                    state <= fetch;
-        end case;
-        end if;
-    end process;
+                elsif AXI_stall = '1' then
+                    pc_load <= '0';
+                    regFile_we <= '0';
+                    mem_we <= '0';
+                end if ;
+            when others => 
+                pc_load <= '0';
+                regFile_we <= '0';
+                mem_we <= '0';  
+        end case ;
+    end process ; -- ena_mealy
 
 
 end Behavioral;
