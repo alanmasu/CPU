@@ -45,7 +45,7 @@ entity memory_write_back is
         rd_addr_in : in STD_LOGIC_VECTOR (4 downto 0);
         rd_value : out STD_LOGIC_VECTOR (31 downto 0);
         rd_addr_out : out STD_LOGIC_VECTOR (4 downto 0);
-        pc_out : out STD_LOGIC_VECTOR (11 downto 0);
+        pc_out : out STD_LOGIC_VECTOR (31 downto 0);
         --Estesioni per I/O [combinatori]
         en_out : out STD_LOGIC_VECTOR (0 downto 0);
         we_out : out STD_LOGIC_VECTOR (3 downto 0);

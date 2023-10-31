@@ -37,7 +37,7 @@ entity istruction_decode is
     Port ( clk, res : in STD_LOGIC;
            we : in STD_LOGIC;
            instruction : in STD_LOGIC_VECTOR (31 downto 0);
-           pc_in, npc_in : in UNSIGNED (11 downto 0);
+           pc_in, npc_in : in UNSIGNED (31 downto 0);
            rd_value_in : in STD_LOGIC_VECTOR (31 downto 0);         --Reg Destination val
            rd_addr_in : in STD_LOGIC_VECTOR (4 downto 0);           --Reg Destination addr
            rs1_value, rs2_value: out STD_LOGIC_VECTOR (31 downto 0);
@@ -100,8 +100,8 @@ begin
             jump <= '0';
         elsif rising_edge(clk) then
             --Registri semplici
-            npc_out <= resize(npc_in, 32);
-            pc_out <= resize(pc_in, 32);
+            npc_out <= npc_in;
+            pc_out <= pc_in;
             --op_class <= (4 => op, 3 => store, 2 => load, 1 => branch, 0 => jump);
             rd_addr_out <= rd_addr;
             mem_opcode <= func3;

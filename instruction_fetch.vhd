@@ -33,11 +33,11 @@ use IEEE.NUMERIC_STD.ALL;
 
 entity instruction_fetch is
     Port ( 
-        pc_in : in STD_LOGIC_VECTOR (11 downto 0);
+        pc_in : in STD_LOGIC_VECTOR (31 downto 0);
         pc_load,  clk, res : in STD_LOGIC;
         instruction : out STD_LOGIC_VECTOR(31 downto 0);
-        npc : out UNSIGNED(11 downto 0);
-        pc: buffer UNSIGNED(11 downto 0);
+        npc : out UNSIGNED(31 downto 0);
+        pc: buffer UNSIGNED(31 downto 0);
 
         --BRAM interface
         clkb : IN STD_LOGIC;

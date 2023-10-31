@@ -146,7 +146,7 @@ architecture Behavioral of CPU is
     END COMPONENT;
 
     --Memory - OUT Fetch - IN
-    signal pc_in : std_logic_vector(11 downto 0) := (others => '0');
+    signal pc_in : std_logic_vector(31 downto 0) := (others => '0');
     --BRAM Controller
     signal mem_out: STD_LOGIC_VECTOR(31 downto 0);
     signal bram_rst_a_i : STD_LOGIC;
@@ -162,7 +162,7 @@ architecture Behavioral of CPU is
     
     --Fetch - OUT | Decode - IN
     signal instruction_fetched : std_logic_vector(31 downto 0) := (others => '0');
-    signal pc_fetched, npc_fetched : unsigned(11 downto 0) := (others => '0');
+    signal pc_fetched, npc_fetched : unsigned(31 downto 0) := (others => '0');
     
     --Decode - MSF 
     signal regFile_we : std_logic := '0';
@@ -473,7 +473,7 @@ begin
                     
                 when memory_writeback =>
                     state <= fetch;
-            end case;
+        end case;
         end if;
     end process;
 
