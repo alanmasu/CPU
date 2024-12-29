@@ -51,9 +51,9 @@ package body memory_pkg is
 
     begin
         for i in memory_map'range loop
-            lower_bound := memory_map(i).lower_bound;
-            upper_bound := memory_map(i).upper_bound;
             if (memory_map(i).space_type = space_type) then
+                lower_bound := memory_map(i).lower_bound;
+                upper_bound := memory_map(i).upper_bound;
                 if (unsigned (addr) >= lower_bound and unsigned(addr) <= upper_bound) then
                     result := '1';
                 end if;

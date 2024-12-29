@@ -360,7 +360,7 @@ begin
         bram_rddata_a   => bram_rddata_a_d
     );
 
-    memory_writeback : entity work.memory_write_back
+    mem_writeback : entity work.memory_write_back
     port map(
         clk => clk,
         res => res,
@@ -435,18 +435,11 @@ begin
 
         if(res = '0') then
             state <= idle;
-            regFile_we <= '0';
-            pc_load <= '1';
-            mem_we <= '0';
         elsif(rising_edge(clk)) then
-            regFile_we <= '0';
-            pc_load <= '0';
-            mem_we <= '0';
             --Next state and control signals for next state
             case state is
                 when idle =>
                     state <= fetch;
-                    pc_load <= '1';
                 when fetch =>
                     state <= decode;
                 when decode =>
@@ -454,7 +447,9 @@ begin
                 when execute =>
                     state <= memory_writeback;               
                 when memory_writeback =>
-                    state <= fetch;
+                    if AXI_stall = '0' then
+                        state <= fetch;
+                    end if ;
             end case;
         end if;
     end process;
@@ -463,9 +458,26 @@ begin
         case state is
             when idle =>
                 pc_load <= '1';
-            when memory_writeback =>
-                if AXI_stall = '0' then       
-                    pc_load <= '1';
+            when execute =>
+                pc_load <= '1';
+                case (op_class_decoded) is
+                    when "10000" => --OP
+                        regFile_we <= '1';
+                    when "01000" => --Store
+                        mem_we <= '1';
+                        mem_ena <= '1';
+                    when "00100" => --Load
+                        mem_ena <= '1';
+                        regFile_we <= '1';
+                    when "00001" => --Jump 
+                        regFile_we <= '1';   
+                    when others =>
+                        regFile_we <= '0';
+                        mem_we <= '0';
+                        mem_ena <= '0';                                   
+                end case;
+            when memory_writeback => 
+                if AXI_stall = '0' then
                     case (op_class_decoded) is
                         when "10000" => --OP
                             regFile_we <= '1';

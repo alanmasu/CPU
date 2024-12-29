@@ -205,9 +205,9 @@ begin
 
     pc_out_comb : process( jmp, op_class, alu_resoult_reg, npc_in )
     begin
-        pc_out <= std_logic_vector(npc_in(11 downto 0));
+        pc_out <= std_logic_vector(npc_in);
         if jmp = '1' and (op_class = "00010" or op_class = "00001") then
-            pc_out <= alu_resoult_reg(11 downto 0);
+            pc_out <= alu_resoult_reg;
         end if ;
     end process ; -- pc_out
     

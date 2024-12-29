@@ -6,21 +6,18 @@
 `define BD_WRAPPER test_design_wrapper
 
 import axi_vip_pkg::*;
-import test_design_axi_vip_0_2_pkg::*;
+import test_design_axi_vip_0_3_pkg::*;
+import test_design_axi_vip_1_0_pkg::*;
 
 module test_CPU_wh_AXI();
 //slave vip agent
 
-//   axi_transaction                         rd_transaction;   
-//   axi_monitor_transaction                 slv_monitor_transaction;  
-//   axi_monitor_transaction                 slave_moniter_transaction_queue[$];  
-//   xil_axi_uint                            slave_moniter_transaction_queue_size =0;  
-//   xil_axi_uint                            slv_agent_verbosity = 0;  
-//   test_axi_vip_0_0_slv_mem_t              slv_agent_0;
-//   bit error_0;
-//   bit done_0;
-//   bit init_0;
-//   bit [31:0] S00_AXI_test_data[3:0]; 
+  axi_transaction                         rd_transaction;   
+  axi_monitor_transaction                 slv_monitor_transaction;  
+  axi_monitor_transaction                 slave_moniter_transaction_queue[$];  
+  xil_axi_uint                            slave_moniter_transaction_queue_size =0;  
+  xil_axi_uint                            slv_agent_verbosity = 0;  
+  test_design_axi_vip_1_0_slv_mem_t       slv_agent_0;
 
   bit                                     clock;
   bit                                     reset;
@@ -42,7 +39,7 @@ module test_CPU_wh_AXI();
   xil_axi_resp_t[255:0]                   mtestRresp;  
   bit [63:0]                              mtestWDataL; 
   bit [63:0]                              mtestRDataL; 
-  test_design_axi_vip_0_2_mst_t           mst_agent_0;
+  test_design_axi_vip_0_3_mst_t           mst_agent_0;
 
   `BD_WRAPPER DUT(
     .reset_rtl(reset),
@@ -51,15 +48,13 @@ module test_CPU_wh_AXI();
     
   initial begin
     //Slave vip agent initialization
-
-    // slv_agent_0 = new("slave vip agent",DUT.`BD_INST_NAME.slave_0.inst.IF);
-    // slv_agent_0.vif_proxy.set_dummy_drive_type(XIL_AXI_VIF_DRIVE_NONE);
-    // slv_agent_0.set_agent_tag("Slave VIP");
-    // slv_agent_0.set_verbosity(slv_agent_verbosity);
-    // slv_agent_0.start_slave();
+    slv_agent_0 = new("slave vip agent",test_CPU_wh_AXI.DUT.test_design_i.axi_vip_1.inst.IF);
+    slv_agent_0.vif_proxy.set_dummy_drive_type(XIL_AXI_VIF_DRIVE_NONE);
+    slv_agent_0.set_agent_tag("Slave VIP");
+    slv_agent_0.set_verbosity(slv_agent_verbosity);
+    slv_agent_0.start_slave();
     
     //Master vip agent initialization
-
     mst_agent_0 = new("master vip agent",test_CPU_wh_AXI.DUT.test_design_i.axi_vip_0.inst.IF);//ms  
     mst_agent_0.vif_proxy.set_dummy_drive_type(XIL_AXI_VIF_DRIVE_NONE); 
     mst_agent_0.set_agent_tag("Master VIP"); 
@@ -84,14 +79,14 @@ module test_CPU_wh_AXI();
     //$finish;
   end
 
-//   initial begin
-//     #1;
-//     forever begin
-//       slv_agent_0.monitor.item_collected_port.get(slv_monitor_transaction);
-//       slave_moniter_transaction_queue.push_back(slv_monitor_transaction);
-//       slave_moniter_transaction_queue_size++;
-//     end
-//   end
+  initial begin
+    #1;
+    forever begin
+      slv_agent_0.monitor.item_collected_port.get(slv_monitor_transaction);
+      slave_moniter_transaction_queue.push_back(slv_monitor_transaction);
+      slave_moniter_transaction_queue_size++;
+    end
+  end
 
   //Modificare questo task qui per il testbench
   task automatic S_AXI_TEST;  
@@ -110,15 +105,15 @@ module test_CPU_wh_AXI();
       mtestQOS = 0; 
 
       //Scrittura in memoria
-      // $display("Imposto l'indirizzo nel slv_reg_2");
-      // mtestADDR = 32'd08; 
-      // mtestWDataL[31:0] = 32'h1028CC;   
-      // mst_agent_0.AXI4LITE_WRITE_BURST( 
-      //   mtestADDR, 
-      //   mtestProtectionType, 
-      //   mtestWDataL, 
-      //   mtestBresp 
-      // );  
+//      $display("Imposto l'indirizzo nel slv_reg_2");
+//      mtestADDR = 32'd0; 
+//      mtestWDataL[31:0] = 32'd0;   
+//      mst_agent_0.AXI4LITE_WRITE_BURST( 
+//        mtestADDR, 
+//        mtestProtectionType, 
+//        mtestWDataL, 
+//        mtestBresp 
+//      );  
 
       // $display("fine impostazione indirizzo");
       // $display("Imposto i dati nel slv_reg_3");
