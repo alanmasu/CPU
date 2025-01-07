@@ -49,7 +49,7 @@ architecture Behavioral of test_memoryAndWriteback is
     signal rd_addr_in : STD_LOGIC_VECTOR (4 downto 0):= (others => '0');
     signal rd_value : STD_LOGIC_VECTOR (31 downto 0):= (others => '0');
     signal rd_addr_out : STD_LOGIC_VECTOR (4 downto 0):= (others => '0');
-    signal pc_out : STD_LOGIC_VECTOR (11 downto 0):= (others => '0');
+    signal pc_out : STD_LOGIC_VECTOR (31 downto 0):= (others => '0');
     signal en_out : STD_LOGIC_VECTOR (0 downto 0);
     signal we_out : STD_LOGIC_VECTOR (3 downto 0);
     signal d_in : peripheral_data_t := (axi_data => (1 => '1', others => '0'));

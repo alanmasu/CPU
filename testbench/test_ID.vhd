@@ -40,7 +40,7 @@ end test_ID;
 architecture Behavioral of test_ID is
     signal clk, res, we, a_pcn, b_immn : STD_LOGIC := '0';
     signal instruction, rd_value_in, rs1_value, rs2_value, rd_value, immediate_out : std_logic_vector(31 downto 0):= (others => '0') ;
-    signal pc_in, npc_in : UNSIGNED(11 downto 0):= (others => '0') ;  
+    signal pc_in, npc_in : UNSIGNED(31 downto 0):= (others => '0') ;  
     signal pc_out, npc_out : UNSIGNED (31 downto 0) := (others => '0');
     signal op_class, rd_addr_in, rd_addr_out : std_logic_vector(4 downto 0) := (others => '0'); 
     signal comparator_opcode, mem_opcode : std_logic_vector(2 downto 0):= (others => '0') ;

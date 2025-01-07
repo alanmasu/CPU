@@ -36,14 +36,14 @@ end test_IF;
 
 architecture Behavioral of test_IF is
     signal clk, res, pc_load : std_logic := '0';
-    signal pc_in : std_logic_vector(11 downto 0) := (others => '0');
-    signal npc_out : unsigned(11 downto 0) := (others => '0');
+    signal pc_in : std_logic_vector(31 downto 0) := (others => '0');
+    signal npc_out : unsigned(31 downto 0) := (others => '0');
     signal instruction : std_logic_vector(31 downto 0):= (others => '0');
     signal wea : std_logic_vector(0 downto 0) := "0";
 
     -- Test signals
     signal sel: std_logic :='0';
-    signal val : std_logic_vector(11 downto 0) := "000001000000"; --"InstrMem[16] = 3e800093"
+    signal val : std_logic_vector(31 downto 0); -- := "000001000000"; --"InstrMem[16] = 3e800093"
 begin
     dut: entity work.instruction_fetch
     port map(
@@ -65,7 +65,7 @@ begin
         clk <= '1'; wait for 5 ns;
         clk <= '0'; wait for 5 ns;
     end process;
-
+    val <= (6 => '1', others => '0');  --"InstrMem[16] = 3e800093"
     -- test_process : process begin
     --     res <= '0';
     --     wait for 19 ns;

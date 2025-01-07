@@ -39,11 +39,17 @@ architecture Behavioral of test_RAM is
     COMPONENT data_memory
         PORT (
             clka : IN STD_LOGIC;
-            wea : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
             ena : IN STD_LOGIC;
+            wea : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
             addra : IN STD_LOGIC_VECTOR(10 DOWNTO 0);
             dina : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-            douta : OUT STD_LOGIC_VECTOR(31 DOWNTO 0) 
+            douta : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+            clkb : IN STD_LOGIC;
+            enb : IN STD_LOGIC;
+            web : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
+            addrb : IN STD_LOGIC_VECTOR(10 DOWNTO 0);
+            dinb : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+            doutb : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
         );
     END COMPONENT;
     signal clk : STD_LOGIC := '0';
@@ -62,7 +68,12 @@ begin
         ena => en,
         addra => addr,
         dina => din,
-        douta => dout
+        douta => dout, 
+        clkb => clk,
+        enb => '0',
+        web => (others => '0'),
+        addrb => (others => '0'),
+        dinb => (others => '0')
     );
 
     clk_gen : process begin
