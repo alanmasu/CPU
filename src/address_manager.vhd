@@ -38,7 +38,7 @@ entity address_manager is
     Port ( 
         address : in STD_LOGIC_VECTOR (31 downto 0);
         en_in : in STD_LOGIC;
-        en_out : out STD_LOGIC_VECTOR (1 downto 0)
+        en_out : out en_bus_t
     );
 end address_manager;
 

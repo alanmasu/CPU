@@ -34,8 +34,8 @@ module test_AXI_ctrl( );
     bit[4:0] rd_addr_in;
     bit[4:0] rd_addr_out;
     bit[31:0] rd_value_out;
-    bit[11:0] pc_out;
-    bit[0:0] en_out;
+    bit[31:0] pc_out;
+    bit[1:0] en_out;
     bit[3:0] we_out;
     bit[31:0] address_out;
     bit[31:0] d_out;
@@ -106,7 +106,7 @@ module test_AXI_ctrl( );
     mem_ctrl_test_wrapper DUT(
         .reset_rtl(reset),
         .clock_100mhz(clock),
-        .en_0(en_out),
+        .en_0(en_out[1]),
         .we_0(we_out),
         .address_0(address_out),
         .write_data_0(d_out),

@@ -47,7 +47,7 @@ entity memory_write_back is
         rd_addr_out : out STD_LOGIC_VECTOR (4 downto 0);
         pc_out : out STD_LOGIC_VECTOR (31 downto 0);
         --Estesioni per I/O [combinatori]
-        en_out : out STD_LOGIC_VECTOR (0 downto 0);
+        en_out : out en_bus_t;
         we_out : out STD_LOGIC_VECTOR (3 downto 0);
         address_out : out STD_LOGIC_VECTOR (31 downto 0);
         d_out : out STD_LOGIC_VECTOR (31 downto 0);
@@ -117,7 +117,7 @@ begin
     address_out <= alu_resoult(31 downto 0);
     d_out <= mem_in;
     
-    en_out <= en_bus(1 downto 1);
+    en_out <= en_bus;
     we_out <= we;
     mem_wea <= we_out ;--when en_bus(0) = '1' else "0000";
 

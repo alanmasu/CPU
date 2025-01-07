@@ -41,6 +41,7 @@ package memory_pkg is
     type peripheral_data_t is record
         AXI_data : std_logic_vector(31 downto 0);
     end record peripheral_data_t;
+    subtype en_bus_t is std_logic_vector(1 downto 0);
 end package ;
 
 package body memory_pkg is

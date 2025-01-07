@@ -26,6 +26,8 @@ use IEEE.STD_LOGIC_1164.ALL;
 -- arithmetic functions with Signed or Unsigned values
 use IEEE.NUMERIC_STD.ALL;
 
+library work;
+use work.memory_pkg.all;
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx leaf cells in this code.
 --library UNISIM;
@@ -38,7 +40,7 @@ end test_addr_manager;
 architecture Behavioral of test_addr_manager is
     signal addr : std_logic_vector(31 downto 0);
     signal en_in : std_logic;
-    signal en_out : std_logic_vector(1 downto 0);
+    signal en_out : en_bus_t;
 begin
 
     dut : entity work.address_manager
