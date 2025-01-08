@@ -38,11 +38,28 @@ end test_GPIO;
 architecture Behavioral of test_GPIO is 
     signal clk : std_logic := '0';
     signal res : std_logic := '0';
-    signal dir : std_logic_vector(1 downto 0) := (others => '0');
-    signal gpio_reg : std_logic_vector(1 downto 0) := (others => '0');
-    signal GPIO : std_logic_vector(1 downto 0) := (others => 'Z');
-
+    signal GPIO : std_logic_vector(31 downto 0) := (others => 'Z');
+    signal ena : std_logic := '0';
+    signal wea : std_logic_vector(3 downto 0) := (others => '0');
+    signal address : std_logic_vector(31 downto 0) := (others => '0');
+    signal d_in    : std_logic_vector(31 downto 0) := (others => '0');
+    signal d_out   : std_logic_vector(31 downto 0) := (others => '0');
+    
+    --TESTING
+    signal esito : std_logic;    
 begin
+
+    DUT : entity work.GPIO
+        port map(
+            clk => clk,
+            res => res,
+            address => address,
+            d_in => d_in,
+            d_out => d_out,
+            wea => wea,
+            ena => ena,
+            GPIO => GPIO
+        );
 
     reset_pro : process begin
         wait for 9 ns;
@@ -56,18 +73,17 @@ begin
     end process ; -- clk_pro
 
     test_pro : process is
-        variable esito : std_logic;    
     begin
         wait until res = '1'; -- wait for reset
         -- TESTING INPUT
         GPIO <= (others => '0');
         wait for 2 ns;
 
-        if(GPIO = "00") then
-            esito := '1';
+        if(GPIO = x"00000000") then
+            esito <= '1';
             report "Test 1 OK";
         else
-            esito := '0';
+            esito <= '0';
             report "Test 1 FAILED";
         end if;
 
@@ -76,88 +92,82 @@ begin
         GPIO <= (others => '1');
         wait for 2 ns;
 
-        if(GPIO = "11") then
-            esito := '1';
+        if(GPIO = x"ffffffff") then
+            esito <= '1';
             report "Test 2 OK";
         else
-            esito := '0';
+            esito <= '0';
             report "Test 2 FAILED";
         end if;
-
         wait for 8 ns;
 
-        -- TESTING OUTPUT
-        GPIO <= "Z0";
-        dir(1) <= '1';      -- GPIO 1 is output
-        gpio_reg(1) <= '0'; -- GPIO 1 is LOW
-        wait for 2 ns;
+        -- -- TESTING OUTPUT
+        ena <= '1';
+        wea <= "0001"; -- READ
+        address <= x"00000004";
+        d_in(31 downto 24) <= "10101010";
+        d_in(23 downto 8) <= (others => '0');
+        d_in(7 downto 0) <= (1 => '1', others => '0');
+        GPIO(1) <= 'Z';
+        wait for 10 ns;
+        wait;
 
-        if(GPIO = "00") then
-            esito := '1';
-            report "Test 3 OK";
-        else
-            esito := '0';
-            report "Test 3 FAILED";
-        end if;
+        -- GPIO <= "Z0";
+        -- dir(1) <= '1';      -- GPIO 1 is output
+        -- gpio_reg(1) <= '0'; -- GPIO 1 is LOW
+        -- wait for 2 ns;
 
-        wait for 8 ns;
+        -- if(GPIO = "00") then
+        --     esito <= '1';
+        --     report "Test 3 OK";
+        -- else
+        --     esito <= '0';
+        --     report "Test 3 FAILED";
+        -- end if;
+
+        -- wait for 8 ns;
         
-        gpio_reg(1) <= '1';  -- GPIO 1 is HIGH
-        wait for 2 ns;
+        -- gpio_reg(1) <= '1';  -- GPIO 1 is HIGH
+        -- wait for 2 ns;
 
-        if(GPIO = "10") then
-            esito := '1';
-            report "Test 4 OK";
-        else
-            esito := '0';
-            report "Test 4 FAILED";
-        end if;
+        -- if(GPIO = "10") then
+        --     esito <= '1';
+        --     report "Test 4 OK";
+        -- else
+        --     esito <= '0';
+        --     report "Test 4 FAILED";
+        -- end if;
 
-        -- TESTING MIXED
-        wait for 8 ns;
+        -- -- TESTING MIXED
+        -- wait for 8 ns;
 
-        GPIO(0) <= '1';     -- GPIO 0 is HIGH
-        gpio_reg(1) <= '0'; -- GPIO 1 is LOW
+        -- GPIO(0) <= '1';     -- GPIO 0 is HIGH
+        -- gpio_reg(1) <= '0'; -- GPIO 1 is LOW
 
-        wait for 2 ns;
-        if(GPIO = "00") then
-            esito := '1';
-            report "Test 5 OK";
-        else
-            esito := '0';
-            report "Test 5 FAILED";
-        end if;
+        -- wait for 2 ns;
+        -- if(GPIO = "00") then
+        --     esito <= '1';
+        --     report "Test 5 OK";
+        -- else
+        --     esito <= '0';
+        --     report "Test 5 FAILED";
+        -- end if;
 
-        wait for 8 ns;
+        -- wait for 8 ns;
 
-        gpio_reg(1) <= '1';  -- GPIO 1 is HIGH
-        wait for 2 ns;
+        -- gpio_reg(1) <= '1';  -- GPIO 1 is HIGH
+        -- wait for 2 ns;
 
-        if(GPIO = "11") then
-            esito := '1';
-            report "Test 6 OK";
-        else
-            esito := '0';
-            report "Test 6 FAILED";
-        end if;
+        -- if(GPIO = "11") then
+        --     esito <= '1';
+        --     report "Test 6 OK";
+        -- else
+        --     esito <= '0';
+        --     report "Test 6 FAILED";
+        -- end if;
 
         
         wait;
     end process ; -- test_pr
-
-    sequenziale : process( clk, res )
-    begin
-        if res = '0' then
-            GPIO <= (others => 'Z');
-        elsif rising_edge(clk) then
-            for i in 0 to 1 loop
-                if dir(i) = '1' then
-                    GPIO(i) <= gpio_reg(i);
-                else
-                    GPIO(i) <= 'Z';
-                end if ;
-            end loop ;
-        end if ;
-    end process ; -- sequenziale
 
 end Behavioral;
