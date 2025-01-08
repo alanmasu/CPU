@@ -46,8 +46,10 @@ architecture Behavioral of test_GPIO is
     signal d_out   : std_logic_vector(31 downto 0) := (others => '0');
     
     --TESTING
-    signal esito : std_logic;    
+    signal esito : std_logic := '0';    
+    signal GPIO_s : std_logic_vector(7 downto 0);
 begin
+    GPIO_s <= GPIO(7 downto 0);
 
     DUT : entity work.GPIO
         port map(
@@ -103,15 +105,110 @@ begin
 
         -- -- TESTING OUTPUT
         ena <= '1';
-        wea <= "0001"; -- READ
+        wea <= "0001";
         address <= x"00000004";
+            -- Setting GPIO 1 as output (and releasing it from controll of the Testbench)
         d_in(31 downto 24) <= "10101010";
         d_in(23 downto 8) <= (others => '0');
         d_in(7 downto 0) <= (1 => '1', others => '0');
-        GPIO(1) <= 'Z';
+        GPIO(1) <= 'Z';       -- Releasing GPIO 1 from the control of the Testbench
         wait for 10 ns;
-        wait;
+            -- Driving GPIO 1 to LOW (and also GPIO 0 to LOW but it's now configured as input)
+        address <= x"00000008";
+        wea <= "0001";
+        d_in(1) <= '0';
+        d_in(0) <= '0';
+        wait for 2 ns;
+        if GPIO = x"fffffffd" then
+            esito <= '1';
+            report "Test 3 OK";
+        else
+            esito <= '0';
+            report "Test 3 FAILED";
+        end if;
+        wait for 8 ns;
+            -- Setting GPIO 0 as output (and releasing it from controll of the Testbench)
+        address <= x"00000004";
+        wea <= "0001";
+        d_in <= (1 => '1', 0 => '1', others => '0');
+        GPIO(0) <= 'Z';       -- Releasing GPIO 0 from the control of the Testbench
+        wait for 2 ns;
+        if GPIO = x"fffffffc" then
+            esito <= '1';
+            report "Test 4 OK";
+        else
+            esito <= '0';
+            report "Test 4 FAILED";
+        end if; 
+        
+            -- Testing READING the driver
+            --   Reading state register
+        wait for 8 ns;
+        address <= x"00000000";
+        wea <= "0000";
+        wait for 2 ns;
 
+        if d_out = x"fffffffc" then
+            esito <= '1';
+            report "Test 5 OK";
+        else
+            esito <= '0';
+            report "Test 5 FAILED";
+        end if;
+            
+            --  Reading direction register
+        wait for 8 ns;
+        address <= x"00000004";
+        wait for 2 ns;
+
+        if d_out = x"00000003" then
+            esito <= '1';
+            report "Test 6 OK";
+        else
+            esito <= '0';
+            report "Test 6 FAILED";
+        end if;
+
+            --  Reading output register
+        wait for 8 ns;
+        address <= x"00000008";
+        wait for 2 ns;
+
+        if d_out(1 downto 0) = "00" then
+            esito <= '1';
+            report "Test 7 OK";
+        else
+            esito <= '0';
+            report "Test 7 FAILED";
+        end if;
+
+            -- TESTING ena functionality
+        wait for 8 ns;
+        ena <= '0';
+        address <= x"00000000";
+        wait for 2 ns;
+
+        if GPIO = x"fffffffc" then
+            esito <= '1';
+            report "Test 8 OK";
+        else
+            esito <= '0';
+            report "Test 8 FAILED";
+        end if;
+
+        wait for 8 ns;
+        GPIO(2) <= '0';
+        wait for 2 ns;
+
+        if GPIO = x"fffffff8" and d_out(2) = '0' then
+            esito <= '1';
+            report "Test 9 OK";
+        else
+            esito <= '0';
+            report "Test 9 FAILED";
+        end if;
+
+        wait;
         -- GPIO <= "Z0";
         -- dir(1) <= '1';      -- GPIO 1 is output
         -- gpio_reg(1) <= '0'; -- GPIO 1 is LOW

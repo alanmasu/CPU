@@ -65,19 +65,27 @@ architecture Behavioral of GPIO is
     signal GPIO_dir     : STD_LOGIC_VECTOR (31 downto 0);
     signal GPIO_reg     : STD_LOGIC_VECTOR (31 downto 0);
     signal GPIO_state   : STD_LOGIC_VECTOR (31 downto 0);
-begin
 
+    -- For Testing
+    signal gpio_dir_s   : STD_LOGIC_VECTOR (7 downto 0);
+    signal gpio_reg_s   : STD_LOGIC_VECTOR (7 downto 0);
+    signal gpio_state_s : STD_LOGIC_VECTOR (7 downto 0);
+    signal gpio_out_s   : STD_LOGIC_VECTOR (7 downto 0);
+begin
+    -- For testing
+    gpio_state_s <= GPIO_state(7 downto 0);
+    gpio_dir_s <= GPIO_dir(7 downto 0);
+    gpio_reg_s <= GPIO_reg(7 downto 0);
+    gpio_out_s <= GPIO(7 downto 0);
+    
     -- Registro di stato [combinatorio]
     GPIO_state <= GPIO;
     
     -- Processo sequenziale
-    sequential_pro : process( clk, res ) is
-        variable GPIO_OE : STD_LOGIC_VECTOR (31 downto 0);
-
-    begin
+    sequential_pro : process( clk, res ) begin
         if res = '0' then
             GPIO_dir <= (others => '0');
-            GPIO_reg <= (others => 'Z');
+            GPIO_reg <= (others => '0');
             d_out <= (others => '0');
         elsif rising_edge(clk) then
             d_out <= (others => '0');         -- default value
@@ -126,13 +134,12 @@ begin
         end if;
     end process ; -- sequential_pro
 
-    GPIO_pro : process( clk, res)
+    GPIO_pro : process(res, GPIO_dir, GPIO_reg )    
     begin
         if res = '0' then
             GPIO <= (others => 'Z');
-        elsif rising_edge(clk) then
+        else
             if ena = '1' then
-                GPIO <= GPIO;          -- Latch Inference
                 for i in 0 to 1 loop
                     if GPIO_dir(i) = '1' then
                         GPIO(i) <= gpio_reg(i);
