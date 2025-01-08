@@ -193,7 +193,11 @@ architecture Behavioral of CPU is
     signal d_bus_in : peripheral_data_t;
 
     --Memory Writeback - OUT | Peripheral - IN
-    signal mem_wb_en_out : en_bus_t := (others => '0');
+    signal mem_wb_en_out : en_bus_t := (
+        en_mem => '0',
+        en_AXI => '0'--,
+        -- en_GPIO => '0'
+    );
     signal mem_wb_we_out : std_logic_vector(3 downto 0) := (others => '0');
     signal mem_wb_addr_out : std_logic_vector(31 downto 0) := (others => '0');
     signal mem_wb_data_out : std_logic_vector(31 downto 0) := (others => '0');
@@ -402,7 +406,7 @@ begin
 
     axi_mem_ctrl : entity work.AXI_memory_controller
     port map(
-        en => mem_wb_en_out(1), 
+        en => mem_wb_en_out.en_AXI, 
         we => mem_wb_we_out,
         address => mem_wb_addr_out,
         write_data => mem_wb_data_out,

@@ -24,6 +24,14 @@ import mem_ctrl_test_axi_vip_0_0_pkg::*;
 import memory_pkg::*;
 
 module test_AXI_ctrl( );
+    //Type definitions
+    typedef struct packed {
+        logic en_mem;
+        logic en_AXI;
+        // logic en_GPIO; // Uncomment if needed later
+    } en_bus_t;
+
+
     bit clock, reset, jmp, we_in, en_in;
     bit[2:0] mem_opcode = 3'b000;
     bit[4:0] op_class = 5'b00000;
@@ -35,7 +43,7 @@ module test_AXI_ctrl( );
     bit[4:0] rd_addr_out;
     bit[31:0] rd_value_out;
     bit[31:0] pc_out;
-    bit[1:0] en_out;
+    en_bus_t en_out = '{en_mem: 1'b0, en_AXI: 1'b0};
     bit[3:0] we_out;
     bit[31:0] address_out;
     bit[31:0] d_out;
@@ -106,7 +114,7 @@ module test_AXI_ctrl( );
     mem_ctrl_test_wrapper DUT(
         .reset_rtl(reset),
         .clock_100mhz(clock),
-        .en_0(en_out[1]),
+        .en_0(en_out.en_AXI),
         .we_0(we_out),
         .address_0(address_out),
         .write_data_0(d_out),

@@ -85,14 +85,17 @@ architecture Behavioral of memory_write_back is
     --Signal for byte access
     signal byte_address : std_logic_vector(1 downto 0) := (others => '0');
     --Signal for enable devices: memory, axi or peripherals
-    signal en_bus : std_logic_vector(1 downto 0) := (others => '0');
+    signal en_bus : en_bus_t := (
+        en_mem => '0', 
+        en_AXI => '0'
+    );
     signal we, mem_wea : std_logic_vector(3 downto 0) := (others => '0');
 begin
     memory : data_memory
     PORT MAP (
         clka => clk,
         wea => mem_wea,
-        ena => en_bus(0),
+        ena => en_bus.en_mem,
         addra => alu_resoult(12 downto 2),
         dina => mem_in,
         douta => mem_out,
@@ -169,14 +172,19 @@ begin
         variable dato : unsigned(31 downto 0);
     begin
         --Source seletion
-        case( en_bus ) is
-            when "01" => --MEMORY 
-                dato := unsigned(mem_out);
-            when "10" => --AXI
-                dato := unsigned(d_in.axi_data);
-            when others =>
-                dato := dato;
-        end case ;
+        -- case( en_bus ) is
+        --     when "01" => --MEMORY 
+        --         dato := unsigned(mem_out);
+        --     when "10" => --AXI
+        --         dato := unsigned(d_in.axi_data);
+        --     when others =>
+        --         dato := dato;
+        -- end case ;
+        if en_bus.en_mem = '1' then
+            dato := unsigned(mem_out);
+        elsif en_bus.en_AXI then
+            dato := unsigned(d_in.axi_data);
+        end if ;
 
         --Sign extension
         if op_class = "00100" then   --LOAD
