@@ -52,6 +52,7 @@ begin
         if en_in = '1' then
             en_out.en_mem <= is_in_space(address, RAM);
             en_out.en_AXI <= is_in_space(address, AXI) or is_in_space(address, ROM);
+            en_out.en_GPIO <= is_in_space(address, GPIO);
         else 
             en_out <= (others => '0');
         end if ;
