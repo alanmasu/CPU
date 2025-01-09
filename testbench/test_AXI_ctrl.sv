@@ -57,7 +57,8 @@ module test_AXI_ctrl( );
 
     bit[31:0] axi_data_out = 32'h00000000;
     bit stall;
-    peripheral_data_t d_in  = '{axi_data: 32'h00000000};
+    peripheral_data_t d_in; // = '{axi_data: 32'h00000000};
+    wire [31:0] gpio_data_out;
 
     const bit[31:0] address_shift = 32'h40010000;
 
@@ -123,7 +124,7 @@ module test_AXI_ctrl( );
         .d_in(d_out),
         .wea(we_out),
         .ena(en_out.en_GPIO),
-        .d_out(d_in.GPIO_data),
+        .d_out(gpio_data_out),
         .gpio(gpio_pins_wire)
     );
 
@@ -139,6 +140,10 @@ module test_AXI_ctrl( );
     always @(axi_data_out) begin
         d_in.axi_data = axi_data_out;
     end 
+
+    always @(gpio_data_out) begin
+        d_in.GPIO_data = gpio_data_out;
+    end
 
     always @(posedge clock) begin
         alu_resoult_reg <= alu_resoult;
@@ -353,24 +358,36 @@ module test_AXI_ctrl( );
         #10;
         
         gpio_pins = 32'hffffffff;
+        #2;
         if (gpio_pins_wire == 32'hffffffff) begin
             $display("GPIO INPUT 2 test OK");
         end else begin
             $display("GPIO INPUT 2 test FAILED");
         end
-        #10;
+        #8;
 
         //Setto la direzione dei GPIO (ed i GPIO andranno a LOW per default)
         mem_opcode = 3'b010;            //SW
         rs2_value = '1;                 //Tutti a 1
         alu_resoult = 32'h40020004;     //Indirizzo reg. GPIO_dir
-        gpio_pins = 32'bz;              //Rilascio i GPIO dal testbench
+        gpio_pins = 'z;                 //Rilascio i GPIO dal testbench (tutti in alta impedenza)
         #10;
+        if (gpio_pins_wire == 32'h00000000) begin
+            $display("GPIO OUTPUT 1 test OK");
+        end else begin
+            $display("GPIO OUTPUT 1 test FAILED");
+        end
 
         //Setto tutti GPIO
         mem_opcode = 3'b010;            //SW
         rs2_value = '1;                 //Tutti a 1
         alu_resoult = 32'h40020008;     //Indirizzo reg. GPIO_reg
+        #10;
+        if (gpio_pins_wire == 32'hffffffff) begin
+            $display("GPIO OUTPUT 2 test OK");
+        end else begin
+            $display("GPIO OUTPUT 2 test FAILED");
+        end
 
         #100;
         en_in = 1'b0;

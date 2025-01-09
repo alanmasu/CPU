@@ -53,7 +53,7 @@ entity GPIO is
         res     : in STD_LOGIC;
         address : in STD_LOGIC_VECTOR (31 downto 0);
         d_in    : in STD_LOGIC_VECTOR (31 downto 0);
-        d_out   : out STD_LOGIC_VECTOR (31 downto 0);
+        d_out   : buffer STD_LOGIC_VECTOR (31 downto 0);
         wea     : in STD_LOGIC_VECTOR (3 downto 0);
         ena     : in STD_LOGIC;
         GPIO    : inout STD_LOGIC_VECTOR (31 downto 0)
@@ -88,7 +88,7 @@ begin
             GPIO_reg <= (others => '0');
             d_out <= (others => '0');
         elsif rising_edge(clk) then
-            d_out <= (others => '0');         -- default value
+            d_out <= d_out;         -- latched value
 
             if ena = '1' then       -- if Enabled
                 case(address(3 downto 0)) is
@@ -123,10 +123,8 @@ begin
                         end if;
                         d_out <= GPIO_reg;
                     when others =>
-                        -- Set to default value
-                        d_out <= (others => '0');
-                        
                         -- LATCH Inference
+                        d_out <= d_out;
                         GPIO_reg <= GPIO_reg;
                         GPIO_dir <= GPIO_dir;
                 end case;
