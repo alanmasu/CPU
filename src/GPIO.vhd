@@ -133,14 +133,15 @@ begin
             end if;
         end if;
     end process ; -- sequential_pro
-
+    
+    -- Processo combinatorio
     GPIO_pro : process(res, GPIO_dir, GPIO_reg )    
     begin
         if res = '0' then
             GPIO <= (others => 'Z');
         else
             if ena = '1' then
-                for i in 0 to 1 loop
+                for i in 0 to 31 loop
                     if GPIO_dir(i) = '1' then
                         GPIO(i) <= gpio_reg(i);
                     else

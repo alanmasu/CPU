@@ -39,6 +39,7 @@ package memory_pkg is
     --PERIPHERALS 
     type peripheral_data_t is record
         AXI_data : std_logic_vector(31 downto 0);
+        GPIO_data : std_logic_vector(31 downto 0);
     end record peripheral_data_t;
     type en_bus_t is record
         en_mem : std_logic;

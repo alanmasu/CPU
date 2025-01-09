@@ -28,9 +28,16 @@ module test_AXI_ctrl( );
     typedef struct packed {
         logic en_mem;
         logic en_AXI;
-        // logic en_GPIO; // Uncomment if needed later
+        logic en_GPIO;
     } en_bus_t;
 
+    typedef struct packed {
+        bit[31:0] axi_data;
+        bit[31:0] GPIO_data;
+    } peripheral_data_t;
+
+    typedef enum {SETUP, ALU, MEMORY, AXI, GPIO } test_type_t;
+        
 
     bit clock, reset, jmp, we_in, en_in;
     bit[2:0] mem_opcode = 3'b000;
@@ -43,7 +50,7 @@ module test_AXI_ctrl( );
     bit[4:0] rd_addr_out;
     bit[31:0] rd_value_out;
     bit[31:0] pc_out;
-    en_bus_t en_out = '{en_mem: 1'b0, en_AXI: 1'b0};
+    en_bus_t en_out = '{en_mem: 1'b0, en_AXI: 1'b0, en_GPIO: 1'b0};
     bit[3:0] we_out;
     bit[31:0] address_out;
     bit[31:0] d_out;
@@ -54,6 +61,8 @@ module test_AXI_ctrl( );
 
     const bit[31:0] address_shift = 32'h40010000;
 
+    logic [31:0] gpio_pins = 32'bZ;
+    wire [31:0] gpio_pins_wire;
 
     //Master vip agent
     axi_transaction                         wr_transaction;   
@@ -62,25 +71,10 @@ module test_AXI_ctrl( );
     axi_monitor_transaction                 slave_moniter_transaction_queue[$];  
     xil_axi_uint                            slave_moniter_transaction_queue_size =0;
   
-    axi_transaction                         wr_transaction;   
-    xil_axi_uint                            mst_agent_verbosity = 0;  
-    xil_axi_uint                            mtestID;  
-    xil_axi_ulong                           mtestADDR;  
-    xil_axi_len_t                           mtestBurstLength;  
-    xil_axi_size_t                          mtestDataSize;   
-    xil_axi_burst_t                         mtestBurstType;   
-    xil_axi_lock_t                          mtestLOCK;  
-    xil_axi_cache_t                         mtestCacheType = 0;  
-    xil_axi_prot_t                          mtestProtectionType = 3'b000;  
-    xil_axi_region_t                        mtestRegion = 4'b000;  
-    xil_axi_qos_t                           mtestQOS = 4'b000; 
-    xil_axi_resp_t                          mtestBresp;  
-    xil_axi_resp_t[255:0]                   mtestRresp;  
-    bit [63:0]                              mtestWDataL; 
-    bit [63:0]                              mtestRDataL; 
     mem_ctrl_test_axi_vip_0_0_slv_mem_t     slv_mem_t;
-    //mem_ctrl_test_axi_vip_0_0_slv_t         slv_mem_t;
 
+    //For testing
+    test_type_t test_type = SETUP;
     memory_write_back mem(
         .clk(clock),
         .res(reset),
@@ -121,6 +115,26 @@ module test_AXI_ctrl( );
         .read_data_0(axi_data_out),
         .stall_0(stall)
     );
+
+    GPIO DUT2(
+        .clk(clock),
+        .res(reset),
+        .address(address_out),
+        .d_in(d_out),
+        .wea(we_out),
+        .ena(en_out.en_GPIO),
+        .d_out(d_in.GPIO_data),
+        .gpio(gpio_pins_wire)
+    );
+
+    assign gpio_pins_wire = gpio_pins;
+
+    genvar i;
+    generate
+        for (i = 0; i < 32; i = i + 1) begin
+            pulldown(gpio_pins_wire[i]);  // Pulldown su ogni bit.
+        end
+    endgenerate
     
     always @(axi_data_out) begin
         d_in.axi_data = axi_data_out;
@@ -160,6 +174,7 @@ module test_AXI_ctrl( );
     end
     
     initial begin
+
         #19;
 
         //Setup the memory controller
@@ -168,10 +183,12 @@ module test_AXI_ctrl( );
         #10;
 
         //ALU OP
+        test_type = ALU;
         op_class = 5'b10000;
         #10;
 
         //Store
+        test_type = MEMORY;
         op_class = 5'b01000;
         en_in = 1'b1;
         we_in = 1'b1;
@@ -238,7 +255,9 @@ module test_AXI_ctrl( );
 
         #10;
 
+        ///////////////////// AXI TESTS /////////////////////////
         //IO test
+        test_type = AXI;
         op_class = 5'b01000;
         en_in = 1'b1;
         we_in = 1'b1;
@@ -310,31 +329,54 @@ module test_AXI_ctrl( );
             wait(stall == 1'b1); //Wait transaction starts
             wait(stall == 1'b0); //Wait reatransactiond ends
         end
+        en_in = 1'b0;
 
+        ///////////////////// GPIO TESTS /////////////////////////
+        wait (clock == 1'b0) wait (clock == 1'b1) ; //Sychronize with the clock
+        #9;
+
+        test_type = GPIO;
+        op_class = 5'b01000;    //Need a Store opration for using the GPIO
+        en_in = 1'b1;           
+        we_in = 1'b1;
+
+          //Setto i GPIO in input
+        mem_opcode = 3'b010; //SW
+        rs2_value = 32'b0;
+        alu_resoult = 32'h40020004; //Indirizzo reg. GPIO_dir
+        gpio_pins = 32'h00000000;
+        if (gpio_pins_wire == 32'h00000000) begin
+            $display("GPIO INPUT 1 test OK");
+        end else begin
+            $display("GPIO INPUT 1 test FAILED");
+        end
+        #10;
+        
+        gpio_pins = 32'hffffffff;
+        if (gpio_pins_wire == 32'hffffffff) begin
+            $display("GPIO INPUT 2 test OK");
+        end else begin
+            $display("GPIO INPUT 2 test FAILED");
+        end
         #10;
 
-        // alu_resoult = 32'h00100000;
-        // rs2_value = 32'd274877688;
-        // //AXI WRITE
-        // op_class = 5'b01000;
-        // en_in = 1'b1;
-        // we_in = 1'b1;
-        // mem_opcode = 3'b010; //SW
+        //Setto la direzione dei GPIO (ed i GPIO andranno a LOW per default)
+        mem_opcode = 3'b010;            //SW
+        rs2_value = '1;                 //Tutti a 1
+        alu_resoult = 32'h40020004;     //Indirizzo reg. GPIO_dir
+        gpio_pins = 32'bz;              //Rilascio i GPIO dal testbench
+        #10;
 
-        // wait(stall == 1'b1); //Wait write starts
-        // we_in = 1'b0;
-        // wait(stall == 1'b0); //Wait write ends
+        //Setto tutti GPIO
+        mem_opcode = 3'b010;            //SW
+        rs2_value = '1;                 //Tutti a 1
+        alu_resoult = 32'h40020008;     //Indirizzo reg. GPIO_reg
 
-        // //AXI READ
-        // op_class = 5'b00100;
-        // en_in = 1'b1;
-        // we_in = 1'b0;
-        // mem_opcode = 3'b010; //LW
+        #100;
+        en_in = 1'b0;
 
-        // wait(stall == 1'b1); //Wait read starts
-        // en_in = 1'b0;
-        // wait(stall == 1'b0); //Wait read ends
-        // #40;
+
+
         $finish;
 
     end

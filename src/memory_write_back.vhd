@@ -87,7 +87,8 @@ architecture Behavioral of memory_write_back is
     --Signal for enable devices: memory, axi or peripherals
     signal en_bus : en_bus_t := (
         en_mem => '0', 
-        en_AXI => '0'
+        en_AXI => '0',
+        en_GPIO => '0'
     );
     signal we, mem_wea : std_logic_vector(3 downto 0) := (others => '0');
 begin
@@ -184,6 +185,8 @@ begin
             dato := unsigned(mem_out);
         elsif en_bus.en_AXI then
             dato := unsigned(d_in.axi_data);
+        elsif en_bus.en_GPIO then
+            dato := unsigned(d_in.GPIO_data);
         end if ;
 
         --Sign extension
