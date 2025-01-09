@@ -1,21 +1,23 @@
 // #include <inttypes.h>
-int*  GPIO_BASE_ADDRESS = (int*)0x40020000;
+// int*  GPIO_BASE_ADDRESS = (int*)0x40020000;
+// int* GPIO_DIR_REG = (char*)0x40020004;
+// int* GPIO_DATA_REG = (char*)0x40020008;
+
 char* PORT_A = (char*)0x40020003;
-char* PORT_B = (char*)0x40020002;
-char* PORT_C = (char*)0x40020001;
-char* PORT_D = (char*)0x40020000;
-
-char* GPIO_DIR_REG = (char*)0x40020004;
 char* PORT_A_DIR = (char*)0x40020007;
-char* PORT_B_DIR = (char*)0x40020006;
-char* PORT_C_DIR = (char*)0x40020005;
-char* PORT_D_DIR = (char*)0x40020004;
-
-char* GPIO_DATA_REG = (char*)0x40020008;
 char* PORT_A_DATA = (char*)0x4002000B;
-char* PORT_B_DATA = (char*)0x4002000A;
-char* PORT_C_DATA = (char*)0x40020009;
-char* PORT_D_DATA = (char*)0x40020008;
+
+// char* PORT_B = (char*)0x40020002;
+// char* PORT_B_DIR = (char*)0x40020006;
+// char* PORT_B_DATA = (char*)0x4002000A;
+
+// char* PORT_C = (char*)0x40020001;
+// char* PORT_C_DIR = (char*)0x40020005;
+// char* PORT_C_DATA = (char*)0x40020009;
+
+// char* PORT_D = (char*)0x40020000;
+// char* PORT_D_DIR = (char*)0x40020004;
+// char* PORT_D_DATA = (char*)0x40020008;
 
 
 #define GPIO0 0b00000001
