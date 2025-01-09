@@ -104,7 +104,10 @@ entity CPU is
 		M_AXI_RDATA	    : in std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
 		M_AXI_RRESP	    : in std_logic_vector(1 downto 0);
 		M_AXI_RVALID	: in std_logic;
-		M_AXI_RREADY	: out std_logic
+		M_AXI_RREADY	: out std_logic;
+
+        -- GPIO
+        GPIO            : INOUT STD_LOGIC_VECTOR(31 downto 0)
     );
 end CPU;
 
@@ -195,8 +198,8 @@ architecture Behavioral of CPU is
     --Memory Writeback - OUT | Peripheral - IN
     signal mem_wb_en_out : en_bus_t := (
         en_mem => '0',
-        en_AXI => '0'--,
-        -- en_GPIO => '0'
+        en_AXI => '0',
+        en_GPIO => '0'
     );
     signal mem_wb_we_out : std_logic_vector(3 downto 0) := (others => '0');
     signal mem_wb_addr_out : std_logic_vector(31 downto 0) := (others => '0');
@@ -433,6 +436,19 @@ begin
 		M_AXI_RRESP => M_AXI_RRESP,
 		M_AXI_RVALID => M_AXI_RVALID,
 		M_AXI_RREADY => M_AXI_RREADY
+    );
+
+    -- GPIO
+    gpio_driver : entity work.GPIO
+    port map(
+        clk => clk,
+        res => res,
+        ena => mem_wb_en_out.en_GPIO,
+        address => mem_wb_addr_out,
+        wea => mem_wb_we_out,
+        d_in => mem_wb_data_out,
+        d_out => d_bus_in.GPIO_data,
+        GPIO => GPIO
     );
 
     process(clk, res) begin
