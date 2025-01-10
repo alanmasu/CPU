@@ -34,9 +34,9 @@ int main(int, char**){
 
     while(1){
         *PORT_A_DATA = *PORT_A_DATA & ~GPIO0;   // Clear GPIO0
-        for (int i = 0; i < 1000000; i++);
+        for (int i = 0; i < 12500000; i++);
         *PORT_A_DATA = *PORT_A_DATA | GPIO0;    // Set GPIO0
-        for (int i = 0; i < 1000000; i++);
+        for (int i = 0; i < 12500000; i++);
     }
 
 }

@@ -6,3 +6,4 @@ test_barrell.vhd
 **$ALU**
 .Xil
 *.log
+*bin
