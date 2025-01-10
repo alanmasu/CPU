@@ -44,7 +44,7 @@ entity CPU is
         res : IN std_logic;
 
         --S_AXI_I interface
-        s_axi_i_awaddr : IN STD_LOGIC_VECTOR(12 DOWNTO 0);
+        s_axi_i_awaddr : IN STD_LOGIC_VECTOR(19 DOWNTO 0);
         s_axi_i_awprot : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
         s_axi_i_awvalid : IN STD_LOGIC;
         s_axi_i_awready : OUT STD_LOGIC;
@@ -55,7 +55,7 @@ entity CPU is
         s_axi_i_bresp : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
         s_axi_i_bvalid : OUT STD_LOGIC;
         s_axi_i_bready : IN STD_LOGIC;
-        s_axi_i_araddr : IN STD_LOGIC_VECTOR(12 DOWNTO 0);
+        s_axi_i_araddr : IN STD_LOGIC_VECTOR(19 DOWNTO 0);
         s_axi_i_arprot : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
         s_axi_i_arvalid : IN STD_LOGIC;
         s_axi_i_arready : OUT STD_LOGIC;
@@ -65,7 +65,7 @@ entity CPU is
         s_axi_i_rready : IN STD_LOGIC;
 
         --S_AXI_D interface
-        s_axi_d_awaddr : IN STD_LOGIC_VECTOR(12 DOWNTO 0);
+        s_axi_d_awaddr : IN STD_LOGIC_VECTOR(19 DOWNTO 0);
         s_axi_d_awprot : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
         s_axi_d_awvalid : IN STD_LOGIC;
         s_axi_d_awready : OUT STD_LOGIC;
@@ -76,7 +76,7 @@ entity CPU is
         s_axi_d_bresp : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
         s_axi_d_bvalid : OUT STD_LOGIC;
         s_axi_d_bready : IN STD_LOGIC;
-        s_axi_d_araddr : IN STD_LOGIC_VECTOR(12 DOWNTO 0);
+        s_axi_d_araddr : IN STD_LOGIC_VECTOR(19 DOWNTO 0);
         s_axi_d_arprot : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
         s_axi_d_arvalid : IN STD_LOGIC;
         s_axi_d_arready : OUT STD_LOGIC;
@@ -119,7 +119,7 @@ architecture Behavioral of CPU is
     PORT (
         s_axi_aclk : IN STD_LOGIC;
         s_axi_aresetn : IN STD_LOGIC;
-        s_axi_awaddr : IN STD_LOGIC_VECTOR(12 DOWNTO 0);
+        s_axi_awaddr : IN STD_LOGIC_VECTOR(19 DOWNTO 0);
         s_axi_awprot : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
         s_axi_awvalid : IN STD_LOGIC;
         s_axi_awready : OUT STD_LOGIC;
@@ -130,7 +130,7 @@ architecture Behavioral of CPU is
         s_axi_bresp : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
         s_axi_bvalid : OUT STD_LOGIC;
         s_axi_bready : IN STD_LOGIC;
-        s_axi_araddr : IN STD_LOGIC_VECTOR(12 DOWNTO 0);
+        s_axi_araddr : IN STD_LOGIC_VECTOR(19 DOWNTO 0);
         s_axi_arprot : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
         s_axi_arvalid : IN STD_LOGIC;
         s_axi_arready : OUT STD_LOGIC;
@@ -142,7 +142,7 @@ architecture Behavioral of CPU is
         bram_clk_a : OUT STD_LOGIC;
         bram_en_a : OUT STD_LOGIC;
         bram_we_a : OUT STD_LOGIC_VECTOR(3 DOWNTO 0);
-        bram_addr_a : OUT STD_LOGIC_VECTOR(12 DOWNTO 0);
+        bram_addr_a : OUT STD_LOGIC_VECTOR(19 DOWNTO 0);
         bram_wrdata_a : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
         bram_rddata_a : IN STD_LOGIC_VECTOR(31 DOWNTO 0)
     );
@@ -156,13 +156,12 @@ architecture Behavioral of CPU is
     signal bram_clk_a_i : STD_LOGIC;
     signal bram_en_a_i : STD_LOGIC;
     signal bram_we_a_i : STD_LOGIC_VECTOR(3 DOWNTO 0);
-    signal bram_addr_a_i : STD_LOGIC_VECTOR(12 DOWNTO 0);
+    signal bram_addr_a_i : STD_LOGIC_VECTOR(19 DOWNTO 0);
     signal bram_wrdata_a_i : STD_LOGIC_VECTOR(31 DOWNTO 0);
-    signal bram_rddata_a_i : STD_LOGIC_VECTOR(31 DOWNTO 0);
+    signal bram_rddata_a_i : STD_LOGIC_VECTOR(31 DOWNTO 0) := (others => '0');
 
     --Fetch - MSF
     signal pc_load      : STD_LOGIC := '0';
-    signal instr_dinb   : STD_LOGIC_VECTOR(31 downto 0);
     signal instr_doutb  : STD_LOGIC_VECTOR(31 downto 0);
     signal instr_enb    : STD_LOGIC := '0';
     
@@ -213,7 +212,7 @@ architecture Behavioral of CPU is
     signal bram_clk_a_d : STD_LOGIC;
     signal bram_en_a_d : STD_LOGIC;
     signal bram_we_a_d : STD_LOGIC_VECTOR(3 DOWNTO 0);
-    signal bram_addr_a_d : STD_LOGIC_VECTOR(12 DOWNTO 0);
+    signal bram_addr_a_d : STD_LOGIC_VECTOR(19 DOWNTO 0);
     signal bram_wrdata_a_d : STD_LOGIC_VECTOR(31 DOWNTO 0);
     signal bram_rddata_a_d : STD_LOGIC_VECTOR(31 DOWNTO 0);
     --Execute - MSF
@@ -279,7 +278,7 @@ begin
         enb => instr_enb,
         web => bram_we_a_i,
         addrb => bram_addr_a_i(11 downto 2),
-        dinb => instr_dinb,
+        dinb => bram_wrdata_a_i,
         doutb => instr_doutb
     );
 
@@ -465,18 +464,20 @@ begin
     --Control Register File
         --Enable signals for Instruction Memory PortB and Control Register File
     ena_comb : process( bram_addr_a_i, bram_en_a_i) begin
-        instr_enb <= is_in_space(bram_addr_a_i, ROM) and bram_en_a_i;
-        control_reg_ena <= is_in_space(bram_addr_a_i, CREG_FILE) and bram_en_a_i;
+        instr_enb <= check_bram_address(bram_addr_a_i, ROM) and bram_en_a_i;
+        control_reg_ena <= check_bram_address(bram_addr_a_i, CREG_FILE) and bram_en_a_i;
     end process ; -- ena_comb
+
         -- Bram Controller In value selector
-    bram_i_dina_comb : process( instr_enb, control_reg_ena ) is
+    bram_i_dina_comb : process( bram_addr_a_i, instr_doutb, control_reg) is
         variable reg_addr : integer;
     begin
-        if(instr_enb = '1') then
-            bram_dina_i <= instr_doutb;
-        elsif(control_reg_ena = '1') then
+        bram_rddata_a_i <= bram_rddata_a_i;     -- Latch inference
+        if(check_bram_address(bram_addr_a_i, ROM) = '1') then
+            bram_rddata_a_i <= instr_doutb;
+        elsif(check_bram_address(bram_addr_a_i, CREG_FILE) = '1') then
             reg_addr := to_integer(unsigned(bram_addr_a_i(4 downto 0)));
-            bram_dina_i <= control_reg(reg_addr);
+            bram_rddata_a_i <= control_reg(reg_addr);
         end if;
         
     end process ; -- bram_i_dina_comb
@@ -490,16 +491,16 @@ begin
         elsif(rising_edge(clk)) then
             if(control_reg_ena = '1') then
                 reg_addr := to_integer(unsigned(bram_addr_a_i(4 downto 0)));
-                if (bram_wea_i(0) = '1') then
+                if (bram_we_a_i(0) = '1') then
                     control_reg(reg_addr)(7 downto 0) <= bram_wrdata_a_i(7 downto 0);
                 end if;
-                if (bram_wea_i(1) = '1') then
+                if (bram_we_a_i(1) = '1') then
                     control_reg(reg_addr)(15 downto 8) <= bram_wrdata_a_i(15 downto 8);
                 end if;
-                if (bram_wea_i(2) = '1') then
+                if (bram_we_a_i(2) = '1') then
                     control_reg(reg_addr)(23 downto 16) <= bram_wrdata_a_i(23 downto 16);
                 end if;
-                if (bram_wea_i(3) = '1') then
+                if (bram_we_a_i(3) = '1') then
                     control_reg(reg_addr)(31 downto 24) <= bram_wrdata_a_i(31 downto 24);
                 end if;
             end if;

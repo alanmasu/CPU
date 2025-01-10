@@ -50,6 +50,7 @@ package memory_pkg is
 
     --FUNCTIONS
     function is_in_space(addr : std_logic_vector(31 downto 0); space_type: memory_space_type_t) return std_logic;
+    function check_bram_address(address : std_logic_vector(19 downto 0); space_type : memory_space_type_t) return std_logic;
     function en_bus_t_to_slv(en_bus : en_bus_t) return std_logic_vector;
 end package ;
 
@@ -65,6 +66,24 @@ package body memory_pkg is
                 lower_bound := memory_map(i).lower_bound;
                 upper_bound := memory_map(i).upper_bound;
                 if (unsigned (addr) >= lower_bound and unsigned(addr) <= upper_bound) then
+                    result := '1';
+                end if;
+            end if;
+        end loop;
+        return result;
+    end function;
+
+    --Function to check if the address is in the memory space specific for the BRAM controller output address
+    function check_bram_address(address : std_logic_vector(19 downto 0); space_type : memory_space_type_t) return std_logic is
+        variable result : std_logic := '0';
+        variable lower_bound : unsigned(19 downto 0);
+        variable upper_bound : unsigned(19 downto 0);
+    begin
+        for i in memory_map'range loop
+            if (memory_map(i).space_type = space_type) then
+                lower_bound := memory_map(i).lower_bound(19 downto 0);
+                upper_bound := memory_map(i).upper_bound(19 downto 0);
+                if (unsigned (address) >= lower_bound and unsigned(address) <= upper_bound) then
                     result := '1';
                 end if;
             end if;
