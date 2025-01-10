@@ -90,7 +90,7 @@ begin
                         cond <= '0';
                     end if;
                 when others => 
-                    cond <= 'X';               
+                    cond <= '0';               
             end case;
         elsif jal = '1' then
             cond <= '1';

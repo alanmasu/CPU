@@ -37,6 +37,7 @@ end triple_port_ram;
 
 architecture Behavioral of triple_port_ram is
     type ram_array is array (30 downto 0) of std_logic_vector (31 downto 0);
+        signal mem_2: ram_array;
 begin
     process(clk, res) is
         variable mem: ram_array;
@@ -63,6 +64,7 @@ begin
                 d_out2 <= (others => '0');
             end if;
         end if;
+        mem_2 <= mem;
     end process;
 
 end architecture Behavioral;
