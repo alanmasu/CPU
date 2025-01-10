@@ -161,7 +161,10 @@ architecture Behavioral of CPU is
     signal bram_rddata_a_i : STD_LOGIC_VECTOR(31 DOWNTO 0);
 
     --Fetch - MSF
-    signal pc_load : std_logic := '0';
+    signal pc_load      : STD_LOGIC := '0';
+    signal instr_dinb   : STD_LOGIC_VECTOR(31 downto 0);
+    signal instr_doutb  : STD_LOGIC_VECTOR(31 downto 0);
+    signal instr_enb    : STD_LOGIC := '0';
     
     --Fetch - OUT | Decode - IN
     signal instruction_fetched : std_logic_vector(31 downto 0) := (others => '0');
@@ -220,9 +223,16 @@ architecture Behavioral of CPU is
     --AXI Memory Controller
     signal AXI_read_data : std_logic_vector(31 downto 0) := (others => '0');
     signal AXI_stall : std_logic := '0';
+
+    --Control Register File
+    signal control_reg_ena : std_logic := '0';
+    signal control_reg_weA : std_logic := '0';
+    type control_reg_t is array (0 to 31) of std_logic_vector(31 downto 0);
+    signal control_reg : control_reg_t := (others => (others => '0'));
+
 begin
     --Fetch
-    axi_bram_instr_i: axi_bram_ctrl_0
+    axi_bram_controller_i: axi_bram_ctrl_0
     PORT MAP (
         s_axi_aclk      => clk,
         s_axi_aresetn   => res,
@@ -266,11 +276,11 @@ begin
 
         --BRAM interface
         clkb => bram_clk_a_i,
-        enb => bram_en_a_i,
+        enb => instr_enb,
         web => bram_we_a_i,
         addrb => bram_addr_a_i(11 downto 2),
-        dinb => bram_wrdata_a_i,
-        doutb => bram_rddata_a_i
+        dinb => instr_dinb,
+        doutb => instr_doutb
     );
 
     --Decode
@@ -334,7 +344,7 @@ begin
     );
 
     --Memory Writeback 
-    axi_bram_instr_d: axi_bram_ctrl_0
+    axi_bram_controller_d: axi_bram_ctrl_0
     PORT MAP (
         s_axi_aclk      => clk,
         s_axi_aresetn   => res,
@@ -450,6 +460,51 @@ begin
         d_out => d_bus_in.GPIO_data,
         GPIO => GPIO
     );
+
+
+    --Control Register File
+        --Enable signals for Instruction Memory PortB and Control Register File
+    ena_comb : process( bram_addr_a_i, bram_en_a_i) begin
+        instr_enb <= is_in_space(bram_addr_a_i, ROM) and bram_en_a_i;
+        control_reg_ena <= is_in_space(bram_addr_a_i, CREG_FILE) and bram_en_a_i;
+    end process ; -- ena_comb
+        -- Bram Controller In value selector
+    bram_i_dina_comb : process( instr_enb, control_reg_ena ) is
+        variable reg_addr : integer;
+    begin
+        if(instr_enb = '1') then
+            bram_dina_i <= instr_doutb;
+        elsif(control_reg_ena = '1') then
+            reg_addr := to_integer(unsigned(bram_addr_a_i(4 downto 0)));
+            bram_dina_i <= control_reg(reg_addr);
+        end if;
+        
+    end process ; -- bram_i_dina_comb
+
+        --Control Register File Implementation
+    control_reg_file : process( clk, res) is 
+        variable reg_addr : integer;
+    begin
+        if(res = '0') then
+            control_reg <= (others => (others => '0'));
+        elsif(rising_edge(clk)) then
+            if(control_reg_ena = '1') then
+                reg_addr := to_integer(unsigned(bram_addr_a_i(4 downto 0)));
+                if (bram_wea_i(0) = '1') then
+                    control_reg(reg_addr)(7 downto 0) <= bram_wrdata_a_i(7 downto 0);
+                end if;
+                if (bram_wea_i(1) = '1') then
+                    control_reg(reg_addr)(15 downto 8) <= bram_wrdata_a_i(15 downto 8);
+                end if;
+                if (bram_wea_i(2) = '1') then
+                    control_reg(reg_addr)(23 downto 16) <= bram_wrdata_a_i(23 downto 16);
+                end if;
+                if (bram_wea_i(3) = '1') then
+                    control_reg(reg_addr)(31 downto 24) <= bram_wrdata_a_i(31 downto 24);
+                end if;
+            end if;
+        end if;
+    end process ; -- control_reg_file
 
     process(clk, res) begin
 
