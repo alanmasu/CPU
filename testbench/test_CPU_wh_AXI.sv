@@ -21,6 +21,8 @@ module test_CPU_wh_AXI();
 
   bit                                     clock;
   bit                                     reset;
+  wire [31:0]                             GPIO;
+
    
 //Master vip agent
   axi_transaction                         wr_transaction;   
@@ -43,9 +45,11 @@ module test_CPU_wh_AXI();
 
   `BD_WRAPPER DUT(
     .reset_rtl(reset),
-    .sys_clock(clock) 
+    .sys_clock(clock), 
+    .GPIO(GPIO)
   ); 
-    
+  
+  // Setup VIP agents
   initial begin
     //Slave vip agent initialization
     slv_agent_0 = new("slave vip agent",test_CPU_wh_AXI.DUT.test_design_i.axi_vip_1.inst.IF);
@@ -62,23 +66,8 @@ module test_CPU_wh_AXI();
     mst_agent_0.start_master(); 
     $timeformat (-12, 1, " ps", 1);
   end
-
-
-  initial begin
-    reset <= 1'b0;
-    #10ns;
-    reset <= 1'b1;
-    repeat (5) @(negedge clock); 
-  end
-
-  always #5 clock <= ~clock;
-
-  initial begin
-    S_AXI_TEST ( );
-    #200ns;
-    //$finish;
-  end
-
+  
+  //Slave monitor agent
   initial begin
     #1;
     forever begin
@@ -88,12 +77,30 @@ module test_CPU_wh_AXI();
     end
   end
 
+  //Reset
+  initial begin
+    reset <= 1'b0;
+    #10ns;
+    reset <= 1'b1;
+    repeat (5) @(negedge clock); 
+  end
+
+  //Clock generation
+  always #5 clock <= ~clock;
+
+  //Testbench
+  initial begin
+    S_AXI_TEST ( );
+    #200ns;
+    //$finish;
+  end
+
   //Modificare questo task qui per il testbench
   task automatic S_AXI_TEST;  
     integer i;
     begin   
       #1; 
-      $display("Init testing of IP, simulating a ZynqPS to vrite & read memory trougth the IP "); 
+      $display("Init testing of IP, simulating a ZynqPS to write & read memory trougth the IP "); 
       mtestID = 0; 
       mtestBurstLength = 0; 
       mtestDataSize = xil_axi_size_t'(xil_clog2(32/8)); 
@@ -104,17 +111,84 @@ module test_CPU_wh_AXI();
       mtestRegion = 0; 
       mtestQOS = 0; 
 
-      //Scrittura in memoria
-//      $display("Imposto l'indirizzo nel slv_reg_2");
-//      mtestADDR = 32'd0; 
-//      mtestWDataL[31:0] = 32'd0;   
-//      mst_agent_0.AXI4LITE_WRITE_BURST( 
-//        mtestADDR, 
-//        mtestProtectionType, 
-//        mtestWDataL, 
-//        mtestBresp 
-//      );  
+      //Lettura in memoria
+      mtestADDR = 32'h40000000;  
+      mst_agent_0.AXI4LITE_READ_BURST( 
+        mtestADDR, 
+        mtestProtectionType, 
+        mtestRDataL, 
+        mtestRresp 
+      );
+      if (mtestRDataL[31:0] == 32'h7ff00113) begin
+        $display("Test READ Instruction Memory: OK");
+      end else begin
+        $display("Test READ Instruction Memory: FAILED");
+      end
 
+      //Reading Control Register
+      mtestADDR = 32'h40001000; 
+      // mtestWDataL[31:0] = 32'd02;    
+      mst_agent_0.AXI4LITE_READ_BURST( 
+        mtestADDR, 
+        mtestProtectionType, 
+        mtestRDataL, 
+        mtestRresp 
+      );
+      if (mtestRDataL[31:0] == '0) begin
+        $display("Test READ Control Register: OK");
+      end else begin
+        $display("Test READ Control Register: FAILED");
+      end
+      
+      //Scrittura in memoria
+      //Imposto la prima cella della memoria istruzioni
+     mtestADDR = 32'h40000000; 
+     mtestWDataL[31:0] = '0;   
+     mst_agent_0.AXI4LITE_WRITE_BURST( 
+       mtestADDR, 
+       mtestProtectionType, 
+       mtestWDataL, 
+       mtestBresp 
+     );  
+     mst_agent_0.AXI4LITE_READ_BURST( 
+        mtestADDR, 
+        mtestProtectionType, 
+        mtestRDataL, 
+        mtestRresp 
+      );
+      if (mtestRDataL[31:0] == '0) begin
+        $display("Test WRITE Instruction Memory: OK");
+      end else begin
+        $display("Test WRITE Instruction Memory: FAILED");
+      end
+      mtestWDataL[31:0] = 32'h7ff00113;   
+      mst_agent_0.AXI4LITE_WRITE_BURST( 
+        mtestADDR, 
+        mtestProtectionType, 
+        mtestWDataL, 
+        mtestBresp 
+      ); 
+
+      //Imposto la prima cella della memoria istruzioni
+      mtestADDR = 32'h40001000; 
+      mtestWDataL[31:0] = 32'b1;   
+      mst_agent_0.AXI4LITE_WRITE_BURST( 
+        mtestADDR, 
+        mtestProtectionType, 
+        mtestWDataL, 
+        mtestBresp 
+      );  
+      mst_agent_0.AXI4LITE_READ_BURST( 
+        mtestADDR, 
+        mtestProtectionType, 
+        mtestRDataL, 
+        mtestRresp 
+      );
+      if (mtestRDataL[31:0] == 32'b1) begin
+        $display("Test WRITE Control Register: OK");
+      end else begin
+        $display("Test WRITE Control Register: FAILED");
+      end
       // $display("fine impostazione indirizzo");
       // $display("Imposto i dati nel slv_reg_3");
       // mtestADDR = 32'd12; 
@@ -149,26 +223,7 @@ module test_CPU_wh_AXI();
       // while (mtestRDataL[2] != 1);
 
           
-      //Lettura in memoria
-      $display("start reading");
-      mtestADDR = 32'd00; 
-      mtestWDataL[31:0] = 32'd02;    
-      mst_agent_0.AXI4LITE_WRITE_BURST( 
-        mtestADDR, 
-        mtestProtectionType, 
-        mtestWDataL, 
-        mtestBresp 
-      );
-      $display("Reading RRESP");
-      for(int i = 32'h40000000; i < 32'h40000000 + 40; i+=4) begin
-        mtestADDR = i; 
-        mst_agent_0.AXI4LITE_READ_BURST( 
-          mtestADDR, 
-          mtestProtectionType, 
-          mtestRDataL, 
-          mtestRresp 
-        );
-      end
+      
     end 
   endtask  
 

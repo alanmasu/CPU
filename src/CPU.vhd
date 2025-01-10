@@ -33,6 +33,7 @@ use IEEE.NUMERIC_STD.ALL;
 
 library work;
 use work.memory_pkg.all;
+use work.constant_package.all;
 
 entity CPU is
     generic (
@@ -44,7 +45,7 @@ entity CPU is
         res : IN std_logic;
 
         --S_AXI_I interface
-        s_axi_i_awaddr : IN STD_LOGIC_VECTOR(12 DOWNTO 0);
+        s_axi_i_awaddr : IN STD_LOGIC_VECTOR(19 DOWNTO 0);
         s_axi_i_awprot : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
         s_axi_i_awvalid : IN STD_LOGIC;
         s_axi_i_awready : OUT STD_LOGIC;
@@ -55,7 +56,7 @@ entity CPU is
         s_axi_i_bresp : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
         s_axi_i_bvalid : OUT STD_LOGIC;
         s_axi_i_bready : IN STD_LOGIC;
-        s_axi_i_araddr : IN STD_LOGIC_VECTOR(12 DOWNTO 0);
+        s_axi_i_araddr : IN STD_LOGIC_VECTOR(19 DOWNTO 0);
         s_axi_i_arprot : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
         s_axi_i_arvalid : IN STD_LOGIC;
         s_axi_i_arready : OUT STD_LOGIC;
@@ -65,7 +66,7 @@ entity CPU is
         s_axi_i_rready : IN STD_LOGIC;
 
         --S_AXI_D interface
-        s_axi_d_awaddr : IN STD_LOGIC_VECTOR(12 DOWNTO 0);
+        s_axi_d_awaddr : IN STD_LOGIC_VECTOR(19 DOWNTO 0);
         s_axi_d_awprot : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
         s_axi_d_awvalid : IN STD_LOGIC;
         s_axi_d_awready : OUT STD_LOGIC;
@@ -76,7 +77,7 @@ entity CPU is
         s_axi_d_bresp : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
         s_axi_d_bvalid : OUT STD_LOGIC;
         s_axi_d_bready : IN STD_LOGIC;
-        s_axi_d_araddr : IN STD_LOGIC_VECTOR(12 DOWNTO 0);
+        s_axi_d_araddr : IN STD_LOGIC_VECTOR(19 DOWNTO 0);
         s_axi_d_arprot : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
         s_axi_d_arvalid : IN STD_LOGIC;
         s_axi_d_arready : OUT STD_LOGIC;
@@ -114,12 +115,13 @@ end CPU;
 architecture Behavioral of CPU is
     type state_type is (idle, fetch, decode, execute, memory_writeback);
     signal state : state_type := fetch;
+    signal run : std_logic := '0';
 
     COMPONENT axi_bram_ctrl_0
     PORT (
         s_axi_aclk : IN STD_LOGIC;
         s_axi_aresetn : IN STD_LOGIC;
-        s_axi_awaddr : IN STD_LOGIC_VECTOR(12 DOWNTO 0);
+        s_axi_awaddr : IN STD_LOGIC_VECTOR(19 DOWNTO 0);
         s_axi_awprot : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
         s_axi_awvalid : IN STD_LOGIC;
         s_axi_awready : OUT STD_LOGIC;
@@ -130,7 +132,7 @@ architecture Behavioral of CPU is
         s_axi_bresp : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
         s_axi_bvalid : OUT STD_LOGIC;
         s_axi_bready : IN STD_LOGIC;
-        s_axi_araddr : IN STD_LOGIC_VECTOR(12 DOWNTO 0);
+        s_axi_araddr : IN STD_LOGIC_VECTOR(19 DOWNTO 0);
         s_axi_arprot : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
         s_axi_arvalid : IN STD_LOGIC;
         s_axi_arready : OUT STD_LOGIC;
@@ -142,7 +144,7 @@ architecture Behavioral of CPU is
         bram_clk_a : OUT STD_LOGIC;
         bram_en_a : OUT STD_LOGIC;
         bram_we_a : OUT STD_LOGIC_VECTOR(3 DOWNTO 0);
-        bram_addr_a : OUT STD_LOGIC_VECTOR(12 DOWNTO 0);
+        bram_addr_a : OUT STD_LOGIC_VECTOR(19 DOWNTO 0);
         bram_wrdata_a : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
         bram_rddata_a : IN STD_LOGIC_VECTOR(31 DOWNTO 0)
     );
@@ -156,12 +158,14 @@ architecture Behavioral of CPU is
     signal bram_clk_a_i : STD_LOGIC;
     signal bram_en_a_i : STD_LOGIC;
     signal bram_we_a_i : STD_LOGIC_VECTOR(3 DOWNTO 0);
-    signal bram_addr_a_i : STD_LOGIC_VECTOR(12 DOWNTO 0);
+    signal bram_addr_a_i : STD_LOGIC_VECTOR(19 DOWNTO 0);
     signal bram_wrdata_a_i : STD_LOGIC_VECTOR(31 DOWNTO 0);
-    signal bram_rddata_a_i : STD_LOGIC_VECTOR(31 DOWNTO 0);
+    signal bram_rddata_a_i : STD_LOGIC_VECTOR(31 DOWNTO 0) := (others => '0');
 
     --Fetch - MSF
-    signal pc_load : std_logic := '0';
+    signal pc_load      : STD_LOGIC := '0';
+    signal instr_doutb  : STD_LOGIC_VECTOR(31 downto 0);
+    signal instr_enb    : STD_LOGIC := '0';
     
     --Fetch - OUT | Decode - IN
     signal instruction_fetched : std_logic_vector(31 downto 0) := (others => '0');
@@ -210,7 +214,7 @@ architecture Behavioral of CPU is
     signal bram_clk_a_d : STD_LOGIC;
     signal bram_en_a_d : STD_LOGIC;
     signal bram_we_a_d : STD_LOGIC_VECTOR(3 DOWNTO 0);
-    signal bram_addr_a_d : STD_LOGIC_VECTOR(12 DOWNTO 0);
+    signal bram_addr_a_d : STD_LOGIC_VECTOR(19 DOWNTO 0);
     signal bram_wrdata_a_d : STD_LOGIC_VECTOR(31 DOWNTO 0);
     signal bram_rddata_a_d : STD_LOGIC_VECTOR(31 DOWNTO 0);
     --Execute - MSF
@@ -220,9 +224,16 @@ architecture Behavioral of CPU is
     --AXI Memory Controller
     signal AXI_read_data : std_logic_vector(31 downto 0) := (others => '0');
     signal AXI_stall : std_logic := '0';
+
+    --Control Register File
+    signal control_reg_ena : std_logic := '0';
+    signal control_reg_weA : std_logic := '0';
+    type control_reg_t is array (0 to 31) of std_logic_vector(31 downto 0);
+    signal control_reg : control_reg_t := (others => (others => '0'));
+
 begin
     --Fetch
-    axi_bram_instr_i: axi_bram_ctrl_0
+    axi_bram_controller_i: axi_bram_ctrl_0
     PORT MAP (
         s_axi_aclk      => clk,
         s_axi_aresetn   => res,
@@ -266,11 +277,11 @@ begin
 
         --BRAM interface
         clkb => bram_clk_a_i,
-        enb => bram_en_a_i,
+        enb => instr_enb,
         web => bram_we_a_i,
         addrb => bram_addr_a_i(11 downto 2),
         dinb => bram_wrdata_a_i,
-        doutb => bram_rddata_a_i
+        doutb => instr_doutb
     );
 
     --Decode
@@ -334,7 +345,7 @@ begin
     );
 
     --Memory Writeback 
-    axi_bram_instr_d: axi_bram_ctrl_0
+    axi_bram_controller_d: axi_bram_ctrl_0
     PORT MAP (
         s_axi_aclk      => clk,
         s_axi_aresetn   => res,
@@ -451,53 +462,91 @@ begin
         GPIO => GPIO
     );
 
-    process(clk, res) begin
 
+    --Control Register File
+        --Enable signals for Instruction Memory PortB and Control Register File
+    ena_comb : process( bram_addr_a_i, bram_en_a_i) begin
+        instr_enb <= check_bram_address(bram_addr_a_i, ROM) and bram_en_a_i;
+        control_reg_ena <= check_bram_address(bram_addr_a_i, CREG_FILE) and bram_en_a_i;
+    end process ; -- ena_comb
+
+        -- Bram Controller In value selector
+    bram_i_dina_comb : process( bram_addr_a_i, instr_doutb, control_reg) is
+        variable reg_addr : integer;
+    begin
+        bram_rddata_a_i <= bram_rddata_a_i;     -- Latch inference
+        if(check_bram_address(bram_addr_a_i, ROM) = '1') then
+            bram_rddata_a_i <= instr_doutb;
+        elsif(check_bram_address(bram_addr_a_i, CREG_FILE) = '1') then
+            reg_addr := to_integer(unsigned(bram_addr_a_i(4 downto 0)));
+            bram_rddata_a_i <= control_reg(reg_addr);
+        end if;
+        
+    end process ; -- bram_i_dina_comb
+
+        --Control Register File Implementation
+    control_reg_file : process( clk, res) is 
+        variable reg_addr : integer;
+    begin
+        if(res = '0') then
+            control_reg <= (others => (others => '0'));
+        elsif(rising_edge(clk)) then
+            if(control_reg_ena = '1') then
+                reg_addr := to_integer(unsigned(bram_addr_a_i(4 downto 0)));
+                if (bram_we_a_i(0) = '1') then
+                    control_reg(reg_addr)(7 downto 0) <= bram_wrdata_a_i(7 downto 0);
+                end if;
+                if (bram_we_a_i(1) = '1') then
+                    control_reg(reg_addr)(15 downto 8) <= bram_wrdata_a_i(15 downto 8);
+                end if;
+                if (bram_we_a_i(2) = '1') then
+                    control_reg(reg_addr)(23 downto 16) <= bram_wrdata_a_i(23 downto 16);
+                end if;
+                if (bram_we_a_i(3) = '1') then
+                    control_reg(reg_addr)(31 downto 24) <= bram_wrdata_a_i(31 downto 24);
+                end if;
+            end if;
+        end if;
+    end process ; -- control_reg_file
+    -- Control Register File Signals
+    run <= control_reg(CREG_RUN)(CREG_RUN_BIT);
+
+
+    
+    ------------------- Control Unit -------------------
+    process(clk, res, run) begin
         if(res = '0') then
             state <= idle;
         elsif(rising_edge(clk)) then
             --Next state and control signals for next state
-            case state is
-                when idle =>
-                    state <= fetch;
-                when fetch =>
-                    state <= decode;
-                when decode =>
-                    state <= execute;
-                when execute =>
-                    state <= memory_writeback;               
-                when memory_writeback =>
-                    if AXI_stall = '0' then
+            if(run = '1') then
+                case state is
+                    when idle =>
                         state <= fetch;
-                    end if ;
-            end case;
+                    when fetch =>
+                        state <= decode;
+                    when decode =>
+                        state <= execute;
+                    when execute =>
+                        state <= memory_writeback;               
+                    when memory_writeback =>
+                        if AXI_stall = '0' then
+                            state <= fetch;
+                        end if ;
+                end case;
+            else
+                state <= state;
+            end if;
         end if;
     end process;
 
-    ena_mealy : process( state, AXI_stall ) begin
-        case state is
-            when idle =>
-                pc_load <= '1';
-            when execute =>
-                pc_load <= '1';
-                case (op_class_decoded) is
-                    when "10000" => --OP
-                        regFile_we <= '1';
-                    when "01000" => --Store
-                        mem_we <= '1';
-                        mem_ena <= '1';
-                    when "00100" => --Load
-                        mem_ena <= '1';
-                        regFile_we <= '1';
-                    when "00001" => --Jump 
-                        regFile_we <= '1';   
-                    when others =>
-                        regFile_we <= '0';
-                        mem_we <= '0';
-                        mem_ena <= '0';                                   
-                end case;
-            when memory_writeback => 
-                if AXI_stall = '0' then
+    ena_mealy : process( state, AXI_stall, run ) begin
+        if run = '1' then
+            case state is
+                when idle =>
+                    pc_load <= '1';
+                when execute =>
+                    pc_load <= '1';
                     case (op_class_decoded) is
                         when "10000" => --OP
                             regFile_we <= '1';
@@ -514,16 +563,39 @@ begin
                             mem_we <= '0';
                             mem_ena <= '0';                                   
                     end case;
-                elsif AXI_stall = '1' then
+                when memory_writeback => 
+                    if AXI_stall = '0' then
+                        case (op_class_decoded) is
+                            when "10000" => --OP
+                                regFile_we <= '1';
+                            when "01000" => --Store
+                                mem_we <= '1';
+                                mem_ena <= '1';
+                            when "00100" => --Load
+                                mem_ena <= '1';
+                                regFile_we <= '1';
+                            when "00001" => --Jump 
+                                regFile_we <= '1';   
+                            when others =>
+                                regFile_we <= '0';
+                                mem_we <= '0';
+                                mem_ena <= '0';                                   
+                        end case;
+                    elsif AXI_stall = '1' then
+                        pc_load <= '0';
+                        regFile_we <= '0';
+                        mem_we <= '0';
+                    end if ;
+                when others => 
                     pc_load <= '0';
                     regFile_we <= '0';
-                    mem_we <= '0';
-                end if ;
-            when others => 
-                pc_load <= '0';
-                regFile_we <= '0';
-                mem_we <= '0';  
-        end case ;
+                    mem_we <= '0';  
+            end case ;
+        else
+            pc_load <= '0';
+            regFile_we <= '0';
+            mem_we <= '0';  
+        end if ;
     end process ; -- ena_mealy
 
 
