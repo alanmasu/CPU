@@ -161,6 +161,13 @@ module test_CPU_wh_AXI();
       end else begin
         $display("Test WRITE Instruction Memory: FAILED");
       end
+      mtestWDataL[31:0] = 32'h7ff00113;   
+      mst_agent_0.AXI4LITE_WRITE_BURST( 
+        mtestADDR, 
+        mtestProtectionType, 
+        mtestWDataL, 
+        mtestBresp 
+      ); 
 
       //Imposto la prima cella della memoria istruzioni
       mtestADDR = 32'h40001000; 

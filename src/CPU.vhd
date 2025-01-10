@@ -33,6 +33,7 @@ use IEEE.NUMERIC_STD.ALL;
 
 library work;
 use work.memory_pkg.all;
+use work.constant_package.all;
 
 entity CPU is
     generic (
@@ -114,6 +115,7 @@ end CPU;
 architecture Behavioral of CPU is
     type state_type is (idle, fetch, decode, execute, memory_writeback);
     signal state : state_type := fetch;
+    signal run : std_logic := '0';
 
     COMPONENT axi_bram_ctrl_0
     PORT (
@@ -506,54 +508,45 @@ begin
             end if;
         end if;
     end process ; -- control_reg_file
+    -- Control Register File Signals
+    run <= control_reg(CREG_RUN)(CREG_RUN_BIT);
 
-    process(clk, res) begin
 
+    
+    ------------------- Control Unit -------------------
+    process(clk, res, run) begin
         if(res = '0') then
             state <= idle;
         elsif(rising_edge(clk)) then
             --Next state and control signals for next state
-            case state is
-                when idle =>
-                    state <= fetch;
-                when fetch =>
-                    state <= decode;
-                when decode =>
-                    state <= execute;
-                when execute =>
-                    state <= memory_writeback;               
-                when memory_writeback =>
-                    if AXI_stall = '0' then
+            if(run = '1') then
+                case state is
+                    when idle =>
                         state <= fetch;
-                    end if ;
-            end case;
+                    when fetch =>
+                        state <= decode;
+                    when decode =>
+                        state <= execute;
+                    when execute =>
+                        state <= memory_writeback;               
+                    when memory_writeback =>
+                        if AXI_stall = '0' then
+                            state <= fetch;
+                        end if ;
+                end case;
+            else
+                state <= state;
+            end if;
         end if;
     end process;
 
-    ena_mealy : process( state, AXI_stall ) begin
-        case state is
-            when idle =>
-                pc_load <= '1';
-            when execute =>
-                pc_load <= '1';
-                case (op_class_decoded) is
-                    when "10000" => --OP
-                        regFile_we <= '1';
-                    when "01000" => --Store
-                        mem_we <= '1';
-                        mem_ena <= '1';
-                    when "00100" => --Load
-                        mem_ena <= '1';
-                        regFile_we <= '1';
-                    when "00001" => --Jump 
-                        regFile_we <= '1';   
-                    when others =>
-                        regFile_we <= '0';
-                        mem_we <= '0';
-                        mem_ena <= '0';                                   
-                end case;
-            when memory_writeback => 
-                if AXI_stall = '0' then
+    ena_mealy : process( state, AXI_stall, run ) begin
+        if run = '1' then
+            case state is
+                when idle =>
+                    pc_load <= '1';
+                when execute =>
+                    pc_load <= '1';
                     case (op_class_decoded) is
                         when "10000" => --OP
                             regFile_we <= '1';
@@ -570,16 +563,39 @@ begin
                             mem_we <= '0';
                             mem_ena <= '0';                                   
                     end case;
-                elsif AXI_stall = '1' then
+                when memory_writeback => 
+                    if AXI_stall = '0' then
+                        case (op_class_decoded) is
+                            when "10000" => --OP
+                                regFile_we <= '1';
+                            when "01000" => --Store
+                                mem_we <= '1';
+                                mem_ena <= '1';
+                            when "00100" => --Load
+                                mem_ena <= '1';
+                                regFile_we <= '1';
+                            when "00001" => --Jump 
+                                regFile_we <= '1';   
+                            when others =>
+                                regFile_we <= '0';
+                                mem_we <= '0';
+                                mem_ena <= '0';                                   
+                        end case;
+                    elsif AXI_stall = '1' then
+                        pc_load <= '0';
+                        regFile_we <= '0';
+                        mem_we <= '0';
+                    end if ;
+                when others => 
                     pc_load <= '0';
                     regFile_we <= '0';
-                    mem_we <= '0';
-                end if ;
-            when others => 
-                pc_load <= '0';
-                regFile_we <= '0';
-                mem_we <= '0';  
-        end case ;
+                    mem_we <= '0';  
+            end case ;
+        else
+            pc_load <= '0';
+            regFile_we <= '0';
+            mem_we <= '0';  
+        end if ;
     end process ; -- ena_mealy
 
 
