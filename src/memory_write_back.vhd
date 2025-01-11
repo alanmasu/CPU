@@ -117,7 +117,8 @@ begin
 
     --Equation
     byte_address <= alu_resoult(1 downto 0);
-    rd_addr_out <= rd_addr_out when op_class = "00100" else rd_addr_in;
+    -- rd_addr_out <= rd_addr_out when op_class = "00100" else rd_addr_in;
+    rd_addr_out <= rd_addr_in;
     address_out <= alu_resoult(31 downto 0);
     d_out <= mem_in;
     
