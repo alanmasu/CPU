@@ -227,7 +227,6 @@ architecture Behavioral of CPU is
 
     --Control Register File
     signal control_reg_ena : std_logic := '0';
-    signal control_reg_weA : std_logic := '0';
     type control_reg_t is array (0 to 31) of std_logic_vector(31 downto 0);
     signal control_reg : control_reg_t := (others => (others => '0'));
 

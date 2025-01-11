@@ -142,15 +142,15 @@ module test_CPU_wh_AXI();
       
       //Scrittura in memoria
       //Imposto la prima cella della memoria istruzioni
-     mtestADDR = 32'h40000000; 
-     mtestWDataL[31:0] = '0;   
-     mst_agent_0.AXI4LITE_WRITE_BURST( 
-       mtestADDR, 
-       mtestProtectionType, 
-       mtestWDataL, 
-       mtestBresp 
-     );  
-     mst_agent_0.AXI4LITE_READ_BURST( 
+      mtestADDR = 32'h40000000; 
+      mtestWDataL[31:0] = '0;   
+      mst_agent_0.AXI4LITE_WRITE_BURST( 
+        mtestADDR, 
+        mtestProtectionType, 
+        mtestWDataL, 
+        mtestBresp 
+      );  
+      mst_agent_0.AXI4LITE_READ_BURST( 
         mtestADDR, 
         mtestProtectionType, 
         mtestRDataL, 
