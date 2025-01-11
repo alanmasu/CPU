@@ -23,6 +23,9 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
+library work;
+use work.types_pkg.all;
+
 entity triple_port_ram is
     Port ( addr_in : in STD_LOGIC_VECTOR (4 downto 0);
            d_in : in STD_LOGIC_VECTOR (31 downto 0);
@@ -36,8 +39,7 @@ entity triple_port_ram is
 end triple_port_ram;
 
 architecture Behavioral of triple_port_ram is
-    type ram_array is array (30 downto 0) of std_logic_vector (31 downto 0);
-        signal mem_2: ram_array;
+    signal mem_2: ram_array;
 begin
     process(clk, res) is
         variable mem: ram_array;
