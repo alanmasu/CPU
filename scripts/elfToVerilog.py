@@ -16,10 +16,10 @@ def extract_text_section(file_path):
             text_data = text_section.data()
             instructions = []
             
-            # Converte i byte in formato esadecimale
+            # Converte i byte in formato esadecimale con lettere minuscole
             for i in range(0, len(text_data), 4):  # Assume istruzioni a 4 byte
                 word = text_data[i:i+4]
-                hex_word = ''.join(f'{byte:02X}' for byte in reversed(word))  # Little endian
+                hex_word = ''.join(f'{byte:02x}' for byte in reversed(word))  # Little endian e minuscolo
                 instructions.append(hex_word)
             
             # Genera l'array in formato SystemVerilog
