@@ -66,7 +66,18 @@ logic [31:0] data_array [] = '{
     32'h40001337,
     32'h00032023,
     32'h00028067,
-    32'hff5ff2ef
+    32'hff5ff2ef,
+    32'h00004397,
+    32'h00742023,
+    32'hffc40413,
+    32'h400204b7,
+    32'h00100513,
+    32'h00a4a223,
+    32'h00a4a423,
+    32'h0004a583,
+    32'h40000637,
+    32'h00c62023,
+    32'h00062683
 };
 
   // Setup VIP agents
@@ -272,8 +283,9 @@ logic [31:0] data_array [] = '{
       test_n = 5;
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
       #1;                       //wait to be after the rising edge of the clock
-      // validating = 1'b1;
-      // //Check instruction       SW x1, -4(x3)
+      validating = 1'b1;
+      //Check instruction       SW x1, -4(x3)
+      $display("Test #5: SKIPPED");
       // mtestADDR = 32'h40012000 - 4;
       // mst_agent_0.AXI4LITE_READ_BURST( 
       //   mtestADDR, 
@@ -352,15 +364,172 @@ logic [31:0] data_array [] = '{
       validating = 1'b0;
       #9;
 
-      // wait (state_tb == fetch); //wait until the CPU has executed the next instruction
-      // #1;                       //wait to be after the rising edge of the clock
-      // validating = 1'b1;
-      // test_n++;
-      // // Check instruction       SW x0, 0(x6) //Stop the CPU by setting RUN to 0
+      test_n = 10;
+      wait (state_tb == fetch); //wait until the CPU has executed the next instruction
+      #1;                       //wait to be after the rising edge of the clock
+      validating = 1'b1;
+      test_n++;
+      // Check instruction       SW x0, 0(x6) //Stop the CPU by setting RUN to 0
+      $display("Test #10: SKIPPED");
+      #1;
+      validating = 1'b0;
+      #9;
 
+      test_n = 11;
+      wait (state_tb == fetch); //wait until the CPU has executed the next instruction
+      #1;                       //wait to be after the rising edge of the clock
+      validating = 1'b1;
+      //Check instruction       jalr x0, 0(x5)
+      if(instruction_tb == 32'h00004397) begin 
+        $display("Test #11: OK");
+      end else begin
+        $display("Test #11: FAILED -> instruction_tb was %h", instruction_tb);
+      end
+      #1;
+      validating = 1'b0;
+      #9;
 
+      test_n = 12;
+      wait (state_tb == fetch); //wait until the CPU has executed the next instruction
+      #1;                       //wait to be after the rising edge of the clock
+      validating = 1'b1;
+      //Check instruction       AUIPC x7, 0x4
+      if(regFile[6] == 32'h4000402c) begin 
+        $display("Test #12: OK");
+      end else begin
+        $display("Test #12: FAILED -> regFile[7] was %h", regFile[6]);
+      end
+      #1;
+      validating = 1'b0;
+      #9;
 
+      test_n = 13;
+      wait (state_tb == fetch); //wait until the CPU has executed the next instruction
+      #1;                       //wait to be after the rising edge of the clock
+      validating = 1'b1;
+      //Check instruction       sw x7, 0(x8)
+      $display("Test #13: SKIPPED");
+      #1;
+      validating = 1'b0;
+      #9;
 
+      test_n = 14;
+      wait (state_tb == fetch); //wait until the CPU has executed the next instruction
+      #1;                       //wait to be after the rising edge of the clock
+      validating = 1'b1;
+      //Check instruction       ADDI x8, x8, -4
+      if(regFile[7] == 32'h40011FF8) begin 
+        $display("Test #14: OK");
+      end else begin
+        $display("Test #14: FAILED -> regFile[8] was %h", regFile[7]);
+      end
+      #1;
+      validating = 1'b0;
+      #9;
+
+      test_n = 15;
+      wait (state_tb == fetch); //wait until the CPU has executed the next instruction
+      #1;                       //wait to be after the rising edge of the clock
+      validating = 1'b1;
+      //Check instruction       lui x9, 0x40020
+      if(regFile[8] == 32'h40020000) begin 
+        $display("Test #15: OK");
+      end else begin
+        $display("Test #15: FAILED -> regFile[9] was %h", regFile[8]);
+      end
+      #1;
+      validating = 1'b0;
+      #9;
+
+      test_n = 16;
+      wait (state_tb == fetch); //wait until the CPU has executed the next instruction
+      #1;                       //wait to be after the rising edge of the clock
+      validating = 1'b1;
+      //Check instruction       addi x10, x0, 1
+      if(regFile[9] == 32'h1) begin 
+        $display("Test #16: OK");
+      end else begin
+        $display("Test #16: FAILED -> regFile[10] was %h", regFile[9]);
+      end
+      #1;
+      validating = 1'b0;
+      #9;
+
+      test_n = 17;
+      wait (state_tb == fetch); //wait until the CPU has executed the next instruction
+      #1;                       //wait to be after the rising edge of the clock
+      validating = 1'b1;
+      //Check instruction       sw x10, 4(x9)
+      $display("Test #17: SKIPPED");
+      #1;
+      validating = 1'b0;
+      #9;
+
+      test_n = 18;
+      wait (state_tb == fetch); //wait until the CPU has executed the next instruction
+      #1;                       //wait to be after the rising edge of the clock
+      validating = 1'b1;
+      //Check instruction       sw x10, 8(x9)
+      if(GPIO[0] == 32'h1) begin 
+        $display("Test #18: OK");
+      end else begin
+        $display("Test #18: FAILED -> GPIO was %h", GPIO[0]);
+      end
+      #1;
+      validating = 1'b0;
+      #9;
+
+      test_n = 19;
+      wait (state_tb == fetch); //wait until the CPU has executed the next instruction
+      #1;                       //wait to be after the rising edge of the clock
+      validating = 1'b1;
+      //Check instruction       lw x11, 0(x9)
+      if(regFile[10] & 32'h1 == 32'h1) begin 
+        $display("Test #19: OK");
+      end else begin
+        $display("Test #19: FAILED -> regFile[11] was %h", regFile[10]);
+      end
+      #1;
+      validating = 1'b0;
+      #9;
+
+      test_n = 20;
+      wait (state_tb == fetch); //wait until the CPU has executed the next instruction
+      #1;                       //wait to be after the rising edge of the clock
+      validating = 1'b1;
+      //Check instruction       lui x12, 0x40000
+      if(regFile[11] == 32'h40000000) begin 
+        $display("Test #20: OK");
+      end else begin
+        $display("Test #20: FAILED -> regFile[12] was %h", regFile[11]);
+      end
+      #1;
+      validating = 1'b0;
+      #9;
+
+      test_n = 21;
+      wait (state_tb == fetch); //wait until the CPU has executed the next instruction
+      #1;                       //wait to be after the rising edge of the clock
+      validating = 1'b1;
+      //Check instruction       sw x12, 0(x12)
+      $display("Test #21: SKIPPED");
+      #1;
+      validating = 1'b0;
+      #9;
+
+      test_n = 22;
+      wait (state_tb == fetch); //wait until the CPU has executed the next instruction
+      #1;                       //wait to be after the rising edge of the clock
+      validating = 1'b1;
+      $display("Test #22: SKIPPED");
+      //Check instruction       lw x13, 0(x12)
+      // if(regFile[12] == 32'h40000000) begin 
+      //   $display("Test #22: OK");
+      // end else begin
+      //   $display("Test #22: FAILED -> regFile[13] was %h", regFile[12]);
+      // end
+
+      $finish;
     end 
   endtask  
 

@@ -22,3 +22,14 @@ L2:
 L1:
     jal    x5, L2           # else, goto L2 // instr=400012b7 // x5 = PC + 4 = 0x40000028
 L3:
+    auipc  x7, 4            # x7 <- PC + 4 // x7 = 0x40000030
+    sw     x7, 0(x8)        # Mem[x8] <- x7 // Mem[0x40011FFC] = 0x40000030
+    addi   x8, x8, -4       # x8 <- x8 - 4 // x8 = 0x40011FF8
+    lui    x9, 0x40020      # x9 <- 0x40020 // x9 = 0x40020000 (GPIO START) GPIO_VALUE
+    addi   x10, x0, 1       # x10 <- 1 // x10 = 1
+    sw     x10, 4(x9)       # Mem[x9 + 4] <- x10 // GPIO[0x40020004] = 1    // GPIO_DIR_REG
+    sw     x10, 8(x9)       # Mem[x9 + 8] <- x10 // GPIO[0x40020008] = 1    // GPIO_OUT_REG
+    lw     x11, 0(x9)       # x11 <- Mem[x9] // x11 = 1                     // GPIO_VALUE
+    lui    x12, 0x40000     # x12 <- 0x40000 // x12 = 0x40000000
+    sw     x12, 0(x12)      # Mem[x12] <- x12 // Mem[0x40000000] = 0x40000000        // AXI WRITE
+    lw     x13, 0(x12)      # x13 <- Mem[x12] // x13 = 0x40000000                    // AXI READ
