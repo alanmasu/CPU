@@ -63,10 +63,10 @@ module test_CPU_wh_AXI();
     32'hfe11ae23,
     32'hffc1a203,
     32'h00120663,
-    32'h400012b7,
-    32'h0002a023,
-    32'hff9ff06f
-  };
+    32'h40001337,
+    32'h00032023,
+    32'hff9ff2ef
+};
 
   // Setup VIP agents
   initial begin
@@ -164,6 +164,7 @@ module test_CPU_wh_AXI();
 
   //Signal for testing
   logic validating = 1'b0;
+  integer test_n = 0;
 
   //Modificare questo task qui per il testbench
   //Segnali gerarchici
@@ -178,6 +179,9 @@ module test_CPU_wh_AXI();
 
   state_type state_tb;
   assign state_tb = DUT.test_design_i.CPU_0.U0.state;
+
+  logic cpu_run;
+  assign cpu_run = DUT.test_design_i.CPU_0.U0.run;
 
   task automatic S_AXI_TEST;  
     integer i;
@@ -203,6 +207,10 @@ module test_CPU_wh_AXI();
         mtestWDataL, 
         mtestBresp 
       );  
+
+      //Istruzione no. 1 
+      test_n = 1;
+
       wait (state_tb == fetch);
       wait (state_tb == fetch); //wait until the CPU has executed the first instruction
       #1;                       //wait to be after the rising edge of the clock
@@ -218,6 +226,7 @@ module test_CPU_wh_AXI();
       validating = 1'b0;
       #9;
 
+      test_n = 2;
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
       #1;                       //wait to be after the rising edge of the clock
       validating = 1'b1;
@@ -231,6 +240,7 @@ module test_CPU_wh_AXI();
       validating = 1'b0;
       #9;
       
+      test_n = 3;
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
       #1;                       //wait to be after the rising edge of the clock
       validating = 1'b1;
@@ -244,6 +254,7 @@ module test_CPU_wh_AXI();
       validating = 1'b0;
       #9;
 
+      test_n = 4;
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
       #1;                       //wait to be after the rising edge of the clock
       validating = 1'b1;
@@ -257,6 +268,7 @@ module test_CPU_wh_AXI();
       #9;
       validating = 1'b0;
 
+      test_n = 5;
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
       #1;                       //wait to be after the rising edge of the clock
       // validating = 1'b1;
@@ -277,6 +289,7 @@ module test_CPU_wh_AXI();
       validating = 1'b0;
       #9;
 
+      test_n = 6;
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
       #1;                       //wait to be after the rising edge of the clock
       validating = 1'b1;
@@ -290,11 +303,12 @@ module test_CPU_wh_AXI();
       validating = 1'b0;
       #9;
 
+      test_n = 7;
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
       #1;                       //wait to be after the rising edge of the clock
       validating = 1'b1;
       //Check instruction       BEQ x4, x1, L1
-      if(instruction_tb == 32'hff9ff06f) begin 
+      if(instruction_tb == 32'hff9ff2ef) begin 
         $display("Test #7: OK");
       end else begin
         $display("Test #7: FAILED -> instruction_tb was %h", instruction_tb);
@@ -303,36 +317,46 @@ module test_CPU_wh_AXI();
       validating = 1'b0;
       #9;
 
+      test_n = 8;
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
       #1;                       //wait to be after the rising edge of the clock
       validating = 1'b1;
       //Check instruction       JAL x5, L2
       if(regFile[4] == 32'h40000028) begin 
-        $display("Test #8: OK");
+        $display("Test #8a: OK");
       end else begin
-        $display("Test #8: FAILED -> regFile[5] was %h", regFile[5]);
+        $display("Test #8a: FAILED -> regFile[5] was %h", regFile[5]);
       end
-      if(instruction_tb == 32'h400012b7) begin 
-        $display("Test #9: OK");
+      
+      if(instruction_tb == 32'h40001337) begin 
+        $display("Test #8b: OK");
       end else begin
-        $display("Test #9: FAILED -> instruction_tb was %h", instruction_tb);
+        $display("Test #8b: FAILED -> instruction_tb was %h", instruction_tb);
       end
       #1;
       validating = 1'b0;
       #9;
 
+      test_n = 9;
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
       #1;                       //wait to be after the rising edge of the clock
       validating = 1'b1;
       //Check instruction       LUI x6, 0x40001
       if(regFile[5] == 32'h40001000) begin 
-        $display("Test #10: OK");
+        $display("Test #9: OK");
       end else begin
-        $display("Test #10: FAILED -> regFile[6] was %h", regFile[6]);
+        $display("Test #9: FAILED -> regFile[6] was %h", regFile[6]);
       end
       #1;
       validating = 1'b0;
       #9;
+
+      // wait (state_tb == fetch); //wait until the CPU has executed the next instruction
+      // #1;                       //wait to be after the rising edge of the clock
+      // validating = 1'b1;
+      // test_n++;
+      // // Check instruction       SW x0, 0(x6) //Stop the CPU by setting RUN to 0
+
 
 
 
@@ -342,5 +366,14 @@ module test_CPU_wh_AXI();
 //  always @(instruction_tb) begin
 //    $display("%h", instruction_tb);
 //  end
+  int istruction_count = 0;
+
+  always @(state_tb, reset) begin
+    if (reset == 0) begin
+      istruction_count = 0;
+    end else if (state_tb == fetch) begin
+      istruction_count ++;
+    end
+  end
 
 endmodule
