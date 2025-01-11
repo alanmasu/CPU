@@ -541,7 +541,7 @@ begin
         end if;
     end process;
 
-    ena_mealy : process( state, AXI_stall, run ) begin
+    ena_mealy : process( state, AXI_stall, run, op_class_decoded ) begin
         if run = '1' then
             case state is
                 when idle =>
@@ -591,6 +591,7 @@ begin
                     pc_load <= '0';
                     regFile_we <= '0';
                     mem_we <= '0';  
+                    mem_ena <= '0';
             end case ;
         else
             pc_load <= '0';
