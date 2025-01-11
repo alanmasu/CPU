@@ -55,17 +55,18 @@ module test_CPU_wh_AXI();
   //Programm
   localparam logic [31:0] BASE_ADDR = 32'h40000000;
   // Data to be written
-  logic [31:0] data_array [] = {
+logic [31:0] data_array [] = '{
     32'hff000093,
     32'h00108113,
     32'h001101b3,
     32'h400121b7,
     32'hfe11ae23,
     32'hffc1a203,
-    32'h00120663,
+    32'h00120863,
     32'h40001337,
     32'h00032023,
-    32'hff9ff2ef
+    32'h00028067,
+    32'hff5ff2ef
 };
 
   // Setup VIP agents
@@ -234,7 +235,7 @@ module test_CPU_wh_AXI();
       if(regFile[1] == -32'd15) begin 
         $display("Test #2: OK");
       end else begin
-        $display("Test #2: FAILED -> regFile[2] was %h", regFile[2]);
+        $display("Test #2: FAILED -> regFile[2] was %h", regFile[1]);
       end
       #1;
       validating = 1'b0;
@@ -248,7 +249,7 @@ module test_CPU_wh_AXI();
       if(regFile[2] == -32'd31) begin 
         $display("Test #3: OK");
       end else begin
-        $display("Test #3: FAILED -> regFile[3] was %h", regFile[3]);
+        $display("Test #3: FAILED -> regFile[3] was %h", regFile[2]);
       end
       #1;
       validating = 1'b0;
@@ -262,7 +263,7 @@ module test_CPU_wh_AXI();
       if(regFile[2] == 32'h40012000) begin 
         $display("Test #4: OK");
       end else begin
-        $display("Test #4: FAILED -> regFile[3] was %h", regFile[3]);
+        $display("Test #4: FAILED -> regFile[3] was %h", regFile[2]);
       end
       #1;
       #9;
@@ -297,7 +298,7 @@ module test_CPU_wh_AXI();
       if(regFile[3] == -32'd16) begin 
         $display("Test #6: OK");
       end else begin
-        $display("Test #6: FAILED -> regFile[4] was %h", regFile[4]);
+        $display("Test #6: FAILED -> regFile[4] was %h", regFile[3]);
       end
       #1;
       validating = 1'b0;
@@ -308,7 +309,7 @@ module test_CPU_wh_AXI();
       #1;                       //wait to be after the rising edge of the clock
       validating = 1'b1;
       //Check instruction       BEQ x4, x1, L1
-      if(instruction_tb == 32'hff9ff2ef) begin 
+      if(instruction_tb == 32'hff5ff2ef) begin 
         $display("Test #7: OK");
       end else begin
         $display("Test #7: FAILED -> instruction_tb was %h", instruction_tb);
@@ -322,10 +323,10 @@ module test_CPU_wh_AXI();
       #1;                       //wait to be after the rising edge of the clock
       validating = 1'b1;
       //Check instruction       JAL x5, L2
-      if(regFile[4] == 32'h40000028) begin 
+      if(regFile[4] == 32'h0000002c) begin 
         $display("Test #8a: OK");
       end else begin
-        $display("Test #8a: FAILED -> regFile[5] was %h", regFile[5]);
+        $display("Test #8a: FAILED -> regFile[5] was %h", regFile[4]);
       end
       
       if(instruction_tb == 32'h40001337) begin 

@@ -232,8 +232,9 @@ begin
             elsif op_class = "00100" then       --LOAD
                 rd_value <= mem_out_extended;
             elsif op_class = "00001" then       --JAL
-                rd_value(11 downto 0 ) <= std_logic_vector(npc_in(11 downto 0));
-                rd_value(31 downto 12) <= (others => '0');                
+                -- rd_value(11 downto 0 ) <= std_logic_vector(npc_in(11 downto 0));
+                -- rd_value(31 downto 12) <= (others => '0'); 
+                rd_value <= std_logic_vector(npc_in);               
             end if ;
         else
             rd_value <= (others => '0');

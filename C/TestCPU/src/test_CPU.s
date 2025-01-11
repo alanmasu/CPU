@@ -18,5 +18,7 @@ main:
 L2:
     lui    x6, 0x40001      # x6 <- 0x40001
     sw     x0, 0(x6)        # Mem[x6] <- 0 //run = 0
+    jalr   x0, 0(x5)        # goto L3
 L1:
     jal    x5, L2           # else, goto L2 // instr=400012b7 // x5 = PC + 4 = 0x40000028
+L3:
