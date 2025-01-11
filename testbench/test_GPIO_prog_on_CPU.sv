@@ -40,6 +40,13 @@ module test_GPIO_prog_on_CPU();
 
     bit                                     clock;
     bit                                     reset;
+    wire [31:0]                             GPIO;
+    wire                                    GPIO_1;
+
+    assign GPIO_1 = GPIO[1];
+
+    logic on_programming = 1'b1;
+
 
     //Master vip agent
     axi_transaction                         wr_transaction;   
@@ -62,20 +69,36 @@ module test_GPIO_prog_on_CPU();
 
     `BD_WRAPPER DUT(
         .reset_rtl(reset),
-        .sys_clock(clock) 
+        .sys_clock(clock),
+        .GPIO(GPIO)
     ); 
+
+    //Programm
+    localparam logic [31:0] BASE_ADDR = 32'h40000000;
+    // Data to be written
+    logic [31:0] data_array [] = {
+        32'h40012437, 32'hffc40413, 32'h400202b7, 32'h0072a703,
+        32'h00176713, 32'h00e283a3, 32'h00b2a703, 32'hffe77713,
+        32'h00e285a3, 32'hfe042623, 32'h0100006f, 32'hfec42783,
+        32'h00178793, 32'hfef42623, 32'hfec42703, 32'h00900793,
+        32'hfee7d6e3, 32'h00b2a703, 32'h00176713, 32'h00e285a3,
+        32'hfe042623, 32'h0100006f, 32'hfec42783, 32'h00178793,
+        32'hfef42623, 32'hfec42703, 32'h00900793, 32'hfee7d6e3,
+        32'hfa9ff06f
+    };
+
 
     // Setup VIP agents
     initial begin
         //Slave vip agent initialization
-        slv_agent_0 = new("slave vip agent",test_CPU_wh_AXI.DUT.test_design_i.axi_vip_1.inst.IF);
+        slv_agent_0 = new("slave vip agent",test_GPIO_prog_on_CPU.DUT.test_design_i.axi_vip_1.inst.IF);
         slv_agent_0.vif_proxy.set_dummy_drive_type(XIL_AXI_VIF_DRIVE_NONE);
         slv_agent_0.set_agent_tag("Slave VIP");
         slv_agent_0.set_verbosity(slv_agent_verbosity);
         slv_agent_0.start_slave();
         
         //Master vip agent initialization
-        mst_agent_0 = new("master vip agent",test_CPU_wh_AXI.DUT.test_design_i.axi_vip_0.inst.IF);//ms  
+        mst_agent_0 = new("master vip agent",test_GPIO_prog_on_CPU.DUT.test_design_i.axi_vip_0.inst.IF);//ms  
         mst_agent_0.vif_proxy.set_dummy_drive_type(XIL_AXI_VIF_DRIVE_NONE); 
         mst_agent_0.set_agent_tag("Master VIP"); 
         mst_agent_0.set_verbosity(mst_agent_verbosity); 
@@ -93,24 +116,77 @@ module test_GPIO_prog_on_CPU();
         end
     end
 
-    //clock generation
+    //Reset generation
     initial begin
-        reset <= 1'b1;
-        #10ns;
         reset <= 1'b0;
-        repeat (5) @(negedge clock); 
+        #9ns;
+        reset <= 1'b1;
+//        repeat (5) @(negedge clock); 
     end
 
+    //Clock generation
     always #5 clock <= ~clock;
 
+
+    //Testbench
     initial begin
-        S_AXI_TEST ( );
+        LOAD_PROGRAM();
+        TEST();
         #200ns;
         //$finish;
     end
 
+
+    task automatic LOAD_PROGRAM;
+        integer i;
+        
+        begin
+            #1
+            mtestID = 0; 
+            mtestBurstLength = 0; 
+            mtestDataSize = xil_axi_size_t'(xil_clog2(32/8)); 
+            mtestBurstType = XIL_AXI_BURST_TYPE_INCR;  
+            mtestLOCK = XIL_AXI_ALOCK_NOLOCK;  
+            mtestCacheType = 0;  
+            mtestProtectionType = 0;  
+            mtestRegion = 0; 
+            mtestQOS = 0; 
+
+            //Leggiamo la memoria
+            mtestADDR = 32'h40000000; 
+            mst_agent_0.AXI4LITE_READ_BURST( 
+                mtestADDR, 
+                mtestProtectionType, 
+                mtestRDataL, 
+                mtestRresp 
+            );
+            if (mtestRDataL[31:0] == 32'h7ff00113) begin
+                $display("Test READ Instruction Memory: OK");
+            end else begin
+                $display("Test READ Instruction Memory: FAILED");
+            end
+
+            #10;
+            mtestWDataL[63:32] = 32'h0;
+            mtestADDR[63:32] = 32'h0;
+            for (int i = 0; i < data_array.size(); i++) begin
+                mtestWDataL[31:0] = data_array[i];
+                mtestADDR[31:0] = BASE_ADDR + i * 4;
+                mst_agent_0.AXI4LITE_WRITE_BURST(
+                    mtestADDR,
+                    mtestProtectionType, 
+                    mtestWDataL, 
+                    mtestBresp 
+                );
+                // $display("Wrote data: %h to address: %h", data_array[i], BASE_ADDR + i * 4);
+            end
+            on_programming = 1'b0;
+        end
+    endtask
+
+
     //Modificare questo task qui per il testbench
-    task automatic S_AXI_TEST;  
+    task automatic TEST;  
         integer i;
         begin   
             #1; 
@@ -125,71 +201,16 @@ module test_GPIO_prog_on_CPU();
             mtestRegion = 0; 
             mtestQOS = 0; 
 
-            //Scrittura in memoria
-        //      $display("Imposto l'indirizzo nel slv_reg_2");
-        //      mtestADDR = 32'd0; 
-        //      mtestWDataL[31:0] = 32'd0;   
-        //      mst_agent_0.AXI4LITE_WRITE_BURST( 
-        //        mtestADDR, 
-        //        mtestProtectionType, 
-        //        mtestWDataL, 
-        //        mtestBresp 
-        //      );  
-
-            // $display("fine impostazione indirizzo");
-            // $display("Imposto i dati nel slv_reg_3");
-            // mtestADDR = 32'd12; 
-            // mtestWDataL[31:0] = 32'd17;    
-            // mst_agent_0.AXI4LITE_WRITE_BURST( 
-            //   mtestADDR, 
-            //   mtestProtectionType, 
-            //   mtestWDataL, 
-            //   mtestBresp 
-            // );  
-            // $display("fine scrittura dati");
-            // $display("start writing at 0x1028CC");
-            // mtestADDR = 32'd00; 
-            // mtestWDataL[31:0] = 32'd01;   
-            // mst_agent_0.AXI4LITE_WRITE_BURST( 
-            //   mtestADDR, 
-            //   mtestProtectionType, 
-            //   mtestWDataL, 
-            //   mtestBresp 
-            // );  
-
-            // $display("Reading BRESP");
-            // do begin
-            //   mtestADDR = 32'd20; 
-            //   mst_agent_0.AXI4LITE_READ_BURST( 
-            //     mtestADDR, 
-            //     mtestProtectionType, 
-            //     mtestRDataL, 
-            //     mtestRresp 
-            //   );
-            // end
-            // while (mtestRDataL[2] != 1);
-
-                
-            //Lettura in memoria
-            $display("start reading");
-            mtestADDR = 32'd00; 
-            mtestWDataL[31:0] = 32'd02;    
+            //Faccio partire la CPU
+            mtestADDR = 32'h40001000; 
+            mtestWDataL[31:0] = 32'b1;   
             mst_agent_0.AXI4LITE_WRITE_BURST( 
                 mtestADDR, 
                 mtestProtectionType, 
                 mtestWDataL, 
                 mtestBresp 
             );
-            $display("Reading RRESP");
-            for(int i = 32'h40000000; i < 32'h40000000 + 40; i+=4) begin
-                mtestADDR = i; 
-                mst_agent_0.AXI4LITE_READ_BURST( 
-                mtestADDR, 
-                mtestProtectionType, 
-                mtestRDataL, 
-                mtestRresp 
-                );
-            end
+
         end 
     endtask  
 
