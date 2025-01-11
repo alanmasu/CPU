@@ -25,6 +25,7 @@ use IEEE.NUMERIC_STD.ALL;
 
 library work;
 use work.types_pkg.all;
+use work.constant_package.all;
 
 entity triple_port_ram is
     Port ( addr_in : in STD_LOGIC_VECTOR (4 downto 0);
@@ -48,7 +49,7 @@ begin
 --            res_mem : for i in 0 to 30 loop
 --                mem(i) := (others => '0');
 --            end loop res_mem;
-            mem := (others => (others => '0'));
+            mem := REG_FILE_RESET_VALUE;
             d_out1 <= (others => '0');
             d_out2 <= (others => '0');
         elsif rising_edge(clk) then

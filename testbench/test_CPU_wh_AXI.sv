@@ -323,7 +323,7 @@ logic [31:0] data_array [] = '{
       #1;                       //wait to be after the rising edge of the clock
       validating = 1'b1;
       //Check instruction       JAL x5, L2
-      if(regFile[4] == 32'h0000002c) begin 
+      if(regFile[4] == 32'h4000002c) begin 
         $display("Test #8a: OK");
       end else begin
         $display("Test #8a: FAILED -> regFile[5] was %h", regFile[4]);
