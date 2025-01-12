@@ -26,6 +26,9 @@ use IEEE.STD_LOGIC_1164.ALL;
 -- arithmetic functions with Signed or Unsigned values
 use IEEE.NUMERIC_STD.ALL;
 
+library work;
+use work.constant_package.ALL;
+
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx leaf cells in this code.
 --library UNISIM;
@@ -89,8 +92,8 @@ begin
     
     counter_process : process(clk, res) begin
         if res = '0' then
-            pc  <= (others => '0');
-            npc <= (others => '0');
+            pc  <= unsigned(PC_RESET_VALUE);
+            npc <= pc;
         elsif rising_edge(clk) then
             if pc_load = '1' then
                 pc <= unsigned(pc_in);

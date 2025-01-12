@@ -34,6 +34,7 @@ use IEEE.NUMERIC_STD.ALL;
 library work;
 use work.memory_pkg.all;
 use work.constant_package.all;
+use work.types_pkg.all;
 
 entity CPU is
     generic (
@@ -113,7 +114,7 @@ entity CPU is
 end CPU;
 
 architecture Behavioral of CPU is
-    type state_type is (idle, fetch, decode, execute, memory_writeback);
+    
     signal state : state_type := fetch;
     signal run : std_logic := '0';
 
@@ -539,7 +540,7 @@ begin
         end if;
     end process;
 
-    ena_mealy : process( state, AXI_stall, run ) begin
+    ena_mealy : process( state, AXI_stall, run, op_class_decoded ) begin
         if run = '1' then
             case state is
                 when idle =>
@@ -589,6 +590,7 @@ begin
                     pc_load <= '0';
                     regFile_we <= '0';
                     mem_we <= '0';  
+                    mem_ena <= '0';
             end case ;
         else
             pc_load <= '0';
