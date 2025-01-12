@@ -23,6 +23,10 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
+library work;
+use work.types_pkg.all;
+use work.constant_package.all;
+
 entity triple_port_ram is
     Port ( addr_in : in STD_LOGIC_VECTOR (4 downto 0);
            d_in : in STD_LOGIC_VECTOR (31 downto 0);
@@ -36,8 +40,7 @@ entity triple_port_ram is
 end triple_port_ram;
 
 architecture Behavioral of triple_port_ram is
-    type ram_array is array (30 downto 0) of std_logic_vector (31 downto 0);
-        signal mem_2: ram_array;
+    signal mem_2: ram_array;
 begin
     process(clk, res) is
         variable mem: ram_array;
@@ -46,7 +49,7 @@ begin
 --            res_mem : for i in 0 to 30 loop
 --                mem(i) := (others => '0');
 --            end loop res_mem;
-            mem := (others => (others => '0'));
+            mem := REG_FILE_RESET_VALUE;
             d_out1 <= (others => '0');
             d_out2 <= (others => '0');
         elsif rising_edge(clk) then
