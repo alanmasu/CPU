@@ -277,8 +277,8 @@ logic [31:0] data_array [] = '{
         $display("Test #4: FAILED -> regFile[3] was %h", regFile[2]);
       end
       #1;
-      #9;
       validating = 1'b0;
+      #9;
 
       test_n = 5;
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
