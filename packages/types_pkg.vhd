@@ -9,4 +9,7 @@ package types_pkg is
     
     -- CPU State type
     type state_type is (idle, fetch, decode, execute, memory_writeback);
+
+    -- Control Register type
+    type control_reg_t is array (0 to 31) of std_logic_vector(31 downto 0);
 end package ;

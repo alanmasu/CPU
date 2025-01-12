@@ -12,7 +12,7 @@ main:
     addi   x2, x1, 1        # x2 <- x1 + 1  // x2 = -15
     add    x3, x2, x1       # x3 <- x2 + x1 // x3 = -31
     lui    x3, 0x40012      # x3 <- 0x40012 // x3 = RAM_END
-    sw     x1, -4(x3)       # Mem[x3 - 4] <- -16   //PENSARE SE c'è un modo per testare questa istruzione
+    sw     x1, -4(x3)       # Mem[x3 - 4] <- -16 // Mem[0x40011ffc] = -16   //PENSARE SE c'è un modo per testare questa istruzione
     lw     x4, -4(x3)       # x4 <- Mem[x3 - 4] // x4 = -16
     beq    x4, x1, L1       # if x4 == x1, goto L1 // instr=0xff9ff06f
 L2:
@@ -23,8 +23,8 @@ L1:
     jal    x5, L2           # else, goto L2 // instr=400012b7 // x5 = PC + 4 = 0x40000028
 L3:
     auipc  x7, 4            # x7 <- PC + 4 // x7 = 0x40000030
-    sw     x7, 0(x8)        # Mem[x8] <- x7 // Mem[0x40011FFC] = 0x40000030
-    addi   x8, x8, -4       # x8 <- x8 - 4 // x8 = 0x40011FF8
+    sw     x7, -8(x8)       # Mem[x8] <- x7 // Mem[0x40011ff8] = 0x40000030
+    addi   x8, x8, -8       # x8 <- x8 - 4 // x8 = 0x40011ff4
     lui    x9, 0x40020      # x9 <- 0x40020 // x9 = 0x40020000 (GPIO START) GPIO_VALUE
     addi   x10, x0, 1       # x10 <- 1 // x10 = 1
     sw     x10, 4(x9)       # Mem[x9 + 4] <- x10 // GPIO[0x40020004] = 1    // GPIO_DIR_REG

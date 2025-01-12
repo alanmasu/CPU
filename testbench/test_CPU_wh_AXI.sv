@@ -68,8 +68,8 @@ logic [31:0] data_array [] = '{
     32'h00028067,
     32'hff5ff2ef,
     32'h00004397,
-    32'h00742023,
-    32'hffc40413,
+    32'hfe742c23,
+    32'hff840413,
     32'h400204b7,
     32'h00100513,
     32'h00a4a223,
@@ -119,17 +119,167 @@ logic [31:0] data_array [] = '{
   //Clock generation
   always #5 clock <= ~clock;
 
+  //AXI Check process
+  typedef struct{
+    integer test_n;
+    logic [31:0] addr;
+    logic [31:0] assert_data;
+    logic [31:0] readed_data;
+    logic resoult;
+    string name = "";
+    string messageOnPass = "OK";
+    string messageOnFail;
+  }check_record_t;
+
+  check_record_t check_queue[$];
+  check_record_t  checked_queue[$];
+  integer check_queue_size = 0;
+  integer checked_queue_size = 0;
+
+  task checkQueuePush(
+    input integer test_n, 
+    input logic [31:0] addr,
+    input logic [31:0] assert_data, 
+    input string msgPass, 
+    input string msgFail, 
+    input string name = ""
+  );
+  begin
+    check_queue.push_back('{test_n:test_n, addr:addr, assert_data:assert_data, readed_data:0, resoult:0, name:name, messageOnPass:msgPass, messageOnFail:msgFail});
+    check_queue_size++;
+  end;
+  endtask;
+
+  task automatic doQueuedTests;
+    logic testPassed = 0;
+    string message;
+    begin
+      if (check_queue_size > 0) begin
+        for (int i = 0; i < check_queue_size; i++) begin
+          check_record_t check_record = check_queue.pop_front();
+          check_queue_size--;
+          mtestADDR = check_record.addr;
+          mst_agent_0.AXI4LITE_READ_BURST( 
+            mtestADDR, 
+            mtestProtectionType, 
+            mtestRDataL, 
+            mtestRresp 
+          );
+          check_record.readed_data = mtestRDataL[31:0];
+          if (check_record.readed_data == check_record.assert_data) begin
+            check_record.resoult = 1;
+            message = check_record.messageOnPass;
+          end else begin
+            check_record.resoult = 0;
+            message = check_record.messageOnFail;
+          end
+          addToLog(check_record.test_n, check_record.resoult, message, check_record.readed_data, check_record.name);
+          checked_queue.push_back(check_record);
+          checked_queue_size++;
+        end
+      end
+    end
+  endtask
+  // always @(check_queue) begin
+  //   if (check_queue_size > 0) begin
+  //     for (int i = 0; i < check_queue_size; i++) begin
+  //       check_record_t check_record = check_queue.pop_front();
+
+  //       mtestADDR = check_record.addr;
+  //       mst_agent_0.AXI4LITE_READ_BURST( 
+  //         mtestADDR, 
+  //         mtestProtectionType, 
+  //         mtestRDataL, 
+  //         mtestRresp 
+  //       );
+  //       check_queue[i].readed_data = mtestRDataL[31:0];
+  //       if (check_queue[i].readed_data == check_queue[i].assert_data) begin
+  //         check_queue[i].resoult = 1;
+  //       end else begin
+  //         check_queue[i].resoult = 0;
+  //       end
+  //       checked_queue.push_back(check_queue[i]);
+  //       checked_queue_size++;
+  //     end
+  //   end
+  // end
+  
+
+  //Test Logging
+  typedef struct {
+    integer test_n;
+    string name = "";
+    logic passed;
+    string message;
+    logic [31:0] actual;
+  } test_resoult_t;
+
+  test_resoult_t test_resoult_queue[$];
+  integer test_resoult_queue_size = 0;
+
+  function automatic void bubbleSort(ref test_resoult_t array[$]);
+    automatic int n = array.size();
+    for (int i = 0; i < n-1; i++) begin
+      for (int j = 0; j < n-i-1; j++) begin
+        if (array[j].test_n > array[j+1].test_n) begin
+          //Swap
+          test_resoult_t tmp = array[j];
+          array[j] = array[j+1];
+          array[j+1] = tmp;
+          // swap(array[j], array[j+1]);
+        end
+      end
+    end
+  endfunction
+
+  task automatic addToLog(input integer test_n, input logic passed, input string message, input logic [31:0] actual, input string name = "");
+    begin
+      test_resoult_queue.push_back('{test_n:test_n, name:name, passed:passed, message:message, actual:actual});
+      test_resoult_queue_size++;
+    end
+  endtask;
+    
+  test_resoult_t resoult;
+  task automatic printLog;
+    begin
+      bubbleSort(test_resoult_queue);
+      if (test_resoult_queue.size() > 0) begin
+        for (int i = test_resoult_queue.size(); i > 0; i--) begin
+          resoult = test_resoult_queue.pop_front();
+          test_resoult_queue_size--;
+          if(resoult.name == "") begin
+            if (resoult.passed == 1) begin
+              $display("Test #%0d: %s", resoult.test_n, resoult.message);
+            end else begin
+              $display("Test #%0d: %s %h", resoult.test_n, resoult.message, resoult.actual);
+            end
+          end else begin
+            if (resoult.passed == 1) begin
+              $display("Test %s: %s", resoult.name, resoult.message);
+            end else begin
+              $display("Test %s: %s %h", resoult.name, resoult.message, resoult.actual);
+            end
+          end
+        end
+      end
+    end
+  endtask;
+
+
   //Testbench
   initial begin
     LOAD_PROGRAM();
     S_AXI_TEST();
-    #200ns;
-    //$finish;
+    doQueuedTests();
+    printLog();
+    $finish;
   end
 
   //Load program
   task automatic LOAD_PROGRAM;
         integer i;
+        logic testPassed = 0;
+        string message;
         begin
             #1
             mtestID = 0; 
@@ -150,12 +300,14 @@ logic [31:0] data_array [] = '{
                 mtestRDataL, 
                 mtestRresp 
             );
-            if (mtestRDataL[31:0] == 32'h7ff00113) begin
-                $display("Test READ Instruction Memory: OK");
+            if (mtestRDataL[31:0] == '0) begin
+                testPassed = 1;
+                message = "OK";
             end else begin
-                $display("Test READ Instruction Memory: FAILED");
+                testPassed = 0;
+                message = "FAILED -> Instruction was";
             end
-
+            addToLog(0, testPassed, message, mtestRDataL[31:0], "READ Instruction Memory");
             #10;
             mtestWDataL[63:32] = 32'h0;
             mtestADDR[63:32] = 32'h0;
@@ -195,8 +347,23 @@ logic [31:0] data_array [] = '{
   logic cpu_run;
   assign cpu_run = DUT.test_design_i.CPU_0.U0.run;
 
+  //CPU Control Register
+  control_reg_t control_reg_tb;
+  assign control_reg_tb = DUT.test_design_i.CPU_0.U0.control_reg;
+
+  //GPIO Registes
+  logic [31:0] GPIO_dir_tb;
+  assign GPIO_dir_tb = DUT.test_design_i.CPU_0.U0.gpio_driver.GPIO_dir;
+  logic [31:0] GPIO_reg_tb;
+  assign GPIO_reg_tb = DUT.test_design_i.CPU_0.U0.gpio_driver.GPIO_reg;
+  logic [31:0] GPIO_state_tb;
+  assign GPIO_state_tb = DUT.test_design_i.CPU_0.U0.gpio_driver.GPIO_state;
+
+
   task automatic S_AXI_TEST;  
     integer i;
+    logic testPassed = 0;
+    string message;
     begin   
       #1; 
       $display("Init testing of IP, simulating a ZynqPS to write & read memory trougth the IP "); 
@@ -230,10 +397,13 @@ logic [31:0] data_array [] = '{
       validating = 1'b1;
       //Check instruction   ADDI x1, x0, -16
       if(regFile[0] == -32'd16) begin
-        $display("Test #1: OK");
+        testPassed = 1;
+        message = "OK";
       end else begin
-        $display("Test #1: FAILED");
+        testPassed = 0;
+        message = "FAILED -> regFile[1] was";
       end
+      addToLog(test_n, testPassed, message, regFile[0]);
       #1;                      
       validating = 1'b0;
       #9;
@@ -243,11 +413,14 @@ logic [31:0] data_array [] = '{
       #1;                       //wait to be after the rising edge of the clock
       validating = 1'b1;
       //Check instruction       ADDI x2, x1, 1
-      if(regFile[1] == -32'd15) begin 
-        $display("Test #2: OK");
+      if(regFile[1] == -32'd15) begin
+        testPassed = 1;
+        message = "OK";
       end else begin
-        $display("Test #2: FAILED -> regFile[2] was %h", regFile[1]);
+        testPassed = 0;
+        message = "FAILED -> regFile[2] was";
       end
+      addToLog(test_n, testPassed, message, regFile[1]);
       #1;
       validating = 1'b0;
       #9;
@@ -257,11 +430,14 @@ logic [31:0] data_array [] = '{
       #1;                       //wait to be after the rising edge of the clock
       validating = 1'b1;
       //Check instruction       ADD x3, x2, x1
-      if(regFile[2] == -32'd31) begin 
-        $display("Test #3: OK");
+      if(regFile[2] == -32'd31) begin
+        testPassed = 1;
+        message = "OK";
       end else begin
-        $display("Test #3: FAILED -> regFile[3] was %h", regFile[2]);
+        testPassed = 0;
+        message = "FAILED -> regFile[3] was";
       end
+      addToLog(test_n, testPassed, message, regFile[2]);
       #1;
       validating = 1'b0;
       #9;
@@ -271,11 +447,14 @@ logic [31:0] data_array [] = '{
       #1;                       //wait to be after the rising edge of the clock
       validating = 1'b1;
       //Check instruction       LUI x3, 0x40012
-      if(regFile[2] == 32'h40012000) begin 
-        $display("Test #4: OK");
+      if(regFile[2] == 32'h40012000) begin
+        testPassed = 1;
+        message = "OK";
       end else begin
-        $display("Test #4: FAILED -> regFile[3] was %h", regFile[2]);
+        testPassed = 0;
+        message = "FAILED -> regFile[3] was";
       end
+      addToLog(test_n, testPassed, message, regFile[2]);
       #1;
       validating = 1'b0;
       #9;
@@ -285,19 +464,7 @@ logic [31:0] data_array [] = '{
       #1;                       //wait to be after the rising edge of the clock
       validating = 1'b1;
       //Check instruction       SW x1, -4(x3)
-      $display("Test #5: SKIPPED");
-      // mtestADDR = 32'h40012000 - 4;
-      // mst_agent_0.AXI4LITE_READ_BURST( 
-      //   mtestADDR, 
-      //   mtestProtectionType, 
-      //   mtestRDataL, 
-      //   mtestRresp 
-      // );
-      // if(mtestRDataL[31:0] == -32'd16) begin 
-      //   $display("Test #5: OK");
-      // end else begin
-      //   $display("Test #5: FAILED");
-      // end
+      checkQueuePush(test_n, 32'h40011FFC, -32'd16, "OK", "FAILED -> Mem[0x40011FFC] was");
       #1;
       validating = 1'b0;
       #9;
@@ -307,11 +474,14 @@ logic [31:0] data_array [] = '{
       #1;                       //wait to be after the rising edge of the clock
       validating = 1'b1;
       //Check instruction       LW x4, -4(x3)
-      if(regFile[3] == -32'd16) begin 
-        $display("Test #6: OK");
+      if(regFile[3] == -32'd16) begin
+        testPassed = 1;
+        message = "OK";
       end else begin
-        $display("Test #6: FAILED -> regFile[4] was %h", regFile[3]);
+        testPassed = 0;
+        message = "FAILED -> regFile[4] was";
       end
+      addToLog(test_n, testPassed, message, regFile[3]);
       #1;
       validating = 1'b0;
       #9;
@@ -322,10 +492,13 @@ logic [31:0] data_array [] = '{
       validating = 1'b1;
       //Check instruction       BEQ x4, x1, L1
       if(instruction_tb == 32'hff5ff2ef) begin 
-        $display("Test #7: OK");
+        testPassed = 1;
+        message = "OK";
       end else begin
-        $display("Test #7: FAILED -> instruction_tb was %h", instruction_tb);
+        testPassed = 0;
+        message = "FAILED -> instruction_tb was";
       end
+      addToLog(test_n, testPassed, message, instruction_tb);
       #1;
       validating = 1'b0;
       #9;
@@ -336,16 +509,22 @@ logic [31:0] data_array [] = '{
       validating = 1'b1;
       //Check instruction       JAL x5, L2
       if(regFile[4] == 32'h4000002c) begin 
-        $display("Test #8a: OK");
+        testPassed = 1;
+        message = "OK";
       end else begin
-        $display("Test #8a: FAILED -> regFile[5] was %h", regFile[4]);
+        testPassed = 0;
+        message = "FAILED -> regFile[5] was";
       end
+      addToLog(test_n, testPassed, message, regFile[4], "#8a");
       
       if(instruction_tb == 32'h40001337) begin 
-        $display("Test #8b: OK");
+        testPassed = 1;
+        message = "OK";
       end else begin
-        $display("Test #8b: FAILED -> instruction_tb was %h", instruction_tb);
+        testPassed = 0;
+        message = "FAILED -> instruction_tb was";
       end
+      addToLog(test_n, testPassed, message, instruction_tb, "#8b");
       #1;
       validating = 1'b0;
       #9;
@@ -356,10 +535,13 @@ logic [31:0] data_array [] = '{
       validating = 1'b1;
       //Check instruction       LUI x6, 0x40001
       if(regFile[5] == 32'h40001000) begin 
-        $display("Test #9: OK");
+        testPassed = 1;
+        message = "OK";
       end else begin
-        $display("Test #9: FAILED -> regFile[6] was %h", regFile[6]);
+        testPassed = 0;
+        message = "FAILED -> regFile[6] was";
       end
+      addToLog(test_n, testPassed, message, regFile[5]);
       #1;
       validating = 1'b0;
       #9;
@@ -370,7 +552,6 @@ logic [31:0] data_array [] = '{
       validating = 1'b1;
       test_n++;
       // Check instruction       SW x0, 0(x6) //Stop the CPU by setting RUN to 0
-      $display("Test #10: SKIPPED");
       #1;
       validating = 1'b0;
       #9;
@@ -381,10 +562,13 @@ logic [31:0] data_array [] = '{
       validating = 1'b1;
       //Check instruction       jalr x0, 0(x5)
       if(instruction_tb == 32'h00004397) begin 
-        $display("Test #11: OK");
+        testPassed = 1;
+        message = "OK";
       end else begin
-        $display("Test #11: FAILED -> instruction_tb was %h", instruction_tb);
+        testPassed = 0;
+        message = "FAILED -> instruction_tb was";
       end
+      addToLog(test_n, testPassed, message, instruction_tb);
       #1;
       validating = 1'b0;
       #9;
@@ -395,10 +579,13 @@ logic [31:0] data_array [] = '{
       validating = 1'b1;
       //Check instruction       AUIPC x7, 0x4
       if(regFile[6] == 32'h4000402c) begin 
-        $display("Test #12: OK");
+        testPassed = 1;
+        message = "OK";
       end else begin
-        $display("Test #12: FAILED -> regFile[7] was %h", regFile[6]);
+        testPassed = 0;
+        message = "FAILED -> regFile[7] was";
       end
+      addToLog(test_n, testPassed, message, regFile[6]);
       #1;
       validating = 1'b0;
       #9;
@@ -407,8 +594,8 @@ logic [31:0] data_array [] = '{
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
       #1;                       //wait to be after the rising edge of the clock
       validating = 1'b1;
-      //Check instruction       sw x7, 0(x8)
-      $display("Test #13: SKIPPED");
+      //Check instruction       sw x7, -8(x8)
+      checkQueuePush(test_n, 32'h40011ff8, 32'h40004030, "OK", "FAILED -> Mem[0x40011FF8] was");
       #1;
       validating = 1'b0;
       #9;
@@ -418,11 +605,14 @@ logic [31:0] data_array [] = '{
       #1;                       //wait to be after the rising edge of the clock
       validating = 1'b1;
       //Check instruction       ADDI x8, x8, -4
-      if(regFile[7] == 32'h40011FF8) begin 
-        $display("Test #14: OK");
+      if(regFile[7] == 32'h40011ff4) begin 
+        testPassed = 1;
+        message = "OK";
       end else begin
-        $display("Test #14: FAILED -> regFile[8] was %h", regFile[7]);
+        testPassed = 0;
+        message = "FAILED -> regFile[8] was";
       end
+      addToLog(test_n, testPassed, message, regFile[7]);
       #1;
       validating = 1'b0;
       #9;
@@ -433,10 +623,13 @@ logic [31:0] data_array [] = '{
       validating = 1'b1;
       //Check instruction       lui x9, 0x40020
       if(regFile[8] == 32'h40020000) begin 
-        $display("Test #15: OK");
+        testPassed = 1;
+        message = "OK";
       end else begin
-        $display("Test #15: FAILED -> regFile[9] was %h", regFile[8]);
+        testPassed = 0;
+        message = "FAILED -> regFile[9] was";
       end
+      addToLog(test_n, testPassed, message, regFile[8]);
       #1;
       validating = 1'b0;
       #9;
@@ -447,9 +640,11 @@ logic [31:0] data_array [] = '{
       validating = 1'b1;
       //Check instruction       addi x10, x0, 1
       if(regFile[9] == 32'h1) begin 
-        $display("Test #16: OK");
+        testPassed = 1;
+        message = "OK";
       end else begin
-        $display("Test #16: FAILED -> regFile[10] was %h", regFile[9]);
+        testPassed = 0;
+        message = "FAILED -> regFile[10] was";
       end
       #1;
       validating = 1'b0;
@@ -460,7 +655,15 @@ logic [31:0] data_array [] = '{
       #1;                       //wait to be after the rising edge of the clock
       validating = 1'b1;
       //Check instruction       sw x10, 4(x9)
-      $display("Test #17: SKIPPED");
+      // $display("Test #17: SKIPPED");
+      if(GPIO_dir_tb[0] == 1) begin 
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = "FAILED -> GPIO_dir_tb[0] was";
+      end
+      addToLog(test_n, testPassed, message, GPIO_dir_tb[0]);
       #1;
       validating = 1'b0;
       #9;
@@ -471,10 +674,13 @@ logic [31:0] data_array [] = '{
       validating = 1'b1;
       //Check instruction       sw x10, 8(x9)
       if(GPIO[0] == 32'h1) begin 
-        $display("Test #18: OK");
+        testPassed = 1;
+        message = "OK";
       end else begin
-        $display("Test #18: FAILED -> GPIO was %h", GPIO[0]);
+        testPassed = 0;
+        message = "FAILED -> GPIO[0] was";
       end
+      addToLog(test_n, testPassed, message, GPIO[0]);
       #1;
       validating = 1'b0;
       #9;
@@ -485,10 +691,13 @@ logic [31:0] data_array [] = '{
       validating = 1'b1;
       //Check instruction       lw x11, 0(x9)
       if(regFile[10] & 32'h1 == 32'h1) begin 
-        $display("Test #19: OK");
+        testPassed = 1;
+        message = "OK";
       end else begin
-        $display("Test #19: FAILED -> regFile[11] was %h", regFile[10]);
+        testPassed = 0;
+        message = "FAILED -> regFile[11] was";
       end
+      addToLog(test_n, testPassed, message, regFile[10]);
       #1;
       validating = 1'b0;
       #9;
@@ -499,10 +708,13 @@ logic [31:0] data_array [] = '{
       validating = 1'b1;
       //Check instruction       lui x12, 0x40000
       if(regFile[11] == 32'h40000000) begin 
-        $display("Test #20: OK");
+        testPassed = 1;
+        message = "OK";
       end else begin
-        $display("Test #20: FAILED -> regFile[12] was %h", regFile[11]);
+        testPassed = 0;
+        message = "FAILED -> regFile[12] was";
       end
+      addToLog(test_n, testPassed, message, regFile[11]);
       #1;
       validating = 1'b0;
       #9;
@@ -512,7 +724,7 @@ logic [31:0] data_array [] = '{
       #1;                       //wait to be after the rising edge of the clock
       validating = 1'b1;
       //Check instruction       sw x12, 0(x12)
-      $display("Test #21: SKIPPED");
+      addToLog(test_n, 1, "SKIPPED", 1);
       #1;
       validating = 1'b0;
       #9;
@@ -521,7 +733,7 @@ logic [31:0] data_array [] = '{
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
       #1;                       //wait to be after the rising edge of the clock
       validating = 1'b1;
-      $display("Test #22: SKIPPED");
+      addToLog(test_n, 1, "SKIPPED", 1);
       //Check instruction       lw x13, 0(x12)
       // if(regFile[12] == 32'h40000000) begin 
       //   $display("Test #22: OK");
@@ -529,7 +741,7 @@ logic [31:0] data_array [] = '{
       //   $display("Test #22: FAILED -> regFile[13] was %h", regFile[12]);
       // end
 
-      $finish;
+      // $finish;
     end 
   endtask  
 
