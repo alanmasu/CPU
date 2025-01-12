@@ -6,7 +6,7 @@ READELF = riscv32-unknown-elf-readelf
 # File
 SRC     = asm/test_GPIO.s
 # SRC     = src/test_GPIO.c
-OUT     = bin/test_GPIO_from_C.elf
+OUT     = bin/test_GPIO.elf
 LINKER  = linker_script.ld
 
 # Flags di compilazione e linking

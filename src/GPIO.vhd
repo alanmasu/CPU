@@ -91,10 +91,10 @@ begin
             d_out <= d_out;         -- latched value
 
             if ena = '1' then       -- if Enabled
-                case(address(3 downto 0)) is
-                    when x"0" =>    -- READ
+                case(address(3 downto 2)) is
+                    when "00" =>    -- READ
                         d_out <= GPIO_state;
-                    when x"4" =>    -- DIR
+                    when "01" =>    -- DIR
                         if wea(0) = '1' then
                             GPIO_dir(7 downto 0) <= d_in(7 downto 0);
                         end if;
@@ -108,7 +108,7 @@ begin
                             GPIO_dir(31 downto 24) <= d_in(31 downto 24);
                         end if;
                         d_out <= GPIO_dir;
-                    when x"8" =>    --WRITE     
+                    when "10" =>    --WRITE     
                         if wea(0) = '1' then
                             GPIO_reg(7 downto 0) <= d_in(7 downto 0);
                         end if;
