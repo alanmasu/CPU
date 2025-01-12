@@ -10,6 +10,7 @@ import test_design_axi_vip_0_3_pkg::*;
 import test_design_axi_vip_1_0_pkg::*;
 
 import types_pkg::*;
+import test_pkg::*;
 
 module test_CPU_wh_AXI();
 //slave vip agent
@@ -55,7 +56,7 @@ module test_CPU_wh_AXI();
   //Programm
   localparam logic [31:0] BASE_ADDR = 32'h40000000;
   // Data to be written
-logic [31:0] data_array [] = '{
+  logic [31:0] data_array [] = '{
     32'hff000093,
     32'h00108113,
     32'h001101b3,
@@ -78,7 +79,7 @@ logic [31:0] data_array [] = '{
     32'h40000637,
     32'h00c62023,
     32'h00062683
-};
+  };
 
   // Setup VIP agents
   initial begin
@@ -119,212 +120,21 @@ logic [31:0] data_array [] = '{
   //Clock generation
   always #5 clock <= ~clock;
 
-  //AXI Check process
-  typedef struct{
-    integer test_n;
-    logic [31:0] addr;
-    logic [31:0] assert_data;
-    logic [31:0] readed_data;
-    logic resoult;
-    string name = "";
-    string messageOnPass = "OK";
-    string messageOnFail;
-  }check_record_t;
-
-  check_record_t check_queue[$];
-  check_record_t  checked_queue[$];
-  integer check_queue_size = 0;
-  integer checked_queue_size = 0;
-
-  task checkQueuePush(
-    input integer test_n, 
-    input logic [31:0] addr,
-    input logic [31:0] assert_data, 
-    input string msgPass, 
-    input string msgFail, 
-    input string name = ""
-  );
-  begin
-    check_queue.push_back('{test_n:test_n, addr:addr, assert_data:assert_data, readed_data:0, resoult:0, name:name, messageOnPass:msgPass, messageOnFail:msgFail});
-    check_queue_size++;
-  end;
-  endtask;
-
-  task automatic doQueuedTests;
-    logic testPassed = 0;
-    string message;
-    begin
-      if (check_queue_size > 0) begin
-        for (int i = 0; i < check_queue_size; i++) begin
-          check_record_t check_record = check_queue.pop_front();
-          check_queue_size--;
-          mtestADDR = check_record.addr;
-          mst_agent_0.AXI4LITE_READ_BURST( 
-            mtestADDR, 
-            mtestProtectionType, 
-            mtestRDataL, 
-            mtestRresp 
-          );
-          check_record.readed_data = mtestRDataL[31:0];
-          if (check_record.readed_data == check_record.assert_data) begin
-            check_record.resoult = 1;
-            message = check_record.messageOnPass;
-          end else begin
-            check_record.resoult = 0;
-            message = check_record.messageOnFail;
-          end
-          addToLog(check_record.test_n, check_record.resoult, message, check_record.readed_data, check_record.name);
-          checked_queue.push_back(check_record);
-          checked_queue_size++;
-        end
-      end
-    end
-  endtask
-  // always @(check_queue) begin
-  //   if (check_queue_size > 0) begin
-  //     for (int i = 0; i < check_queue_size; i++) begin
-  //       check_record_t check_record = check_queue.pop_front();
-
-  //       mtestADDR = check_record.addr;
-  //       mst_agent_0.AXI4LITE_READ_BURST( 
-  //         mtestADDR, 
-  //         mtestProtectionType, 
-  //         mtestRDataL, 
-  //         mtestRresp 
-  //       );
-  //       check_queue[i].readed_data = mtestRDataL[31:0];
-  //       if (check_queue[i].readed_data == check_queue[i].assert_data) begin
-  //         check_queue[i].resoult = 1;
-  //       end else begin
-  //         check_queue[i].resoult = 0;
-  //       end
-  //       checked_queue.push_back(check_queue[i]);
-  //       checked_queue_size++;
-  //     end
-  //   end
-  // end
-  
-
-  //Test Logging
-  typedef struct {
-    integer test_n;
-    string name = "";
-    logic passed;
-    string message;
-    logic [31:0] actual;
-  } test_resoult_t;
-
-  test_resoult_t test_resoult_queue[$];
-  integer test_resoult_queue_size = 0;
-
-  function automatic void bubbleSort(ref test_resoult_t array[$]);
-    automatic int n = array.size();
-    for (int i = 0; i < n-1; i++) begin
-      for (int j = 0; j < n-i-1; j++) begin
-        if (array[j].test_n > array[j+1].test_n) begin
-          //Swap
-          test_resoult_t tmp = array[j];
-          array[j] = array[j+1];
-          array[j+1] = tmp;
-          // swap(array[j], array[j+1]);
-        end
-      end
-    end
-  endfunction
-
-  task automatic addToLog(input integer test_n, input logic passed, input string message, input logic [31:0] actual, input string name = "");
-    begin
-      test_resoult_queue.push_back('{test_n:test_n, name:name, passed:passed, message:message, actual:actual});
-      test_resoult_queue_size++;
-    end
-  endtask;
-    
-  test_resoult_t resoult;
-  task automatic printLog;
-    begin
-      bubbleSort(test_resoult_queue);
-      if (test_resoult_queue.size() > 0) begin
-        for (int i = test_resoult_queue.size(); i > 0; i--) begin
-          resoult = test_resoult_queue.pop_front();
-          test_resoult_queue_size--;
-          if(resoult.name == "") begin
-            if (resoult.passed == 1) begin
-              $display("Test #%0d: %s", resoult.test_n, resoult.message);
-            end else begin
-              $display("Test #%0d: %s %h", resoult.test_n, resoult.message, resoult.actual);
-            end
-          end else begin
-            if (resoult.passed == 1) begin
-              $display("Test %s: %s", resoult.name, resoult.message);
-            end else begin
-              $display("Test %s: %s %h", resoult.name, resoult.message, resoult.actual);
-            end
-          end
-        end
-      end
-    end
-  endtask;
-
+  //Testing class instantiation
+  TestClass tester;
+  initial begin
+    tester = new();
+    tester.init(mst_agent_0);
+  end
 
   //Testbench
   initial begin
-    LOAD_PROGRAM();
+    tester.loadProgram(data_array, on_programming);
     S_AXI_TEST();
     doQueuedTests();
     printLog();
     $finish;
   end
-
-  //Load program
-  task automatic LOAD_PROGRAM;
-        integer i;
-        logic testPassed = 0;
-        string message;
-        begin
-            #1
-            mtestID = 0; 
-            mtestBurstLength = 0; 
-            mtestDataSize = xil_axi_size_t'(xil_clog2(32/8)); 
-            mtestBurstType = XIL_AXI_BURST_TYPE_INCR;  
-            mtestLOCK = XIL_AXI_ALOCK_NOLOCK;  
-            mtestCacheType = 0;  
-            mtestProtectionType = 0;  
-            mtestRegion = 0; 
-            mtestQOS = 0; 
-
-            //Leggiamo la memoria
-            mtestADDR = 32'h40000000; 
-            mst_agent_0.AXI4LITE_READ_BURST( 
-                mtestADDR, 
-                mtestProtectionType, 
-                mtestRDataL, 
-                mtestRresp 
-            );
-            if (mtestRDataL[31:0] == '0) begin
-                testPassed = 1;
-                message = "OK";
-            end else begin
-                testPassed = 0;
-                message = "FAILED -> Instruction was";
-            end
-            addToLog(0, testPassed, message, mtestRDataL[31:0], "READ Instruction Memory");
-            #10;
-            mtestWDataL[63:32] = 32'h0;
-            mtestADDR[63:32] = 32'h0;
-            for (int i = 0; i < data_array.size(); i++) begin
-                mtestWDataL[31:0] = data_array[i];
-                mtestADDR[31:0] = BASE_ADDR + i * 4;
-                mst_agent_0.AXI4LITE_WRITE_BURST(
-                    mtestADDR,
-                    mtestProtectionType, 
-                    mtestWDataL, 
-                    mtestBresp 
-                );
-                // $display("Wrote data: %h to address: %h", data_array[i], BASE_ADDR + i * 4);
-            end
-            on_programming = 1'b0;
-        end
-    endtask
 
   //Signal for testing
   logic validating = 1'b0;
@@ -403,7 +213,7 @@ logic [31:0] data_array [] = '{
         testPassed = 0;
         message = "FAILED -> regFile[1] was";
       end
-      addToLog(test_n, testPassed, message, regFile[0]);
+      tester.addToLog(test_n, testPassed, message, regFile[0]);
       #1;                      
       validating = 1'b0;
       #9;
@@ -420,7 +230,7 @@ logic [31:0] data_array [] = '{
         testPassed = 0;
         message = "FAILED -> regFile[2] was";
       end
-      addToLog(test_n, testPassed, message, regFile[1]);
+      tester.addToLog(test_n, testPassed, message, regFile[1]);
       #1;
       validating = 1'b0;
       #9;
@@ -437,7 +247,7 @@ logic [31:0] data_array [] = '{
         testPassed = 0;
         message = "FAILED -> regFile[3] was";
       end
-      addToLog(test_n, testPassed, message, regFile[2]);
+      tester.addToLog(test_n, testPassed, message, regFile[2]);
       #1;
       validating = 1'b0;
       #9;
@@ -454,7 +264,7 @@ logic [31:0] data_array [] = '{
         testPassed = 0;
         message = "FAILED -> regFile[3] was";
       end
-      addToLog(test_n, testPassed, message, regFile[2]);
+      tester.addToLog(test_n, testPassed, message, regFile[2]);
       #1;
       validating = 1'b0;
       #9;
@@ -464,7 +274,7 @@ logic [31:0] data_array [] = '{
       #1;                       //wait to be after the rising edge of the clock
       validating = 1'b1;
       //Check instruction       SW x1, -4(x3)
-      checkQueuePush(test_n, 32'h40011FFC, -32'd16, "OK", "FAILED -> Mem[0x40011FFC] was");
+      tester.checkQueuePush(test_n, 32'h40011FFC, -32'd16, "OK", "FAILED -> Mem[0x40011FFC] was");
       #1;
       validating = 1'b0;
       #9;
@@ -481,7 +291,7 @@ logic [31:0] data_array [] = '{
         testPassed = 0;
         message = "FAILED -> regFile[4] was";
       end
-      addToLog(test_n, testPassed, message, regFile[3]);
+      tester.addToLog(test_n, testPassed, message, regFile[3]);
       #1;
       validating = 1'b0;
       #9;
@@ -498,7 +308,7 @@ logic [31:0] data_array [] = '{
         testPassed = 0;
         message = "FAILED -> instruction_tb was";
       end
-      addToLog(test_n, testPassed, message, instruction_tb);
+      tester.addToLog(test_n, testPassed, message, instruction_tb);
       #1;
       validating = 1'b0;
       #9;
@@ -515,7 +325,7 @@ logic [31:0] data_array [] = '{
         testPassed = 0;
         message = "FAILED -> regFile[5] was";
       end
-      addToLog(test_n, testPassed, message, regFile[4], "#8a");
+      tester.addToLog(test_n, testPassed, message, regFile[4], "#8a");
       
       if(instruction_tb == 32'h40001337) begin 
         testPassed = 1;
@@ -524,7 +334,7 @@ logic [31:0] data_array [] = '{
         testPassed = 0;
         message = "FAILED -> instruction_tb was";
       end
-      addToLog(test_n, testPassed, message, instruction_tb, "#8b");
+      tester.addToLog(test_n, testPassed, message, instruction_tb, "#8b");
       #1;
       validating = 1'b0;
       #9;
@@ -541,7 +351,7 @@ logic [31:0] data_array [] = '{
         testPassed = 0;
         message = "FAILED -> regFile[6] was";
       end
-      addToLog(test_n, testPassed, message, regFile[5]);
+      tester.addToLog(test_n, testPassed, message, regFile[5]);
       #1;
       validating = 1'b0;
       #9;
@@ -568,7 +378,7 @@ logic [31:0] data_array [] = '{
         testPassed = 0;
         message = "FAILED -> instruction_tb was";
       end
-      addToLog(test_n, testPassed, message, instruction_tb);
+      tester.addToLog(test_n, testPassed, message, instruction_tb);
       #1;
       validating = 1'b0;
       #9;
@@ -585,7 +395,7 @@ logic [31:0] data_array [] = '{
         testPassed = 0;
         message = "FAILED -> regFile[7] was";
       end
-      addToLog(test_n, testPassed, message, regFile[6]);
+      tester.addToLog(test_n, testPassed, message, regFile[6]);
       #1;
       validating = 1'b0;
       #9;
@@ -595,7 +405,7 @@ logic [31:0] data_array [] = '{
       #1;                       //wait to be after the rising edge of the clock
       validating = 1'b1;
       //Check instruction       sw x7, -8(x8)
-      checkQueuePush(test_n, 32'h40011ff8, 32'h40004030, "OK", "FAILED -> Mem[0x40011FF8] was");
+      tester.checkQueuePush(test_n, 32'h40011ff8, 32'h40004030, "OK", "FAILED -> Mem[0x40011FF8] was");
       #1;
       validating = 1'b0;
       #9;
@@ -612,7 +422,7 @@ logic [31:0] data_array [] = '{
         testPassed = 0;
         message = "FAILED -> regFile[8] was";
       end
-      addToLog(test_n, testPassed, message, regFile[7]);
+      tester.addToLog(test_n, testPassed, message, regFile[7]);
       #1;
       validating = 1'b0;
       #9;
@@ -629,7 +439,7 @@ logic [31:0] data_array [] = '{
         testPassed = 0;
         message = "FAILED -> regFile[9] was";
       end
-      addToLog(test_n, testPassed, message, regFile[8]);
+      tester.addToLog(test_n, testPassed, message, regFile[8]);
       #1;
       validating = 1'b0;
       #9;
@@ -663,7 +473,7 @@ logic [31:0] data_array [] = '{
         testPassed = 0;
         message = "FAILED -> GPIO_dir_tb[0] was";
       end
-      addToLog(test_n, testPassed, message, GPIO_dir_tb[0]);
+      tester.addToLog(test_n, testPassed, message, GPIO_dir_tb[0]);
       #1;
       validating = 1'b0;
       #9;
@@ -680,7 +490,7 @@ logic [31:0] data_array [] = '{
         testPassed = 0;
         message = "FAILED -> GPIO[0] was";
       end
-      addToLog(test_n, testPassed, message, GPIO[0]);
+      tester.addToLog(test_n, testPassed, message, GPIO[0]);
       #1;
       validating = 1'b0;
       #9;
@@ -697,7 +507,7 @@ logic [31:0] data_array [] = '{
         testPassed = 0;
         message = "FAILED -> regFile[11] was";
       end
-      addToLog(test_n, testPassed, message, regFile[10]);
+      tester.addToLog(test_n, testPassed, message, regFile[10]);
       #1;
       validating = 1'b0;
       #9;
@@ -714,7 +524,7 @@ logic [31:0] data_array [] = '{
         testPassed = 0;
         message = "FAILED -> regFile[12] was";
       end
-      addToLog(test_n, testPassed, message, regFile[11]);
+      tester.addToLog(test_n, testPassed, message, regFile[11]);
       #1;
       validating = 1'b0;
       #9;
@@ -724,7 +534,7 @@ logic [31:0] data_array [] = '{
       #1;                       //wait to be after the rising edge of the clock
       validating = 1'b1;
       //Check instruction       sw x12, 0(x12)
-      addToLog(test_n, 1, "SKIPPED", 1);
+      tester.addToLog(test_n, 1, "SKIPPED", 1);
       #1;
       validating = 1'b0;
       #9;
@@ -733,7 +543,7 @@ logic [31:0] data_array [] = '{
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
       #1;                       //wait to be after the rising edge of the clock
       validating = 1'b1;
-      addToLog(test_n, 1, "SKIPPED", 1);
+      tester.addToLog(test_n, 1, "SKIPPED", 1);
       //Check instruction       lw x13, 0(x12)
       // if(regFile[12] == 32'h40000000) begin 
       //   $display("Test #22: OK");
