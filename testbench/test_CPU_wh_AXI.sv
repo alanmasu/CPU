@@ -272,6 +272,7 @@ logic [31:0] data_array [] = '{
     S_AXI_TEST();
     doQueuedTests();
     printLog();
+    #200ns;
     $finish;
   end
 
