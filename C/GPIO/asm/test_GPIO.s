@@ -9,9 +9,9 @@
 .type	main, @function
 main:
     lui     s0,0x40012
-    addi    s0,s0,-4 # s0 <- 0x40011FFF (s0 = RAM END Address)
+    addi    s0,s0,-4 # s0 <- 0x40011FFC (s0 = RAM END Address - 4, ovvero la prima word (32bit) disponibile per lo stack)
     lui     t0,0x40020
-    lw      a4,0x007(t0) # a4 <- Mem[0x40020007] (GPIOA DIR reg)
+    lb      a4,0x007(t0) # a4 <- Mem[0x40020007] (GPIOA DIR reg)
     ori     a4,a4,1
     sb      a4,0x007(t0) # Mem[0x40020007] <- a4
 L2:
@@ -32,7 +32,7 @@ L3:
     ble     a4,a5,L4
 
 #Turn on the LED
-    lw      a4,0x00B(t0) # a4 <- Mem[0x4002000B] (GPIOA DATA reg)
+    lb      a4,0x00B(t0) # a4 <- Mem[0x4002000B] (GPIOA DATA reg)
     ori     a4,a4,1      # a4 <- a4 | GPIO1    
     sb      a4,0x00B(t0)
 
