@@ -1,23 +1,4 @@
 `timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date: 01/10/2025 01:04:36 AM
-// Design Name: 
-// Module Name: test_GPIO_prog_on_CPU
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
-//////////////////////////////////////////////////////////////////////////////////
 
 //Configuration current bd names
 //`define BD_NAME test_design
@@ -28,118 +9,267 @@ import axi_vip_pkg::*;
 import test_design_axi_vip_0_3_pkg::*;
 import test_design_axi_vip_1_0_pkg::*;
 
+import types_pkg::*;
+
 module test_GPIO_prog_on_CPU();
-    //slave vip agent
+//slave vip agent
 
-    axi_transaction                         rd_transaction;   
-    axi_monitor_transaction                 slv_monitor_transaction;  
-    axi_monitor_transaction                 slave_moniter_transaction_queue[$];  
-    xil_axi_uint                            slave_moniter_transaction_queue_size =0;  
-    xil_axi_uint                            slv_agent_verbosity = 0;  
-    test_design_axi_vip_1_0_slv_mem_t       slv_agent_0;
+  axi_transaction                         rd_transaction;   
+  axi_monitor_transaction                 slv_monitor_transaction;  
+  axi_monitor_transaction                 slave_moniter_transaction_queue[$];  
+  xil_axi_uint                            slave_moniter_transaction_queue_size =0;  
+  xil_axi_uint                            slv_agent_verbosity = 0;  
+  test_design_axi_vip_1_0_slv_mem_t       slv_agent_0;
 
-    bit                                     clock;
-    bit                                     reset;
-    wire [31:0]                             GPIO;
-    wire                                    GPIO_1;
-
-    assign GPIO_1 = GPIO[1];
-
-    logic on_programming = 1'b1;
+  bit                                     clock = 1;
+  bit                                     reset;
+  bit                                     run;
+  wire                                    aliveLed;
+  wire [31:0]                             GPIO;
 
 
-    //Master vip agent
-    axi_transaction                         wr_transaction;   
-    xil_axi_uint                            mst_agent_verbosity = 0;  
-    xil_axi_uint                            mtestID;  
-    xil_axi_ulong                           mtestADDR;  
-    xil_axi_len_t                           mtestBurstLength;  
-    xil_axi_size_t                          mtestDataSize;   
-    xil_axi_burst_t                         mtestBurstType;   
-    xil_axi_lock_t                          mtestLOCK;  
-    xil_axi_cache_t                         mtestCacheType = 0;  
-    xil_axi_prot_t                          mtestProtectionType = 3'b000;  
-    xil_axi_region_t                        mtestRegion = 4'b000;  
-    xil_axi_qos_t                           mtestQOS = 4'b000; 
-    xil_axi_resp_t                          mtestBresp;  
-    xil_axi_resp_t[255:0]                   mtestRresp;  
-    bit [63:0]                              mtestWDataL; 
-    bit [63:0]                              mtestRDataL; 
-    test_design_axi_vip_0_3_mst_t           mst_agent_0;
+  logic on_programming = 1'b1;
+   
+//Master vip agent
+  axi_transaction                         wr_transaction;   
+  xil_axi_uint                            mst_agent_verbosity = 0;  
+  xil_axi_uint                            mtestID;  
+  xil_axi_ulong                           mtestADDR;  
+  xil_axi_len_t                           mtestBurstLength;  
+  xil_axi_size_t                          mtestDataSize;   
+  xil_axi_burst_t                         mtestBurstType;   
+  xil_axi_lock_t                          mtestLOCK;  
+  xil_axi_cache_t                         mtestCacheType = 0;  
+  xil_axi_prot_t                          mtestProtectionType = 3'b000;  
+  xil_axi_region_t                        mtestRegion = 4'b000;  
+  xil_axi_qos_t                           mtestQOS = 4'b000; 
+  xil_axi_resp_t                          mtestBresp;  
+  xil_axi_resp_t[255:0]                   mtestRresp;  
+  bit [63:0]                              mtestWDataL; 
+  bit [63:0]                              mtestRDataL; 
+  test_design_axi_vip_0_3_mst_t           mst_agent_0;
 
-    `BD_WRAPPER DUT(
-        .reset_rtl(reset),
-        .sys_clock(clock),
-        .GPIO(GPIO)
-    ); 
+  `BD_WRAPPER DUT(
+    .reset_rtl(reset),
+    .sys_clock(clock), 
+    .run_in_0(run),
+    .GPIO_0(GPIO),
+    .run_out_0(aliveLed)
+  ); 
+  
+  //Programm
+  localparam logic [31:0] BASE_ADDR = 32'h40000000;
+  // Data to be written
+  logic [31:0] GPIO_programm [] = '{
+    32'h40012437,
+    32'hffc40413,
+    32'h400202b7,
+    32'h00728703,
+    32'h00176713,
+    32'h00e283a3,
+    32'h00b2a703,
+    32'hffe77713,
+    32'h00e285a3,
+    32'hfe042623,
+    32'h0100006f,
+    32'hfec42783,
+    32'h00178793,
+    32'hfef42623,
+    32'hfec42703,
+    32'h00900793,
+    32'hfee7d6e3,
+    32'h00b28703,
+    32'h00176713,
+    32'h00e285a3,
+    32'hfe042623,
+    32'h0100006f,
+    32'hfec42783,
+    32'h00178793,
+    32'hfef42623,
+    32'hfec42703,
+    32'h00900793,
+    32'hfee7d6e3,
+    32'hfa9ff06f
+  };
 
-    //Programm
-    localparam logic [31:0] BASE_ADDR = 32'h40000000;
-    // Data to be written
-    logic [31:0] data_array [] = {
-        32'h40012437, 32'hffc40413, 32'h400202b7, 32'h0072a703,
-        32'h00176713, 32'h00e283a3, 32'h00b2a703, 32'hffe77713,
-        32'h00e285a3, 32'hfe042623, 32'h0100006f, 32'hfec42783,
-        32'h00178793, 32'hfef42623, 32'hfec42703, 32'h00900793,
-        32'hfee7d6e3, 32'h00b2a703, 32'h00176713, 32'h00e285a3,
-        32'hfe042623, 32'h0100006f, 32'hfec42783, 32'h00178793,
-        32'hfef42623, 32'hfec42703, 32'h00900793, 32'hfee7d6e3,
-        32'hfa9ff06f
-    };
-
-
-    // Setup VIP agents
-    initial begin
-        //Slave vip agent initialization
-        slv_agent_0 = new("slave vip agent",test_GPIO_prog_on_CPU.DUT.test_design_i.axi_vip_1.inst.IF);
-        slv_agent_0.vif_proxy.set_dummy_drive_type(XIL_AXI_VIF_DRIVE_NONE);
-        slv_agent_0.set_agent_tag("Slave VIP");
-        slv_agent_0.set_verbosity(slv_agent_verbosity);
-        slv_agent_0.start_slave();
-        
-        //Master vip agent initialization
-        mst_agent_0 = new("master vip agent",test_GPIO_prog_on_CPU.DUT.test_design_i.axi_vip_0.inst.IF);//ms  
-        mst_agent_0.vif_proxy.set_dummy_drive_type(XIL_AXI_VIF_DRIVE_NONE); 
-        mst_agent_0.set_agent_tag("Master VIP"); 
-        mst_agent_0.set_verbosity(mst_agent_verbosity); 
-        mst_agent_0.start_master(); 
-        $timeformat (-12, 1, " ps", 1);
+  // Setup VIP agents
+  initial begin
+    //Slave vip agent initialization
+    slv_agent_0 = new("slave vip agent",test_GPIO_prog_on_CPU.DUT.test_design_i.axi_vip_1.inst.IF);
+    slv_agent_0.vif_proxy.set_dummy_drive_type(XIL_AXI_VIF_DRIVE_NONE);
+    slv_agent_0.set_agent_tag("Slave VIP");
+    slv_agent_0.set_verbosity(slv_agent_verbosity);
+    slv_agent_0.start_slave();
+    
+    //Master vip agent initialization
+    mst_agent_0 = new("master vip agent",test_GPIO_prog_on_CPU.DUT.test_design_i.axi_vip_0.inst.IF);//ms  
+    mst_agent_0.vif_proxy.set_dummy_drive_type(XIL_AXI_VIF_DRIVE_NONE); 
+    mst_agent_0.set_agent_tag("Master VIP"); 
+    mst_agent_0.set_verbosity(mst_agent_verbosity); 
+    mst_agent_0.start_master(); 
+    $timeformat (-12, 1, " ps", 1);
+  end
+  
+  //Slave monitor agent
+  initial begin
+    #1;
+    forever begin
+      slv_agent_0.monitor.item_collected_port.get(slv_monitor_transaction);
+      slave_moniter_transaction_queue.push_back(slv_monitor_transaction);
+      slave_moniter_transaction_queue_size++;
     end
+  end
 
-    // Demone per VIP slave
-    initial begin
-        #1;
-        forever begin
-            slv_agent_0.monitor.item_collected_port.get(slv_monitor_transaction);
-            slave_moniter_transaction_queue.push_back(slv_monitor_transaction);
-            slave_moniter_transaction_queue_size++;
+  //Reset
+  initial begin
+    reset <= 1'b0;
+    #10ns;
+    reset <= 1'b1;
+    repeat (5) @(negedge clock); 
+  end
+
+  //Clock generation
+  always #5 clock <= ~clock;
+
+  //AXI Check process
+  typedef struct{
+    integer test_n;
+    logic [31:0] addr;
+    logic [31:0] assert_data;
+    logic [31:0] readed_data;
+    logic resoult;
+    string name = "";
+    string messageOnPass = "OK";
+    string messageOnFail;
+  }check_record_t;
+
+  check_record_t check_queue[$];
+  check_record_t  checked_queue[$];
+  integer check_queue_size = 0;
+  integer checked_queue_size = 0;
+
+  task checkQueuePush(
+    input integer test_n, 
+    input logic [31:0] addr,
+    input logic [31:0] assert_data, 
+    input string msgPass, 
+    input string msgFail, 
+    input string name = ""
+  );
+  begin
+    check_queue.push_back('{test_n:test_n, addr:addr, assert_data:assert_data, readed_data:0, resoult:0, name:name, messageOnPass:msgPass, messageOnFail:msgFail});
+    check_queue_size++;
+  end;
+  endtask;
+
+  task automatic doQueuedTests;
+    logic testPassed = 0;
+    string message;
+    begin
+      if (check_queue_size > 0) begin
+        for (int i = 0; i < check_queue_size; i++) begin
+          check_record_t check_record = check_queue.pop_front();
+          check_queue_size--;
+          mtestADDR = check_record.addr;
+          mst_agent_0.AXI4LITE_READ_BURST( 
+            mtestADDR, 
+            mtestProtectionType, 
+            mtestRDataL, 
+            mtestRresp 
+          );
+          check_record.readed_data = mtestRDataL[31:0];
+          if (check_record.readed_data == check_record.assert_data) begin
+            check_record.resoult = 1;
+            message = check_record.messageOnPass;
+          end else begin
+            check_record.resoult = 0;
+            message = check_record.messageOnFail;
+          end
+          addToLog(check_record.test_n, check_record.resoult, message, check_record.readed_data, check_record.name);
+          checked_queue.push_back(check_record);
+          checked_queue_size++;
         end
+      end
     end
+  endtask
 
-    //Reset generation
-    initial begin
-        reset <= 1'b0;
-        #9ns;
-        reset <= 1'b1;
-//        repeat (5) @(negedge clock); 
+  //Test Logging
+  typedef struct {
+    integer test_n;
+    string name = "";
+    logic passed;
+    string message;
+    logic [31:0] actual;
+  } test_resoult_t;
+
+  test_resoult_t test_resoult_queue[$];
+  integer test_resoult_queue_size = 0;
+
+  function automatic void bubbleSort(ref test_resoult_t array[$]);
+    automatic int n = array.size();
+    for (int i = 0; i < n-1; i++) begin
+      for (int j = 0; j < n-i-1; j++) begin
+        if (array[j].test_n > array[j+1].test_n) begin
+          //Swap
+          test_resoult_t tmp = array[j];
+          array[j] = array[j+1];
+          array[j+1] = tmp;
+          // swap(array[j], array[j+1]);
+        end
+      end
     end
+  endfunction
 
-    //Clock generation
-    always #5 clock <= ~clock;
-
-
-    //Testbench
-    initial begin
-        LOAD_PROGRAM();
-        TEST();
-        #200ns;
-        //$finish;
+  task automatic addToLog(input integer test_n, input logic passed, input string message, input logic [31:0] actual, input string name = "");
+    begin
+      test_resoult_queue.push_back('{test_n:test_n, name:name, passed:passed, message:message, actual:actual});
+      test_resoult_queue_size++;
     end
+  endtask;
+    
+  test_resoult_t resoult;
+  task automatic printLog;
+    begin
+      bubbleSort(test_resoult_queue);
+      if (test_resoult_queue.size() > 0) begin
+        for (int i = test_resoult_queue.size(); i > 0; i--) begin
+          resoult = test_resoult_queue.pop_front();
+          test_resoult_queue_size--;
+          if(resoult.name == "") begin
+            if (resoult.passed == 1) begin
+              $display("Test #%0d: %s", resoult.test_n, resoult.message);
+            end else begin
+              $display("Test #%0d: %s %h", resoult.test_n, resoult.message, resoult.actual);
+            end
+          end else begin
+            if (resoult.passed == 1) begin
+              $display("Test %s: %s", resoult.name, resoult.message);
+            end else begin
+              $display("Test %s: %s %h", resoult.name, resoult.message, resoult.actual);
+            end
+          end
+        end
+      end
+    end
+  endtask;
 
 
-    task automatic LOAD_PROGRAM;
+  //Testbench
+  initial begin
+    LOAD_PROGRAM(GPIO_programm, BASE_ADDR);
+    GPIO_TEST();
+    doQueuedTests();
+    printLog();
+
+    #400ns;
+    $finish;
+  end
+
+  //Load program
+  task automatic LOAD_PROGRAM (input logic [31:0] programma[], input [31:0] BASE_ADDR);
         integer i;
-        
+        logic testPassed = 0;
+        string message;
         begin
             #1
             mtestID = 0; 
@@ -160,17 +290,19 @@ module test_GPIO_prog_on_CPU();
                 mtestRDataL, 
                 mtestRresp 
             );
-            if (mtestRDataL[31:0] == 32'h7ff00113) begin
-                $display("Test READ Instruction Memory: OK");
+            if (mtestRDataL[31:0] == '0) begin
+                testPassed = 1;
+                message = "OK";
             end else begin
-                $display("Test READ Instruction Memory: FAILED");
+                testPassed = 0;
+                message = "FAILED -> Instruction was";
             end
-
+            addToLog(0, testPassed, message, mtestRDataL[31:0], "READ Instruction Memory");
             #10;
             mtestWDataL[63:32] = 32'h0;
             mtestADDR[63:32] = 32'h0;
-            for (int i = 0; i < data_array.size(); i++) begin
-                mtestWDataL[31:0] = data_array[i];
+            for (int i = 0; i < programma.size(); i++) begin
+                mtestWDataL[31:0] = programma[i];
                 mtestADDR[31:0] = BASE_ADDR + i * 4;
                 mst_agent_0.AXI4LITE_WRITE_BURST(
                     mtestADDR,
@@ -184,35 +316,238 @@ module test_GPIO_prog_on_CPU();
         end
     endtask
 
+  //Signal for testing
+  logic validating = 1'b0;
+  integer test_n = 0;
 
-    //Modificare questo task qui per il testbench
-    task automatic TEST;  
-        integer i;
-        begin   
-            #1; 
-            $display("Init testing of IP, simulating a ZynqPS to write & read memory trougth the IP "); 
-            mtestID = 0; 
-            mtestBurstLength = 0; 
-            mtestDataSize = xil_axi_size_t'(xil_clog2(32/8)); 
-            mtestBurstType = XIL_AXI_BURST_TYPE_INCR;  
-            mtestLOCK = XIL_AXI_ALOCK_NOLOCK;  
-            mtestCacheType = 0;  
-            mtestProtectionType = 0;  
-            mtestRegion = 0; 
-            mtestQOS = 0; 
+  //Modificare questo task qui per il testbench
+  //Segnali gerarchici
+  ram_array regFile; 
+  assign regFile = DUT.test_design_i.CPU_0.U0.instr_decode.register_file.mem_2;
 
-            //Faccio partire la CPU
-            mtestADDR = 32'h40001000; 
-            mtestWDataL[31:0] = 32'b1;   
-            mst_agent_0.AXI4LITE_WRITE_BURST( 
-                mtestADDR, 
-                mtestProtectionType, 
-                mtestWDataL, 
-                mtestBresp 
-            );
+  logic [31:0] instruction_tb;
+  assign instruction_tb = DUT.test_design_i.CPU_0.U0.instr_fetch.instruction;
+  
+  wire run;
+  assign run = DUT.test_design_i.CPU_0.U0.run;
 
-        end 
-    endtask  
+  state_type state_tb;
+  assign state_tb = DUT.test_design_i.CPU_0.U0.state;
+
+  logic cpu_run;
+  assign cpu_run = DUT.test_design_i.CPU_0.U0.run;
+
+  //CPU Control Register
+  control_reg_t control_reg_tb;
+  assign control_reg_tb = DUT.test_design_i.CPU_0.U0.control_reg;
+
+  //GPIO Registes
+  logic [31:0] GPIO_dir_tb;
+  assign GPIO_dir_tb = DUT.test_design_i.CPU_0.U0.gpio_driver.GPIO_dir;
+  logic [31:0] GPIO_reg_tb;
+  assign GPIO_reg_tb = DUT.test_design_i.CPU_0.U0.gpio_driver.GPIO_reg;
+  logic [31:0] GPIO_state_tb;
+  assign GPIO_state_tb = DUT.test_design_i.CPU_0.U0.gpio_driver.GPIO_state;
+  wire GPIO1;
+  assign GPIO1 = GPIO[0];
+
+  task automatic GPIO_TEST;
+    integer i;
+    logic testPassed = 0;
+    string message;
+    begin   
+      #1; 
+      $display("Init testing of IP, simulating a ZynqPS to write & read memory trougth the IP "); 
+      mtestID = 0; 
+      mtestBurstLength = 0; 
+      mtestDataSize = xil_axi_size_t'(xil_clog2(32/8)); 
+      mtestBurstType = XIL_AXI_BURST_TYPE_INCR;  
+      mtestLOCK = XIL_AXI_ALOCK_NOLOCK;  
+      mtestCacheType = 0;  
+      mtestProtectionType = 0;  
+      mtestRegion = 0; 
+      mtestQOS = 0; 
+
+      //Imposto la CPU in RUN
+      mtestADDR = 32'h40001000; 
+      mtestWDataL[31:0] = 32'b1;   
+      mst_agent_0.AXI4LITE_WRITE_BURST( 
+        mtestADDR, 
+        mtestProtectionType, 
+        mtestWDataL, 
+        mtestBresp 
+      );  
+
+      //Istruzione no. 1 
+      test_n = 1;
+
+      wait (state_tb == fetch);
+      wait (state_tb == fetch); //wait until the CPU has executed the first instruction
+      #1;                       //wait to be after the rising edge of the clock
+      
+      validating = 1'b1;
+      //Check instruction   LUI s0, 0x40012
+      if(regFile[7] == 32'h40012000) begin
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = "FAILED -> regFile[8] was";
+      end
+      addToLog(test_n, testPassed, message, regFile[7]);
+      #1;                      
+      validating = 1'b0;
+      #9;
+      
+      test_n = 2;
+      wait (state_tb == fetch); //wait until the CPU has executed the next instruction
+      #1;                       //wait to be after the rising edge of the clock
+      validating = 1'b1;
+      //Check instruction       addi s0, s0, -4
+      if(regFile[7] == 32'h40011ffc) begin
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = "FAILED -> regFile[8] was";
+      end
+      addToLog(test_n, testPassed, message, regFile[7]);
+      #1;
+      validating = 1'b0;
+      #9;
+
+      test_n = 3;
+      wait (state_tb == fetch); //wait until the CPU has executed the next instruction
+      #1;                       //wait to be after the rising edge of the clock
+      validating = 1'b1;
+      //Check instruction       lui t0, 0x40020
+      if(regFile[4] == 32'h40020000) begin
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = "FAILED -> regFile[5] was";
+      end
+      addToLog(test_n, testPassed, message, regFile[4]);
+      #1;
+      validating = 1'b0;
+      #9;
+
+      test_n = 4;
+      wait (state_tb == fetch); //wait until the CPU has executed the next instruction
+      #1;                       //wait to be after the rising edge of the clock
+      validating = 1'b1;
+      //Check instruction       lb a4, 7(t0)
+      if(regFile[13][7:0] == '0) begin
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = "FAILED -> regFile[14][7:0] was";
+      end
+      addToLog(test_n, testPassed, message, regFile[13][7:0]);
+      #1;
+      validating = 1'b0;
+      #9;
+
+      test_n = 5;
+      wait (state_tb == fetch); //wait until the CPU has executed the next instruction
+      #1;                       //wait to be after the rising edge of the clock
+      validating = 1'b1;
+      //Check instruction       ori a4, a4, 1
+      if(regFile[13][0] == 1'h1) begin
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = "FAILED -> regFile[14][0] was";
+      end
+      addToLog(test_n, testPassed, message, regFile[13][0]);
+      #1;
+      validating = 1'b0;
+      #9;
+
+      test_n = 6;
+      wait (state_tb == fetch); //wait until the CPU has executed the next instruction
+      #1;                       //wait to be after the rising edge of the clock
+      validating = 1'b1;
+      //Check instruction       sb a4, 7(t0)
+      if(GPIO_dir_tb[0] == 1) begin
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = "FAILED -> GPIO_dir_tb[0] was";
+      end
+      addToLog(test_n, testPassed, message, GPIO_dir_tb[0]);
+      #1;
+      validating = 1'b0;
+      #9;
+
+      test_n = 7;
+      wait (state_tb == fetch); //wait until the CPU has executed the next instruction
+      #1;                       //wait to be after the rising edge of the clock
+      validating = 1'b1;
+      //Check instruction       lb a4, 0xB(t0)
+      if(regFile[13][0] == 1'b0) begin
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = "FAILED -> regFile[14][0] was";
+      end
+      addToLog(test_n, testPassed, message, regFile[13][0]);
+      #1;
+      validating = 1'b0;
+      #9;
+
+      test_n = 8;
+      wait (state_tb == fetch); //wait until the CPU has executed the next instruction
+      #1;                       //wait to be after the rising edge of the clock
+      validating = 1'b1;
+      //Check instruction       andi a4, a4, -2
+      if(regFile[13][0] == 1'b0) begin
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = "FAILED -> regFile[14][0] was";
+      end
+      addToLog(test_n, testPassed, message, regFile[13][0]);
+      #1;
+      validating = 1'b0;
+      #9;
+
+      test_n = 9;
+      wait (state_tb == fetch); //wait until the CPU has executed the next instruction
+      #1;                       //wait to be after the rising edge of the clock
+      validating = 1'b1;
+      //Check instruction       sb a4, 0xB(t0)
+      if(GPIO[0] == 1'b0) begin
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = "FAILED -> GPIO[0] was";
+      end
+      addToLog(test_n, testPassed, message, GPIO[0]);
+
+
+
+    end
+  endtask
+
+//  always @(instruction_tb) begin
+//    $display("%h", instruction_tb);
+//  end
+  int istruction_count = 0;
+
+  always @(state_tb, reset) begin
+    if (reset == 0) begin
+      istruction_count = 0;
+    end else if (state_tb == fetch) begin
+      istruction_count ++;
+    end
+  end
 
 endmodule
-

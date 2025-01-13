@@ -10,6 +10,7 @@ import test_design_axi_vip_0_3_pkg::*;
 import test_design_axi_vip_1_0_pkg::*;
 
 import types_pkg::*;
+// import constant_package::*;
 
 module test_CPU_wh_AXI();
 //slave vip agent
@@ -23,6 +24,8 @@ module test_CPU_wh_AXI();
 
   bit                                     clock = 1;
   bit                                     reset;
+  bit                                     run = 1;
+  wire                                    aliveLed;
   wire [31:0]                             GPIO;
 
   logic on_programming = 1'b1;
@@ -49,7 +52,9 @@ module test_CPU_wh_AXI();
   `BD_WRAPPER DUT(
     .reset_rtl(reset),
     .sys_clock(clock), 
-    .GPIO(GPIO)
+    .run_in_0(run),
+    .GPIO_0(GPIO),
+    .run_out_0(aliveLed)
   ); 
   
   //Programm
@@ -78,38 +83,6 @@ module test_CPU_wh_AXI();
     32'h40000637,
     32'h00c62023,
     32'h00062683
-  };
-
-  logic [31:0] GPIO_programm [] = '{
-    32'h40012437,
-    32'hffc40413,
-    32'h400202b7,
-    32'h00728703,
-    32'h00176713,
-    32'h00e283a3,
-    32'h00b2a703,
-    32'hffe77713,
-    32'h00e285a3,
-    32'hfe042623,
-    32'h0100006f,
-    32'hfec42783,
-    32'h00178793,
-    32'hfef42623,
-    32'hfec42703,
-    32'h00900793,
-    32'hfee7d6e3,
-    32'h00b28703,
-    32'h00176713,
-    32'h00e285a3,
-    32'hfe042623,
-    32'h0100006f,
-    32'hfec42783,
-    32'h00178793,
-    32'hfef42623,
-    32'hfec42703,
-    32'h00900793,
-    32'hfee7d6e3,
-    32'hfa9ff06f
   };
 
   // Setup VIP agents
@@ -212,30 +185,6 @@ module test_CPU_wh_AXI();
       end
     end
   endtask
-  // always @(check_queue) begin
-  //   if (check_queue_size > 0) begin
-  //     for (int i = 0; i < check_queue_size; i++) begin
-  //       check_record_t check_record = check_queue.pop_front();
-
-  //       mtestADDR = check_record.addr;
-  //       mst_agent_0.AXI4LITE_READ_BURST( 
-  //         mtestADDR, 
-  //         mtestProtectionType, 
-  //         mtestRDataL, 
-  //         mtestRresp 
-  //       );
-  //       check_queue[i].readed_data = mtestRDataL[31:0];
-  //       if (check_queue[i].readed_data == check_queue[i].assert_data) begin
-  //         check_queue[i].resoult = 1;
-  //       end else begin
-  //         check_queue[i].resoult = 0;
-  //       end
-  //       checked_queue.push_back(check_queue[i]);
-  //       checked_queue_size++;
-  //     end
-  //   end
-  // end
-  
 
   //Test Logging
   typedef struct {
@@ -300,16 +249,13 @@ module test_CPU_wh_AXI();
 
   //Testbench
   initial begin
-    // LOAD_PROGRAM(data_array, BASE_ADDR);
-    // S_AXI_TEST();
-
-    LOAD_PROGRAM(GPIO_programm, BASE_ADDR);
-    GPIO_TEST();
+    LOAD_PROGRAM(data_array, BASE_ADDR);
+    S_AXI_TEST();
     doQueuedTests();
     printLog();
 
     #200ns;
-    // $finish;
+    $finish;
   end
 
   //Load program
@@ -375,14 +321,13 @@ module test_CPU_wh_AXI();
   logic [31:0] instruction_tb;
   assign instruction_tb = DUT.test_design_i.CPU_0.U0.instr_fetch.instruction;
   
-  wire run;
-  assign run = DUT.test_design_i.CPU_0.U0.run;
-
+  // CPU State
   state_type state_tb;
   assign state_tb = DUT.test_design_i.CPU_0.U0.state;
-
-  logic cpu_run;
-  assign cpu_run = DUT.test_design_i.CPU_0.U0.run;
+  wire run_tb;
+  assign run_tb = DUT.test_design_i.CPU_0.U0.run;
+  wire res_tb;
+  // assign res_tb = DUT.test_design_i.CPU_0.U0.res;
 
   //CPU Control Register
   control_reg_t control_reg_tb;
@@ -395,13 +340,16 @@ module test_CPU_wh_AXI();
   assign GPIO_reg_tb = DUT.test_design_i.CPU_0.U0.gpio_driver.GPIO_reg;
   logic [31:0] GPIO_state_tb;
   assign GPIO_state_tb = DUT.test_design_i.CPU_0.U0.gpio_driver.GPIO_state;
-
+  wire GPIO1;
+  assign GPIO1 = GPIO[0];
 
   task automatic S_AXI_TEST;  
     integer i;
     logic testPassed = 0;
     string message;
-    begin   
+    time t0;
+    time t1;
+    begin
       #1; 
       $display("Init testing of IP, simulating a ZynqPS to write & read memory trougth the IP "); 
       mtestID = 0; 
@@ -414,9 +362,9 @@ module test_CPU_wh_AXI();
       mtestRegion = 0; 
       mtestQOS = 0; 
 
-      //Imposto la CPU in RUN
+      //Imposto la CPU in RUN and NON in RESET
       mtestADDR = 32'h40001000; 
-      mtestWDataL[31:0] = 32'b1;   
+      mtestWDataL[31:0] = 32'b11;   
       mst_agent_0.AXI4LITE_WRITE_BURST( 
         mtestADDR, 
         mtestProtectionType, 
@@ -779,197 +727,84 @@ module test_CPU_wh_AXI();
       // end
 
       // $finish;
-    end 
-  endtask  
+      test_n = 23;
+      wait (state_tb == fetch); //wait until the CPU has executed the next instruction;
+      run = 0;
+      #1;                       //wait to be after the rising edge of the clock
+      validating = 1'b1;
+      //Check run signal
+      if(run_tb == 0) begin 
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = "FAILED -> run_tb was";
+      end
+      #1;
+      validating = 1'b0;
+      addToLog(test_n, testPassed, message, run_tb);
 
-  wire GPIO1;
-  assign GPIO1 = GPIO[0];
-
-  task GPIO_TEST;
-    integer i;
-    logic testPassed = 0;
-    string message;
-    begin   
-      #1; 
-      $display("Init testing of IP, simulating a ZynqPS to write & read memory trougth the IP "); 
-      mtestID = 0; 
-      mtestBurstLength = 0; 
-      mtestDataSize = xil_axi_size_t'(xil_clog2(32/8)); 
-      mtestBurstType = XIL_AXI_BURST_TYPE_INCR;  
-      mtestLOCK = XIL_AXI_ALOCK_NOLOCK;  
-      mtestCacheType = 0;  
-      mtestProtectionType = 0;  
-      mtestRegion = 0; 
-      mtestQOS = 0; 
-
-      //Imposto la CPU in RUN
-      mtestADDR = 32'h40001000; 
-      mtestWDataL[31:0] = 32'b1;   
+      //Reset the CPU
+      test_n = 24;
+      validating = 1'bZ;
+      mtestADDR = 32'h40001000;
+      mtestWDataL[31:0] = '0;
       mst_agent_0.AXI4LITE_WRITE_BURST( 
         mtestADDR, 
         mtestProtectionType, 
         mtestWDataL, 
         mtestBresp 
-      );  
+      );
+      validating = 1'b0;
+      #10;
+      validating = 1'b1;
+      #1;
+      addToLog(test_n, 1, "SKIPPED -> You need to check if a LOW glitch is present on RES sig.", 0);
+      // addToLog(test_n, testPassed, message, control_reg_tb[CREG_CTR][CREG_RES_BIT]);
+      #1;
+      validating = 1'b0;
 
-      //Istruzione no. 1 
-      test_n = 1;
-
-      wait (state_tb == fetch);
-      wait (state_tb == fetch); //wait until the CPU has executed the first instruction
-      #1;                       //wait to be after the rising edge of the clock
       
+      // Start the CPU
+      test_n = 25;
+      run = 1;
+      mtestADDR = 32'h40001000;
+      mtestWDataL[31:0] = 32'b11;
+      mst_agent_0.AXI4LITE_WRITE_BURST( 
+        mtestADDR, 
+        mtestProtectionType, 
+        mtestWDataL, 
+        mtestBresp 
+      );
       validating = 1'b1;
-      //Check instruction   LUI s0, 0x40012
-      if(regFile[7] == 32'h40012000) begin
+      if(run_tb == 1) begin 
         testPassed = 1;
         message = "OK";
       end else begin
         testPassed = 0;
-        message = "FAILED -> regFile[8] was";
+        message = "FAILED -> run_tb was";
       end
-      addToLog(test_n, testPassed, message, regFile[7]);
-      #1;                      
-      validating = 1'b0;
-      #9;
-      
-      test_n = 2;
-      wait (state_tb == fetch); //wait until the CPU has executed the next instruction
-      #1;                       //wait to be after the rising edge of the clock
-      validating = 1'b1;
-      //Check instruction       addi s0, s0, -4
-      if(regFile[7] == 32'h40011ffc) begin
-        testPassed = 1;
-        message = "OK";
-      end else begin
-        testPassed = 0;
-        message = "FAILED -> regFile[8] was";
-      end
-      addToLog(test_n, testPassed, message, regFile[7]);
       #1;
       validating = 1'b0;
-      #9;
-
-      test_n = 3;
-      wait (state_tb == fetch); //wait until the CPU has executed the next instruction
-      #1;                       //wait to be after the rising edge of the clock
-      validating = 1'b1;
-      //Check instruction       lui t0, 0x40020
-      if(regFile[4] == 32'h40020000) begin
-        testPassed = 1;
-        message = "OK";
-      end else begin
-        testPassed = 0;
-        message = "FAILED -> regFile[5] was";
-      end
-      addToLog(test_n, testPassed, message, regFile[4]);
-      #1;
-      validating = 1'b0;
-      #9;
-
-      test_n = 4;
-      wait (state_tb == fetch); //wait until the CPU has executed the next instruction
-      #1;                       //wait to be after the rising edge of the clock
-      validating = 1'b1;
-      //Check instruction       lb a4, 7(t0)
-      if(regFile[13][7:0] == '0) begin
-        testPassed = 1;
-        message = "OK";
-      end else begin
-        testPassed = 0;
-        message = "FAILED -> regFile[14][7:0] was";
-      end
-      addToLog(test_n, testPassed, message, regFile[13][7:0]);
-      #1;
-      validating = 1'b0;
-      #9;
-
-      test_n = 5;
-      wait (state_tb == fetch); //wait until the CPU has executed the next instruction
-      #1;                       //wait to be after the rising edge of the clock
-      validating = 1'b1;
-      //Check instruction       ori a4, a4, 1
-      if(regFile[13][0] == 1'h1) begin
-        testPassed = 1;
-        message = "OK";
-      end else begin
-        testPassed = 0;
-        message = "FAILED -> regFile[14][0] was";
-      end
-      addToLog(test_n, testPassed, message, regFile[13][0]);
-      #1;
-      validating = 1'b0;
-      #9;
-
-      test_n = 6;
-      wait (state_tb == fetch); //wait until the CPU has executed the next instruction
-      #1;                       //wait to be after the rising edge of the clock
-      validating = 1'b1;
-      //Check instruction       sb a4, 7(t0)
-      if(GPIO_dir_tb[0] == 1) begin
-        testPassed = 1;
-        message = "OK";
-      end else begin
-        testPassed = 0;
-        message = "FAILED -> GPIO_dir_tb[0] was";
-      end
-      addToLog(test_n, testPassed, message, GPIO_dir_tb[0]);
-      #1;
-      validating = 1'b0;
-      #9;
-
-      test_n = 7;
-      wait (state_tb == fetch); //wait until the CPU has executed the next instruction
-      #1;                       //wait to be after the rising edge of the clock
-      validating = 1'b1;
-      //Check instruction       lb a4, 0xB(t0)
-      if(regFile[13][0] == 1'b0) begin
-        testPassed = 1;
-        message = "OK";
-      end else begin
-        testPassed = 0;
-        message = "FAILED -> regFile[14][0] was";
-      end
-      addToLog(test_n, testPassed, message, regFile[13][0]);
-      #1;
-      validating = 1'b0;
-      #9;
-
-      test_n = 8;
-      wait (state_tb == fetch); //wait until the CPU has executed the next instruction
-      #1;                       //wait to be after the rising edge of the clock
-      validating = 1'b1;
-      //Check instruction       andi a4, a4, -2
-      if(regFile[13][0] == 1'b0) begin
-        testPassed = 1;
-        message = "OK";
-      end else begin
-        testPassed = 0;
-        message = "FAILED -> regFile[14][0] was";
-      end
-      addToLog(test_n, testPassed, message, regFile[13][0]);
-      #1;
-      validating = 1'b0;
-      #9;
-
-      test_n = 9;
-      wait (state_tb == fetch); //wait until the CPU has executed the next instruction
-      #1;                       //wait to be after the rising edge of the clock
-      validating = 1'b1;
-      //Check instruction       sb a4, 0xB(t0)
-      if(GPIO[0] == 1'b0) begin
-        testPassed = 1;
-        message = "OK";
-      end else begin
-        testPassed = 0;
-        message = "FAILED -> GPIO[0] was";
-      end
-      addToLog(test_n, testPassed, message, GPIO[0]);
+      addToLog(test_n, testPassed, message, run_tb);
 
 
-
-    end
-  endtask
+      //Test aliveLed period
+      // test_n = 26;
+      // wait (aliveLed == );
+      // t0 = $time;
+      // wait for (posedge aliveLed);
+      // t1 = $time;
+      // if (t1 - t0 == 80 ns) begin
+      //   testPassed = 1;
+      //   message = "OK";
+      // end else begin
+      //   testPassed = 0;
+      //   message = "FAILED -> aliveLed period was";
+      // end
+      // addToLog(test_n, testPassed, message, t1 - t0); 
+    end 
+  endtask  
 
 //  always @(instruction_tb) begin
 //    $display("%h", instruction_tb);
