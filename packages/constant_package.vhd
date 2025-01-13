@@ -19,8 +19,9 @@ package constant_package is
     constant opcode_alu_op : std_logic_vector(6 downto 0) := "0110011";
 
     -- Control Registers
-    constant CREG_RUN : integer := 0;
+    constant CREG_CTR : integer := 0;
     constant CREG_RUN_BIT : integer := 0;
+    constant CREG_RES_BIT : integer := 1;
 
     -- Registers Reset Values
     constant REG_FILE_RESET_VALUE : ram_array := (

@@ -39,11 +39,12 @@ use work.types_pkg.all;
 entity CPU is
     generic (
 		C_M_AXI_ADDR_WIDTH	: integer	:= 32;
-		C_M_AXI_DATA_WIDTH	: integer	:= 32
+		C_M_AXI_DATA_WIDTH	: integer	:= 32;
+        RUN_BLINK_COUNTER_SIZE : integer := 26
 	);
     Port ( 
         clk : IN std_logic;
-        res : IN std_logic;
+        res_in : IN std_logic;
 
         --S_AXI_I interface
         s_axi_i_awaddr : IN STD_LOGIC_VECTOR(19 DOWNTO 0);
@@ -109,14 +110,27 @@ entity CPU is
 		M_AXI_RREADY	: out std_logic;
 
         -- GPIO
-        GPIO            : INOUT STD_LOGIC_VECTOR(31 downto 0)
+        GPIO            : INOUT STD_LOGIC_VECTOR(31 downto 0);
+
+        -- RUN/RES
+        run_in          : IN STD_LOGIC;
+        run_out         : OUT STD_LOGIC
     );
 end CPU;
 
 architecture Behavioral of CPU is
     
     signal state : state_type := fetch;
-    signal run : std_logic := '0';
+
+    -- RUN/RES
+    signal res          : std_logic := '0';
+    signal res_tmp      : std_logic := '0';
+    signal run          : std_logic := '0';
+    signal run_reg      : std_logic := '0';
+
+    -- BLINK
+    signal blink_counter : unsigned(RUN_BLINK_COUNTER_SIZE-1 downto 0) := (others => '0');
+    signal alive_led : std_logic := '0';
 
     COMPONENT axi_bram_ctrl_0
     PORT (
@@ -489,7 +503,10 @@ begin
         variable reg_addr : integer;
     begin
         if(res = '0') then
-            control_reg <= (others => (others => '0'));
+            control_reg <= (
+                0 => (1 => '1', others => '0'), -- CREG_CTR[RES_BIT] = 1
+                others => (others => '0')
+            );
         elsif(rising_edge(clk)) then
             if(control_reg_ena = '1') then
                 reg_addr := to_integer(unsigned(bram_addr_a_i(4 downto 0)));
@@ -508,11 +525,24 @@ begin
             end if;
         end if;
     end process ; -- control_reg_file
-    -- Control Register File Signals
-    run <= control_reg(CREG_RUN)(CREG_RUN_BIT);
-
-
     
+    -- Control Register File Signals
+      -- Run
+    run <= control_reg(CREG_CTR)(CREG_RUN_BIT) and run_in;
+      -- Reset
+    res <= res_tmp and res_in;
+    reset_pro : process( clk ) begin
+        if(rising_edge(clk)) then
+            if(control_reg(CREG_CTR)(CREG_RES_BIT) = '0') then
+                res_tmp <= '0';
+                -- control_reg(CREG_CTR)(CREG_RES_BIT) <= '1';
+            else 
+                res_tmp <= '1';
+            end if; 
+        end if;
+    end process ; -- reset_pro
+
+
     ------------------- Control Unit -------------------
     process(clk, res, run) begin
         if(res = '0') then
@@ -599,5 +629,30 @@ begin
         end if ;
     end process ; -- ena_mealy
 
+    -- Alive LED / run_out
+    blink_counter_pro : process( clk, res, run ) is
+        constant MAX : unsigned(RUN_BLINK_COUNTER_SIZE-1 downto 0) := (others => '1');
+    begin
+        if(res = '0') then
+            blink_counter <= (others => '0');
+            alive_led <= '0';
+        elsif(run = '1') then
+            if rising_edge(clk) then
+                if blink_counter = MAX then
+                    blink_counter <= (others => '0');
+                else
+                    blink_counter <= blink_counter + 1;
+                end if;
+                if(blink_counter = MAX) then
+                    alive_led <= not alive_led;
+                end if;
+            end if;
+        else 
+            blink_counter <= (others => '0');
+            alive_led <= '0';
+        end if;            
+    end process ; -- blink_counter_pro
+
+    run_out <= alive_led;
 
 end Behavioral;
