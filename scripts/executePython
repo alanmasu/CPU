@@ -1,0 +1,27 @@
+#!/bin/bash
+source "$CPU_PYTHON_V_ENV"
+
+# Leggi il primo parametro
+case "$1" in
+    coe)
+        # Esegui lo script Python per "coe"
+        echo "Eseguo lo script Python per 'coe'..."
+        python3 "${CPU_PYTHON_DIR}/elfToCoe.py" "${@:2}";
+        ;;
+    verilog)
+        # Esegui lo script Python per "verilog"
+        echo "Eseguo lo script Python per 'verilog'..."
+        python3 "${CPU_PYTHON_DIR}/elfToVerilog.py" "${@:2}";
+        ;;
+    c)
+        # Esegui lo script Python per "c"
+        echo "Eseguo lo script Python per 'c'..."
+        python3 "${CPU_PYTHON_DIR}/elfToC.py" "${@:2}";
+        ;;
+    *)
+        # Gestione dei valori non validi
+        echo "Errore: primo parametro non valido. Usa uno tra: coe, verilog, c"
+        exit 1
+        ;;
+esac
+deactivate;

@@ -1,0 +1,16 @@
+CPU_DIR=$(dirname "$PWD")
+CPU_PYTHON_ENV="${CPU_DIR}/CPU Repo/pyEnv"
+CPU_PYTHON_DIR="${CPU_DIR}/CPU Repo/scripts"
+CPU_PYTHON_V_ENV="${CPU_PYTHON_ENV}/bin/activate"
+
+export CPU_PYTHON_DIR
+export CPU_PYTHON_ENV
+export CPU_PYTHON_V_ENV
+
+alias executePython="source \"${CPU_PYTHON_DIR}/executePython\""
+
+# Creazione e attivazione dell'ambiente virtuale
+python3 -m venv "$CPU_PYTHON_ENV"
+source "$CPU_PYTHON_V_ENV"
+pip3 install pyelftools
+deactivate
