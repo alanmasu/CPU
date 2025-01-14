@@ -115,7 +115,14 @@ entity CPU is
 
         -- RUN/RES
         run_in          : IN STD_LOGIC;
-        run_out         : OUT STD_LOGIC
+        run_out         : OUT STD_LOGIC;
+
+        --DEBUG
+        run_dbg         : OUT STD_LOGIC;
+        run_in_dbg      : OUT STD_LOGIC;
+        res_dbg         : OUT STD_LOGIC;
+        res_in_dbg      : OUT STD_LOGIC
+        
     );
 end CPU;
 
@@ -251,7 +258,7 @@ begin
     axi_bram_controller_i: axi_bram_ctrl_0
     PORT MAP (
         s_axi_aclk      => clk,
-        s_axi_aresetn   => res,
+        s_axi_aresetn   => res_in,
         s_axi_awaddr    => s_axi_i_awaddr,
         s_axi_awprot    => s_axi_i_awprot,
         s_axi_awvalid   => s_axi_i_awvalid,
@@ -363,7 +370,7 @@ begin
     axi_bram_controller_d: axi_bram_ctrl_0
     PORT MAP (
         s_axi_aclk      => clk,
-        s_axi_aresetn   => res,
+        s_axi_aresetn   => res_in,
         s_axi_awaddr    => s_axi_d_awaddr,
         s_axi_awprot    => s_axi_d_awprot,
         s_axi_awvalid   => s_axi_d_awvalid,
@@ -476,7 +483,12 @@ begin
         d_out => d_bus_in.GPIO_data,
         GPIO => GPIO
     );
-
+    ----------------------------------- DEBUG -----------------------------------
+    run_dbg <= run;
+    run_in_dbg <= run_in;
+    res_dbg <= res;
+    res_in_dbg <= res_in;
+    ----------------------------------- END DEBUG -----------------------------------
 
     --Control Register File
         --Enable signals for Instruction Memory PortB and Control Register File
@@ -502,6 +514,7 @@ begin
         --Control Register File Implementation
     control_reg_file : process( clk, res) is 
         variable reg_addr : integer;
+        variable state_integer : integer := 0;
     begin
         if(res = '0') then
             control_reg <= (
@@ -524,6 +537,11 @@ begin
                     control_reg(reg_addr)(31 downto 24) <= bram_wrdata_a_i(31 downto 24);
                 end if;
             end if;
+            state_integer := state_type'POS(state);
+            control_reg(CREG_CTR)(CREG_RUN_C_BIT) <= run;
+            control_reg(CREG_PC) <= std_logic_vector(pc_fetched);
+            control_reg(CREG_STATE) <= std_logic_vector(to_unsigned(state_integer,32));
+            control_reg(CREG_INST) <= instruction_fetched;
         end if;
     end process ; -- control_reg_file
     

@@ -759,14 +759,30 @@ module test_CPU_wh_AXI();
       #10;
       validating = 1'b1;
       #1;
-      addToLog(test_n, 1, "SKIPPED -> You need to check if a LOW glitch is present on RES sig.", 0);
+      addToLog(test_n, 1, $sformatf("SKIPPED -> You need to check if a LOW glitch is present on RES sig at %0t", $time), 0);
       // addToLog(test_n, testPassed, message, control_reg_tb[CREG_CTR][CREG_RES_BIT]);
-      #1;
       validating = 1'b0;
 
+      //Sync whit clock
+      @(clock);
+      wait (clock == 1);
+
+      validating = 1'b1;
+      #1;
+      test_n = 25;
+      if(control_reg_tb[1] == 32'h40000000) begin 
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = "FAILED -> control_reg_tb[1] (aka RISC-V PC) was";
+      end
+      addToLog(test_n, testPassed, message, control_reg_tb[1]);
+      validating = 1'b0;
+      #9;
       
       // Start the CPU
-      test_n = 25;
+      test_n = 26;
       run = 1;
       mtestADDR = 32'h40001000;
       mtestWDataL[31:0] = 32'b11;
@@ -784,25 +800,57 @@ module test_CPU_wh_AXI();
         testPassed = 0;
         message = "FAILED -> run_tb was";
       end
-      #1;
+      #1
       validating = 1'b0;
       addToLog(test_n, testPassed, message, run_tb);
 
+      test_n = 27;
+      wait (state_tb == fetch); //wait until the CPU has executed the next instruction
+      #1;                       //wait to be after the rising edge of the clock
+      validating = 1'b1;
+      //Check CREG_STATE == memory_writeback (aka stato precedente)
+      if(control_reg_tb[2] == memory_writeback) begin // State 
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = "FAILED -> control_reg_tb was";
+      end
+      addToLog(test_n, testPassed, message, control_reg_tb[2], $sformatf("#%0da", test_n));
 
-      //Test aliveLed period
-      // test_n = 26;
-      // wait (aliveLed == );
-      // t0 = $time;
-      // wait for (posedge aliveLed);
-      // t1 = $time;
-      // if (t1 - t0 == 80 ns) begin
-      //   testPassed = 1;
-      //   message = "OK";
-      // end else begin
-      //   testPassed = 0;
-      //   message = "FAILED -> aliveLed period was";
-      // end
-      // addToLog(test_n, testPassed, message, t1 - t0); 
+      if(control_reg_tb[3] == 32'h00108113) begin 
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = "FAILED -> control_reg_tb[3] was";
+      end
+      addToLog(test_n, testPassed, message, control_reg_tb[3], $sformatf("#%0db", test_n));
+      #1;
+      validating = 1'b0;
+
+      //chech run out signal
+      test_n++;
+      @(aliveLed);
+      t0 = $time;
+      @(aliveLed);
+      t1 = $time;
+      validating = 1'b1;
+      if(t1 - t0 == 40) begin 
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = "FAILED -> aliveLed period was";
+      end
+      addToLog(test_n, testPassed, message, t1 - t0);
+      #1;
+      validating = 1'b0;
+
+
+
+
+      #1;
     end 
   endtask  
 
