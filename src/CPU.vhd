@@ -38,9 +38,10 @@ use work.types_pkg.all;
 
 entity CPU is
     generic (
-		C_M_AXI_ADDR_WIDTH	: integer	:= 32;
-		C_M_AXI_DATA_WIDTH	: integer	:= 32;
-        RUN_BLINK_COUNTER_SIZE : integer := 26
+		C_M_AXI_ADDR_WIDTH	   : integer	:= 32;
+		C_M_AXI_DATA_WIDTH	   : integer	:= 32;
+        RUN_BLINK_COUNTER_SIZE : integer    := 26;
+        IS_STANDALONE          : boolean    := false
 	);
     Port ( 
         clk : IN std_logic;
@@ -528,7 +529,9 @@ begin
     
     -- Control Register File Signals
       -- Run
-    run <= control_reg(CREG_CTR)(CREG_RUN_BIT) and run_in;
+    run <=  control_reg(CREG_CTR)(CREG_RUN_BIT) and run_in when IS_STANDALONE = false else
+            control_reg(CREG_CTR)(CREG_RUN_BIT) or  run_in when IS_STANDALONE = true else
+            '0';
       -- Reset
     res <= res_tmp and res_in;
     reset_pro : process( clk ) begin
