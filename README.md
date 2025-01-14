@@ -35,22 +35,86 @@ Configurazione BRAM
 Note:
    - Nel caso di una Jump è il comparator (dello stadio precedente) a mettere ad '1' il segnale 'cond'.
  
+## Struttura della Repository
+
+```
+.
+├── assembly
+│   ├── bin
+│   │   └── <here are placed all free Assembly Files binaries>
+│   └── <here are placed all free Assembly Files>
+├── C
+│   ├── <Project Name>
+│   │   ├── bin [GIT UNTRACKED]
+│   │   │   └── <here are placed Project Binaries>
+│   │   ├── src
+│   │   │   └── <here are placed Project Sources>
+│   │   ├── linker_script.ld
+│   │   └── Makefile
+│   └── <Here are placed all C/Assembly Project folders>
+├── coe
+│   └── <here are placed all free coe files>
+├── hex
+│   └── <here are placed all free hex files>
+├── packages
+│   └── <here are placed HDL packages>
+├── scripts
+│   └── <here are placed all utility scripts>
+├── simulation
+│   └── <here are placed all simulation files>
+├── src
+│   └── <here are placed all HDL sources>
+├── testbench
+│   └── <here are placed all testbench files>
+└── README.md [This file]
+```
 
 ---
+
+# RISC-V toolchain 
+## Installazione 
+1) Seguire le informazioni di installazione dei prerequisiti presenti nel repository [riscv-gnu-toolchain](https://github.com/riscv-collab/riscv-gnu-toolchain)
+2) Eseguire lo script fornito nel repository per la compilazione del toolchain con il comando 
+```bash
+./configure --prefix=<Your Compilation Paht> --with-arch=rv32i --with-abi=ilp32
+```
+3) Eseguire il comando
+```bash
+make 
+```
+per la compilazione del toolchain
+
+4) Aggiungere la variabile d'ambiente `PATH` al file `.bashrc` con il comando 
+```bash
+export PATH=$PATH:<Your Compilation Path>/bin`
+```
+
+## Utilizzo
+Per compilare un file sorgente in assembly RISC-V è sufficiente eseguire il comando 
+```bash
+riscv32-unknown-elf-gcc -march=rv32i -mabi=ilp32 -nostdlib -nostartfiles -ffreestanding
+```
+
+## Compilare Progetti C/Assembly della repository
+Nei progetti C/assembly presenti in questa repository nella directory `./C` è presente un Makefile che permette di compilare il progetto con il comando 
+```bash
+make
+```
+
 
 # TO DO LIST
  ## Instuction fetch 
 - [x] Cambiare il PC in contatore a 12 bit;
 - [x] Portare fuori il contatore
 - [x] Cambiare la memoria istruzioni in BRAM
-- [ ] Provare a vedere come influisci il pc_enable e il registro dell'istruzione
-- [ ] Inserire il controller AXI per la BRAM e creare la modalità programmazione
+- [ ] Provare a vedere come influisce il pc_enable e il registro dell'istruzione
+- [x] Inserire il controller AXI per la BRAM e creare la modalità programmazione
 
 ## Instruction decode
 - [x] Modificare il sign-extender
   - [x] Da testare 
-- [ ] Aggiungere un 'load_enable' al register file
-  - [ ] Testare il file register
+- [x] Aggiungere un 'load_enable' al register file
+  - [x] Testare il file register
 - [x] Creare il decoder
 - [ ] Aggiungere il load_enable
 
@@ -73,4 +137,3 @@ Note:
 - [x] Jump
 - [x] LUI
 - [x] AUIPC
-
