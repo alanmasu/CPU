@@ -221,6 +221,7 @@ module test_CPU_wh_AXI();
   endtask;
     
   test_resoult_t resoult;
+  localparam int CLOCK_PERIOD = 10;
   task automatic printLog;
     begin
       bubbleSort(test_resoult_queue);
@@ -391,7 +392,8 @@ module test_CPU_wh_AXI();
       addToLog(test_n, testPassed, message, regFile[0]);
       #1;                      
       validating = 1'b0;
-      #9;
+      @(posedge clock);
+      #1;
 
       test_n = 2;
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
@@ -408,7 +410,8 @@ module test_CPU_wh_AXI();
       addToLog(test_n, testPassed, message, regFile[1]);
       #1;
       validating = 1'b0;
-      #9;
+      @(posedge clock);
+      #1;
       
       test_n = 3;
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
@@ -425,7 +428,8 @@ module test_CPU_wh_AXI();
       addToLog(test_n, testPassed, message, regFile[2]);
       #1;
       validating = 1'b0;
-      #9;
+      @(posedge clock);
+      #1;
 
       test_n = 4;
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
@@ -442,7 +446,8 @@ module test_CPU_wh_AXI();
       addToLog(test_n, testPassed, message, regFile[2]);
       #1;
       validating = 1'b0;
-      #9;
+      @(posedge clock);
+      #1;
 
       test_n = 5;
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
@@ -452,7 +457,8 @@ module test_CPU_wh_AXI();
       checkQueuePush(test_n, 32'h40011FFC, -32'd16, "OK", "FAILED -> Mem[0x40011FFC] was");
       #1;
       validating = 1'b0;
-      #9;
+      @(posedge clock);
+      #1;
 
       test_n = 6;
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
@@ -469,7 +475,8 @@ module test_CPU_wh_AXI();
       addToLog(test_n, testPassed, message, regFile[3]);
       #1;
       validating = 1'b0;
-      #9;
+      @(posedge clock);
+      #1;
 
       test_n = 7;
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
@@ -486,7 +493,8 @@ module test_CPU_wh_AXI();
       addToLog(test_n, testPassed, message, instruction_tb);
       #1;
       validating = 1'b0;
-      #9;
+      @(posedge clock);
+      #1;
 
       test_n = 8;
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
@@ -512,7 +520,8 @@ module test_CPU_wh_AXI();
       addToLog(test_n, testPassed, message, instruction_tb, "#8b");
       #1;
       validating = 1'b0;
-      #9;
+      @(posedge clock);
+      #1;
 
       test_n = 9;
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
@@ -529,7 +538,8 @@ module test_CPU_wh_AXI();
       addToLog(test_n, testPassed, message, regFile[5]);
       #1;
       validating = 1'b0;
-      #9;
+      @(posedge clock);
+      #1;
 
       test_n = 10;
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
@@ -539,7 +549,8 @@ module test_CPU_wh_AXI();
       // Check instruction       SW x0, 0(x6) //Stop the CPU by setting RUN to 0
       #1;
       validating = 1'b0;
-      #9;
+      @(posedge clock);
+      #1;
 
       test_n = 11;
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
@@ -556,7 +567,8 @@ module test_CPU_wh_AXI();
       addToLog(test_n, testPassed, message, instruction_tb);
       #1;
       validating = 1'b0;
-      #9;
+      @(posedge clock);
+      #1;
 
       test_n = 12;
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
@@ -573,7 +585,8 @@ module test_CPU_wh_AXI();
       addToLog(test_n, testPassed, message, regFile[6]);
       #1;
       validating = 1'b0;
-      #9;
+      @(posedge clock);
+      #1;
 
       test_n = 13;
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
@@ -583,7 +596,8 @@ module test_CPU_wh_AXI();
       checkQueuePush(test_n, 32'h40011ff8, 32'h40004030, "OK", "FAILED -> Mem[0x40011FF8] was");
       #1;
       validating = 1'b0;
-      #9;
+      @(posedge clock);
+      #1;
 
       test_n = 14;
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
@@ -600,7 +614,8 @@ module test_CPU_wh_AXI();
       addToLog(test_n, testPassed, message, regFile[7]);
       #1;
       validating = 1'b0;
-      #9;
+      @(posedge clock);
+      #1;
 
       test_n = 15;
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
@@ -617,7 +632,8 @@ module test_CPU_wh_AXI();
       addToLog(test_n, testPassed, message, regFile[8]);
       #1;
       validating = 1'b0;
-      #9;
+      @(posedge clock);
+      #1;
 
       test_n = 16;
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
@@ -633,7 +649,8 @@ module test_CPU_wh_AXI();
       end
       #1;
       validating = 1'b0;
-      #9;
+      @(posedge clock);
+      #1;
 
       test_n = 17;
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
@@ -651,7 +668,8 @@ module test_CPU_wh_AXI();
       addToLog(test_n, testPassed, message, GPIO_dir_tb[0]);
       #1;
       validating = 1'b0;
-      #9;
+      @(posedge clock);
+      #1;
 
       test_n = 18;
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
@@ -668,7 +686,8 @@ module test_CPU_wh_AXI();
       addToLog(test_n, testPassed, message, GPIO[0]);
       #1;
       validating = 1'b0;
-      #9;
+      @(posedge clock);
+      #1;
 
       test_n = 19;
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
@@ -685,7 +704,8 @@ module test_CPU_wh_AXI();
       addToLog(test_n, testPassed, message, regFile[10]);
       #1;
       validating = 1'b0;
-      #9;
+      @(posedge clock);
+      #1;
 
       test_n = 20;
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
@@ -702,7 +722,8 @@ module test_CPU_wh_AXI();
       addToLog(test_n, testPassed, message, regFile[11]);
       #1;
       validating = 1'b0;
-      #9;
+      @(posedge clock);
+      #1;
 
       test_n = 21;
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
@@ -712,7 +733,8 @@ module test_CPU_wh_AXI();
       addToLog(test_n, 1, "SKIPPED", 1);
       #1;
       validating = 1'b0;
-      #9;
+      @(posedge clock);
+      #1;
 
       test_n = 22;
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
@@ -779,7 +801,8 @@ module test_CPU_wh_AXI();
       end
       addToLog(test_n, testPassed, message, control_reg_tb[1]);
       validating = 1'b0;
-      #9;
+      @(posedge clock);
+      #1;
       
       // Start the CPU
       test_n = 26;
@@ -836,7 +859,7 @@ module test_CPU_wh_AXI();
       @(aliveLed);
       t1 = $time;
       validating = 1'b1;
-      if(t1 - t0 == 40) begin 
+      if(t1 - t0 == 4 * CLOCK_PERIOD) begin 
         testPassed = 1;
         message = "OK";
       end else begin
