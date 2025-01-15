@@ -123,12 +123,12 @@ module test_CPU_wh_AXI();
 
   //Clock generation
   // always #5 clock <= ~clock;ù
-  localparam int CLOCK_PERIOD = 25;
+  localparam int CLOCK_PERIOD = 10;
   always begin
     clock <= 1'b1;
-    #13ns;
+    #5ns;
     clock <= 1'b0;
-    #12ns;
+    #5ns;
   end
 
   //AXI Check process
