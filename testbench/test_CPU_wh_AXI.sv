@@ -122,7 +122,14 @@ module test_CPU_wh_AXI();
   end
 
   //Clock generation
-  always #5 clock <= ~clock;
+  // always #5 clock <= ~clock;ù
+  localparam int CLOCK_PERIOD = 25;
+  always begin
+    clock <= 1'b1;
+    #13ns;
+    clock <= 1'b0;
+    #12ns;
+  end
 
   //AXI Check process
   typedef struct{
@@ -221,7 +228,6 @@ module test_CPU_wh_AXI();
   endtask;
     
   test_resoult_t resoult;
-  localparam int CLOCK_PERIOD = 10;
   task automatic printLog;
     begin
       bubbleSort(test_resoult_queue);
