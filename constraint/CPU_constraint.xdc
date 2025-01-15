@@ -8,9 +8,9 @@
 # User LEDs - Bank 33
 # ---------------------------------------------------------------------------- 
 set_property PACKAGE_PIN T22 [get_ports {run_out_0}];  # "LD0"
-# set_property PACKAGE_PIN T21 [get_ports {LD1}];  # "LD1"
-# set_property PACKAGE_PIN U22 [get_ports {LD2}];  # "LD2"
-# set_property PACKAGE_PIN U21 [get_ports {LD3}];  # "LD3"
+set_property PACKAGE_PIN T21 [get_ports {leds_0[0]}];  # "LD1"
+set_property PACKAGE_PIN U22 [get_ports {leds_0[1]}];  # "LD2"
+set_property PACKAGE_PIN U21 [get_ports {leds_0[2]}];  # "LD3"
 set_property PACKAGE_PIN V22 [get_ports {GPIO_0[0]}];  # "LD4"
 set_property PACKAGE_PIN W22 [get_ports {GPIO_0[1]}];  # "LD5"
 set_property PACKAGE_PIN U19 [get_ports {GPIO_0[2]}];  # "LD6"
@@ -20,13 +20,22 @@ set_property PACKAGE_PIN U14 [get_ports {GPIO_0[3]}];  # "LD7"
 # User DIP Switches - Bank 35
 # ---------------------------------------------------------------------------- 
 set_property PACKAGE_PIN F22 [get_ports {run_in_0}];  # "SW0"
-# set_property PACKAGE_PIN G22 [get_ports {SW1}];  # "SW1"
-# set_property PACKAGE_PIN H22 [get_ports {SW2}];  # "SW2"
+set_property PACKAGE_PIN G22 [get_ports {oled_select0_0}];  # "SW1"
+# set_property PACKAGE_PIN H22 [get_ports {WS2}];  # "SW2"
 # set_property PACKAGE_PIN F21 [get_ports {SW3}];  # "SW3"
 set_property PACKAGE_PIN H19 [get_ports {GPIO_0[4]}];  # "SW4"
 set_property PACKAGE_PIN H18 [get_ports {GPIO_0[5]}];  # "SW5"
 set_property PACKAGE_PIN H17 [get_ports {GPIO_0[6]}];  # "SW6"
 set_property PACKAGE_PIN M15 [get_ports {GPIO_0[7]}];  # "SW7"
+
+# ----------------------------------------------------------------------------
+# User Push Buttons - Bank 34
+# ---------------------------------------------------------------------------- 
+set_property PACKAGE_PIN P16 [get_ports {btn_center_0}];  # "BTNC"
+set_property PACKAGE_PIN R16 [get_ports {btn_down_0}];  # "BTND"
+set_property PACKAGE_PIN N15 [get_ports {btn_left_0}];  # "BTNL"
+set_property PACKAGE_PIN R18 [get_ports {btn_right_0}];  # "BTNR"
+set_property PACKAGE_PIN T18 [get_ports {btn_up_0}];  # "BTNU"
 
 # ----------------------------------------------------------------------------
 # PMOD STANDARD
@@ -64,9 +73,9 @@ set_property PACKAGE_PIN W8  [get_ports {res_in_dbg_0}];    # "JB4"
 # ----------------------------------------------------------------------------
 # JC Pmod - Bank 13
 # ---------------------------------------------------------------------------- 
-# set_property PACKAGE_PIN AB6 [get_ports {JC1_N}];  # "JC1_N"
-# set_property PACKAGE_PIN AB7 [get_ports {JC1_P}];  # "JC1_P"
-# set_property PACKAGE_PIN AA4 [get_ports {JC2_N}];  # "JC2_N"
+set_property PACKAGE_PIN AB6 [get_ports {state_dbg_0[0]}];  # "JC1_N"
+set_property PACKAGE_PIN AB7 [get_ports {state_dbg_0[1]}];  # "JC1_P"
+set_property PACKAGE_PIN AA4 [get_ports {state_dbg_0[2]}];  # "JC2_N"
 # set_property PACKAGE_PIN Y4  [get_ports {JC2_P}];  # "JC2_P"
 # set_property PACKAGE_PIN T6  [get_ports {JC3_N}];  # "JC3_N"
 # set_property PACKAGE_PIN R6  [get_ports {JC3_P}];  # "JC3_P"
@@ -88,12 +97,12 @@ set_property PACKAGE_PIN W8  [get_ports {res_in_dbg_0}];    # "JB4"
 # ----------------------------------------------------------------------------
 # OLED Display - Bank 13
 # ---------------------------------------------------------------------------- 
-#set_property PACKAGE_PIN U10  [get_ports {oled_dc}];  # "OLED-DC"
-#set_property PACKAGE_PIN U9   [get_ports {oled_res}];  # "OLED-RES"
-#set_property PACKAGE_PIN AB12 [get_ports {oled_sclk}];  # "OLED-SCLK"
-#set_property PACKAGE_PIN AA12 [get_ports {oled_sdin}];  # "OLED-SDIN"
-#set_property PACKAGE_PIN U11  [get_ports {oled_vbat}];  # "OLED-VBAT"
-#set_property PACKAGE_PIN U12  [get_ports {oled_vdd}];  # "OLED-VDD"
+set_property PACKAGE_PIN U10  [get_ports {oled_dc_0}];  # "OLED-DC"
+set_property PACKAGE_PIN U9   [get_ports {oled_res_0}];  # "OLED-RES"
+set_property PACKAGE_PIN AB12 [get_ports {oled_sclk_0}];  # "OLED-SCLK"
+set_property PACKAGE_PIN AA12 [get_ports {oled_sdin_0}];  # "OLED-SDIN"
+set_property PACKAGE_PIN U11  [get_ports {oled_vbat_0}];  # "OLED-VBAT"
+set_property PACKAGE_PIN U12  [get_ports {oled_vdd_0}];  # "OLED-VDD"
 
 # ----------------------------------------------------------------------------
 # Audio Codec - Bank 13
@@ -154,15 +163,6 @@ set_property PACKAGE_PIN W8  [get_ports {res_in_dbg_0}];    # "JB4"
 # set_property PACKAGE_PIN V19  [get_ports {VGA_R3}];  # "VGA-R3"
 # set_property PACKAGE_PIN V18  [get_ports {VGA_R4}];  # "VGA-R4"
 # set_property PACKAGE_PIN Y19  [get_ports {VGA_VS}];  # "VGA-VS"
-
-# ----------------------------------------------------------------------------
-# User Push Buttons - Bank 34
-# ---------------------------------------------------------------------------- 
-# set_property PACKAGE_PIN P16 [get_ports {screen_on}];  # "BTNC"
-# set_property PACKAGE_PIN R16 [get_ports {poweroff}];  # "BTND"
-# set_property PACKAGE_PIN N15 [get_ports {screen_off}];  # "BTNL"
-# set_property PACKAGE_PIN R18 [get_ports {BTNR}];  # "BTNR"
-# set_property PACKAGE_PIN T18 [get_ports {init_oled}];  # "BTNU"
 
 # ----------------------------------------------------------------------------
 # USB OTG Reset - Bank 34
