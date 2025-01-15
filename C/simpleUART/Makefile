@@ -4,7 +4,7 @@ OBJDUMP = riscv32-unknown-elf-objdump
 READELF = riscv32-unknown-elf-readelf
 
 # File
-SRC     = src/simpleUART.c
+SRC     = src/simpleUART.s
 OUT     = bin/simpleUART.elf
 
 LINKER  = linker_script.ld

@@ -12,4 +12,6 @@ main:
     addi    a4, zero, 1  # a4 <- 1
     sb      a4,0x007(t0) # Mem[0x40020007] <- a4 (GPIOA DIR reg)  ## Set GPIO0 as output
     sb      a4,0x00B(t0) # a4 <- Mem[0x4002000B] (GPIOA DATA reg) ## Set GPIO0 HIGH
+L1:
+    j       L1
     
