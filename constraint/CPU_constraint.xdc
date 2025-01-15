@@ -1,4 +1,10 @@
 # ----------------------------------------------------------------------------
+# Clock Source - Bank 13
+# ---------------------------------------------------------------------------- 
+#set_property PACKAGE_PIN Y9 [get_ports {clock}];  # "GCLK"
+#create_clock -add -name sys_clk_pin -period 10.00 -waveform {0 5} [get_ports {clock}];
+
+# ----------------------------------------------------------------------------
 # User LEDs - Bank 33
 # ---------------------------------------------------------------------------- 
 set_property PACKAGE_PIN T22 [get_ports {run_out_0}];  # "LD0"
@@ -23,60 +29,37 @@ set_property PACKAGE_PIN H17 [get_ports {GPIO_0[6]}];  # "SW6"
 set_property PACKAGE_PIN M15 [get_ports {GPIO_0[7]}];  # "SW7"
 
 # ----------------------------------------------------------------------------
-# JA Pmod - Bank 13
-# ---------------------------------------------------------------------------- 
- set_property PACKAGE_PIN W7 [get_ports {GPIO_0[8]}];  # "JD1_N"
- set_property PACKAGE_PIN V7 [get_ports {GPIO_0[9]}];  # "JD1_P"
- set_property PACKAGE_PIN V4 [get_ports {GPIO_0[10]}];  # "JD2_N"
- set_property PACKAGE_PIN V5 [get_ports {GPIO_0[11]}];  # "JD2_P"
- set_property PACKAGE_PIN W5 [get_ports {GPIO_0[12]}];  # "JD3_N"
- set_property PACKAGE_PIN W6 [get_ports {GPIO_0[13]}];  # "JD3_P"
- set_property PACKAGE_PIN U5 [get_ports {GPIO_0[14]}];  # "JD4_N"
- set_property PACKAGE_PIN U6 [get_ports {GPIO_0[15]}];  # "JD4_P"
-
-# ----------------------------------------------------------------------------
-# Audio Codec - Bank 13
-# ---------------------------------------------------------------------------- 
-# set_property PACKAGE_PIN AB1 [get_ports {AC_ADR0}];  # "AC-ADR0"
-# set_property PACKAGE_PIN Y5  [get_ports {AC_ADR1}];  # "AC-ADR1"
-# set_property PACKAGE_PIN Y8  [get_ports {AC_GPIO0}];  # "AC-GPIO0"
-# set_property PACKAGE_PIN AA7 [get_ports {AC_GPIO1}];  # "AC-GPIO1"
-# set_property PACKAGE_PIN AA6 [get_ports {AC_GPIO2}];  # "AC-GPIO2"
-# set_property PACKAGE_PIN Y6  [get_ports {AC_GPIO3}];  # "AC-GPIO3"
-# set_property PACKAGE_PIN AB2 [get_ports {AC_MCLK}];  # "AC-MCLK"
-# set_property PACKAGE_PIN AB4 [get_ports {AC_SCK}];  # "AC-SCK"
-# set_property PACKAGE_PIN AB5 [get_ports {AC_SDA}];  # "AC-SDA"
-
-# ----------------------------------------------------------------------------
-# Clock Source - Bank 13
-# ---------------------------------------------------------------------------- 
-#set_property PACKAGE_PIN Y9 [get_ports {clock}];  # "GCLK"
-#create_clock -add -name sys_clk_pin -period 10.00 -waveform {0 5} [get_ports {clock}];
+# PMOD STANDARD
+# +-------------------+
+# | O  O  O  O  O  O |  <-- PMOD Header
+# | O  O  O  O  O  O |      (12-pin standard)
+# +-------------------+
+#   6  5  4  3  2  1
+#  12 11 10  9  8  7
 
 # ----------------------------------------------------------------------------
 # JA Pmod - Bank 13
 # ---------------------------------------------------------------------------- 
-# set_property PACKAGE_PIN Y11  [get_ports {JA1}];  # "JA1"
-# set_property PACKAGE_PIN AA8  [get_ports {JA10}];  # "JA10"
-# set_property PACKAGE_PIN AA11 [get_ports {JA2}];  # "JA2"
-# set_property PACKAGE_PIN Y10  [get_ports {JA3}];  # "JA3"
-# set_property PACKAGE_PIN AA9  [get_ports {JA4}];  # "JA4"
-# set_property PACKAGE_PIN AB11 [get_ports {JA7}];  # "JA7"
-# set_property PACKAGE_PIN AB10 [get_ports {JA8}];  # "JA8"
-# set_property PACKAGE_PIN AB9  [get_ports {JA9}];  # "JA9"
-
+set_property PACKAGE_PIN Y11  [get_ports {GPIO_0[8]}];  # "JA1"
+set_property PACKAGE_PIN AA11 [get_ports {GPIO_0[9]}];  # "JA2"
+set_property PACKAGE_PIN Y10  [get_ports {GPIO_0[10]}];  # "JA3"
+set_property PACKAGE_PIN AA9  [get_ports {GPIO_0[11]}];  # "JA4"
+set_property PACKAGE_PIN AB11 [get_ports {GPIO_0[12]}];  # "JA7"
+set_property PACKAGE_PIN AB10 [get_ports {GPIO_0[13]}];  # "JA8"
+set_property PACKAGE_PIN AB9  [get_ports {GPIO_0[14]}];  # "JA9"
+set_property PACKAGE_PIN AA8  [get_ports {GPIO_0[15]}];  # "JA10"
 
 # ----------------------------------------------------------------------------
 # JB Pmod - Bank 13
 # ---------------------------------------------------------------------------- 
-# set_property PACKAGE_PIN W12 [get_ports {JB1}];  # "JB1"
-# set_property PACKAGE_PIN V8 [get_ports {JB10}];  # "JB10"
-# set_property PACKAGE_PIN W11 [get_ports {JB2}];  # "JB2"
-# set_property PACKAGE_PIN V10 [get_ports {JB3}];  # "JB3"
-# set_property PACKAGE_PIN W8 [get_ports {JB4}];  # "JB4"
+set_property PACKAGE_PIN W12 [get_ports {run_dbg_0}];  # "JB1"
+set_property PACKAGE_PIN W11 [get_ports {res_dbg_0}];  # "JB2"
+set_property PACKAGE_PIN V10 [get_ports {res_in_dbg_0}];  # "JB3"
+set_property PACKAGE_PIN W8 [get_ports {run_in_dbg_0}];  # "JB4"
 # set_property PACKAGE_PIN V12 [get_ports {JB7}];  # "JB7"
 # set_property PACKAGE_PIN W10 [get_ports {JB8}];  # "JB8"
 # set_property PACKAGE_PIN V9 [get_ports {JB9}];  # "JB9"
+# set_property PACKAGE_PIN V8 [get_ports {run_in_dbg_0}];  # "JB10"
 
 # ----------------------------------------------------------------------------
 # JC Pmod - Bank 13
@@ -91,6 +74,18 @@ set_property PACKAGE_PIN M15 [get_ports {GPIO_0[7]}];  # "SW7"
 # set_property PACKAGE_PIN T4  [get_ports {JC4_P}];  # "JC4_P"
 
 # ----------------------------------------------------------------------------
+# JD Pmod - Bank 13
+# ---------------------------------------------------------------------------- 
+#  set_property PACKAGE_PIN W7 [get_ports {GPIO_0[8]}];  # "JD1_N"
+#  set_property PACKAGE_PIN V7 [get_ports {GPIO_0[9]}];  # "JD1_P"
+#  set_property PACKAGE_PIN V4 [get_ports {GPIO_0[10]}];  # "JD2_N"
+#  set_property PACKAGE_PIN V5 [get_ports {GPIO_0[11]}];  # "JD2_P"
+#  set_property PACKAGE_PIN W5 [get_ports {GPIO_0[12]}];  # "JD3_N"
+#  set_property PACKAGE_PIN W6 [get_ports {GPIO_0[13]}];  # "JD3_P"
+#  set_property PACKAGE_PIN U5 [get_ports {GPIO_0[14]}];  # "JD4_N"
+#  set_property PACKAGE_PIN U6 [get_ports {GPIO_0[15]}];  # "JD4_P"
+
+# ----------------------------------------------------------------------------
 # OLED Display - Bank 13
 # ---------------------------------------------------------------------------- 
 #set_property PACKAGE_PIN U10  [get_ports {oled_dc}];  # "OLED-DC"
@@ -99,6 +94,19 @@ set_property PACKAGE_PIN M15 [get_ports {GPIO_0[7]}];  # "SW7"
 #set_property PACKAGE_PIN AA12 [get_ports {oled_sdin}];  # "OLED-SDIN"
 #set_property PACKAGE_PIN U11  [get_ports {oled_vbat}];  # "OLED-VBAT"
 #set_property PACKAGE_PIN U12  [get_ports {oled_vdd}];  # "OLED-VDD"
+
+# ----------------------------------------------------------------------------
+# Audio Codec - Bank 13
+# ---------------------------------------------------------------------------- 
+# set_property PACKAGE_PIN AB1 [get_ports {AC_ADR0}];  # "AC-ADR0"
+# set_property PACKAGE_PIN Y5  [get_ports {AC_ADR1}];  # "AC-ADR1"
+# set_property PACKAGE_PIN Y8  [get_ports {AC_GPIO0}];  # "AC-GPIO0"
+# set_property PACKAGE_PIN AA7 [get_ports {AC_GPIO1}];  # "AC-GPIO1"
+# set_property PACKAGE_PIN AA6 [get_ports {AC_GPIO2}];  # "AC-GPIO2"
+# set_property PACKAGE_PIN Y6  [get_ports {AC_GPIO3}];  # "AC-GPIO3"
+# set_property PACKAGE_PIN AB2 [get_ports {AC_MCLK}];  # "AC-MCLK"
+# set_property PACKAGE_PIN AB4 [get_ports {AC_SCK}];  # "AC-SCK"
+# set_property PACKAGE_PIN AB5 [get_ports {AC_SDA}];  # "AC-SDA"
 
 # ----------------------------------------------------------------------------
 # HDMI Output - Bank 33
