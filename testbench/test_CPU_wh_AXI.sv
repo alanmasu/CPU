@@ -830,7 +830,7 @@ module test_CPU_wh_AXI();
       validating = 1'b0;
 
       //chech run out signal
-      test_n++;
+      test_n = 28;
       @(aliveLed);
       t0 = $time;
       @(aliveLed);

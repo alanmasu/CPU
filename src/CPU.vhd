@@ -651,14 +651,14 @@ begin
     end process ; -- ena_mealy
 
     -- Alive LED / run_out
-    blink_counter_pro : process( clk, res, run ) is
+    blink_counter_pro : process( clk, res) is
         constant MAX : unsigned(RUN_BLINK_COUNTER_SIZE-1 downto 0) := (others => '1');
     begin
         if(res = '0') then
             blink_counter <= (others => '0');
             alive_led <= '0';
-        elsif(run = '1') then
-            if rising_edge(clk) then
+        elsif rising_edge(clk) then
+            if  run = '1' then
                 if blink_counter = MAX then
                     blink_counter <= (others => '0');
                 else
@@ -667,10 +667,10 @@ begin
                 if(blink_counter = MAX) then
                     alive_led <= not alive_led;
                 end if;
+            else 
+                blink_counter <= (others => '0');
+                alive_led <= '0';
             end if;
-        else 
-            blink_counter <= (others => '0');
-            alive_led <= '0';
         end if;            
     end process ; -- blink_counter_pro
 
