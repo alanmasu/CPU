@@ -23,10 +23,16 @@ module test_CPU_wh_AXI();
   test_design_axi_vip_1_0_slv_mem_t       slv_agent_0;
 
   bit                                     clock = 1;
+  bit                                     clock100MHz = 1;
   bit                                     reset;
   bit                                     run = 1;
   wire                                    aliveLed;
   wire [31:0]                             GPIO;
+  bit  [4:0]                              BTNs = 5'b1;
+
+  wire                                    [2:0] LEDs;
+  wire                                    [2:0] state_dbg;
+  logic                                   oled_select0 = 1'b0;
 
   logic on_programming = 1'b1;
    
@@ -52,9 +58,18 @@ module test_CPU_wh_AXI();
   `BD_WRAPPER DUT(
     .reset_rtl(reset),
     .sys_clock(clock), 
+    .clk_100MHz_0(clock100MHz),
     .run_in_0(run),
     .GPIO_0(GPIO),
-    .run_out_0(aliveLed)
+    .run_out_0(aliveLed),
+    .btn_up_0     (BTNs[0]),
+    .btn_down_0   (BTNs[1]),
+    .btn_left_0   (BTNs[2]),
+    .btn_right_0  (BTNs[3]),
+    .btn_center_0 (BTNs[4]),
+    .leds_0(LEDs),
+    .state_dbg_0(state_dbg),
+    .oled_select0_0(oled_select0) 
   ); 
   
   //Programm
@@ -349,6 +364,10 @@ module test_CPU_wh_AXI();
   assign GPIO_state_tb = DUT.test_design_i.CPU_0.U0.gpio_driver.GPIO_state;
   wire GPIO1;
   assign GPIO1 = GPIO[0];
+
+  //OLED
+  wire [31:0] display_in_tb;
+  assign display_in_tb = DUT.test_design_i.CPU_0.U0.display_in;
 
   task automatic S_AXI_TEST;  
     integer i;
@@ -847,6 +866,16 @@ module test_CPU_wh_AXI();
       end
       addToLog(test_n, testPassed, message, control_reg_tb[2], $sformatf("#%0da", test_n));
 
+      //Check state_dbg == memory_writeback (aka stato ATTUALE)
+      if(state_dbg == fetch) begin // State 
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = "FAILED -> state_dbg was";
+      end
+      addToLog(test_n, testPassed, message, state_dbg, $sformatf("#%0db", test_n));
+
       if(control_reg_tb[3] == 32'h00108113) begin 
         testPassed = 1;
         message = "OK";
@@ -854,7 +883,7 @@ module test_CPU_wh_AXI();
         testPassed = 0;
         message = "FAILED -> control_reg_tb[3] was";
       end
-      addToLog(test_n, testPassed, message, control_reg_tb[3], $sformatf("#%0db", test_n));
+      addToLog(test_n, testPassed, message, control_reg_tb[3], $sformatf("#%0dc", test_n));
       #1;
       validating = 1'b0;
 
@@ -876,9 +905,81 @@ module test_CPU_wh_AXI();
       #1;
       validating = 1'b0;
 
+      //Writing to PS-PL GPIO registers
+      test_n = 29;
+      mtestADDR = 32'h40001010;
+      mst_agent_0.AXI4LITE_READ_BURST( 
+        mtestADDR, 
+        mtestProtectionType, 
+        mtestRDataL, 
+        mtestRresp 
+      );
+      validating = 1'b1;   
+      if(mtestRDataL[31:4] == 32'h0 && mtestRDataL[3:0] == 1) begin 
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = "FAILED -> mtestRDataL was";
+      end
+      addToLog(test_n, testPassed, message, mtestRDataL[31:0], $sformatf("#%0da", test_n));
+      if(control_reg_tb[4] == 32'h00000001) begin 
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = "FAILED -> control_reg_tb[4] was";
+      end
+      addToLog(test_n, testPassed, message, control_reg_tb[4], $sformatf("#%0db", test_n));
+      #1;
+      validating = 1'b0;
 
+      //Writing to PS-PL GPIO registers
+      test_n = 30;
+      mtestADDR = 32'h40001010;
+      mtestWDataL[31:24] = 8'b00000111;
+      mtestWDataL[23:0] = 24'b0;
+      mst_agent_0.AXI4LITE_WRITE_BURST( 
+        mtestADDR, 
+        mtestProtectionType, 
+        mtestWDataL, 
+        mtestBresp 
+      );
+      validating = 1'b1;
+      if(LEDs == 3'b111) begin 
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = "FAILED -> LEDs was";
+      end
+      addToLog(test_n, testPassed, message, LEDs, $sformatf("#%0da", test_n));
 
+      if(control_reg_tb[4][26:24] == 3'b111) begin 
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = "FAILED -> control_reg_tb[4] was";
+      end
+      addToLog(test_n, testPassed, message, control_reg_tb[4], $sformatf("#%0db", test_n));
+      #1;
+      validating = 1'b0;
 
+      //Change OLED value
+      test_n = 31;
+      oled_select0 = 1;
+      #1;
+      validating = 1'b1;
+      if(display_in_tb == 32'hfe11ae23) begin 
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = "FAILED -> display_in_tb was";
+      end
+      addToLog(test_n, testPassed, message, display_in_tb, $sformatf("#%0da", test_n)); 
+      
       #1;
     end 
   endtask  

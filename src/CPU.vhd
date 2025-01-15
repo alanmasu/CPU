@@ -44,8 +44,9 @@ entity CPU is
         IS_STANDALONE          : boolean    := false
 	);
     Port ( 
-        clk : IN std_logic;
-        res_in : IN std_logic;
+        clk         : IN std_logic;
+        clk_100MHz  : IN std_logic;
+        res_in      : IN std_logic;
 
         --S_AXI_I interface
         s_axi_i_awaddr : IN STD_LOGIC_VECTOR(19 DOWNTO 0);
@@ -121,7 +122,27 @@ entity CPU is
         run_dbg         : OUT STD_LOGIC;
         run_in_dbg      : OUT STD_LOGIC;
         res_dbg         : OUT STD_LOGIC;
-        res_in_dbg      : OUT STD_LOGIC
+        res_in_dbg      : OUT STD_LOGIC;
+        state_dbg       : OUT STD_LOGIC_VECTOR(2 downto 0);
+
+        -- Buttons
+        btn_up          : IN STD_LOGIC;
+        btn_down        : IN STD_LOGIC;
+        btn_left        : IN STD_LOGIC;
+        btn_right       : IN STD_LOGIC;
+        btn_center      : IN STD_LOGIC;
+
+        -- LEDs
+        leds            : OUT STD_LOGIC_VECTOR(2 downto 0);
+
+        -- OLED Display
+        oled_select0 : in std_logic;
+        oled_sdin   : out std_logic;
+        oled_sclk   : out std_logic;
+        oled_dc     : out std_logic;
+        oled_res    : out std_logic;
+        oled_vbat   : out std_logic;
+        oled_vdd    : out std_logic
         
     );
 end CPU;
@@ -250,8 +271,14 @@ architecture Behavioral of CPU is
 
     --Control Register File
     signal control_reg_ena : std_logic := '0';
-    type control_reg_t is array (0 to 31) of std_logic_vector(31 downto 0);
     signal control_reg : control_reg_t := (others => (others => '0'));
+
+    --OLED
+    signal display_in : std_logic_vector(31 downto 0) := (others => '0');
+    signal oled_select : std_logic_vector(2 downto 0) := (others => '0');
+
+    --DEBUG
+    signal state_dbg_sig : std_logic_vector(2 downto 0);
 
 begin
     --Fetch
@@ -483,11 +510,35 @@ begin
         d_out => d_bus_in.GPIO_data,
         GPIO => GPIO
     );
+
+    -- OLED Display
+    oled_display : entity work.oled_driver
+    port map(
+        clock => clk_100MHz,
+        reset => res_in,
+        poweroff => btn_center,
+        display_in => display_in,
+        oled_sdin => oled_sdin,
+        oled_sclk => oled_sclk,
+        oled_dc => oled_dc,
+        oled_res => oled_res,
+        oled_vbat => oled_vbat,
+        oled_vdd => oled_vdd
+    );
+
     ----------------------------------- DEBUG -----------------------------------
     run_dbg <= run;
     run_in_dbg <= run_in;
     res_dbg <= res;
     res_in_dbg <= res_in;
+
+    state_dbg_comb : process( state ) is 
+        variable state_integer : integer := 0;
+    begin
+            state_integer := state_type'POS(state);
+            state_dbg_sig <= std_logic_vector(to_unsigned(state_integer,3));
+    end process ; -- control_reg_file
+    state_dbg <= state_dbg_sig;
     ----------------------------------- END DEBUG -----------------------------------
 
     --Control Register File
@@ -505,7 +556,7 @@ begin
         if(check_bram_address(bram_addr_a_i, ROM) = '1') then
             bram_rddata_a_i <= instr_doutb;
         elsif(check_bram_address(bram_addr_a_i, CREG_FILE) = '1') then
-            reg_addr := to_integer(unsigned(bram_addr_a_i(4 downto 0)));
+            reg_addr := to_integer(unsigned(bram_addr_a_i(6 downto 2)));
             bram_rddata_a_i <= control_reg(reg_addr);
         end if;
         
@@ -517,13 +568,10 @@ begin
         variable state_integer : integer := 0;
     begin
         if(res = '0') then
-            control_reg <= (
-                0 => (1 => '1', others => '0'), -- CREG_CTR[RES_BIT] = 1
-                others => (others => '0')
-            );
+            control_reg <= CREG_RESET_VALUE;
         elsif(rising_edge(clk)) then
             if(control_reg_ena = '1') then
-                reg_addr := to_integer(unsigned(bram_addr_a_i(4 downto 0)));
+                reg_addr := to_integer(unsigned(bram_addr_a_i(6 downto 2)));
                 if (bram_we_a_i(0) = '1') then
                     control_reg(reg_addr)(7 downto 0) <= bram_wrdata_a_i(7 downto 0);
                 end if;
@@ -542,6 +590,12 @@ begin
             control_reg(CREG_PC) <= std_logic_vector(pc_fetched);
             control_reg(CREG_STATE) <= std_logic_vector(to_unsigned(state_integer,32));
             control_reg(CREG_INST) <= instruction_fetched;
+            --IO
+            control_reg(CREG_IO)(0) <= btn_up;
+            control_reg(CREG_IO)(1) <= btn_down;
+            control_reg(CREG_IO)(2) <= btn_left;
+            control_reg(CREG_IO)(3) <= btn_right;
+
         end if;
     end process ; -- control_reg_file
     
@@ -563,6 +617,39 @@ begin
         end if;
     end process ; -- reset_pro
 
+    -- PS-PL GPIO
+    leds(0) <= control_reg(CREG_IO)(CREG_LED0_BIT);
+    leds(1) <= control_reg(CREG_IO)(CREG_LED1_BIT);
+    leds(2) <= control_reg(CREG_IO)(CREG_LED2_BIT);
+
+    -- OLED Display
+    oled_select(2 downto 1) <= control_reg(CREG_OLED_CTR)(1 downto 0);
+    oled_select(0) <= oled_select0;
+
+    display_in_comb : process( 
+        oled_select,
+        pc_fetched, 
+        instruction_fetched,
+        control_reg(CREG_OLED_DATA),
+        state_dbg_sig
+    ) is 
+        variable index : integer;
+    begin
+        index := to_integer(unsigned(oled_select));
+        case( index ) is
+            when 0 =>
+                display_in <= std_logic_vector(pc_fetched);
+            when 1 =>
+                display_in <= instruction_fetched;
+            when 2 =>
+                display_in(2 downto 0) <= state_dbg_sig;
+                display_in(31 downto 3) <= (others => '0');
+            when 3 =>
+                display_in <= control_reg(CREG_OLED_DATA);
+            when others =>
+                display_in <= (others => '0');
+        end case ;
+    end process ; -- display_in_comb
 
     ------------------- Control Unit -------------------
     process(clk, res, run) begin
