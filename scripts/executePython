@@ -21,7 +21,7 @@ case "$1" in
     *)
         # Gestione dei valori non validi
         echo "Errore: primo parametro non valido. Usa uno tra: -coe, -sv, -c"
-        exit 1
+        # exit 1
         ;;
 esac
 deactivate;
