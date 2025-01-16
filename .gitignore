@@ -8,3 +8,4 @@ test_barrell.vhd
 *.log
 *bin
 pyEnv
+*obj
