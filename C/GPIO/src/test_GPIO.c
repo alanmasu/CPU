@@ -1,11 +1,9 @@
 // #include <inttypes.h>
-// int*  GPIO_BASE_ADDRESS = (int*)0x40020000;
-// int* GPIO_DIR_REG = (char*)0x40020004;
-// int* GPIO_DATA_REG = (char*)0x40020008;
 
-char* PORT_A = (char*)0x40020003;
-char* PORT_A_DIR = (char*)0x40020007;
-char* PORT_A_DATA = (char*)0x4002000B;
+
+// char* PORT_A = (char*)0x40020003;
+// char* PORT_A_DIR = (char*)0x40020007;
+// char* PORT_A_DATA = (char*)0x4002000B;
 
 // char* PORT_B = (char*)0x40020002;
 // char* PORT_B_DIR = (char*)0x40020006;
@@ -30,13 +28,25 @@ char* PORT_A_DATA = (char*)0x4002000B;
 #define GPIO7 0b10000000
 
 int main(int, char**){
-    *PORT_A_DIR = *PORT_A_DIR | GPIO0;      // Set GPIO0 as output
+    int* GPIO_BASE_ADDRESS  = (int*)0x40020000;
+    int* GPIO_DIR_REG       = (int*)0x40020004;
+    int* GPIO_DATA_REG      = (int*)0x40020008;
+
+    *GPIO_DIR_REG = *GPIO_DIR_REG | GPIO0;      // Set GPIO0 as output
+    *GPIO_DATA_REG = 0;                         // Clear all GPIOs
 
     while(1){
-        *PORT_A_DATA = *PORT_A_DATA & ~GPIO0;   // Clear GPIO0
-        for (int i = 0; i < 12500000; i++);
-        *PORT_A_DATA = *PORT_A_DATA | GPIO0;    // Set GPIO0
-        for (int i = 0; i < 12500000; i++);
+        *GPIO_DATA_REG = *GPIO_DATA_REG & ~GPIO0;   // Clear GPIO0
+        
+        for (int i = 0; i < 1250000; i++){
+
+        }
+
+        *GPIO_DATA_REG = *GPIO_DATA_REG | GPIO0;    // Set GPIO0
+
+        for (int i = 0; i < 1250000; i++){
+
+        }
     }
 
 }
