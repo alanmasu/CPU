@@ -18,7 +18,8 @@ main:
     beq    x4, x1, L1       # if x4 == x1, goto L1 // instr=0xff9ff06f
 L2:
     lui    x6, 0x40001      # x6 <- 0x40001
-    sw     x0, 0(x6)        # Mem[x6] <- 0 //run = 0
+    li     x14, 2           # x14 <- 2
+    sw     x14, 0(x6)       # Mem[x6] <- 2 //res = 1 && run = 0 
     jalr   x0, 0(x5)        # goto L3
 L1:
     jal    x5, L2           # else, goto L2 // instr=400012b7 // x5 = PC + 4 = 0x40000028
