@@ -15,17 +15,18 @@ main:
     lui    x3, 0x40010      # x3 <- 0x40010000 // x3 = RAM_START
     sw     x1, 0(x3)        # Mem[x3] <- -16 // Mem[0x40010000] = -16   //PENSARE SE c'è un modo per testare questa istruzione
     lw     x4, 0(x3)        # x4 <- Mem[x3] // x4 = -16
+    nop    #mv     x4, x1           # LOADS do not wowk for now; to continue whit testing, we need to set x4 = x1
     beq    x4, x1, L1       # if x4 == x1, goto L1 // instr=0xff9ff06f
 L2:
     lui    x6, 0x40001      # x6 <- 0x40001
     li     x14, 2           # x14 <- 2
     sw     x14, 0(x6)       # Mem[x6] <- 2 //res = 1 && run = 0 
-    jalr   x0, 0(x5)        # goto L3
+    jalr   x0, 0(x5)        # goto L3 (aka ret x5)
 L1:
     jal    x5, L2           # else, goto L2 // instr=400012b7 // x5 = PC + 4 = 0x40000028
 L3:
-    auipc  x7, 4            # x7 <- PC + 4 // x7 = 0x40000030
-    sw     x7, -8(x8)       # Mem[x8] <- x7 // Mem[0x40011ff8] = 0x40000030
+    auipc  x7, 4            # x7 <- PC + 4 // x7 = 0x40004030
+    sw     x7, -8(x8)       # Mem[x8] <- x7 // Mem[0x40011ff8] = 0x40004030
     addi   x8, x8, -8       # x8 <- x8 - 4 // x8 = 0x40011ff4
     lui    x9, 0x40020      # x9 <- 0x40020 // x9 = 0x40020000 (GPIO START) GPIO_VALUE
     addi   x10, x0, 1       # x10 <- 1 // x10 = 1

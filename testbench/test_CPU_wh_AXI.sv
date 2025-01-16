@@ -77,16 +77,17 @@ module test_CPU_wh_AXI();
   // Data to be written
   logic [31:0] data_array [] = '{
     32'hff000093,
-    32'h00108113,
-    32'h001101b3,
-    32'h400121b7,
-    32'hfe11ae23,
-    32'hffc1a203,
-    32'h00120863,
+    32'h00108a13,
+    32'h001a01b3,
+    32'h400101b7,
+    32'h0011a023,
+    32'h0001a203,
+    32'h00120a63,
     32'h40001337,
-    32'h00032023,
+    32'h00200713,
+    32'h00e32023,
     32'h00028067,
-    32'hff5ff2ef,
+    32'hff1ff2ef,
     32'h00004397,
     32'hfe742c23,
     32'hff840413,
@@ -97,7 +98,40 @@ module test_CPU_wh_AXI();
     32'h0004a583,
     32'h40000637,
     32'h00c62023,
-    32'h00062683
+    32'h00062683,
+    32'h0000006f,
+    32'h00112023, // Start of cat_registers
+    32'hfe212e23,
+    32'hfe312c23,
+    32'hfe412a23,
+    32'hfe512823,
+    32'hfe612623,
+    32'hfe712423,
+    32'hfe812223,
+    32'hfe912023,
+    32'hfca12e23,
+    32'hfcb12c23,
+    32'hfcc12a23,
+    32'hfcd12823,
+    32'hfce12623,
+    32'hfcf12423,
+    32'hfd012223,
+    32'hfd112023,
+    32'hfb212e23,
+    32'hfb312c23,
+    32'hfb412a23,
+    32'hfb512823,
+    32'hfb612623,
+    32'hfb712423,
+    32'hfb812223,
+    32'hfb912023,
+    32'hf9a12e23,
+    32'hf9b12c23,
+    32'hf9c12a23,
+    32'hf9d12823,
+    32'hf9e12623,
+    32'hf9f12423,
+    32'h00008067
   };
 
   // Setup VIP agents
@@ -424,8 +458,8 @@ module test_CPU_wh_AXI();
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
       #1;                       //wait to be after the rising edge of the clock
       validating = 1'b1;
-      //Check instruction       ADDI x2, x1, 1
-      if(regFile[1] == -32'd15) begin
+      //Check instruction       ADDI x20, x1, 1
+      if(regFile[19] == -32'd15) begin
         testPassed = 1;
         message = "OK";
       end else begin
@@ -460,8 +494,8 @@ module test_CPU_wh_AXI();
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
       #1;                       //wait to be after the rising edge of the clock
       validating = 1'b1;
-      //Check instruction       LUI x3, 0x40012
-      if(regFile[2] == 32'h40012000) begin
+      //Check instruction       LUI x3, 0x40010
+      if(regFile[2] == 32'h40010000) begin
         testPassed = 1;
         message = "OK";
       end else begin
@@ -478,8 +512,9 @@ module test_CPU_wh_AXI();
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
       #1;                       //wait to be after the rising edge of the clock
       validating = 1'b1;
-      //Check instruction       SW x1, -4(x3)
-      checkQueuePush(test_n, 32'h40011FFC, -32'd16, "OK", "FAILED -> Mem[0x40011FFC] was");
+      //Check instruction       SW x1, 0(x3)
+      checkQueuePush(test_n, 32'h40010000, -32'd16, "OK", "FAILED -> Mem[0x40010000] was");
+      // addToLog(test_n, 1, "Further more analiys on TEST SUITE are needed: If next test is OK, this test is OK too", 0);
       #1;
       validating = 1'b0;
       @(posedge clock);
@@ -489,7 +524,7 @@ module test_CPU_wh_AXI();
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
       #1;                       //wait to be after the rising edge of the clock
       validating = 1'b1;
-      //Check instruction       LW x4, -4(x3)
+      //Check instruction       LW x4, 0(x3)
       if(regFile[3] == -32'd16) begin
         testPassed = 1;
         message = "OK";
@@ -508,7 +543,7 @@ module test_CPU_wh_AXI();
       #1;                       //wait to be after the rising edge of the clock
       validating = 1'b1;
       //Check instruction       BEQ x4, x1, L1
-      if(instruction_tb == 32'hff5ff2ef) begin 
+      if(instruction_tb == 32'hff1ff2ef) begin 
         testPassed = 1;
         message = "OK";
       end else begin
@@ -525,8 +560,8 @@ module test_CPU_wh_AXI();
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
       #1;                       //wait to be after the rising edge of the clock
       validating = 1'b1;
-      //Check instruction       JAL x5, L2
-      if(regFile[4] == 32'h4000002c) begin 
+      //Check instruction       JAL x5, L2 
+      if(regFile[4] == 32'h40000030) begin // Modify this after compiling the code whit addr(JAL x5, L2) + 4
         testPassed = 1;
         message = "OK";
       end else begin
@@ -566,12 +601,32 @@ module test_CPU_wh_AXI();
       @(posedge clock);
       #1;
 
+      test_n = 32;
+      wait (state_tb == fetch); //wait until the CPU has executed the next instruction
+      #1;                       //wait to be after the rising edge of the clock
+      validating = 1'b1;
+      //Check instruction       li x14, 2
+      if(regFile[13] == 32'h2) begin 
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = "FAILED -> regFile[14] was";
+      end
+      addToLog(test_n, testPassed, message, regFile[13]);
+      #1;
+      validating = 1'b0;
+      @(posedge clock);
+      #1;
+    
+
+
       test_n = 10;
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
       #1;                       //wait to be after the rising edge of the clock
       validating = 1'b1;
-      test_n++;
       // Check instruction       SW x0, 0(x6) //Stop the CPU by setting RUN to 0
+      addToLog(test_n, 1, $sformatf("SKIPPED -> You need to check it: if a AXI transaction is done at %0t on CPU_0.M_AXI interface at Address: 0x%x and value: 2 -> TEST OK", $time, regFile[5]), 0);
       #1;
       validating = 1'b0;
       @(posedge clock);
@@ -582,7 +637,7 @@ module test_CPU_wh_AXI();
       #1;                       //wait to be after the rising edge of the clock
       validating = 1'b1;
       //Check instruction       jalr x0, 0(x5)
-      if(instruction_tb == 32'h00004397) begin 
+      if(instruction_tb == 32'h00004397) begin  //Modi
         testPassed = 1;
         message = "OK";
       end else begin
@@ -600,7 +655,7 @@ module test_CPU_wh_AXI();
       #1;                       //wait to be after the rising edge of the clock
       validating = 1'b1;
       //Check instruction       AUIPC x7, 0x4
-      if(regFile[6] == 32'h4000402c) begin 
+      if(regFile[6] == 32'h40004030) begin   // TO MODIFY whit addr(AUIPC x7, 0x4) + (4 << 12) (3 cifre esadeciamli)
         testPassed = 1;
         message = "OK";
       end else begin
@@ -618,7 +673,7 @@ module test_CPU_wh_AXI();
       #1;                       //wait to be after the rising edge of the clock
       validating = 1'b1;
       //Check instruction       sw x7, -8(x8)
-      checkQueuePush(test_n, 32'h40011ff8, 32'h40004030, "OK", "FAILED -> Mem[0x40011FF8] was");
+      checkQueuePush(test_n, 32'h40011ff4, 32'h40004030, "OK", "FAILED -> Mem[0x40011FF8] was");
       #1;
       validating = 1'b0;
       @(posedge clock);
@@ -866,7 +921,7 @@ module test_CPU_wh_AXI();
       end
       addToLog(test_n, testPassed, message, control_reg_tb[2], $sformatf("#%0da", test_n));
 
-      //Check state_dbg == memory_writeback (aka stato ATTUALE)
+      //Check state_dbg == fetch (aka stato ATTUALE)
       if(state_dbg == fetch) begin // State 
         testPassed = 1;
         message = "OK";
@@ -876,7 +931,7 @@ module test_CPU_wh_AXI();
       end
       addToLog(test_n, testPassed, message, state_dbg, $sformatf("#%0db", test_n));
 
-      if(control_reg_tb[3] == 32'h00108113) begin 
+      if(control_reg_tb[3] == 32'hff000093) begin 
         testPassed = 1;
         message = "OK";
       end else begin
@@ -971,7 +1026,7 @@ module test_CPU_wh_AXI();
       oled_select0 = 1;
       #1;
       validating = 1'b1;
-      if(display_in_tb == 32'hfe11ae23) begin 
+      if(display_in_tb == 32'h00120a63) begin 
         testPassed = 1;
         message = "OK";
       end else begin
@@ -981,6 +1036,10 @@ module test_CPU_wh_AXI();
       addToLog(test_n, testPassed, message, display_in_tb, $sformatf("#%0da", test_n)); 
       
       #1;
+
+      ///////////// TEST 32 UP, between Test #10 and Test #11
+
+
     end 
   endtask  
 
@@ -998,3 +1057,36 @@ module test_CPU_wh_AXI();
   end
 
 endmodule
+
+// Program assembly code:
+// main:
+//     addi   x1, x0,-16       # x1 <- -16
+//     addi   x20, x1, 1        # x20 <- x1 + 1  // x20 = -15
+//     add    x3, x20, x1      # x3 <- x20 + x1 // x3 = -31
+//     lui    x3, 0x40010      # x3 <- 0x40010000 // x3 = RAM_START
+//     sw     x1, 0(x3)        # Mem[x3] <- -16 // Mem[0x40010000] = -16   //PENSARE SE c'è un modo per testare questa istruzione
+//     lw     x4, 0(x3)        # x4 <- Mem[x3] // x4 = -16
+//     nop    #mv     x4, x1           # LOADS do not wowk for now; to continue whit testing, we need to set x4 = x1
+//     beq    x4, x1, L1       # if x4 == x1, goto L1 // instr=0xff9ff06f
+// L2:
+//     lui    x6, 0x40001      # x6 <- 0x40001
+//     li     x14, 2           # x14 <- 2
+//     sw     x14, 0(x6)       # Mem[x6] <- 2 //res = 1 && run = 0 
+//     jalr   x0, 0(x5)        # goto L3 (aka ret x5)
+// L1:
+//     jal    x5, L2           # else, goto L2 // instr=400012b7 // x5 = PC + 4 = 0x40000028
+// L3:
+//     auipc  x7, 4            # x7 <- PC + 4 // x7 = 0x40004030
+//     sw     x7, -8(x8)       # Mem[x8] <- x7 // Mem[0x40011ff8] = 0x40004030
+//     addi   x8, x8, -8       # x8 <- x8 - 4 // x8 = 0x40011ff4
+//     lui    x9, 0x40020      # x9 <- 0x40020 // x9 = 0x40020000 (GPIO START) GPIO_VALUE
+//     addi   x10, x0, 1       # x10 <- 1 // x10 = 1
+//     sw     x10, 4(x9)       # Mem[x9 + 4] <- x10 // GPIO[0x40020004] = 1    // GPIO_DIR_REG
+//     sw     x10, 8(x9)       # Mem[x9 + 8] <- x10 // GPIO[0x40020008] = 1    // GPIO_OUT_REG
+//     lw     x11, 0(x9)       # x11 <- Mem[x9] // x11 = 1                     // GPIO_VALUE
+//     lui    x12, 0x40000     # x12 <- 0x40000 // x12 = 0x40000000
+//     sw     x12, 0(x12)      # Mem[x12] <- x12 // Mem[0x40000000] = 0x40000000        // AXI WRITE
+//     lw     x13, 0(x12)      # x13 <- Mem[x12] // x13 = 0x40000000                    // AXI READ
+//     call   cat_registers    # call cat_registers
+// L4:
+//     j      L4               # trap CPU

@@ -683,6 +683,9 @@ begin
             case state is
                 when idle =>
                     pc_load <= '1';
+                    mem_we <= '0';
+                    mem_ena <= '0';
+                    regFile_we <= '0';
                 when execute =>
                     pc_load <= '1';
                     case (op_class_decoded) is
@@ -723,6 +726,7 @@ begin
                         pc_load <= '0';
                         regFile_we <= '0';
                         mem_we <= '0';
+                        mem_ena <= '0';
                     end if ;
                 when others => 
                     pc_load <= '0';
@@ -734,6 +738,7 @@ begin
             pc_load <= '0';
             regFile_we <= '0';
             mem_we <= '0';  
+            mem_ena <= '0';
         end if ;
     end process ; -- ena_mealy
 
