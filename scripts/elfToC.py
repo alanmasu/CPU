@@ -1,7 +1,7 @@
 import argparse
 from elftools.elf.elffile import ELFFile
 
-def extract_text_section_to_c(file_path, output_path):
+def extract_text_section_to_c(file_path, output_path, programName):
     try:
         with open(file_path, 'rb') as f:
             elf = ELFFile(f)
@@ -24,9 +24,10 @@ def extract_text_section_to_c(file_path, output_path):
             
             # Genera il contenuto del file .c
             c_content = "#include <stdint.h>\n\n"
-            c_content += "const uint32_t text_memory[] = {\n"
+            c_content += "const uint32_t "
+            c_content += programName +"[] = {\n"
             c_content += ',\n'.join(f"    0x{instr}" for instr in instructions)
-            c_content += "\n};\n"
+            c_content += ",\n    0\n};\n"
             
             # Salva il file .c
             with open(output_path, 'w') as out_file:
@@ -41,10 +42,13 @@ def main():
     parser = argparse.ArgumentParser(description="Estrai la sezione .text da un file ELF e generala come file .c.")
     parser.add_argument("file", help="Percorso del file ELF da elaborare")
     parser.add_argument("output", help="Percorso del file .c di output")
+    parser.add_argument("program", help="Nome della variabile creata nel file .c")
     args = parser.parse_args()
     
     # Chiama la funzione con i file specificati dall'utente
-    extract_text_section_to_c(args.file, args.output)
+    extract_text_section_to_c(args.file, args.output, args.program) 
 
 if __name__ == "__main__":
     main()
+
+# tilde ~ 
