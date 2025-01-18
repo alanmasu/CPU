@@ -137,3 +137,4 @@ make
 - [x] Jump
 - [x] LUI
 - [x] AUIPC
+- [ ] Provare a togliere 'ena' al MEM&WB nello stato di 'mem_wb' per sistemare le load riflessive tipo `lw x1, 0(x1)`

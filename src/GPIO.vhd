@@ -56,7 +56,8 @@ entity GPIO is
         d_out   : buffer STD_LOGIC_VECTOR (31 downto 0);
         wea     : in STD_LOGIC_VECTOR (3 downto 0);
         ena     : in STD_LOGIC;
-        GPIO    : inout STD_LOGIC_VECTOR (31 downto 0)
+        GPIO    : inout STD_LOGIC_VECTOR (31 downto 0);
+        gpio_state_dbg : out STD_LOGIC_VECTOR (31 downto 0)
         -- GPIO_out : inout STD_LOGIC_VECTOR (GPIO_SIZE-1 downto 0)
     );
 end GPIO;
@@ -78,9 +79,9 @@ begin
     gpio_reg_s <= GPIO_reg(7 downto 0);
     gpio_out_s <= GPIO(7 downto 0);
     
-    -- Registro di stato [combinatorio]
-    GPIO_state <= GPIO;
-    
+    ---------------- DEBUG ----------------
+    gpio_state_dbg <= GPIO_state;
+
     -- Processo sequenziale
     sequential_pro : process( clk, res ) begin
         if res = '0' then
@@ -89,7 +90,8 @@ begin
             d_out <= (others => '0');
         elsif rising_edge(clk) then
             d_out <= d_out;         -- latched value
-
+            -- Registro di stato
+            GPIO_state <= GPIO;
             if ena = '1' then       -- if Enabled
                 case(address(3 downto 2)) is
                     when "00" =>    -- READ
@@ -133,20 +135,19 @@ begin
     end process ; -- sequential_pro
     
     -- Processo combinatorio
-    GPIO_pro : process(res, GPIO_dir, GPIO_reg )    
+    GPIO_pro : process(res, GPIO_dir, GPIO_reg)    
     begin
         if res = '0' then
             GPIO <= (others => 'Z');
         else
-            if ena = '1' then
-                for i in 0 to 31 loop
-                    if GPIO_dir(i) = '1' then
-                        GPIO(i) <= gpio_reg(i);
-                    else
-                        GPIO(i) <= 'Z';
-                    end if ;
-                end loop ;
-            end if ;
+            GPIO <= (others => 'Z');
+            for i in 0 to 31 loop
+                if GPIO_dir(i) = '1' then
+                    GPIO(i) <= gpio_reg(i);
+                else
+                    GPIO(i) <= 'Z';
+                end if ;
+            end loop ;
         end if ;
     end process ; -- GPIO_pro
 

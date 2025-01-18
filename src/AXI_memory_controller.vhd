@@ -286,11 +286,15 @@ begin
 				axi_wvalid <= '0';
 				dwrite_state <= dwrite_state;
 				dwrite_end <= '0';
+				-- axi_wstrb <= (others => '0');
 				case( dwrite_state ) is
 					when IDLE =>
 						if en = '1' and we /= "0000" and stall_int = '0' then
 							dwrite_state <= write;
 							axi_wdata <= write_data;
+							axi_wstrb <= we;
+						else
+						    axi_wstrb <= (others => '0');
 						end if ;	
 					when write => 
 						axi_wvalid <= '1';

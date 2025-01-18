@@ -29,6 +29,7 @@ module test_CPU_wh_AXI();
   wire                                    aliveLed;
   wire [31:0]                             GPIO;
   bit  [4:0]                              BTNs = 5'b1;
+  bit  [1:0]                              switches = 2'b1;
 
   wire                                    [2:0] LEDs;
   wire                                    [2:0] state_dbg;
@@ -67,6 +68,7 @@ module test_CPU_wh_AXI();
     .btn_left_0   (BTNs[2]),
     .btn_right_0  (BTNs[3]),
     .btn_center_0 (BTNs[4]),
+    .switches_0   (switches),
     .leds_0(LEDs),
     .state_dbg_0(state_dbg),
     .oled_select0_0(oled_select0) 
@@ -626,7 +628,7 @@ module test_CPU_wh_AXI();
       #1;                       //wait to be after the rising edge of the clock
       validating = 1'b1;
       // Check instruction       SW x0, 0(x6) //Stop the CPU by setting RUN to 0
-      addToLog(test_n, 1, $sformatf("SKIPPED -> You need to check it: if a AXI transaction is done at %0t on CPU_0.M_AXI interface at Address: 0x%x and value: 2 -> TEST OK", $time, regFile[5]), 0);
+      addToLog(test_n, 1, $sformatf("SKIPPED -> You need to check it: if a WRITE AXI transaction is done at %0t on CPU_0.M_AXI interface at Address: 0x%x and value: 2 -> TEST OK", $time, regFile[5]), 0);
       #1;
       validating = 1'b0;
       @(posedge clock);
@@ -861,7 +863,7 @@ module test_CPU_wh_AXI();
       #10;
       validating = 1'b1;
       #1;
-      addToLog(test_n, 1, $sformatf("SKIPPED -> You need to check if a LOW glitch is present on RES sig at %0t", $time), 0);
+      addToLog(test_n, 1, $sformatf("SKIPPED -> You need to check it: if a LOW glitch is present on RES sig at %0t", $time), 0);
       // addToLog(test_n, testPassed, message, control_reg_tb[CREG_CTR][CREG_RES_BIT]);
       validating = 1'b0;
 
@@ -970,15 +972,16 @@ module test_CPU_wh_AXI();
         mtestRresp 
       );
       validating = 1'b1;   
-      if(mtestRDataL[31:4] == 32'h0 && mtestRDataL[3:0] == 1) begin 
+      if(mtestRDataL[31:6] == 32'h0 && mtestRDataL[3:0] == 1) begin 
         testPassed = 1;
         message = "OK";
       end else begin
         testPassed = 0;
         message = "FAILED -> mtestRDataL was";
       end
-      addToLog(test_n, testPassed, message, mtestRDataL[31:0], $sformatf("#%0da", test_n));
-      if(control_reg_tb[4] == 32'h00000001) begin 
+      addToLog(test_n, testPassed, message, mtestRDataL[31:6], $sformatf("#%0da", test_n));
+      
+      if(control_reg_tb[4] == 32'h00000011) begin 
         testPassed = 1;
         message = "OK";
       end else begin

@@ -124,6 +124,23 @@ entity CPU is
         res_dbg         : OUT STD_LOGIC;
         res_in_dbg      : OUT STD_LOGIC;
         state_dbg       : OUT STD_LOGIC_VECTOR(2 downto 0);
+        M_WB_en_dbg     : OUT STD_LOGIC;
+        M_WB_we_dbg     : OUT STD_LOGIC;
+        mem_we_dbg      : OUT STD_LOGIC_VECTOR(3 downto 0);
+        regFile_we_dbg  : OUT STD_LOGIC;
+        mem_addr_dbg    : OUT STD_LOGIC_VECTOR(31 downto 0);
+        mem_data_dbg    : OUT STD_LOGIC_VECTOR(31 downto 0);
+        mem_rdata_dbg   : OUT STD_LOGIC_VECTOR(31 downto 0);
+        ram_en_dbg      : OUT STD_LOGIC;
+        axi_en_dbg      : OUT STD_LOGIC;
+        gpio_en_dbg     : OUT STD_LOGIC;
+        axi_stall_dbg   : OUT STD_LOGIC;
+        instruction_dbg : OUT STD_LOGIC_VECTOR(31 downto 0);
+        CREG_CTR_dbg    : OUT STD_LOGIC_VECTOR(7 downto 0);
+        rd_addr_dbg     : OUT STD_LOGIC_VECTOR(4 downto 0);
+
+        gpio_state_dbg  : OUT STD_LOGIC_VECTOR(31 downto 0);
+        gpio_dbg        : OUT STD_LOGIC_VECTOR(31 downto 0);
 
         -- Buttons
         btn_up          : IN STD_LOGIC;
@@ -131,6 +148,7 @@ entity CPU is
         btn_left        : IN STD_LOGIC;
         btn_right       : IN STD_LOGIC;
         btn_center      : IN STD_LOGIC;
+        switches        : IN STD_LOGIC_VECTOR(1 downto 0);
 
         -- LEDs
         leds            : OUT STD_LOGIC_VECTOR(2 downto 0);
@@ -508,7 +526,8 @@ begin
         wea => mem_wb_we_out,
         d_in => mem_wb_data_out,
         d_out => d_bus_in.GPIO_data,
-        GPIO => GPIO
+        GPIO => GPIO,
+        gpio_state_dbg => gpio_state_dbg
     );
 
     -- OLED Display
@@ -531,6 +550,23 @@ begin
     run_in_dbg <= run_in;
     res_dbg <= res;
     res_in_dbg <= res_in;
+        -- Memory Writeback
+    M_WB_en_dbg     <= mem_ena;
+    M_WB_we_dbg     <= mem_we;
+    mem_we_dbg      <= mem_wb_we_out;
+    regFile_we_dbg  <= regFile_we;
+    mem_addr_dbg    <= mem_wb_addr_out;
+    mem_data_dbg    <= mem_wb_data_out;
+    mem_rdata_dbg   <= rd_value_in;
+    ram_en_dbg      <= mem_wb_en_out.en_mem;
+    axi_en_dbg      <= mem_wb_en_out.en_AXI;
+    gpio_en_dbg     <= mem_wb_en_out.en_GPIO;
+    axi_stall_dbg   <= AXI_stall;
+    instruction_dbg <= instruction_fetched;
+    CREG_CTR_dbg    <= control_reg(CREG_CTR)(7 downto 0);
+    rd_addr_dbg     <= rd_addr_in;
+    gpio_dbg        <= GPIO;
+    
 
     state_dbg_comb : process( state ) is 
         variable state_integer : integer := 0;
@@ -595,6 +631,8 @@ begin
             control_reg(CREG_IO)(1) <= btn_down;
             control_reg(CREG_IO)(2) <= btn_left;
             control_reg(CREG_IO)(3) <= btn_right;
+            control_reg(CREG_IO)(4) <= switches(0);
+            control_reg(CREG_IO)(5) <= switches(1);
 
         end if;
     end process ; -- control_reg_file

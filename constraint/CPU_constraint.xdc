@@ -19,14 +19,14 @@ set_property PACKAGE_PIN U14 [get_ports {GPIO_0[3]}];  # "LD7"
 # ----------------------------------------------------------------------------
 # User DIP Switches - Bank 35
 # ---------------------------------------------------------------------------- 
-set_property PACKAGE_PIN F22 [get_ports {run_in_0}];  # "SW0"
+set_property PACKAGE_PIN F22 [get_ports {run_in_0}];        # "SW0"
 set_property PACKAGE_PIN G22 [get_ports {oled_select0_0}];  # "SW1"
-# set_property PACKAGE_PIN H22 [get_ports {WS2}];  # "SW2"
-# set_property PACKAGE_PIN F21 [get_ports {SW3}];  # "SW3"
-set_property PACKAGE_PIN H19 [get_ports {GPIO_0[4]}];  # "SW4"
-set_property PACKAGE_PIN H18 [get_ports {GPIO_0[5]}];  # "SW5"
-set_property PACKAGE_PIN H17 [get_ports {GPIO_0[6]}];  # "SW6"
-set_property PACKAGE_PIN M15 [get_ports {GPIO_0[7]}];  # "SW7"
+set_property PACKAGE_PIN H22 [get_ports {switches_0[0]}];   # "SW2"
+set_property PACKAGE_PIN F21 [get_ports {switches_0[1]}];   # "SW3"
+set_property PACKAGE_PIN H19 [get_ports {GPIO_0[4]}];       # "SW4"
+set_property PACKAGE_PIN H18 [get_ports {GPIO_0[5]}];       # "SW5"
+set_property PACKAGE_PIN H17 [get_ports {GPIO_0[6]}];       # "SW6"
+set_property PACKAGE_PIN M15 [get_ports {GPIO_0[7]}];       # "SW7"
 
 # ----------------------------------------------------------------------------
 # User Push Buttons - Bank 34
