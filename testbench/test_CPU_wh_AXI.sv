@@ -824,11 +824,14 @@ module test_CPU_wh_AXI();
       validating = 1'b1;
       addToLog(test_n, 1, "SKIPPED", 1);
       //Check instruction       lw x13, 0(x12)
-      // if(regFile[12] == 32'h40000000) begin 
-      //   $display("Test #22: OK");
-      // end else begin
-      //   $display("Test #22: FAILED -> regFile[13] was %h", regFile[12]);
-      // end
+      if(regFile[12] == 32'h40000000) begin 
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = "FAILED -> regFile[13] was";
+      end
+      addToLog(test_n, testPassed, message, regFile[12]);
 
       // $finish;
       test_n = 23;

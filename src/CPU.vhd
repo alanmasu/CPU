@@ -236,7 +236,8 @@ architecture Behavioral of CPU is
     --Decode - MSF 
     signal regFile_we : std_logic := '0';
     --Decode - IN | Memory Writeback - OUT
-    signal rd_addr_in : std_logic_vector(4 downto 0) := (others => '0');
+    signal rd_addr_in : std_logic_vector(4 downto 0) := (others => '0');    -- Memory Writeback - OUT
+    signal rd_addr_in_decode : std_logic_vector(4 downto 0) := (others => '0'); -- Decode - IN
     signal rd_value_in : std_logic_vector(31 downto 0) := (others => '0');
     --Decode - OUT | Execute - IN
     signal rs1_value, rs2_value, immediate : std_logic_vector(31 downto 0) := (others => '0');
@@ -260,6 +261,8 @@ architecture Behavioral of CPU is
 
     --Memory Writeback - IN
     signal d_bus_in : peripheral_data_t;
+    signal mem_wb_op_class : std_logic_vector(4 downto 0) := (others => '0');
+    signal mem_wb_mem_opcode : std_logic_vector(2 downto 0) := (others => '0');
 
     --Memory Writeback - OUT | Peripheral - IN
     signal mem_wb_en_out : en_bus_t := (
@@ -282,6 +285,13 @@ architecture Behavioral of CPU is
     --Execute - MSF
     signal mem_we : std_logic := '0';
     signal mem_ena : std_logic := '0';
+    signal is_axi_load : std_logic := '0';
+    signal rd_addr_out_reg : std_logic_vector(4 downto 0) := (others => '0');
+    signal op_class_reg : std_logic_vector(4 downto 0) := (others => '0');
+    signal mem_opcode_reg : std_logic_vector(2 downto 0) := (others => '0');
+    -- type is_axi_state_t is (waiting, triggered, finishing);
+    type is_axi_state_t is (waiting, triggered);
+    signal is_axi_state : is_axi_state_t := waiting; 
 
     --AXI Memory Controller
     signal AXI_read_data : std_logic_vector(31 downto 0) := (others => '0');
@@ -377,7 +387,7 @@ begin
         pc_in => pc_fetched,
         npc_in => npc_fetched,
         rd_value_in => rd_value_in,
-        rd_addr_in => rd_addr_in
+        rd_addr_in => rd_addr_in_decode
     );
     
     --Execute
@@ -459,13 +469,14 @@ begin
         jmp => jmp_executed,
         we_in => mem_we,
         en_in => mem_ena,
-        mem_opcode => mem_opcode_executed,
-        op_class => op_class_executed,
+        mem_opcode => mem_wb_mem_opcode,
+        op_class => mem_wb_op_class,
         npc_in => npc_executed,
         alu_resoult => result,
         alu_resoult_reg => result_reg,
         rs2_value => rs2_value_executed,
         rd_addr_in => rd_addr_executed,
+        is_axi_load => is_axi_load,
 
         --Peripheral
         en_out => mem_wb_en_out,
@@ -716,6 +727,38 @@ begin
         end if;
     end process;
 
+    rd_addr_pro : process( clk, res ) begin
+        if(res = '0') then
+            rd_addr_out_reg <= (others => '0');
+            op_class_reg <= (others => '0');
+            mem_opcode_reg <= (others => '0');
+            is_axi_state <= waiting;
+        elsif(rising_edge(clk)) then 
+            case( is_axi_state ) is
+                when waiting =>
+                    if state = execute and op_class_executed = "00100" and mem_wb_en_out.en_AXI = '1' then 
+                        rd_addr_out_reg <= rd_addr_executed;
+                        op_class_reg <= op_class_executed;
+                        mem_opcode_reg <= mem_opcode_executed;
+                        is_axi_load <= '1';
+                        is_axi_state <= triggered;
+                    end if ;
+                when triggered =>
+                    if AXI_stall = '0' then
+                        is_axi_load <= '0';
+                        is_axi_state <= waiting;
+                    end if ;
+                -- when finishing =>
+                --     is_axi_load <= '0';
+                --     is_axi_state <= waiting;
+            end case ;
+        end if;
+    end process ; -- rd_addr_pro
+
+    rd_addr_in_decode   <= rd_addr_in           when is_axi_load = '0' else rd_addr_out_reg;
+    mem_wb_op_class     <= op_class_executed    when is_axi_load = '0' else op_class_reg;
+    mem_wb_mem_opcode   <= mem_opcode_executed  when is_axi_load = '0' else mem_opcode_reg;
+
     ena_mealy : process( state, AXI_stall, run, op_class_decoded ) begin
         if run = '1' then
             case state is
@@ -751,7 +794,7 @@ begin
                                 mem_we <= '1';
                                 mem_ena <= '1';
                             when "00100" => --Load
-                                mem_ena <= '1';
+                                mem_ena <= '0';
                                 regFile_we <= '1';
                             when "00001" => --Jump 
                                 regFile_we <= '1';   
