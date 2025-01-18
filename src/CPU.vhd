@@ -167,7 +167,12 @@ end CPU;
 
 architecture Behavioral of CPU is
     
+    -- MACCHINA A STATI
     signal state : state_type := fetch;
+    signal is_axi_load : std_logic := '0';
+    signal rd_addr_out_reg : std_logic_vector(4 downto 0) := (others => '0');
+    signal op_class_reg : std_logic_vector(4 downto 0) := (others => '0');
+    signal mem_opcode_reg : std_logic_vector(2 downto 0) := (others => '0');
 
     -- RUN/RES
     signal res          : std_logic := '0';
@@ -249,7 +254,6 @@ architecture Behavioral of CPU is
     signal op_class_decoded : std_logic_vector(4 downto 0) := (others => '0');
 
     --Execute - MSF
-    --
     --Execute - OUT | Memory Writeback - IN
     signal result, result_reg : std_logic_vector(31 downto 0) := (others => '0');
     signal npc_executed : unsigned(31 downto 0) := (others => '0');
@@ -274,7 +278,7 @@ architecture Behavioral of CPU is
     signal mem_wb_addr_out : std_logic_vector(31 downto 0) := (others => '0');
     signal mem_wb_data_out : std_logic_vector(31 downto 0) := (others => '0');
 
-    --BRAM 
+        --BRAM 
     signal bram_rst_a_d : STD_LOGIC;
     signal bram_clk_a_d : STD_LOGIC;
     signal bram_en_a_d : STD_LOGIC;
@@ -282,18 +286,11 @@ architecture Behavioral of CPU is
     signal bram_addr_a_d : STD_LOGIC_VECTOR(19 DOWNTO 0);
     signal bram_wrdata_a_d : STD_LOGIC_VECTOR(31 DOWNTO 0);
     signal bram_rddata_a_d : STD_LOGIC_VECTOR(31 DOWNTO 0);
-    --Execute - MSF
+        --Execute - MSF
     signal mem_we : std_logic := '0';
     signal mem_ena : std_logic := '0';
-    signal is_axi_load : std_logic := '0';
-    signal rd_addr_out_reg : std_logic_vector(4 downto 0) := (others => '0');
-    signal op_class_reg : std_logic_vector(4 downto 0) := (others => '0');
-    signal mem_opcode_reg : std_logic_vector(2 downto 0) := (others => '0');
-    -- type is_axi_state_t is (waiting, triggered, finishing);
-    type is_axi_state_t is (waiting, triggered);
-    signal is_axi_state : is_axi_state_t := waiting; 
 
-    --AXI Memory Controller
+        --AXI Memory Controller
     signal AXI_read_data : std_logic_vector(31 downto 0) := (others => '0');
     signal AXI_stall : std_logic := '0';
 
@@ -732,25 +729,21 @@ begin
             rd_addr_out_reg <= (others => '0');
             op_class_reg <= (others => '0');
             mem_opcode_reg <= (others => '0');
-            is_axi_state <= waiting;
         elsif(rising_edge(clk)) then 
-            case( is_axi_state ) is
-                when waiting =>
+            case( is_axi_load ) is
+                when '0' =>
                     if state = execute and op_class_executed = "00100" and mem_wb_en_out.en_AXI = '1' then 
                         rd_addr_out_reg <= rd_addr_executed;
                         op_class_reg <= op_class_executed;
                         mem_opcode_reg <= mem_opcode_executed;
                         is_axi_load <= '1';
-                        is_axi_state <= triggered;
                     end if ;
-                when triggered =>
+                when '1' =>
                     if AXI_stall = '0' then
                         is_axi_load <= '0';
-                        is_axi_state <= waiting;
                     end if ;
-                -- when finishing =>
-                --     is_axi_load <= '0';
-                --     is_axi_state <= waiting;
+                when others =>
+                    is_axi_load <= '0';
             end case ;
         end if;
     end process ; -- rd_addr_pro

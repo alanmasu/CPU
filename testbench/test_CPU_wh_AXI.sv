@@ -812,7 +812,7 @@ module test_CPU_wh_AXI();
       #1;                       //wait to be after the rising edge of the clock
       validating = 1'b1;
       //Check instruction       sw x12, 0(x12)
-      addToLog(test_n, 1, "SKIPPED", 1);
+      // addToLog(test_n, 1, "SKIPPED", 1);
       #1;
       validating = 1'b0;
       @(posedge clock);
@@ -822,7 +822,7 @@ module test_CPU_wh_AXI();
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
       #1;                       //wait to be after the rising edge of the clock
       validating = 1'b1;
-      addToLog(test_n, 1, "SKIPPED", 1);
+      // addToLog(test_n, 1, "SKIPPED", 1);
       //Check instruction       lw x13, 0(x12)
       if(regFile[12] == 32'h40000000) begin 
         testPassed = 1;
@@ -830,6 +830,11 @@ module test_CPU_wh_AXI();
       end else begin
         testPassed = 0;
         message = "FAILED -> regFile[13] was";
+      end
+      if(testPassed == 1) begin
+        addToLog(test_n-1, 1, "OK", 1);
+      end else begin
+        addToLog(test_n-1, 1, "UNKNOWN -> reading memory at the address get:", regFile[12]);
       end
       addToLog(test_n, testPassed, message, regFile[12]);
 
