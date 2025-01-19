@@ -150,9 +150,7 @@ begin
     --     end if ;
     -- end process ; -- GPIO_pro
     gpio_for_loop : for i in 0 to 31 generate
-        GPIO(i) <=  'Z'         when res = '0' else
-                    gpio_reg(i) when GPIO_dir(i) = '1' else
-                    'Z';
+        GPIO(i) <=  GPIO_reg(i) when GPIO_dir(i) = '1' else 'Z';
     end generate ; -- gpio_for_loop
 
 end Behavioral;
