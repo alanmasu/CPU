@@ -32,17 +32,22 @@ int main(int, char**){
     int* GPIO_DIR_REG       = (int*)0x40020004;
     int* GPIO_DATA_REG      = (int*)0x40020008;
 
-    *GPIO_DIR_REG = *GPIO_DIR_REG | GPIO0;      // Set GPIO0 as output
-    *GPIO_DATA_REG = 0;                         // Clear all GPIOs
+    *GPIO_DIR_REG = 1;                          // Set all GPIOs as input
+    *GPIO_DATA_REG = 0;                         // Clear all GPIOs 
+
+    // *GPIO_DIR_REG = *GPIO_DIR_REG | GPIO0;      // Set GPIO0 as output
+    // *GPIO_DATA_REG = 0;                         // Clear all GPIOs
 
     while(1){
-        *GPIO_DATA_REG = *GPIO_DATA_REG & ~GPIO0;   // Clear GPIO0
-        
+        // *GPIO_DATA_REG = *GPIO_DATA_REG & ~GPIO0;   // Clear GPIO0
+        *GPIO_DATA_REG = 0;                       // Clear all GPIOs
+
         for (int i = 0; i < 1250000; i++){
 
         }
 
-        *GPIO_DATA_REG = *GPIO_DATA_REG | GPIO0;    // Set GPIO0
+        // *GPIO_DATA_REG = *GPIO_DATA_REG | GPIO0;    // Set GPIO0
+        *GPIO_DATA_REG = 1;
 
         for (int i = 0; i < 1250000; i++){
 
