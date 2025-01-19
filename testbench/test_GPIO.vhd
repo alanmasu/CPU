@@ -152,7 +152,6 @@ begin
         address <= x"00000000";
         wea <= "0000";
         wait for 2 ns;
-        wait for 10 ns;
         if d_out = x"fffffffc" then
             esito <= '1';
             report "Test 5 OK";

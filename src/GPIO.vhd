@@ -65,7 +65,6 @@ end GPIO;
 architecture Behavioral of GPIO is
     signal GPIO_dir     : STD_LOGIC_VECTOR (31 downto 0);
     signal GPIO_reg     : STD_LOGIC_VECTOR (31 downto 0);
-    signal GPIO_state   : STD_LOGIC_VECTOR (31 downto 0);
 
     -- For Testing
     signal gpio_dir_s   : STD_LOGIC_VECTOR (7 downto 0);
@@ -74,13 +73,12 @@ architecture Behavioral of GPIO is
     signal gpio_out_s   : STD_LOGIC_VECTOR (7 downto 0);
 begin
     -- For testing
-    gpio_state_s <= GPIO_state(7 downto 0);
     gpio_dir_s <= GPIO_dir(7 downto 0);
     gpio_reg_s <= GPIO_reg(7 downto 0);
     gpio_out_s <= GPIO(7 downto 0);
     
     ---------------- DEBUG ----------------
-    gpio_state_dbg <= GPIO_state;
+    -- gpio_state_dbg <= GPIO_state;
 
     -- Processo sequenziale
     sequential_pro : process( clk, res ) begin
@@ -88,14 +86,15 @@ begin
             GPIO_dir <= (others => '0');
             GPIO_reg <= (others => '0');
             d_out <= (others => '0');
+            gpio_state_dbg <= (others => '0');
         elsif rising_edge(clk) then
             d_out <= d_out;         -- latched value
             -- Registro di stato
-            GPIO_state <= GPIO;
+            gpio_state_dbg <= GPIO;
             if ena = '1' then       -- if Enabled
                 case(address(3 downto 2)) is
                     when "00" =>    -- READ
-                        d_out <= GPIO_state;
+                        d_out <= GPIO;
                     when "01" =>    -- DIR
                         if wea(0) = '1' then
                             GPIO_dir(7 downto 0) <= d_in(7 downto 0);
@@ -135,20 +134,25 @@ begin
     end process ; -- sequential_pro
     
     -- Processo combinatorio
-    GPIO_pro : process(res, GPIO_dir, GPIO_reg)    
-    begin
-        if res = '0' then
-            GPIO <= (others => 'Z');
-        else
-            GPIO <= (others => 'Z');
-            for i in 0 to 31 loop
-                if GPIO_dir(i) = '1' then
-                    GPIO(i) <= gpio_reg(i);
-                else
-                    GPIO(i) <= 'Z';
-                end if ;
-            end loop ;
-        end if ;
-    end process ; -- GPIO_pro
+    -- GPIO_pro : process(res, GPIO_dir, GPIO_reg)    
+    -- begin
+    --     if res = '0' then
+    --         GPIO <= (others => 'Z');
+    --     else
+    --         GPIO <= (others => 'Z');
+    --         for i in 0 to 31 loop
+    --             if GPIO_dir(i) = '1' then
+    --                 GPIO(i) <= gpio_reg(i);
+    --             else
+    --                 GPIO(i) <= 'Z';
+    --             end if ;
+    --         end loop ;
+    --     end if ;
+    -- end process ; -- GPIO_pro
+    gpio_for_loop : for i in 0 to 31 generate
+        GPIO(i) <=  'Z'         when res = '0' else
+                    gpio_reg(i) when GPIO_dir(i) = '1' else
+                    'Z';
+    end generate ; -- gpio_for_loop
 
 end Behavioral;

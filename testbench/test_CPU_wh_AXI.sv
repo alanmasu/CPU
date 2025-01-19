@@ -27,7 +27,8 @@ module test_CPU_wh_AXI();
   bit                                     reset;
   bit                                     run = 1;
   wire                                    aliveLed;
-  wire [31:0]                             GPIO;
+  wire [31:0]                             GPIO = 'z;
+  logic [31:0]                            GPIO_sig = '0;
   bit  [4:0]                              BTNs = 5'b1;
   bit  [1:0]                              switches = 2'b1;
 
@@ -396,10 +397,10 @@ module test_CPU_wh_AXI();
   assign GPIO_dir_tb = DUT.test_design_i.CPU_0.U0.gpio_driver.GPIO_dir;
   logic [31:0] GPIO_reg_tb;
   assign GPIO_reg_tb = DUT.test_design_i.CPU_0.U0.gpio_driver.GPIO_reg;
-  logic [31:0] GPIO_state_tb;
-  assign GPIO_state_tb = DUT.test_design_i.CPU_0.U0.gpio_driver.GPIO_state;
   wire GPIO1;
   assign GPIO1 = GPIO[0];
+
+  assign GPIO = GPIO_sig;
 
   //OLED
   wire [31:0] display_in_tb;
@@ -736,10 +737,10 @@ module test_CPU_wh_AXI();
 
       test_n = 17;
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
+      GPIO_sig[0] = 1'bz;
       #1;                       //wait to be after the rising edge of the clock
       validating = 1'b1;
       //Check instruction       sw x10, 4(x9)
-      // $display("Test #17: SKIPPED");
       if(GPIO_dir_tb[0] == 1) begin 
         testPassed = 1;
         message = "OK";
@@ -754,6 +755,7 @@ module test_CPU_wh_AXI();
       #1;
 
       test_n = 18;
+      GPIO_sig[1] = 1;
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
       #1;                       //wait to be after the rising edge of the clock
       validating = 1'b1;
@@ -776,14 +778,14 @@ module test_CPU_wh_AXI();
       #1;                       //wait to be after the rising edge of the clock
       validating = 1'b1;
       //Check instruction       lw x11, 0(x9)
-      if(regFile[10] & 32'h1 == 32'h1) begin 
+      if(regFile[10] & 32'h2 == 32'h2) begin 
         testPassed = 1;
         message = "OK";
       end else begin
         testPassed = 0;
         message = "FAILED -> regFile[11] was";
       end
-      addToLog(test_n, testPassed, message, regFile[10]);
+      addToLog(test_n, testPassed, message, regFile[10] & 32'h2);
       #1;
       validating = 1'b0;
       @(posedge clock);
@@ -867,6 +869,7 @@ module test_CPU_wh_AXI();
         mtestWDataL, 
         mtestBresp 
       );
+      GPIO_sig[0] = 0;
       validating = 1'b0;
       #10;
       validating = 1'b1;
