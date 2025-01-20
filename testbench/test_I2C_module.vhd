@@ -64,6 +64,8 @@ architecture Behavioral of test_I2C_module is
     --Slave
     type i2c_slave_state_t is (idle, start, address, data, ack1, ack2, stop);
     signal i2c_slave_state : i2c_slave_state_t := idle;
+    signal byte_count : integer := 0; --unsigned(31 downto 0);
+
 
     --- Nomi gerarchici se Vivado torna collaborativo
     signal i2c_regFile : I2C_regFile_t;
@@ -259,10 +261,122 @@ begin
         validating <= '0';
 
         -- Test 7
-
+        test_n <= 7;
+        ena <= '1';           -- Enable I2C
+        wea <= "0001";        -- Write only first byte
+        addra <= x"00000000";
+        dina  <= x"0F000000";
+        -- i2c_data_tb <= (others => 'Z');
+        dina(I2C_CREG_RW_N_BIT)  <= '1'; -- Set RW_N bit to 1 for reading
+        dina(I2C_CREG_START_BIT) <= '1'; -- Set START bit
         wait until rising_edge(clk);
         wait for 1 ns;
-       
+        ena <= '0';           -- Disable I2C
+        wea <= "0000";        -- Read only first byte
+        wait until i2c_regFile(I2C_REG_CONTROL)(I2C_CREG_BUSY_BIT) = '1';
+        wait until i2c_regFile(I2C_REG_CONTROL)(I2C_CREG_BUSY_BIT) = '0';
+        validating <= '1';
+        wait for 1 ns;
+        if i2c_regFile(I2C_REG_RDATA) = x"000000AA" then
+            resoult <= '1';
+            report "Test #" & integer'image(test_n) & ": OK";
+        else
+            resoult <= '0';
+            report "Test #" & integer'image(test_n) & ": FAILED -> i2c_regFile(I2C_REG_RDATA) was " & integer'image(stdv2int(i2c_regFile(I2C_REG_RDATA)));
+        end if;
+        validating <= '0';
+
+
+        -- Test 8 Continuous writing 1: address update
+        test_n <= 8;
+        ena <= '1';           -- Enable I2C
+        wea <= "0001";        -- Write only first byte
+        addra <= x"00000004"; -- Writing to I2C_REG_ADDRESS
+        dina  <= x"0F000056"; -- Writing 0x56 as Address
+        wait until rising_edge(clk);
+        wait for 1 ns;
+        ena  <= '0';           -- Disable I2C
+        wea <= "0000";         -- Read only first byte
+        validating <= '1';
+        if i2c_regFile(I2C_REG_ADDRESS) = x"00000056" then
+            resoult <= '1';
+            report "Test #" & integer'image(test_n) & ": OK";
+        else
+            resoult <= '0';
+            report "Test #" & integer'image(test_n) & ": FAILED -> i2c_regFile(I2C_REG_ADDRESS) was " & integer'image(stdv2int(i2c_regFile(I2C_REG_ADDRESS)));
+        end if;
+        wait for 1 ns;
+        validating <= '0';
+
+        -- Test 9 Continuous writing 2: wdata update
+        test_n <= 9;
+        ena <= '1';           -- Enable I2C
+        wea <= "0011";        -- Write only first byte
+        addra <= x"0000000C"; -- Writing to I2C_REG_WDATA
+        dina  <= x"0F00CCFF";  
+        wait until rising_edge(clk);
+        wait for 1 ns;
+        ena  <= '0';           -- Disable I2C
+        wea <= "0000";         -- Read only first byte
+        validating <= '1';
+        if i2c_regFile(I2C_REG_WDATA) = x"0000AABB" then
+            resoult <= '1';
+            report "Test #" & integer'image(test_n) & ": OK";
+        else
+            resoult <= '0';
+            report "Test #" & integer'image(test_n) & ": FAILED -> i2c_regFile(I2C_REG_WDATA) was " & integer'image(stdv2int(i2c_regFile(I2C_REG_WDATA)));
+        end if;
+        wait for 1 ns;
+
+        -- Test 10 Continuous writing 3: len update
+        test_n <= 10;
+        ena <= '1';           -- Enable I2C
+        wea <= "0001";        -- Write only first byte
+        addra <= x"00000010"; -- Writing to I2C_REG_LEN
+        dina  <= x"0F000002"; -- Writing 0x02 as Length
+        wait until rising_edge(clk);
+        wait for 1 ns;
+        ena  <= '0';           -- Disable I2C
+        wea <= "0000";         -- Read only first byte
+        validating <= '1';
+        if i2c_regFile(I2C_REG_LEN) = x"00000002" then
+            resoult <= '1';
+            report "Test #" & integer'image(test_n) & ": OK";
+        else
+            resoult <= '0';
+            report "Test #" & integer'image(test_n) & ": FAILED -> i2c_regFile(I2C_REG_LEN) was " & integer'image(stdv2int(i2c_regFile(I2C_REG_LEN)));
+        end if;
+        wait for 1 ns;
+        validating <= '0';
+
+
+        -- Test 11 Continuous writing 4: start bit
+        test_n <= 11;
+        ena <= '1';           -- Enable I2C
+        wea <= "0001";        -- Write only first byte
+        addra <= x"00000000"; -- Writing to I2C_REG_CONTROL
+        dina  <= x"0F000000"; 
+        dina(I2C_CREG_RW_N_BIT)  <= '0'; -- Set RW_N bit
+        dina(I2C_CREG_START_BIT) <= '1'; -- Set START bit
+        wait until rising_edge(clk);
+        wait for 1 ns;
+        ena  <= '0';           -- Disable I2C
+        wea <= "0000";         -- Read only first byte
+
+        wait until i2c_regFile(I2C_REG_CONTROL)(I2C_CREG_BUSY_BIT) = '1';
+        wait until i2c_regFile(I2C_REG_CONTROL)(I2C_CREG_BUSY_BIT) = '0';
+        validating <= '1';
+        if i2c_data_tb = x"0000_aabb" then
+            resoult <= '1';
+            report "Test #" & integer'image(test_n) & ": OK";
+        else
+            resoult <= '0';
+            report "Test #" & integer'image(test_n) & ": FAILED -> i2c_data_tb was " & integer'image(stdv2int(i2c_data_tb));
+        end if;
+        wait for 1 ns;
+        validating <= '0';
+
+
         
 
 
@@ -281,33 +395,36 @@ begin
             i2c_slave_state <= idle;
             i2c_data_count := 0;
             i2c_data_to_send <= (others => '0');
+            byte_count <=0;
         elsif falling_edge(i2c_sda) and i2c_slave_state = idle then
             i2c_slave_state <= start;
+            byte_count <=0;
         elsif falling_edge(i2c_scl) and i2c_slave_state = start then
-            -- i2c_data_tb <= (others => '0');
             i2c_slave_state <= address;
         elsif rising_edge(i2c_scl) then
             if i2c_slave_state = address then
                 i2c_data_count := i2c_data_count + 1;
                 if(i2c_data_count = 8) then
+                    -- i2c_data_tb <= (others => '0');
                     i2c_rw_n_tb <= to_X01(i2c_sda);
                     i2c_slave_state <= ack1;
                     i2c_next_state := data;
+                    byte_count <=byte_count + 1;
                     i2c_data_count := 0;
                 else 
                     i2c_address_tb <= (i2c_address_tb sll 1);
                     i2c_address_tb(0) <= to_X01(i2c_sda);
                 end if;
             elsif i2c_slave_state = data then
+                i2c_data_count := i2c_data_count + 1;
                 if i2c_rw_n_tb = '0' then               -- Incoming WRITE
                     i2c_data_tb <= (i2c_data_tb sll 1);
                     i2c_data_tb(0) <= to_X01(i2c_sda);
                 elsif i2c_rw_n_tb = '1' then            -- Incoming READ
-                    i2c_sda <= data_to_send(32);
+                    i2c_sda <= data_to_send(32 - i2c_data_count);
                     -- i2c_data_tb <= i2c_data_tb sll 1;
-                    data_to_send := data_to_send sll 1;
+                    -- data_to_send := data_to_send sll 1;
                 end if;
-                i2c_data_count := i2c_data_count + 1;
                 if(i2c_data_count = 8) then
                     i2c_slave_state <= ack1;
                     i2c_next_state := stop;
@@ -323,17 +440,19 @@ begin
             i2c_slave_state <= i2c_next_state;
             -- Prepare for next byte if needed
             if i2c_rw_n_tb = '1' then
-                i2c_sda <= data_to_send(31);
+                i2c_sda <= 'Z' when data_to_send(31) = '1' else '0';
                 -- i2c_data_tb <= i2c_data_tb sll 1;
             end if;
         elsif i2c_slave_state = stop and to_X01(i2c_scl) = '1' and rising_edge(i2c_sda) then
             if i2c_rw_n_tb = '0' then
+                i2c_data_to_send <= i2c_data_tb sll (32-(byte_count * 8));                
                 data_to_send(31 downto 32-i2c_data_count) := i2c_data_tb(i2c_data_count-1 downto 0);
             end if;
             i2c_slave_state <= idle;
             i2c_data_count := 0;
             i2c_data_to_send <= data_to_send;
         elsif i2c_slave_state = stop and falling_edge(i2c_scl) then
+            byte_count <= byte_count + 1;
             if i2c_rw_n_tb = '0' then -- Incoming WRITE
                 i2c_data_tb(0) <= temp_data;
                 data_to_send := data_to_send sll 1;
