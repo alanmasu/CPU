@@ -12,4 +12,7 @@ package types_pkg is
 
     -- Control Register type
     type control_reg_t is array (0 to 31) of std_logic_vector(31 downto 0);
+
+    -- I2C Register File type
+    type I2C_regFile_t is array(0 to 31) of std_logic_vector(31 downto 0);
 end package ;
