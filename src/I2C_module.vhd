@@ -108,11 +108,13 @@ begin
                 douta <= regFile(regAddress);
             end if;
             regFile(I2C_REG_RDATA) <= driver_out;
-
             regFile(I2C_REG_LEN_O)(31 downto 3) <= (others => '0');
             regFile(I2C_REG_LEN_O)(2 downto 0)  <= data_len_out;
             regFile(I2C_REG_CONTROL)(I2C_CREG_BUSY_BIT)  <= busy;
             regFile(I2C_REG_CONTROL)(I2C_CREG_ERROR_BIT) <= err;
+            if(regFile(I2C_REG_CONTROL)(I2C_CREG_START_BIT) = '1') then
+                regFile(I2C_REG_CONTROL)(I2C_CREG_START_BIT) <= '0';
+            end if;
         end if;
     end process;   
             

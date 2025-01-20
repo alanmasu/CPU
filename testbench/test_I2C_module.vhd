@@ -196,18 +196,23 @@ begin
         dina(I2C_CREG_START_BIT) <= '1'; -- Set START bit
         wait until rising_edge(clk);
         wait for 1 ns;
+        ena <= '0';           -- Disable I2C
+        wea <= "0000";        -- Read only first byte
+
+       
+        wait until i2c_regFile(I2C_REG_CONTROL)(I2C_CREG_BUSY_BIT) = '1';
+        wait until i2c_regFile(I2C_REG_CONTROL)(I2C_CREG_BUSY_BIT) = '0';
         validating <= '1';
-        
+        if i2c_data_tb = x"000000aa" then
+            resoult <= '1';
+            report "Test #" & integer'image(test_n) & ": OK";
+        else
+            resoult <= '0';
+            report "Test #" & integer'image(test_n) & ": FAILED -> i2c_data_tb was " & integer'image(stdv2int(i2c_data_tb));
+        end if; 
         wait for 1 ns;
         validating <= '0';
 
-        --ADDRESS ACK
-        -- wait for 21.36 us;
-        -- i2c_sda <= '0';
-        -- wait for 1.38 us;
-        -- i2c_sda <= 'H';
-
-        wait for 50 us;
         -- wait;
         assert false report "End of test" severity failure;
     end process ; -- test_pro
