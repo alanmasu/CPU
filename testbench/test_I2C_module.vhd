@@ -228,6 +228,7 @@ begin
             resoult <= '0';
             report "Test #" & integer'image(test_n) & ": FAILED -> douta was " & integer'image(stdv2int(douta));
         end if;
+        validating <= '0';
 
         -- Test 6
         test_n <= 6;
@@ -235,6 +236,7 @@ begin
         wea <= "0001";        -- Write only first byte
         addra <= x"00000000";
         dina  <= x"0F000000";
+        -- i2c_data_tb <= (others => 'Z');
         dina(I2C_CREG_RW_N_BIT)  <= '1'; -- Set RW_N bit to 1 for reading
         dina(I2C_CREG_START_BIT) <= '1'; -- Set START bit
         wait until rising_edge(clk);
@@ -271,6 +273,8 @@ begin
         variable i2c_data_count : integer := 0;
         variable i2c_next_state : i2c_slave_state_t := idle;
         variable temp_address : std_logic_vector(6 downto 0) := (others => '0');
+        variable temp_data : std_logic := '0';
+        variable data_to_send : std_logic_vector(31 downto 0) := (others => '0');
     begin
         if res = '0' then
             i2c_slave_state <= idle;
@@ -304,6 +308,8 @@ begin
                     i2c_slave_state <= ack1;
                     i2c_next_state := stop;
                 end if;
+            elsif i2c_slave_state = stop then
+                temp_data := to_X01(i2c_sda);
             end if;
         elsif i2c_slave_state = ack1 and falling_edge(i2c_scl) then
             i2c_sda <= '0';
@@ -311,9 +317,21 @@ begin
         elsif i2c_slave_state = ack2 and falling_edge(i2c_scl) then
             i2c_sda <= 'H';
             i2c_slave_state <= i2c_next_state;
+            -- Prepare for next byte if needed
+            if i2c_rw_n_tb = '1' then
+                i2c_sda <= i2c_data_tb(7);
+                -- i2c_data_tb <= i2c_data_tb sll 1;
+            end if;
         elsif i2c_slave_state = stop and to_X01(i2c_scl) = '1' and rising_edge(i2c_sda) then
             i2c_slave_state <= idle;
             i2c_data_count := 0;
+        elsif i2c_slave_state = stop and falling_edge(i2c_scl) then
+            if i2c_rw_n_tb = '0' then -- Incoming WRITE
+                i2c_data_tb(0) <= temp_data;
+            end if;
+            i2c_data_tb <= (i2c_data_tb sll 1);
+            i2c_data_count := 1;
+            i2c_slave_state <= data;            
         end if;
             
         
