@@ -75,13 +75,13 @@ begin
                 alu_out <= barrell_out;
             when "0010" => --SLT
                 if a < b then
-                    alu_out <= (1 => '1', others => '0');
+                    alu_out <= (0 => '1', others => '0');
                 else 
                     alu_out <= (others => '0');
                 end if;
             when "0011" => --SLTU
                 if au < bu then
-                    alu_out <= (1 => '1', others => '0');
+                    alu_out <= (0 => '1', others => '0');
                 else 
                     alu_out <= (others => '0');
                 end if;
