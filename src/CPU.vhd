@@ -573,14 +573,19 @@ begin
     instruction_dbg <= instruction_fetched;
     CREG_CTR_dbg    <= control_reg(CREG_CTR)(7 downto 0);
     rd_addr_dbg     <= rd_addr_in;
-    gpio_dbg        <= GPIO;
+    
+    gpio_for_loop: for i in 0 to 31 generate
+        -- gpio_state_dbg(i) <= '1' when to_X01(GPIO(i)) = '1' else '0';
+        gpio_dbg(i) <= '1' when to_X01(GPIO(i)) = '1' else '0';
+    end generate;
+    -- gpio_dbg        <= GPIO;
     
 
     state_dbg_comb : process( state ) is 
         variable state_integer : integer := 0;
     begin
-            state_integer := state_type'POS(state);
-            state_dbg_sig <= std_logic_vector(to_unsigned(state_integer,3));
+        state_integer := state_type'POS(state);
+        state_dbg_sig <= std_logic_vector(to_unsigned(state_integer,3));
     end process ; -- control_reg_file
     state_dbg <= state_dbg_sig;
     ----------------------------------- END DEBUG -----------------------------------

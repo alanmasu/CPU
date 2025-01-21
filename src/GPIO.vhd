@@ -75,7 +75,7 @@ begin
     -- For testing
     gpio_dir_s <= GPIO_dir(7 downto 0);
     gpio_reg_s <= GPIO_reg(7 downto 0);
-    gpio_out_s <= GPIO(7 downto 0);
+    -- gpio_out_s <= GPIO(7 downto 0);
     
     ---------------- DEBUG ----------------
     -- gpio_state_dbg <= GPIO_state;
@@ -90,11 +90,25 @@ begin
         elsif rising_edge(clk) then
             d_out <= d_out;         -- latched value
             -- Registro di stato
-            gpio_state_dbg <= GPIO;
+            -- gpio_state_dbg <= GPIO;
+            for i in 0 to 31 loop
+                if(GPIO(i) = '1') then
+                    gpio_state_dbg(i) <= '1';
+                else
+                    gpio_state_dbg(i) <= '0';
+                end if;
+            end loop;
             if ena = '1' then       -- if Enabled
                 case(address(3 downto 2)) is
                     when "00" =>    -- READ
-                        d_out <= GPIO;
+                        -- d_out <= GPIO;
+                        for i in 0 to 31 loop
+                            if(GPIO(i) = '1') then
+                                d_out(i) <= '1';
+                            else
+                                d_out(i) <= '0';
+                            end if;
+                        end loop;
                     when "01" =>    -- DIR
                         if wea(0) = '1' then
                             GPIO_dir(7 downto 0) <= d_in(7 downto 0);
