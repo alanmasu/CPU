@@ -177,6 +177,13 @@ module test_AXI_ctrl( );
           slave_moniter_transaction_queue_size++;
         end
     end
+
+
+    integer testN = 0;
+    logic   validating = 1'b0;
+
+    wire [31:0] mem_out_tb;
+    assign mem_out_tb = mem.mem_out;
     
     initial begin
 
@@ -193,33 +200,249 @@ module test_AXI_ctrl( );
         #10;
 
         //Store
+        //Test 1: Store word allineata
+        testN = 1;
         test_type = MEMORY;
         op_class = 5'b01000;
         en_in = 1'b1;
         we_in = 1'b1;
         //Scrive 4 WORDS shiftate di un byte ciascuna
         mem_opcode = 3'b010; //SW
-        rs2_value = 32'd274877688;
-        for(int i = 0; i <= 3; i++) begin
-            alu_resoult = 32'h40010000 + i*4 + i; 
-            #10;
+        rs2_value = 32'h10624CF8;
+
+        alu_resoult = 32'h40010000; 
+        @ (posedge clock);
+        #1;
+        validating = 1'b1;
+        if(mem_out_tb == 32'h10624CF8) begin
+            $display("Test #%0da: OK", testN);
+        end else begin
+            $display("Test #%0da: FAILED -> mem_out_tb was %x", testN, mem_out_tb);
         end
+        if(we_out == 4'b1111) begin
+            $display("Test #%0db: OK", testN);
+        end else begin
+            $display("Test #%0db: FAILED -> we_out was %b", testN, we_out);
+        end
+        #1;
+        validating = 1'b0;
+
+
+        //Test 2: Store word ad un byte di disallineamento
+        testN = 2;
+        alu_resoult = alu_resoult + 4 + 1; // + 4(byte) + 1(byte) di disallineamento
+        @ (posedge clock);
+        #1;
+        validating = 1'b1;
+        if( mem_out_tb == 32'h624CF800) begin
+            $display("Test #%0da: OK", testN);
+        end else begin
+            $display("Test #%0da: FAILED -> mem_out_tb was %x", testN, mem_out_tb);
+        end
+        if(we_out == 4'b1110) begin
+            $display("Test #%0db: OK", testN);
+        end else begin
+            $display("Test #%0db: FAILED -> we_out was %b", testN, we_out);
+        end
+        #1;
+        validating = 1'b0;
+
+        //Test 3: Store word a 2 byte di disallineamento
+        testN = 3;
+        alu_resoult = alu_resoult + 4 + 1; // + 4(byte) + 2(byte) di disallineamento
+        @ (posedge clock);
+        #1;
+        validating = 1'b1;
+        if( mem_out_tb == 32'h4CF80000) begin
+            $display("Test #%0da: OK", testN);
+        end else begin
+            $display("Test #%0da: FAILED -> mem_out_tb was %x", testN, mem_out_tb);
+        end
+        if(we_out == 4'b1100) begin
+            $display("Test #%0db: OK", testN);
+        end else begin
+            $display("Test #%0db: FAILED -> we_out was %b", testN, we_out);
+        end
+        #1;
+        validating = 1'b0;
+
+        //Test 4: Store word a 3 byte di disallineamento
+        testN = 4;
+        alu_resoult = alu_resoult + 4 + 1; // + 4(byte) + 3(byte) di disallineamento
+        @ (posedge clock);
+        #1;
+        validating = 1'b1;
+        if( mem_out_tb == 32'hF8000000) begin
+            $display("Test #%0da: OK", testN);
+        end else begin
+            $display("Test #%0da: FAILED -> mem_out_tb was %x", testN, mem_out_tb);
+        end
+        if(we_out == 4'b1000) begin
+            $display("Test #%0db: OK", testN);
+        end else begin
+            $display("Test #%0db: FAILED -> we_out was %b", testN, we_out);
+        end
+        #1;
+        validating = 1'b0;
 
         //Scrive 4 HALF WORDS shiftate di un byte ciascuna
         mem_opcode = 3'b001; //SH
-        rs2_value = 32'd35535;
-        for(int i = 0; i <= 3; i++) begin
-            alu_resoult = 32'h40010000 + i*4 + i + 16; 
-            #10;
+
+        // Test 5: Store half word allineata
+        testN = 5;
+        alu_resoult = alu_resoult + 1; // + 1(byte) di disallineamento (aka prima locazione allineata)
+        @ (posedge clock);
+        #1;
+        validating = 1'b1;
+        if( mem_out_tb == 32'h00004CF8) begin
+            $display("Test #%0da: OK", testN);
+        end else begin
+            $display("Test #%0da: FAILED -> mem_out_tb was %x", testN, mem_out_tb);
         end
+        if(we_out == 4'b0011) begin
+            $display("Test #%0db: OK", testN);
+        end else begin
+            $display("Test #%0db: FAILED -> we_out was %b", testN, we_out);
+        end
+        #1;
+        validating = 1'b0;
+
+        // Test 6: Store half word ad un byte di disallineamento
+        testN = 6;
+        alu_resoult = alu_resoult + 4 + 1; // + 1(byte) di disallineamento
+        @ (posedge clock);
+        #1;
+        validating = 1'b1;
+        if( mem_out_tb == 32'h004CF800) begin
+            $display("Test #%0da: OK", testN);
+        end else begin
+            $display("Test #%0da: FAILED -> mem_out_tb was %x", testN, mem_out_tb);
+        end
+        if(we_out == 4'b0110 ) begin
+            $display("Test #%0db: OK", testN);
+        end else begin
+            $display("Test #%0db: FAILED -> we_out was %b", testN, we_out);
+        end
+        #1;
+        validating = 1'b0;
+
+        // Test 7: Store half word a 2 byte di disallineamento
+        testN = 7;
+        alu_resoult = alu_resoult + 4 + 1; // + 1(byte) di disallineamento
+        @ (posedge clock);
+        #1;
+        validating = 1'b1;
+        if( mem_out_tb == 32'h4CF80000) begin
+            $display("Test #%0da: OK", testN);
+        end else begin
+            $display("Test #%0da: FAILED -> mem_out_tb was %x", testN, mem_out_tb);
+        end
+        if(we_out == 4'b1100) begin
+            $display("Test #%0db: OK", testN);
+        end else begin
+            $display("Test #%0db: FAILED -> we_out was %b", testN, we_out);
+        end
+        #1;
+        validating = 1'b0;
+
+        // Test 8: Store half word a 3 byte di disallineamento
+        testN = 8;
+        alu_resoult = alu_resoult + 4 + 1; // + 1(byte) di disallineamento
+        @ (posedge clock);
+        #1;
+        validating = 1'b1;
+        if( mem_out_tb == 32'hF8000000) begin
+            $display("Test #%0da: OK", testN);
+        end else begin
+            $display("Test #%0da: FAILED -> mem_out_tb was %x", testN, mem_out_tb);
+        end
+        if(we_out == 4'b1000) begin
+            $display("Test #%0db: OK", testN);
+        end else begin
+            $display("Test #%0db: FAILED -> we_out was %b", testN, we_out);
+        end
+        #1;
+        validating = 1'b0;
+
 
         //Scrive 4 BYTE shiftate di un byte ciascuna
         mem_opcode = 3'b000; //SB
-        rs2_value = 32'd207;
-        for(int i = 0; i <= 3; i++) begin
-            alu_resoult = 32'h40010000 + i*4 + i + 32; 
-            #10;
+
+        // Test 9: Store byte allineata
+        testN = 9;
+        alu_resoult = alu_resoult + 1; // + 1(byte) di disallineamento (aka prima locazione allineata)
+        @ (posedge clock);
+        #1;
+        validating = 1'b1;
+        if( mem_out_tb == 32'h000000F8) begin
+            $display("Test #%0da: OK", testN);
+        end else begin
+            $display("Test #%0da: FAILED -> mem_out_tb was %x", testN, mem_out_tb);
         end
+        if(we_out == 4'b0001) begin
+            $display("Test #%0db: OK", testN);
+        end else begin
+            $display("Test #%0db: FAILED -> we_out was %b", testN, we_out);
+        end
+        #1;
+        validating = 1'b0;
+
+        // Test 10: Store byte ad un byte di disallineamento
+        testN = 10;
+        alu_resoult = alu_resoult + 4 + 1; // + 1(byte) di disallineamento
+        @ (posedge clock);
+        #1;
+        validating = 1'b1;
+        if( mem_out_tb == 32'h0000F800) begin
+            $display("Test #%0da: OK", testN);
+        end else begin
+            $display("Test #%0da: FAILED -> mem_out_tb was %x", testN, mem_out_tb);
+        end
+        if(we_out == 4'b0010) begin
+            $display("Test #%0db: OK", testN);
+        end else begin
+            $display("Test #%0db: FAILED -> we_out was %b", testN, we_out);
+        end
+        #1;
+        validating = 1'b0;
+
+        // Test 11: Store byte a 2 byte di disallineamento
+        testN = 11;
+        alu_resoult = alu_resoult + 4 + 1; // + 1(byte) di disallineamento
+        @ (posedge clock);
+        #1;
+        validating = 1'b1;
+        if( mem_out_tb == 32'h00F80000) begin
+            $display("Test #%0da: OK", testN);
+        end else begin
+            $display("Test #%0da: FAILED -> mem_out_tb was %x", testN, mem_out_tb);
+        end
+        if(we_out == 4'b0100) begin
+            $display("Test #%0db: OK", testN);
+        end else begin
+            $display("Test #%0db: FAILED -> we_out was %b", testN, we_out);
+        end
+        #1;
+        validating = 1'b0;
+
+        // Test 12: Store byte a 3 byte di disallineamento
+        testN = 12;
+        alu_resoult = alu_resoult + 4 + 1; // + 1(byte) di disallineamento
+        @ (posedge clock);
+        #1;
+        validating = 1'b1;
+        if( mem_out_tb == 32'hF8000000) begin
+            $display("Test #%0da: OK", testN);
+        end else begin
+            $display("Test #%0da: FAILED -> mem_out_tb was %x", testN, mem_out_tb);
+        end
+        if(we_out == 4'b1000) begin
+            $display("Test #%0db: OK", testN);
+        end else begin
+            $display("Test #%0db: FAILED -> we_out was %b", testN, we_out);
+        end
+        #1;
+        validating = 1'b0;
 
         //Load
         op_class = 5'b00100;
@@ -227,17 +450,181 @@ module test_AXI_ctrl( );
         we_in = 1'b0;
         //Carica 4 WORDS shiftate di un byte ciascuna
         mem_opcode = 3'b010; //LW
-        for(int i = 0; i <= 3; i++) begin
-            alu_resoult = 32'h40010000 + i*4 + i; 
-            #10;
+        
+        // Test 13: Load word allineata
+        testN = 13;
+        alu_resoult = 32'h40010000;
+        @ (posedge clock);
+        #1;
+        validating = 1'b1;
+        if( rd_value_out == 32'h10624CF8) begin
+            $display("Test #%0d: OK", testN);
+        end else begin
+            $display("Test #%0d: FAILED -> rd_value_out was %x", testN, rd_value_out);
         end
+        #1;
+        validating = 1'b0;
+
+        // Test 14: Load word ad un byte di disallineamento
+        testN = 14;
+        alu_resoult = alu_resoult + 4 + 1; // + 4(byte) + 1(byte) di disallineamento
+        @ (posedge clock);
+        #1;
+        validating = 1'b1;
+        if( rd_value_out == 32'h624CF800) begin
+            $display("Test #%0d: OK", testN);
+        end else begin
+            $display("Test #%0d: FAILED -> rd_value_out was %x", testN, rd_value_out);
+        end
+        #1;
+        validating = 1'b0;
+
+        // Test 15: Load word a 2 byte di disallineamento
+        testN = 15;
+        alu_resoult = alu_resoult + 4 + 1; // + 4(byte) + 2(byte) di disallineamento
+        @ (posedge clock);
+        #1;
+        validating = 1'b1;
+        if( rd_value_out == 32'h4CF80000) begin
+            $display("Test #%0d: OK", testN);
+        end else begin
+            $display("Test #%0d: FAILED -> rd_value_out was %x", testN, rd_value_out);
+        end
+        #1;
+        validating = 1'b0;
+
+        // Test 16: Load word a 3 byte di disallineamento
+        testN = 16;
+        alu_resoult = alu_resoult + 4 + 1; // + 4(byte) + 3(byte) di disallineamento
+        @ (posedge clock);
+        #1;
+        validating = 1'b1;
+        if( rd_value_out == 32'hF8000000) begin
+            $display("Test #%0d: OK", testN);
+        end else begin
+            $display("Test #%0d: FAILED -> rd_value_out was %x", testN, rd_value_out);
+        end
+        #1;
+        validating = 1'b0;
 
         //Carica 4 HALF WORDS shiftate di un byte ciascuna
         mem_opcode = 3'b001; //LH
-        for(int i = 0; i <= 3; i++) begin
-            alu_resoult = 32'h40010000 + i*4 + i + 16; 
-            #10;
+        
+        // Test 17: Load half word allineata
+        testN = 17;
+        alu_resoult = alu_resoult + 1; // + 1(byte) di disallineamento (aka prima locazione allineata)
+        @ (posedge clock);
+        #1;
+        validating = 1'b1;
+        if( rd_value_out == 32'h00004CF8) begin
+            $display("Test #%0d: OK", testN);
+        end else begin
+            $display("Test #%0d: FAILED -> rd_value_out was %x", testN, rd_value_out);
         end
+        #1;
+        validating = 1'b0;
+
+        // Test 18: Load half word ad un byte di disallineamento
+        testN = 18;
+        alu_resoult = alu_resoult + 4 + 1; // + 1(byte) di disallineamento
+        @ (posedge clock);
+        #1;
+        validating = 1'b1;
+        if( rd_value_out == 32'h004CF800) begin
+            $display("Test #%0d: OK", testN);
+        end else begin
+            $display("Test #%0d: FAILED -> rd_value_out was %x", testN, rd_value_out);
+        end
+        #1;
+        validating = 1'b0;
+
+        // Test 19: Load half word a 2 byte di disallineamento
+        testN = 19;
+        alu_resoult = alu_resoult + 4 + 1; // + 1(byte) di disallineamento
+        @ (posedge clock);
+        #1;
+        validating = 1'b1;
+        if( rd_value_out == 32'h4CF80000) begin
+            $display("Test #%0d: OK", testN);
+        end else begin
+            $display("Test #%0d: FAILED -> rd_value_out was %x", testN, rd_value_out);
+        end
+        #1;
+        validating = 1'b0;
+
+        // Test 20: Load half word a 3 byte di disallineamento
+        testN = 20;
+        alu_resoult = alu_resoult + 4 + 1; // + 1(byte) di disallineamento
+        @ (posedge clock);
+        #1;
+        validating = 1'b1;
+        if( rd_value_out == 32'hF8000000) begin
+            $display("Test #%0d: OK", testN);
+        end else begin
+            $display("Test #%0d: FAILED -> rd_value_out was %x", testN, rd_value_out);
+        end
+        #1;
+        validating = 1'b0;
+
+        //Carica 4 BYTE shiftate di un byte ciascuna
+        mem_opcode = 3'b000; //LB
+
+        // Test 21: Load byte allineata
+        testN = 21;
+        alu_resoult = alu_resoult + 1; // + 1(byte) di disallineamento (aka prima locazione allineata)
+        @ (posedge clock);
+        #1;
+        validating = 1'b1;
+        if( rd_value_out == 32'h000000F8) begin
+            $display("Test #%0d: OK", testN);
+        end else begin
+            $display("Test #%0d: FAILED -> rd_value_out was %x", testN, rd_value_out);
+        end
+        #1;
+        validating = 1'b0;
+
+        // Test 22: Load byte ad un byte di disallineamento
+        testN = 22;
+        alu_resoult = alu_resoult + 4 + 1; // + 1(byte) di disallineamento
+        @ (posedge clock);
+        #1;
+        validating = 1'b1;
+        if( rd_value_out == 32'h0000F800) begin
+            $display("Test #%0d: OK", testN);
+        end else begin
+            $display("Test #%0d: FAILED -> rd_value_out was %x", testN, rd_value_out);
+        end
+        #1;
+        validating = 1'b0;
+        
+        // Test 23: Load byte a 2 byte di disallineamento
+        testN = 23;
+        alu_resoult = alu_resoult + 4 + 1; // + 1(byte) di disallineamento
+        @ (posedge clock);
+        #1;
+        validating = 1'b1;
+        if( rd_value_out == 32'h00F80000) begin
+            $display("Test #%0d: OK", testN);
+        end else begin
+            $display("Test #%0d: FAILED -> rd_value_out was %x", testN, rd_value_out);
+        end
+        #1;
+        validating = 1'b0;
+
+        // Test 24: Load byte a 3 byte di disallineamento
+        testN = 24;
+        alu_resoult = alu_resoult + 4 + 1; // + 1(byte) di disallineamento
+        @ (posedge clock);
+        #1;
+        validating = 1'b1;
+        if( rd_value_out == 32'hF8000000) begin
+            $display("Test #%0d: OK", testN);
+        end else begin
+            $display("Test #%0d: FAILED -> rd_value_out was %x", testN, rd_value_out);
+        end
+        #1;
+        validating = 1'b0;
+
 
         mem_opcode = 3'b101; //LHU
         for(int i = 0; i <= 3; i++) begin

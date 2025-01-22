@@ -140,11 +140,11 @@ begin
         if op_class = "01000" then  --STORE
             case( mem_opcode ) is
                 when "010" =>   --SW
-                    dato := dato sll (0 - to_integer(unsigned(byte_address))) * 8;
+                    dato := dato sll (to_integer(unsigned(byte_address))) * 8;
                 when "001" =>   --SH
-                    dato := dato sll (2 - to_integer(unsigned(byte_address))) * 8;
+                    dato := dato sll (to_integer(unsigned(byte_address))) * 8;
                 when "000" =>   --SB
-                    dato := dato sll (3 - to_integer(unsigned(byte_address))) * 8;
+                    dato := dato sll (to_integer(unsigned(byte_address))) * 8;
                 when others =>
                     dato := dato;
             end case ;
@@ -162,11 +162,11 @@ begin
             if op_class = "01000" then  --STORE
                 case (mem_opcode) is
                     when "010" => --SW (32 bits) "1111"
-                        wea := "1111" srl to_integer(unsigned(byte_address)); 
-                    when "001" => --SH (16 bits) "1100"
-                        wea := "1100" srl to_integer(unsigned(byte_address));
-                    when "000" => --SB (8 bits)  "1000"
-                        wea := "1000" srl to_integer(unsigned(byte_address));
+                        wea := "1111" sll to_integer(unsigned(byte_address)); 
+                    when "001" => --SH (16 bits) "0011"
+                        wea := "0011" sll to_integer(unsigned(byte_address));
+                    when "000" => --SB (8 bits)  "0001"
+                        wea := "0001" sll to_integer(unsigned(byte_address));
                     when others => 
                         wea := "0000";
                 end case;
@@ -218,15 +218,17 @@ begin
                 when "010" =>   --LW
                     dato := dato sll to_integer(unsigned(byte_address)) * 8;
                 when "001" =>   --LH
-                    dato := dato srl (2 - to_integer(unsigned(byte_address))) * 8;
+                    dato := dato srl (to_integer(unsigned(byte_address))) * 8;
                     dato(31 downto 16) := (others => dato(15));
                 when "101" =>   --LHU
-                    dato := dato srl (2 - to_integer(unsigned(byte_address))) * 8;
+                    dato := dato srl (to_integer(unsigned(byte_address))) * 8;
+                    dato(31 downto 16) := (others => '0');
                 when "000" =>   --LB
-                    dato := dato srl (3 - to_integer(unsigned(byte_address))) * 8;
+                    dato := dato srl (to_integer(unsigned(byte_address))) * 8;
                     dato(31 downto 8) := (others => dato(7));
                 when "100" =>   --LBU
-                    dato := dato srl (3 - to_integer(unsigned(byte_address))) * 8;
+                    dato := dato srl (to_integer(unsigned(byte_address))) * 8;
+                    dato(31 downto 8) := (others => '0');
                 when others =>
                     dato := dato;
             end case ;
