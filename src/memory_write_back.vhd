@@ -194,7 +194,9 @@ begin
     --Source selection and sign extension
     sign_extension : process( en_bus_reg, mem_out, mem_opcode, op_class, byte_address, d_in ) is
         variable dato : unsigned(31 downto 0);
+        variable extensionBound : integer;
     begin
+        extensionBound := 32 - to_integer(unsigned(byte_address)) * 8;
         --Source seletion
         -- case( en_bus ) is
         --     when "01" => --MEMORY 
@@ -216,12 +218,21 @@ begin
         if op_class = "00100" then   --LOAD
             case( mem_opcode ) is
                 when "010" =>   --LW
-                    dato := dato sll to_integer(unsigned(byte_address)) * 8;
+                    dato := dato srl to_integer(unsigned(byte_address)) * 8;
+                    if(extensionBound /= 32) then
+                        dato(31 downto extensionBound) := (others => dato(extensionBound - 1));
+                    end if;
                 when "001" =>   --LH
                     dato := dato srl (to_integer(unsigned(byte_address))) * 8;
+                    if(extensionBound < 16) then
+                        dato(15 downto extensionBound) := (others => dato(extensionBound - 1));
+                    end if;
                     dato(31 downto 16) := (others => dato(15));
                 when "101" =>   --LHU
                     dato := dato srl (to_integer(unsigned(byte_address))) * 8;
+                    if(extensionBound < 16) then
+                        dato(15 downto extensionBound) := (others => '0');
+                    end if;
                     dato(31 downto 16) := (others => '0');
                 when "000" =>   --LB
                     dato := dato srl (to_integer(unsigned(byte_address))) * 8;

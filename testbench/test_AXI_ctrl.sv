@@ -208,13 +208,13 @@ module test_AXI_ctrl( );
         we_in = 1'b1;
         //Scrive 4 WORDS shiftate di un byte ciascuna
         mem_opcode = 3'b010; //SW
-        rs2_value = 32'h10624CF8;
+        rs2_value = 32'h10B2ACF8;
 
         alu_resoult = 32'h40010000; 
         @ (posedge clock);
         #1;
         validating = 1'b1;
-        if(mem_out_tb == 32'h10624CF8) begin
+        if(mem_out_tb == 32'h10B2ACF8) begin
             $display("Test #%0da: OK", testN);
         end else begin
             $display("Test #%0da: FAILED -> mem_out_tb was %x", testN, mem_out_tb);
@@ -234,7 +234,7 @@ module test_AXI_ctrl( );
         @ (posedge clock);
         #1;
         validating = 1'b1;
-        if( mem_out_tb == 32'h624CF800) begin
+        if( mem_out_tb == 32'hB2ACF800) begin
             $display("Test #%0da: OK", testN);
         end else begin
             $display("Test #%0da: FAILED -> mem_out_tb was %x", testN, mem_out_tb);
@@ -253,7 +253,7 @@ module test_AXI_ctrl( );
         @ (posedge clock);
         #1;
         validating = 1'b1;
-        if( mem_out_tb == 32'h4CF80000) begin
+        if( mem_out_tb == 32'hACF80000) begin
             $display("Test #%0da: OK", testN);
         end else begin
             $display("Test #%0da: FAILED -> mem_out_tb was %x", testN, mem_out_tb);
@@ -294,7 +294,7 @@ module test_AXI_ctrl( );
         @ (posedge clock);
         #1;
         validating = 1'b1;
-        if( mem_out_tb == 32'h00004CF8) begin
+        if( mem_out_tb == 32'h0000ACF8) begin
             $display("Test #%0da: OK", testN);
         end else begin
             $display("Test #%0da: FAILED -> mem_out_tb was %x", testN, mem_out_tb);
@@ -313,7 +313,7 @@ module test_AXI_ctrl( );
         @ (posedge clock);
         #1;
         validating = 1'b1;
-        if( mem_out_tb == 32'h004CF800) begin
+        if( mem_out_tb == 32'h00ACF800) begin
             $display("Test #%0da: OK", testN);
         end else begin
             $display("Test #%0da: FAILED -> mem_out_tb was %x", testN, mem_out_tb);
@@ -332,7 +332,7 @@ module test_AXI_ctrl( );
         @ (posedge clock);
         #1;
         validating = 1'b1;
-        if( mem_out_tb == 32'h4CF80000) begin
+        if( mem_out_tb == 32'hACF80000) begin
             $display("Test #%0da: OK", testN);
         end else begin
             $display("Test #%0da: FAILED -> mem_out_tb was %x", testN, mem_out_tb);
@@ -457,7 +457,7 @@ module test_AXI_ctrl( );
         @ (posedge clock);
         #1;
         validating = 1'b1;
-        if( rd_value_out == 32'h10624CF8) begin
+        if( rd_value_out == 32'h10B2ACF8) begin
             $display("Test #%0d: OK", testN);
         end else begin
             $display("Test #%0d: FAILED -> rd_value_out was %x", testN, rd_value_out);
@@ -471,7 +471,7 @@ module test_AXI_ctrl( );
         @ (posedge clock);
         #1;
         validating = 1'b1;
-        if( rd_value_out == 32'h624CF800) begin
+        if( rd_value_out == 32'hFFB2ACF8) begin
             $display("Test #%0d: OK", testN);
         end else begin
             $display("Test #%0d: FAILED -> rd_value_out was %x", testN, rd_value_out);
@@ -485,7 +485,7 @@ module test_AXI_ctrl( );
         @ (posedge clock);
         #1;
         validating = 1'b1;
-        if( rd_value_out == 32'h4CF80000) begin
+        if( rd_value_out == 32'hFFFFACF8) begin
             $display("Test #%0d: OK", testN);
         end else begin
             $display("Test #%0d: FAILED -> rd_value_out was %x", testN, rd_value_out);
@@ -499,7 +499,7 @@ module test_AXI_ctrl( );
         @ (posedge clock);
         #1;
         validating = 1'b1;
-        if( rd_value_out == 32'hF8000000) begin
+        if( rd_value_out == 32'hFFFFFFF8) begin
             $display("Test #%0d: OK", testN);
         end else begin
             $display("Test #%0d: FAILED -> rd_value_out was %x", testN, rd_value_out);
@@ -516,7 +516,7 @@ module test_AXI_ctrl( );
         @ (posedge clock);
         #1;
         validating = 1'b1;
-        if( rd_value_out == 32'h00004CF8) begin
+        if( rd_value_out == 32'hFFFFACF8) begin
             $display("Test #%0d: OK", testN);
         end else begin
             $display("Test #%0d: FAILED -> rd_value_out was %x", testN, rd_value_out);
@@ -530,7 +530,7 @@ module test_AXI_ctrl( );
         @ (posedge clock);
         #1;
         validating = 1'b1;
-        if( rd_value_out == 32'h004CF800) begin
+        if( rd_value_out == 32'hFFFFACF8) begin
             $display("Test #%0d: OK", testN);
         end else begin
             $display("Test #%0d: FAILED -> rd_value_out was %x", testN, rd_value_out);
@@ -544,7 +544,7 @@ module test_AXI_ctrl( );
         @ (posedge clock);
         #1;
         validating = 1'b1;
-        if( rd_value_out == 32'h4CF80000) begin
+        if( rd_value_out == 32'hFFFFACF8) begin
             $display("Test #%0d: OK", testN);
         end else begin
             $display("Test #%0d: FAILED -> rd_value_out was %x", testN, rd_value_out);
@@ -558,7 +558,7 @@ module test_AXI_ctrl( );
         @ (posedge clock);
         #1;
         validating = 1'b1;
-        if( rd_value_out == 32'hF8000000) begin
+        if( rd_value_out == 32'hFFFFFFF8) begin
             $display("Test #%0d: OK", testN);
         end else begin
             $display("Test #%0d: FAILED -> rd_value_out was %x", testN, rd_value_out);
@@ -575,7 +575,7 @@ module test_AXI_ctrl( );
         @ (posedge clock);
         #1;
         validating = 1'b1;
-        if( rd_value_out == 32'h000000F8) begin
+        if( rd_value_out == 32'hFFFFFFF8) begin
             $display("Test #%0d: OK", testN);
         end else begin
             $display("Test #%0d: FAILED -> rd_value_out was %x", testN, rd_value_out);
@@ -589,7 +589,7 @@ module test_AXI_ctrl( );
         @ (posedge clock);
         #1;
         validating = 1'b1;
-        if( rd_value_out == 32'h0000F800) begin
+        if( rd_value_out == 32'hFFFFFFF8) begin
             $display("Test #%0d: OK", testN);
         end else begin
             $display("Test #%0d: FAILED -> rd_value_out was %x", testN, rd_value_out);
@@ -603,7 +603,7 @@ module test_AXI_ctrl( );
         @ (posedge clock);
         #1;
         validating = 1'b1;
-        if( rd_value_out == 32'h00F80000) begin
+        if( rd_value_out == 32'hFFFFFFF8) begin
             $display("Test #%0d: OK", testN);
         end else begin
             $display("Test #%0d: FAILED -> rd_value_out was %x", testN, rd_value_out);
@@ -617,7 +617,125 @@ module test_AXI_ctrl( );
         @ (posedge clock);
         #1;
         validating = 1'b1;
-        if( rd_value_out == 32'hF8000000) begin
+        if( rd_value_out == 32'hFFFFFFF8) begin
+            $display("Test #%0d: OK", testN);
+        end else begin
+            $display("Test #%0d: FAILED -> rd_value_out was %x", testN, rd_value_out);
+        end
+        #1;
+        validating = 1'b0;
+
+        //Load 4 HALF WORDS Unsigned shiftate di un byte ciascuna
+        mem_opcode = 3'b101; //LHU
+
+        // Test 25: Load half word allineata
+        testN = 25;
+        alu_resoult = 32'h40010000 + 16;
+        @ (posedge clock);
+        #1;
+        validating = 1'b1;
+        if( rd_value_out == 32'h0000ACF8) begin
+            $display("Test #%0d: OK", testN);
+        end else begin
+            $display("Test #%0d: FAILED -> rd_value_out was %x", testN, rd_value_out);
+        end
+        #1;
+        validating = 1'b0;
+
+        // Test 26: Load half word ad un byte di disallineamento
+        testN = 26;
+        alu_resoult = alu_resoult + 4 + 1; // + 1(byte) di disallineamento
+        @ (posedge clock);
+        #1;
+        validating = 1'b1;
+        if( rd_value_out == 32'h0000ACF8) begin
+            $display("Test #%0d: OK", testN);
+        end else begin
+            $display("Test #%0d: FAILED -> rd_value_out was %x", testN, rd_value_out);
+        end
+        #1;
+        validating = 1'b0;
+
+        // Test 27: Load half word a 2 byte di disallineamento
+        testN = 27; 
+        alu_resoult = alu_resoult + 4 + 1; // + 1(byte) di disallineamento
+        @ (posedge clock);
+        #1;
+        validating = 1'b1;
+        if( rd_value_out == 32'h0000ACF8) begin
+            $display("Test #%0d: OK", testN);
+        end else begin
+            $display("Test #%0d: FAILED -> rd_value_out was %x", testN, rd_value_out);
+        end 
+        #1;
+        validating = 1'b0;
+
+        // Test 28: Load half word a 3 byte di disallineamento
+        testN = 28;
+        alu_resoult = alu_resoult + 4 + 1; // + 1(byte) di disallineamento
+        @ (posedge clock);
+        #1;
+        validating = 1'b1;
+        if( rd_value_out == 32'h000000F8) begin
+            $display("Test #%0d: OK", testN);
+        end else begin
+            $display("Test #%0d: FAILED -> rd_value_out was %x", testN, rd_value_out);
+        end 
+        #1;
+        validating = 1'b0;
+
+        //Load 4 BYTE Unsigned shiftate di un byte ciascuna
+        mem_opcode = 3'b100; //LBU
+
+        // Test 29: Load byte allineata
+        testN = 29;
+        alu_resoult = alu_resoult + 1; // + 1(byte) di disallineamento (aka prima locazione allineata)
+        @ (posedge clock);
+        #1;
+        validating = 1'b1;
+        if( rd_value_out == 32'hF8) begin
+            $display("Test #%0d: OK", testN);
+        end else begin
+            $display("Test #%0d: FAILED -> rd_value_out was %x", testN, rd_value_out);
+        end
+        #1;
+        validating = 1'b0;
+
+        // Test 30: Load byte ad un byte di disallineamento
+        testN = 30;
+        alu_resoult = alu_resoult + 4 + 1; // + 1(byte) di disallineamento
+        @ (posedge clock);
+        #1;
+        validating = 1'b1;
+        if( rd_value_out == 32'hF8) begin
+            $display("Test #%0d: OK", testN);
+        end else begin
+            $display("Test #%0d: FAILED -> rd_value_out was %x", testN, rd_value_out);
+        end
+        #1;
+        validating = 1'b0;
+
+        // Test 31: Load byte a 2 byte di disallineamento
+        testN = 31;
+        alu_resoult = alu_resoult + 4 + 1; // + 1(byte) di disallineamento
+        @ (posedge clock);
+        #1;
+        validating = 1'b1;
+        if( rd_value_out == 32'hF8) begin
+            $display("Test #%0d: OK", testN);
+        end else begin
+            $display("Test #%0d: FAILED -> rd_value_out was %x", testN, rd_value_out);
+        end
+        #1;
+        validating = 1'b0;
+
+        // Test 32: Load byte a 3 byte di disallineamento
+        testN = 32;
+        alu_resoult = alu_resoult + 4 + 1; // + 1(byte) di disallineamento
+        @ (posedge clock);
+        #1;
+        validating = 1'b1;
+        if( rd_value_out == 32'hF8) begin
             $display("Test #%0d: OK", testN);
         end else begin
             $display("Test #%0d: FAILED -> rd_value_out was %x", testN, rd_value_out);
@@ -626,28 +744,9 @@ module test_AXI_ctrl( );
         validating = 1'b0;
 
 
-        mem_opcode = 3'b101; //LHU
-        for(int i = 0; i <= 3; i++) begin
-            alu_resoult = 32'h40010000 + i*4 + i + 16; 
-            #10;
-        end
-
-        //Carica 4 BYTE shiftate di un byte ciascuna
-        mem_opcode = 3'b000; //LB
-        for(int i = 0; i <= 3; i++) begin
-            alu_resoult = 32'h40010000 + i*4 + i + 32; 
-            #10;
-        end
-
-        mem_opcode = 3'b100; //LBU
-        for(int i = 0; i <= 3; i++) begin
-            alu_resoult = 32'h40010000 + i*4 + i + 32; 
-            #10;
-        end
-
-        #10;
-
         ///////////////////// AXI TESTS /////////////////////////
+        @ (posedge clock);
+        #1;
         //IO test
         test_type = AXI;
         op_class = 5'b01000;
@@ -724,8 +823,8 @@ module test_AXI_ctrl( );
         en_in = 1'b0;
 
         ///////////////////// GPIO TESTS /////////////////////////
-        wait (clock == 1'b0) wait (clock == 1'b1) ; //Sychronize with the clock
-        #9;
+        @ (posedge clock);
+        #1; ; //Sychronize with the clock
 
         test_type = GPIO;
         op_class = 5'b01000;    //Need a Store opration for using the GPIO
@@ -737,45 +836,60 @@ module test_AXI_ctrl( );
         rs2_value = 32'b0;
         alu_resoult = 32'h40020004; //Indirizzo reg. GPIO_dir
         gpio_pins = 32'h00000000;
+        @ (posedge clock);
+        #1;
+        validating = 1'b1;
         if (gpio_pins_wire == 32'h00000000) begin
             $display("GPIO INPUT 1 test OK");
         end else begin
             $display("GPIO INPUT 1 test FAILED");
         end
-        #10;
+        #1;
+        validating = 1'b0;
         
         gpio_pins = 32'hffffffff;
-        #2;
+        @ (posedge clock);
+        #1;
+        validating = 1'b1;
         if (gpio_pins_wire == 32'hffffffff) begin
             $display("GPIO INPUT 2 test OK");
         end else begin
             $display("GPIO INPUT 2 test FAILED");
         end
-        #8;
+        #1;
+        validating = 1'b0;
 
         //Setto la direzione dei GPIO (ed i GPIO andranno a LOW per default)
         mem_opcode = 3'b010;            //SW
         rs2_value = '1;                 //Tutti a 1
         alu_resoult = 32'h40020004;     //Indirizzo reg. GPIO_dir
         gpio_pins = 'z;                 //Rilascio i GPIO dal testbench (tutti in alta impedenza)
-        #10;
+        @ (posedge clock);
+        #1;
+        validating = 1'b1;
         if (gpio_pins_wire == 32'h00000000) begin
             $display("GPIO OUTPUT 1 test OK");
         end else begin
             $display("GPIO OUTPUT 1 test FAILED");
         end
+        #1;
+        validating = 1'b0;
+        
 
         //Setto tutti GPIO
         mem_opcode = 3'b010;            //SW
         rs2_value = '1;                 //Tutti a 1
         alu_resoult = 32'h40020008;     //Indirizzo reg. GPIO_reg
-        #10;
+        @ (posedge clock);
+        #1;
+        validating = 1'b1;
         if (gpio_pins_wire == 32'hffffffff) begin
             $display("GPIO OUTPUT 2 test OK");
         end else begin
             $display("GPIO OUTPUT 2 test FAILED");
         end
-
+        #1;
+        validating = 1'b0;
         #100;
         en_in = 1'b0;
 
