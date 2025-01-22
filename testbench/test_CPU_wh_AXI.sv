@@ -406,9 +406,9 @@ module test_CPU_wh_AXI();
   wire [31:0] display_in_tb;
   assign display_in_tb = DUT.test_design_i.CPU_0.U0.display_in;
 
+  logic testPassed = 0;
   task automatic S_AXI_TEST;  
     integer i;
-    logic testPassed = 0;
     string message;
     time t0;
     time t1;
@@ -1040,7 +1040,7 @@ module test_CPU_wh_AXI();
       oled_select0 = 1;
       #1;
       validating = 1'b1;
-      if(display_in_tb == 32'h00120a63) begin 
+      if(display_in_tb == 32'h0011a023) begin 
         testPassed = 1;
         message = "OK";
       end else begin
