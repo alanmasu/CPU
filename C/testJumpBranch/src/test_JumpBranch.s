@@ -14,15 +14,15 @@ main:
     li      t1, 1                   # Valore di successo da salvare in memoria
 
     # Test 1: JAL (Jump and Link)
-    jal     t2, test_jal            # Salta a test_jal, salva il PC+4 in t2
+    jal     ra, test_jal            # Salta a test_jal, salva il PC+4 in t2
     sw      t1, 0(t0)               # Scrive 1 in memoria (test passato)
-    sw      t2, 0(sp)               # Salva il registro di ritorno (PC+4)
+    sw      ra, 0(sp)               # Salva il registro di ritorno (PC+4)
 
     # Test 2: JALR (Jump and Link Register)
     la      t3, test_jalr           # Carica l'indirizzo di test_jalr
-    jalr    t4, 0(t3)               # Salta a test_jalr, salva il PC+4 in t4
+    jalr    ra, 0(t3)               # Salta a test_jalr, salva il PC+4 in t4
     sw      t1, 4(t0)               # Scrive 1 in memoria (test passato)
-    sw      t4, 4(sp)               # Salva il registro di ritorno (PC+4)
+    sw      ra, -4(sp)              # Salva il registro di ritorno (PC+4)
 
     # Test 3: BEQ (Branch if Equal)
     li      t2, 5
