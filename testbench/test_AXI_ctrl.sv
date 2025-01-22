@@ -840,9 +840,9 @@ module test_AXI_ctrl( );
         #1;
         validating = 1'b1;
         if (gpio_pins_wire == 32'h00000000) begin
-            $display("GPIO INPUT 1 test OK");
+            $display("GPIO INPUT 1 test: OK");
         end else begin
-            $display("GPIO INPUT 1 test FAILED");
+            $display("GPIO INPUT 1 test: FAILED");
         end
         #1;
         validating = 1'b0;
@@ -852,9 +852,9 @@ module test_AXI_ctrl( );
         #1;
         validating = 1'b1;
         if (gpio_pins_wire == 32'hffffffff) begin
-            $display("GPIO INPUT 2 test OK");
+            $display("GPIO INPUT 2 test: OK");
         end else begin
-            $display("GPIO INPUT 2 test FAILED");
+            $display("GPIO INPUT 2 test: FAILED");
         end
         #1;
         validating = 1'b0;
@@ -868,9 +868,9 @@ module test_AXI_ctrl( );
         #1;
         validating = 1'b1;
         if (gpio_pins_wire == 32'h00000000) begin
-            $display("GPIO OUTPUT 1 test OK");
+            $display("GPIO OUTPUT 1 test: OK");
         end else begin
-            $display("GPIO OUTPUT 1 test FAILED");
+            $display("GPIO OUTPUT 1 test: FAILED");
         end
         #1;
         validating = 1'b0;
@@ -884,12 +884,47 @@ module test_AXI_ctrl( );
         #1;
         validating = 1'b1;
         if (gpio_pins_wire == 32'hffffffff) begin
-            $display("GPIO OUTPUT 2 test OK");
+            $display("GPIO OUTPUT 2 test: OK");
         end else begin
-            $display("GPIO OUTPUT 2 test FAILED");
+            $display("GPIO OUTPUT 2 test: FAILED");
         end
         #1;
         validating = 1'b0;
+
+
+        //Testo le store byte e le load byte sui GPIO
+        op_class = 5'b01000;
+        mem_opcode = 3'b000;            //SB
+        rs2_value = 32'h00000000;       //Setto il primo GPIO a 1
+        alu_resoult = 32'h40020005;     //Indirizzo reg. GPIO_dir + 1 (aka PORT_B_DIR)
+        @ (posedge clock);
+        #1;
+        validating = 1'b1;
+        if (gpio_pins_wire == 32'hffff00ff) begin
+            $display("GPIO OUTPUT 3 test: OK");
+        end else begin
+            $display("GPIO OUTPUT 3 test: FAILED -> gpio_pins_wire was %x", gpio_pins_wire);
+        end
+        #1;
+        validating = 1'b0;
+
+        // Load a byte from GPIO
+        op_class = 5'b00100;
+        alu_resoult = 32'h40020001;     //Indirizzo reg. GPIO_status + 1 (aka PORT_B)
+        mem_opcode = 3'b100;            //LBU
+        gpio_pins[15:8] = 8'hAA;
+        @ (posedge clock);
+        #1;
+        validating = 1'b1;
+        if(rd_value_out == 32'hAA) begin
+            $display("GPIO INPUT 3 test: OK");
+        end else begin
+            $display("GPIO INPUT 3 test: FAILED -> rd_value_out was %x", rd_value_out);
+        end 
+        #1;
+        validating = 1'b0;
+
+
         #100;
         en_in = 1'b0;
 
