@@ -15,7 +15,7 @@ main:
 while:
     lw      a0, 0(t1)
     jal     a1, send_d
-    # call    send_n
+    jal     a1, send_n
     j       while
 
 L1:
@@ -37,7 +37,7 @@ send_n:
     sw      t4, 0x30(t0)
     call    delay
     call    delay
-    ret
+    jalr    zero, a1, 0
     
 send_d:
     sw      a0, 0x30(t0)
