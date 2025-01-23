@@ -20,6 +20,15 @@ while:
     lw      a2, 0(t1)
     mv      a0, t5           # 'g' 
     jal     a1, compose
+
+    mv      a0, t6           # 'o'
+    ori     a2, a2, 1
+    jal     a1, compose
+
+    mv      a0, s7           # 'a'
+    andi    a2, a2, -2
+    jal     a1, compose
+
     j       while
 
 L1:
