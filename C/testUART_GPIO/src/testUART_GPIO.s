@@ -11,11 +11,13 @@
 main:
     lui     t0, 0xE0001
     lui     t1, 0x40020
-    li      t4, 10        # \n       
+    li      t4, 10          # \n  
+    mv      a2, t4          # \n     
 while:
     lw      a0, 0(t1)
-    jal     a1, send_d
-    jal     a1, send_n
+    # jal     a1, send_d
+    # jal     a1, send_n
+    jal     a1, compose
     j       while
 
 L1:
@@ -44,3 +46,13 @@ send_d:
     # call    delay
     # call    delay
     jalr    zero, a1, 0
+
+compose:
+    sw      a0, 0x30(t0)
+    nop
+    nop
+    sw      a2, 0x30(t0)
+    call    delay
+    call    delay
+    jalr    zero, a1, 0
+
