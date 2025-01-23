@@ -16,6 +16,8 @@ main:
     li      t5, 0x67         # 'g'
     li      t6, 0x6F         # 'o'
     li      s7, 0x61         # 'a'
+    # li      s8, 0b011111110
+    li      s8, -2
 while:
     lw      a2, 0(t1)
     mv      a0, t5           # 'g' 
@@ -26,7 +28,16 @@ while:
     jal     a1, compose
 
     mv      a0, s7           # 'a'
-    andi    a2, a2, -2
+    mv      a7, a2
+    and     a2, a7, s8
+    jal     a1, compose
+
+    li      a6, 0b10000001
+    andi    a6, a6, -2
+    mv      a0, s7           # 'a'
+    jal     a1, send_d
+    li      a0, 'i'          # 'i'
+    mv      a2, a6
     jal     a1, compose
 
     j       while
