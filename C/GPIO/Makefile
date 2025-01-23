@@ -13,7 +13,7 @@ OUT     = bin/test_GPIO_from_C.elf
 LINKER  = linker_script.ld
 
 # Flags di compilazione e linking
-CFLAGS  = -nostdlib -nostartfiles -ffreestanding
+CFLAGS  = -nostdlib -ffreestanding 
 LDFLAGS = -T $(LINKER) -e main
 # LDFLAGS = -e main
 

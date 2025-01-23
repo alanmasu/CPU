@@ -17,6 +17,7 @@
 // char* PORT_D_DIR = (char*)0x40020004;
 // char* PORT_D_DATA = (char*)0x40020008;
 
+#include <stdint.h>
 
 #define GPIO0 0b00000001
 #define GPIO1 0b00000010
@@ -28,26 +29,31 @@
 #define GPIO7 0b10000000
 
 int main(int, char**){
-    int* GPIO_BASE_ADDRESS  = (int*)0x40020000;
-    int* GPIO_DIR_REG       = (int*)0x40020004;
-    int* GPIO_DATA_REG      = (int*)0x40020008;
+    uint8_t* PORT_A = (uint8_t*)0x40020000;
+    uint8_t* PORT_A_DIR = (uint8_t*)0x40020004;
+    uint8_t* PORT_A_DATA = (uint8_t*)0x40020008;
 
-    *GPIO_DIR_REG = 1;                          // Set all GPIOs as input
-    *GPIO_DATA_REG = 0;                         // Clear all GPIOs 
+    // *PORT_A_DATA = 0;                         // Clear all GPIOs
+    // *PORT_A_DIR = 0;
 
-    // *GPIO_DIR_REG = *GPIO_DIR_REG | GPIO0;      // Set GPIO0 as output
-    // *GPIO_DATA_REG = 0;                         // Clear all GPIOs
+    *PORT_A_DIR = *PORT_A_DIR | GPIO1 | GPIO0;      // Set GPIO0 and GPIO1 as output
 
+    uint32_t* GPIO_state = (uint32_t*)0x40010000;
     while(1){
-        // *GPIO_DATA_REG = *GPIO_DATA_REG & ~GPIO0;   // Clear GPIO0
-        *GPIO_DATA_REG = 0;                       // Clear all GPIOs
+        *PORT_A_DATA = *PORT_A | GPIO0;    // Set GPIO0
+
+        // uint8_t tmp = *PORT_A_DATA;
+        // tmp = tmp >> 4;
+        // tmp |= GPIO0;
+        // (*PORT_A_DATA) &= tmp;
+        
+        GPIO_state[0] = *PORT_A;
 
         for (int i = 0; i < 1250000; i++){
 
         }
 
-        // *GPIO_DATA_REG = *GPIO_DATA_REG | GPIO0;    // Set GPIO0
-        *GPIO_DATA_REG = 1;
+        *PORT_A_DATA = *PORT_A_DATA & ~GPIO0;   // Clear GPIO0
 
         for (int i = 0; i < 1250000; i++){
 
