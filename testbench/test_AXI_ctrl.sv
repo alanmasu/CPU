@@ -29,14 +29,16 @@ module test_AXI_ctrl( );
         logic en_mem;
         logic en_AXI;
         logic en_GPIO;
+        logig en_I2C;
     } en_bus_t;
 
     typedef struct packed {
         bit[31:0] axi_data;
         bit[31:0] GPIO_data;
+        bit[31:0] I2C_data;
     } peripheral_data_t;
 
-    typedef enum {SETUP, ALU, MEMORY, AXI, GPIO } test_type_t;
+    typedef enum {SETUP, ALU, MEMORY, AXI, GPIO, I2C } test_type_t;
         
 
     bit clock, reset, jmp, we_in, en_in;
@@ -64,6 +66,12 @@ module test_AXI_ctrl( );
 
     logic [31:0] gpio_pins = 32'bZ;
     wire [31:0] gpio_pins_wire;
+
+    //I2C
+    wire SCL;
+    wire SDA;
+    bit [31:0] i2c_data_out;
+
 
     //Master vip agent
     axi_transaction                         wr_transaction;   
@@ -127,8 +135,20 @@ module test_AXI_ctrl( );
         .d_out(gpio_data_out),
         .gpio(gpio_pins_wire)
     );
-
     assign gpio_pins_wire = gpio_pins;
+
+    I2C_module DUT3(
+        .clk(clock),
+        .res(reset),
+        .scl(SCL),
+        .sda(SDA),
+        .ena(en_out.en_I2C),
+        .wea(we_out),
+        .addra(address_out),
+        .dina(d_out),
+        .douta(i2c_data_out)
+    );
+        
 
     genvar i;
     generate

@@ -5,7 +5,7 @@ use IEEE.NUMERIC_STD.ALL;
 
 package memory_pkg is
     --MEMORY model
-    type memory_space_type_t is (ROM, CREG_FILE, RAM, IO, GPIO, AXI, RESERVED);
+    type memory_space_type_t is (ROM, CREG_FILE, RAM, IO, GPIO, I2C, AXI, RESERVED);
     type memory_addr_space_t is record
         lower_bound : unsigned(31 downto 0);
         upper_bound : unsigned(31 downto 0);
@@ -20,7 +20,8 @@ package memory_pkg is
         (lower_bound => x"40001000", upper_bound => x"4000FFFF", space_type => CREG_FILE),  --AXI FSM Control Register
         (lower_bound => x"40010000", upper_bound => x"4001FFFF", space_type => RAM),        --AXI DATA MEMORY (Mem upper bount = 0x40011FFF)
         (lower_bound => x"40020000", upper_bound => x"4002000F", space_type => GPIO),       --RISC-V GPIO
-        (lower_bound => x"40020010", upper_bound => x"7FFFFFFF", space_type => IO),         --RISC-V IO
+        (lower_bound => x"40020010", upper_bound => x"4002002F", space_type => I2C),        --RISC-V I2C
+        (lower_bound => x"40020030", upper_bound => x"7FFFFFFF", space_type => IO),         --RISC-V IO
         (lower_bound => x"80000000", upper_bound => x"DFFFFFFF", space_type => RESERVED),   
         (lower_bound => x"E0000000", upper_bound => x"E02FFFFF", space_type => AXI),        --PS IO
         (lower_bound => x"E0300000", upper_bound => x"E0FFFFFF", space_type => RESERVED),
@@ -41,11 +42,13 @@ package memory_pkg is
     type peripheral_data_t is record
         AXI_data : std_logic_vector(31 downto 0);
         GPIO_data : std_logic_vector(31 downto 0);
+        I2C_data : std_logic_vector(31 downto 0);
     end record peripheral_data_t;
     type en_bus_t is record
         en_mem : std_logic;
         en_AXI : std_logic;
         en_GPIO : std_logic;
+        en_I2C : std_logic;
     end record en_bus_t;
 
     --FUNCTIONS
@@ -92,11 +95,12 @@ package body memory_pkg is
     end function;
 
     function en_bus_t_to_slv(en_bus : en_bus_t) return std_logic_vector is
-        variable result : std_logic_vector(2 downto 0);
+        variable result : std_logic_vector(3 downto 0);
     begin
         result(0) := en_bus.en_mem;
         result(1) := en_bus.en_AXI;
         result(2) := en_bus.en_GPIO;
+        result(3) := en_bus.en_I2C;
         return result;
     end function;
 
