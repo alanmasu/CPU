@@ -41,6 +41,6 @@ send_n:
     
 send_d:
     sw      a0, 0x30(t0)
-    call    delay
-    call    delay
+    # call    delay
+    # call    delay
     jalr    zero, a1, 0
