@@ -37,6 +37,7 @@ module test_CPU_wh_AXI();
   logic                                   oled_select0 = 1'b0;
 
   logic on_programming = 1'b1;
+  int istruction_count = 0;
    
 //Master vip agent
   axi_transaction                         wr_transaction;   
@@ -135,6 +136,13 @@ module test_CPU_wh_AXI();
     32'hf9e12623,
     32'hf9f12423,
     32'h00008067
+  };
+
+  logic [31:0] and_array [] = '{
+    32'h40020337,
+    32'h00032803,
+    32'h03e87813,
+    32'h0000006f
   };
 
   // Setup VIP agents
@@ -313,6 +321,12 @@ module test_CPU_wh_AXI();
     doQueuedTests();
     printLog();
 
+    writeCREG(32'b00); //Reset CPU
+    LOAD_PROGRAM(and_array, BASE_ADDR);
+    istruction_count = 0;
+    doAndiTest();
+    printLog();
+
     #200ns;
     $finish;
   end
@@ -349,7 +363,6 @@ module test_CPU_wh_AXI();
                 testPassed = 0;
                 message = "FAILED -> Instruction was";
             end
-            addToLog(0, testPassed, message, mtestRDataL[31:0], "READ Instruction Memory");
             #10;
             mtestWDataL[63:32] = 32'h0;
             mtestADDR[63:32] = 32'h0;
@@ -405,6 +418,31 @@ module test_CPU_wh_AXI();
   //OLED
   wire [31:0] display_in_tb;
   assign display_in_tb = DUT.test_design_i.CPU_0.U0.display_in;
+
+
+  task automatic writeCREG(input logic [31:0] data);
+    begin
+      mtestID = 0; 
+      mtestBurstLength = 0; 
+      mtestDataSize = xil_axi_size_t'(xil_clog2(32/8)); 
+      mtestBurstType = XIL_AXI_BURST_TYPE_INCR;  
+      mtestLOCK = XIL_AXI_ALOCK_NOLOCK;  
+      mtestCacheType = 0;  
+      mtestProtectionType = 0;  
+      mtestRegion = 0; 
+      mtestQOS = 0; 
+
+
+      mtestADDR = 32'h40001000; 
+      mtestWDataL[31:0] = data;   
+      mst_agent_0.AXI4LITE_WRITE_BURST( 
+        mtestADDR, 
+        mtestProtectionType, 
+        mtestWDataL, 
+        mtestBresp 
+      );  
+    end
+  endtask
 
   logic testPassed = 0;
   task automatic S_AXI_TEST;  
@@ -1040,27 +1078,85 @@ module test_CPU_wh_AXI();
       oled_select0 = 1;
       #1;
       validating = 1'b1;
-      if(display_in_tb == 32'h0011a023) begin 
+      if(display_in_tb == 32'h00120a63) begin 
         testPassed = 1;
         message = "OK";
       end else begin
         testPassed = 0;
         message = "FAILED -> display_in_tb was";
       end
-      addToLog(test_n, testPassed, message, display_in_tb, $sformatf("#%0da", test_n)); 
-      
+      addToLog(test_n, testPassed, message, display_in_tb, $sformatf("#%0da", test_n));
       #1;
+      validating = 1'b0;
 
       ///////////// TEST 32 UP, between Test #10 and Test #11
-
-
     end 
   endtask  
 
-//  always @(instruction_tb) begin
-//    $display("%h", instruction_tb);
-//  end
-  int istruction_count = 0;
+  task automatic doAndiTest;
+    string message;
+    
+    begin
+      $display("Testing ANDI instruction");
+      writeCREG(32'b11); //Set CPU in RUN 
+
+      wait (state_tb == fetch);
+      wait (state_tb == fetch);
+      #1;
+      test_n = 1;
+      validating = 1'b1;
+      //Check instruction   lui     t1, 0x40020
+      if(regFile[5] == 32'h40020000) begin
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = "FAILED -> regFile[6] was";
+      end
+      addToLog(test_n, testPassed, message, regFile[5]);
+      #1;
+      validating = 1'b0;
+      @(posedge clock);
+      #1;
+
+      test_n = 2;
+      GPIO_sig[7:0] = 8'b0001_0001;
+      wait (state_tb == fetch);
+      #1; 
+      validating = 1'b1;
+      //Check instruction   lw  a6, 0(t1)
+      if (regFile[15][7:0] == 8'b0001_0001) begin
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = "FAILED -> regFile[16] was";
+      end
+      addToLog(test_n, testPassed, message, regFile[15]);
+      #1;
+      validating = 1'b0;
+      @(posedge clock);
+      #1;
+
+      test_n = 3;
+      wait (state_tb == fetch);
+      #1;
+      validating = 1'b1;
+      //Check instruction   andi    a6, a6, 0b111110
+      if (regFile[15][7:0] == 8'b0001_0000) begin
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = "FAILED -> regFile[16] was";
+      end
+      addToLog(test_n, testPassed, message, regFile[15]);
+      #1;
+      validating = 1'b0;     
+
+    end  
+  endtask    
+
 
   always @(state_tb, reset) begin
     if (reset == 0) begin

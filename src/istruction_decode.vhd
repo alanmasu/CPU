@@ -79,8 +79,7 @@ begin
         imm_out => immediate_out
     );
 
-    register_process : process( clk, res )
-    begin
+    register_process : process( clk, res ) begin
         if res = '0' then
             npc_out <= (others => '0');
             pc_out <= (others => '0');
@@ -102,19 +101,21 @@ begin
             --Registri semplici
             npc_out <= npc_in;
             pc_out <= pc_in;
-            --op_class <= (4 => op, 3 => store, 2 => load, 1 => branch, 0 => jump);
+
+            --Decodifica
             rd_addr_out <= rd_addr;
             mem_opcode <= func3;
             comparator_opcode <= func3;
-            
-            
-            --Decodifica
-            if func7 = "0000000" or func7 = "0100000" then
+
+            -- Se operazione ALU reg-reg o Shift la codifica cambia, qunidi:
+            if( opcode = opcode_alu_op or func3 = "001" or func3 = "101") then
                 alu_opcode(3) <= func7(5);
                 alu_opcode(2 downto 0) <= func3; 
-            else 
-                alu_opcode <= (others => '0');     --ADD
-            end if ;
+            else
+                alu_opcode(3) <= '0';
+                alu_opcode(2 downto 0) <= func3;
+            end if;
+            
             --Calcolo della control word
             --Defaults
             op <= '0';
