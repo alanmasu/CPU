@@ -24,6 +24,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 library work;
 use work.memory_pkg.all;
+use work.types_pkg.all;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
@@ -43,19 +44,17 @@ entity address_manager is
 end address_manager;
 
 architecture Behavioral of address_manager is
-    signal mem_en : STD_LOGIC;
-    signal axi_en : STD_LOGIC;
-begin
 
+begin
     comb_process : process( address, en_in )
     begin
         if en_in = '1' then
             en_out.en_mem <= is_in_space(address, RAM);
             en_out.en_AXI <= is_in_space(address, AXI) or is_in_space(address, ROM) or is_in_space(address, CREG_FILE);
             en_out.en_GPIO <= is_in_space(address, GPIO);
+            en_out.en_I2C <= is_in_space(address, I2C);
         else 
             en_out <= (others => '0');
         end if ;
     end process ; -- comb_process
-
 end Behavioral;

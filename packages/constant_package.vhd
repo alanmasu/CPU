@@ -114,4 +114,18 @@ package constant_package is
         30 => x"00000000"  -- x31/t6
     );
     constant PC_RESET_VALUE : std_logic_vector(31 downto 0) := x"40000000";
+
+    -- I2C Register File Names
+    constant I2C_REG_CONTROL : integer := 0;
+        constant I2C_CREG_START_BIT : integer := 0;
+        constant I2C_CREG_RW_N_BIT  : integer := 1;
+        constant I2C_CREG_BUSY_BIT  : integer := 2;
+        constant I2C_CREG_ERROR_BIT : integer := 3;
+
+    constant I2C_REG_ADDRESS : integer := 1;
+    constant I2C_REG_RDATA   : integer := 2;
+    constant I2C_REG_WDATA   : integer := 3;
+    constant I2C_REG_LEN     : integer := 4;
+    constant I2C_REG_LEN_O   : integer := 5;
+
 end package ;
