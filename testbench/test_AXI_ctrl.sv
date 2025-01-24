@@ -71,8 +71,8 @@ module test_AXI_ctrl( );
     wire SCL;
     wire SDA;
     bit [31:0] i2c_data_out;
-    bit sda_tb = 1'bz;
-    bit scl_tb = 1'bz;
+    logic sda_tb = 1'bz;
+    logic scl_tb = 1'bz;
       //for slave interface
     bit [31:0] i2c_data_to_send_tb;
     bit [7:0] i2c_data_tb;
