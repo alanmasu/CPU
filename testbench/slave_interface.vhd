@@ -8,9 +8,9 @@ entity slave_interface is
         i2c_scl : inout STD_LOGIC;
         i2c_sda : inout STD_LOGIC;
         res : in STD_LOGIC;
-        i2c_address_tb : buffer STD_LOGIC_VECTOR(6 downto 0);
+        i2c_address_tb : buffer STD_LOGIC_VECTOR(31 downto 0);
         i2c_rw_n_tb : buffer STD_LOGIC;
-        i2c_data_tb : buffer STD_LOGIC_VECTOR(7 downto 0);
+        i2c_data_tb : buffer STD_LOGIC_VECTOR(31 downto 0);
         i2c_data_to_send : buffer STD_LOGIC_VECTOR(31 downto 0)
     );
 end slave_interface;
@@ -23,6 +23,8 @@ architecture Behavioral of slave_interface is
     signal shamt : integer := 0;
 begin
 
+    shamt <= 32 - (byte_count * 8);
+    
     i2c_slave_pro : process( i2c_scl, i2c_sda, res ) is
         variable i2c_data_count : integer := 0;
         variable i2c_next_state : i2c_slave_state_t := idle;
@@ -37,11 +39,18 @@ begin
             byte_count <= 0;
             i2c_sda <= 'Z';
             i2c_scl <= 'Z';
+            i2c_slave_state <= idle;
+            i2c_address_tb <= (others => '0');
+            i2c_data_tb <= (others => '0');
+            i2c_rw_n_tb <= '0';
+            i2c_data_to_send <= (others => '0');
         elsif falling_edge(i2c_sda) and i2c_slave_state = idle then
             i2c_slave_state <= start;
             byte_count <= 0;
         elsif falling_edge(i2c_scl) and i2c_slave_state = start then
             i2c_slave_state <= address;
+            i2c_address_tb <= (others => '0');
+            i2c_rw_n_tb <= '0';
         elsif rising_edge(i2c_scl) then
             if i2c_slave_state = address then
                 i2c_data_count := i2c_data_count + 1;

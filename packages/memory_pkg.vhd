@@ -39,6 +39,9 @@ package memory_pkg is
         (lower_bound => x"FE000000", upper_bound => x"FFFBFFFF", space_type => RESERVED),   
         (lower_bound => x"FFFC0000", upper_bound => x"FFFFFFFF", space_type => AXI)         --PS OCM
     );
+    -- Offset for peripherals
+    constant GPIO_OFFSET    : unsigned(31 downto 0) := x"0000_0000";
+    constant I2C_OFFSET     : unsigned(31 downto 0) := x"0000_0010";
 
     --FUNCTIONS
     function is_in_space(addr : std_logic_vector(31 downto 0); space_type: memory_space_type_t) return std_logic;

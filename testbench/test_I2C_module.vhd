@@ -57,7 +57,6 @@ architecture Behavioral of test_I2C_module is
     signal i2c_finish         : STD_LOGIC := '0';
     signal i2c_address_tb     : STD_LOGIC_VECTOR(6 downto 0) := (others => '0');
     signal i2c_data_tb        : STD_LOGIC_VECTOR(31 downto 0) := (others => '0');
-    signal i2c_data_length_tb : STD_LOGIC_VECTOR(2 downto 0) := (others => '0');
     signal i2c_rw_n_tb        : STD_LOGIC := '0';
     signal i2c_data_to_send   : STD_LOGIC_VECTOR(31 downto 0) := (others => '0');
 

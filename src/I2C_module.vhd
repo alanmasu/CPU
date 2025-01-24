@@ -29,6 +29,7 @@ library work;
 use work.i2c_utils_pkg.all;
 use work.types_pkg.all;
 use work.constant_package.all;
+use work.memory_pkg.all;
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx leaf cells in this code.
 --library UNISIM;
@@ -86,12 +87,14 @@ begin
 
     regFile_proc : process(clk, res)
         variable regAddress : integer;
+        variable address : unsigned(31 downto 0);
     begin
         if res = '0' then
             regFile <= (others => (others => '0'));
             douta <= (others => '0');
         elsif rising_edge(clk) then
-            regAddress := to_integer(unsigned(addra(5 downto 2)));
+            address := unsigned(addra) - I2C_OFFSET;
+            regAddress := to_integer(unsigned(address(4 downto 2)));
             if(ena = '1') then
                 if(wea(0) = '1') then
                     regFile(regAddress)(7 downto 0) <= dina(7 downto 0);
