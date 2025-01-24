@@ -21,7 +21,7 @@
 import axi_vip_pkg::*;
 import mem_ctrl_test_axi_vip_0_0_pkg::*;
 
-import memory_pkg::*;
+// import memory_pkg::*;
 
 module test_AXI_ctrl( );
     //Type definitions
@@ -29,7 +29,7 @@ module test_AXI_ctrl( );
         logic en_mem;
         logic en_AXI;
         logic en_GPIO;
-        logig en_I2C;
+        logic en_I2C;
     } en_bus_t;
 
     typedef struct packed {
@@ -52,7 +52,7 @@ module test_AXI_ctrl( );
     bit[4:0] rd_addr_out;
     bit[31:0] rd_value_out;
     bit[31:0] pc_out;
-    en_bus_t en_out = '{en_mem: 1'b0, en_AXI: 1'b0, en_GPIO: 1'b0};
+    en_bus_t en_out = '{en_mem: 1'b0, en_AXI: 1'b0, en_GPIO: 1'b0, en_I2C: 1'b0};
     bit[3:0] we_out;
     bit[31:0] address_out;
     bit[31:0] d_out;
@@ -71,6 +71,9 @@ module test_AXI_ctrl( );
     wire SCL;
     wire SDA;
     bit [31:0] i2c_data_out;
+
+    logic sda_tb;
+    logic scl_tb;
 
 
     //Master vip agent
@@ -148,7 +151,10 @@ module test_AXI_ctrl( );
         .dina(d_out),
         .douta(i2c_data_out)
     );
-        
+    pullup(SCL);
+    pullup(SDA);       
+    assign SCL = scl_tb;
+    assign SDA = sda_tb;
 
     genvar i;
     generate

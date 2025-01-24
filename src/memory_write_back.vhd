@@ -88,7 +88,8 @@ architecture Behavioral of memory_write_back is
     signal en_bus : en_bus_t := (
         en_mem => '0', 
         en_AXI => '0',
-        en_GPIO => '0'
+        en_GPIO => '0',
+        en_I2C => '0'
     );
     signal we, mem_wea : std_logic_vector(3 downto 0) := (others => '0');
 begin

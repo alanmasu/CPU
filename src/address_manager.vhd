@@ -42,7 +42,9 @@ entity address_manager is
     );
 end address_manager;
 
-architecture Behavioral of address_manager begin
+architecture Behavioral of address_manager is
+
+begin
     comb_process : process( address, en_in )
     begin
         if en_in = '1' then
