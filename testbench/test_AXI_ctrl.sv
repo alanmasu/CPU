@@ -21,22 +21,23 @@
 import axi_vip_pkg::*;
 import mem_ctrl_test_axi_vip_0_0_pkg::*;
 
-// import memory_pkg::*;
+import types_pkg::*;
+import memory_pkg::*;
 
 module test_AXI_ctrl( );
     //Type definitions
     typedef struct packed {
         logic en_mem;
-        logic en_AXI;
-        logic en_GPIO;
-        logic en_I2C;
+        logic en_axi;
+        logic en_gpio;
+        logic en_i2c;
     } en_bus_t;
 
-    typedef struct packed {
-        bit[31:0] axi_data;
-        bit[31:0] GPIO_data;
-        bit[31:0] I2C_data;
-    } peripheral_data_t;
+    // typedef struct packed {
+    //     bit[31:0] axi_data;
+    //     bit[31:0] gpio_data;
+    //     bit[31:0] I2C_data;
+    // } peripheral_data_t;
 
     typedef enum {SETUP, ALU, MEMORY, AXI, GPIO, I2C } test_type_t;
         
@@ -52,7 +53,7 @@ module test_AXI_ctrl( );
     bit[4:0] rd_addr_out;
     bit[31:0] rd_value_out;
     bit[31:0] pc_out;
-    en_bus_t en_out = '{en_mem: 1'b0, en_AXI: 1'b0, en_GPIO: 1'b0, en_I2C: 1'b0};
+    en_bus_t en_out = '{en_mem: 1'b0, en_axi: 1'b0, en_gpio: 1'b0, en_i2c: 1'b0};
     bit[3:0] we_out;
     bit[31:0] address_out;
     bit[31:0] d_out;
@@ -124,7 +125,7 @@ module test_AXI_ctrl( );
     mem_ctrl_test_wrapper DUT(
         .reset_rtl(reset),
         .clock_100mhz(clock),
-        .en_0(en_out.en_AXI),
+        .en_0(en_out.en_axi),
         .we_0(we_out),
         .address_0(address_out),
         .write_data_0(d_out),
@@ -138,7 +139,7 @@ module test_AXI_ctrl( );
         .address(address_out),
         .d_in(d_out),
         .wea(we_out),
-        .ena(en_out.en_GPIO),
+        .ena(en_out.en_gpio),
         .d_out(gpio_data_out),
         .gpio(gpio_pins_wire)
     );
@@ -149,7 +150,7 @@ module test_AXI_ctrl( );
         .res(reset),
         .scl(SCL),
         .sda(SDA),
-        .ena(en_out.en_I2C),
+        .ena(en_out.en_i2c),
         .wea(we_out),
         .addra(address_out),
         .dina(d_out),
@@ -183,7 +184,7 @@ module test_AXI_ctrl( );
     end 
 
     always @(gpio_data_out) begin
-        d_in.GPIO_data = gpio_data_out;
+        d_in.gpio_data = gpio_data_out;
     end
 
     always @(posedge clock) begin
@@ -218,6 +219,11 @@ module test_AXI_ctrl( );
           slave_moniter_transaction_queue_size++;
         end
     end
+
+
+    //Nomi generici per i segnali di I2C
+    // I2C_regFile_t i2c_regFile_tb;
+    // assign i2c_regFile_tb = DUT3.regFile;
     
     initial begin
 
@@ -429,6 +435,22 @@ module test_AXI_ctrl( );
         end else begin
             $display("GPIO OUTPUT 2 test FAILED");
         end
+
+
+
+        ///////////////////// I2C TESTS /////////////////////////
+        @ (posedge clock);
+        #1;
+        test_type = I2C;
+        op_class = 5'b01000;    //Need a Store opration for using the I2C
+        en_in = 1'b1;
+        we_in = 1'b1;
+        mem_opcode = 3'b000; //SB
+        alu_resoult = 32'h4002_0014; // I2C_REG_ADDRESS
+        rs2_value = 32'h56; // 0x56 address
+
+    
+
 
         #100;
         en_in = 1'b0;

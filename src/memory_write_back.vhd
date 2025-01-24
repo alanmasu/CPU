@@ -28,6 +28,8 @@ use IEEE.NUMERIC_STD.ALL;
 
 library work;
 use work.memory_pkg.all;
+use work.types_pkg.all;
+
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx leaf cells in this code.
 --library UNISIM;

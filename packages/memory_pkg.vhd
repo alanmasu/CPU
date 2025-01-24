@@ -2,6 +2,8 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
+library work;
+use work.types_pkg.all;
 
 package memory_pkg is
     --MEMORY model
@@ -12,8 +14,8 @@ package memory_pkg is
         space_type : memory_space_type_t;
     end record memory_addr_space_t;
 
+    -- Memory map
     type memory_model is array (natural range <>) of memory_addr_space_t;
-
     constant memory_map : memory_model(0 to 20) := (
         (lower_bound => x"00000000", upper_bound => x"3FFFFFFF", space_type => AXI),        --OCM & DDR
         (lower_bound => x"40000000", upper_bound => x"40000FFF", space_type => ROM),        --AXI INSTRUCTION MEMORY
@@ -37,19 +39,6 @@ package memory_pkg is
         (lower_bound => x"FE000000", upper_bound => x"FFFBFFFF", space_type => RESERVED),   
         (lower_bound => x"FFFC0000", upper_bound => x"FFFFFFFF", space_type => AXI)         --PS OCM
     );
-
-    --PERIPHERALS 
-    type peripheral_data_t is record
-        AXI_data : std_logic_vector(31 downto 0);
-        GPIO_data : std_logic_vector(31 downto 0);
-        I2C_data : std_logic_vector(31 downto 0);
-    end record peripheral_data_t;
-    type en_bus_t is record
-        en_mem : std_logic;
-        en_AXI : std_logic;
-        en_GPIO : std_logic;
-        en_I2C : std_logic;
-    end record en_bus_t;
 
     --FUNCTIONS
     function is_in_space(addr : std_logic_vector(31 downto 0); space_type: memory_space_type_t) return std_logic;
