@@ -21,22 +21,27 @@
 import axi_vip_pkg::*;
 import mem_ctrl_test_axi_vip_0_0_pkg::*;
 
+import types_pkg::*;
 import memory_pkg::*;
 
 module test_AXI_ctrl( );
     //Type definitions
     typedef struct packed {
         logic en_mem;
-        logic en_AXI;
-        logic en_GPIO;
+        logic en_axi;
+        logic en_gpio;
+        logic en_i2c;
     } en_bus_t;
 
-    typedef struct packed {
-        bit[31:0] axi_data;
-        bit[31:0] GPIO_data;
-    } peripheral_data_t;
+    // typedef struct packed {
+    //     bit[31:0] axi_data;
+    //     bit[31:0] gpio_data;
+    //     bit[31:0] I2C_data;
+    // } peripheral_data_t;
 
-    typedef enum {SETUP, ALU, MEMORY, AXI, GPIO } test_type_t;
+    typedef enum {SETUP, ALU, MEMORY, AXI, GPIO, I2C } test_type_t;
+    logic validating = 1'b0;
+    int   test_n = 0;
         
 
     bit clock, reset, jmp, we_in, en_in;
@@ -50,7 +55,7 @@ module test_AXI_ctrl( );
     bit[4:0] rd_addr_out;
     bit[31:0] rd_value_out;
     bit[31:0] pc_out;
-    en_bus_t en_out = '{en_mem: 1'b0, en_AXI: 1'b0, en_GPIO: 1'b0};
+    en_bus_t en_out = '{en_mem: 1'b0, en_axi: 1'b0, en_gpio: 1'b0, en_i2c: 1'b0};
     bit[3:0] we_out;
     bit[31:0] address_out;
     bit[31:0] d_out;
@@ -64,6 +69,19 @@ module test_AXI_ctrl( );
 
     logic [31:0] gpio_pins = 32'bZ;
     wire [31:0] gpio_pins_wire;
+
+    //I2C
+    wire SCL;
+    wire SDA;
+    bit [31:0] i2c_data_out;
+    logic sda_tb = 1'bz;
+    logic scl_tb = 1'bz;
+      //for slave interface
+    wire [31:0] i2c_data_to_send_tb;
+    wire [31:0] i2c_data_tb;
+    wire [31:0] i2c_address_tb;
+    wire i2c_rw_n_tb;
+
 
     //Master vip agent
     axi_transaction                         wr_transaction;   
@@ -109,7 +127,7 @@ module test_AXI_ctrl( );
     mem_ctrl_test_wrapper DUT(
         .reset_rtl(reset),
         .clock_100mhz(clock),
-        .en_0(en_out.en_AXI),
+        .en_0(en_out.en_axi),
         .we_0(we_out),
         .address_0(address_out),
         .write_data_0(d_out),
@@ -123,12 +141,38 @@ module test_AXI_ctrl( );
         .address(address_out),
         .d_in(d_out),
         .wea(we_out),
-        .ena(en_out.en_GPIO),
+        .ena(en_out.en_gpio),
         .d_out(gpio_data_out),
         .gpio(gpio_pins_wire)
     );
-
     assign gpio_pins_wire = gpio_pins;
+
+    I2C_module DUT3(
+        .clk(clock),
+        .res(reset),
+        .scl(SCL),
+        .sda(SDA),
+        .ena(en_out.en_i2c),
+        .wea(we_out),
+        .addra(address_out),
+        .dina(d_out),
+        .douta(i2c_data_out)
+    );
+    pullup(SCL);
+    pullup(SDA);       
+    assign SCL = scl_tb;
+    assign SDA = sda_tb;
+
+    //slave interface
+    slave_interface DUT4(
+        .i2c_sda(SDA),
+        .i2c_scl(SCL),
+        .res(reset),
+        .i2c_address_tb(i2c_address_tb),
+        .i2c_rw_n_tb(i2c_rw_n_tb),
+        .i2c_data_tb(i2c_data_tb),
+        .i2c_data_to_send(i2c_data_to_send_tb)
+    );
 
     genvar i;
     generate
@@ -142,7 +186,7 @@ module test_AXI_ctrl( );
     end 
 
     always @(gpio_data_out) begin
-        d_in.GPIO_data = gpio_data_out;
+        d_in.gpio_data = gpio_data_out;
     end
 
     always @(posedge clock) begin
@@ -177,6 +221,11 @@ module test_AXI_ctrl( );
           slave_moniter_transaction_queue_size++;
         end
     end
+
+
+    //Nomi generici per i segnali di I2C
+    i2c_regfile_t i2c_regFile_tb;
+    assign i2c_regFile_tb = DUT3.regFile;
     
     initial begin
 
@@ -388,6 +437,166 @@ module test_AXI_ctrl( );
         end else begin
             $display("GPIO OUTPUT 2 test FAILED");
         end
+
+
+
+        ///////////////////// I2C TESTS /////////////////////////
+        $display("Starting I2C TESTS...");
+        test_n = 1;
+        @ (posedge clock);
+        #1;
+        test_type = I2C;
+        op_class = 5'b01000;    //Need a Store opration for using the I2C
+        en_in = 1'b1;
+        we_in = 1'b1;
+        mem_opcode = 3'b010; //SW
+        alu_resoult = 32'h4002_0010 + (1 * 4); // I2C_REG_ADDRESS: I2C_BASE + 1 WORD
+        rs2_value = 32'h56; // 0x56 address
+        @ (posedge clock);
+        #1;
+        en_in = 1'b0;
+        we_in = 1'b0;
+        validating = 1'b1;
+        if (i2c_regFile_tb[1] == 32'h56) begin
+            $display("Test #%0d: OK", test_n);
+        end else begin
+            $display("Test #%0d: FAILED -> i2c_regFile_tb[1] was %0x", test_n, i2c_regFile_tb[1]);
+        end
+        #1;
+        validating = 1'b0;
+
+        test_n = 2;
+        @ (posedge clock);
+        #1;
+        alu_resoult = 32'h4002_0010 + (3 * 4); // I2C_REG_WDATA: I2C_BASE + 3 WORDS
+        en_in = 1'b1;
+        we_in = 1'b1;
+        rs2_value = 32'h78; // 0x78 data
+        @ (posedge clock);
+        #1;
+        en_in = 1'b0;
+        we_in = 1'b0;
+        validating = 1'b1;
+        if (i2c_regFile_tb[3] == 32'h78) begin
+            $display("Test #%0d: OK", test_n);
+        end else begin
+            $display("Test #%0d: FAILED -> i2c_regFile_tb[3] was %0x", test_n, i2c_regFile_tb[3]);
+        end
+        #1;
+        validating = 1'b0;
+
+
+        test_n = 3;
+        @ (posedge clock);
+        #1;
+        alu_resoult = 32'h4002_0010 + (4 * 4); // I2C_REG_LEN: I2C_BASE + 4 WORDS
+        en_in = 1'b1;
+        we_in = 1'b1;
+        rs2_value = 32'h1; // 0x1 byte
+        @ (posedge clock);
+        #1;
+        en_in = 1'b0;
+        we_in = 1'b0;
+        validating = 1'b1;
+        if (i2c_regFile_tb[4] == 32'h1) begin
+            $display("Test #%0d: OK", test_n);
+        end else begin
+            $display("Test #%0d: FAILED -> i2c_regFile_tb[4] was %0x", test_n, i2c_regFile_tb[4]);
+        end
+        #1;
+        validating = 1'b0;
+
+        test_n = 4;
+        @ (posedge clock);
+        #1;
+        alu_resoult = 32'h4002_0010 + (0 * 4); // I2C_REG_CTRL: I2C_BASE + 0 WORD
+        en_in = 1'b1;
+        we_in = 1'b1;
+        rs2_value[0] = 1'b1; // Start
+        rs2_value[1] = 1'b0; // Write
+        @ (posedge clock);
+        #1;
+        en_in = 1'b0;
+        we_in = 1'b0;
+        validating = 1'b1;
+        if (i2c_regFile_tb[0] == 32'h1) begin
+            $display("Test #%0da: OK", test_n);
+        end else begin
+            $display("Test #%0da: FAILED -> i2c_regFile_tb[0] was %0x", test_n, i2c_regFile_tb[0]);
+        end
+        #1;
+        validating = 1'b0;
+        wait (i2c_regFile_tb[0][2] == 1'b1); // Wait until the I2C is busy is set (start the transaction)
+        wait (i2c_regFile_tb[0][2] == 1'b0); // Wait until the I2C is busy is cleared (end the transaction)
+        validating = 1'b1;
+        if(i2c_address_tb == 32'h56) begin
+            $display("Test #%0db: OK", test_n);
+        end else begin
+            $display("Test #%0db: FAILED -> i2c_address_tb was %0x", test_n, i2c_address_tb);
+        end
+        if(i2c_rw_n_tb == 1'b0) begin
+            $display("Test #%0dc: OK", test_n);
+        end else begin
+            $display("Test #%0dc: FAILED -> i2c_rw_n_tb was %0x", test_n, i2c_rw_n_tb);
+        end
+        if(i2c_data_tb == 32'h78) begin
+            $display("Test #%0dd: OK", test_n);
+        end else begin
+            $display("Test #%0dd: FAILED -> i2c_data_tb was %0x", test_n, i2c_data_tb);
+        end
+        #1;
+        validating = 1'b0;
+
+        test_n = 5;
+        @ (posedge clock);
+        #1;
+        alu_resoult = 32'h4002_0010 + (0 * 4); // I2C_REG_CTRL: I2C_BASE + 0 WORD
+        en_in = 1'b1;
+        we_in = 1'b1;
+        rs2_value[0] = 1'b1; // Start
+        rs2_value[1] = 1'b1; // Read
+        @ (posedge clock);
+        #1;
+        en_in = 1'b0;
+        we_in = 1'b0;
+        validating = 1'b1;
+        if (i2c_regFile_tb[0] == 32'h3) begin
+            $display("Test #%0da: OK", test_n);
+        end else begin
+            $display("Test #%0da: FAILED -> i2c_regFile_tb[0] was %0x", test_n, i2c_regFile_tb[0]);
+        end
+        #1;
+        validating = 1'b0;
+
+        op_class <= 5'b00100;   //LOAD
+        en_in = 1'b1;
+        we_in = 1'b0;
+        mem_opcode = 3'b010; //LW
+        alu_resoult = 32'h4002_0010 + (2 * 4); // I2C_REG_RDATA: I2C_BASE + 2 WORD
+        
+        wait (i2c_regFile_tb[0][2] == 1'b1); // Wait until the I2C is busy is set (start the transaction)
+        wait (i2c_regFile_tb[0][2] == 1'b0); // Wait until the I2C is busy is cleared (end the transaction)
+        validating = 1'b1;
+        if(i2c_address_tb == 32'h56) begin
+            $display("Test #%0db: OK", test_n);
+        end else begin
+            $display("Test #%0db: FAILED -> i2c_address_tb was %0x", test_n, i2c_address_tb);
+        end
+        if(i2c_rw_n_tb == 1'b1) begin
+            $display("Test #%0dc: OK", test_n);
+        end else begin
+            $display("Test #%0dc: FAILED -> i2c_rw_n_tb was %0x", test_n, i2c_rw_n_tb);
+        end
+        if(i2c_data_out == 32'h78) begin
+            $display("Test #%0dd: OK", test_n);
+        end else begin
+            $display("Test #%0dd: FAILED -> i2c_data_tb was %0x", test_n, i2c_data_tb);
+        end
+        #1;
+        validating = 1'b0;
+
+
+        // #50us;
 
         #100;
         en_in = 1'b0;

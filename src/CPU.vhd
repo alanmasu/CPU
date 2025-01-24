@@ -112,6 +112,10 @@ entity CPU is
         -- GPIO
         GPIO            : INOUT STD_LOGIC_VECTOR(31 downto 0);
 
+        -- I2C
+        SDA             : INOUT STD_LOGIC;
+        SCL             : INOUT STD_LOGIC;
+
         -- RUN/RES
         run_in          : IN STD_LOGIC;
         run_out         : OUT STD_LOGIC
@@ -218,7 +222,8 @@ architecture Behavioral of CPU is
     signal mem_wb_en_out : en_bus_t := (
         en_mem => '0',
         en_AXI => '0',
-        en_GPIO => '0'
+        en_GPIO => '0',
+        en_I2C => '0'
     );
     signal mem_wb_we_out : std_logic_vector(3 downto 0) := (others => '0');
     signal mem_wb_addr_out : std_logic_vector(31 downto 0) := (others => '0');
@@ -476,6 +481,22 @@ begin
         GPIO => GPIO
     );
 
+    -- I2C
+    i2c_driver : entity work.I2C_module
+    generic map(
+        CLOCK_FREQUENCY => 40_000
+    )
+    port map(
+        clk => clk,
+        res => res,
+        ena => mem_wb_en_out.en_I2C,
+        wea => mem_wb_we_out,
+        addra => mem_wb_addr_out,
+        dina => mem_wb_data_out,
+        douta => d_bus_in.I2C_data,
+        scl => SCL,
+        sda => SDA
+    );
 
     --Control Register File
         --Enable signals for Instruction Memory PortB and Control Register File
