@@ -71,9 +71,13 @@ module test_AXI_ctrl( );
     wire SCL;
     wire SDA;
     bit [31:0] i2c_data_out;
-
-    logic sda_tb;
-    logic scl_tb;
+    bit sda_tb = 1'bz;
+    bit scl_tb = 1'bz;
+      //for slave interface
+    bit [31:0] i2c_data_to_send_tb;
+    bit [7:0] i2c_data_tb;
+    bit [6:0] i2c_address_tb;
+    bit i2c_rw_n_tb;
 
 
     //Master vip agent
@@ -155,6 +159,17 @@ module test_AXI_ctrl( );
     pullup(SDA);       
     assign SCL = scl_tb;
     assign SDA = sda_tb;
+
+    //slave interface
+    slave_interface DUT4(
+        .i2c_sda(SDA),
+        .i2c_scl(SCL),
+        .res(reset),
+        .i2c_address_tb(i2c_address_tb),
+        .i2c_rw_n_tb(i2c_rw_n_tb),
+        .i2c_data_tb(i2c_data_tb),
+        .i2c_data_to_send(i2c_data_to_send_tb)
+    );
 
     genvar i;
     generate
