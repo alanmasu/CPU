@@ -9,3 +9,4 @@ test_barrell.vhd
 *bin
 pyEnv
 *obj
+.vscode
