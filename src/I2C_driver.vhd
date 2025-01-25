@@ -73,8 +73,8 @@ architecture Behavioral of I2C_driver is
     constant half_cycle : unsigned (freq2dim(FREQ_KHZ, S_FREQ_KHZ) - 1  downto 0) := total_cycle/2;     --125 cicli * 10 ns - 1 ciclo * 10 ns
     constant quarter_cycle : unsigned (freq2dim(FREQ_KHZ, S_FREQ_KHZ) - 1  downto 0) := total_cycle/4;  --62  cicli * 10 ns - 1 ciclo * 10 ns
     
-
 begin
+
 
     msf : process( clk, res) begin
         if res = '0' then

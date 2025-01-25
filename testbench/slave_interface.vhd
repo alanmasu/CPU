@@ -39,7 +39,6 @@ begin
             byte_count <= 0;
             i2c_sda <= 'Z';
             i2c_scl <= 'Z';
-            i2c_slave_state <= idle;
             i2c_address_tb <= (others => '0');
             i2c_data_tb <= (others => '0');
             i2c_rw_n_tb <= '0';
@@ -89,10 +88,10 @@ begin
             i2c_sda <= 'Z';
             i2c_slave_state <= i2c_next_state;
             -- Prepare for next byte if needed
-            if i2c_rw_n_tb = '1' then
-                i2c_sda <= 'Z' when data_to_send(31) = '1' else '0';
-                -- i2c_data_tb <= i2c_data_tb sll 1;
-            end if;
+--            if i2c_rw_n_tb = '1' then
+--                i2c_sda <= 'Z' when data_to_send(31) = '1' else '0';
+--                -- i2c_data_tb <= i2c_data_tb sll 1;
+--            end if;
         elsif i2c_slave_state = stop and to_X01(i2c_scl) = '1' and rising_edge(i2c_sda) then
             if i2c_rw_n_tb = '0' then
                 -- i2c_data_to_send <= i2c_data_tb sll shamt;                
@@ -100,6 +99,8 @@ begin
                 data_to_send(31 downto 32-i2c_data_count) := i2c_data_tb(i2c_data_count-1 downto 0);
             end if;
             i2c_slave_state <= idle;
+            i2c_sda <= 'Z';
+            i2c_scl <= 'Z';
             i2c_data_count := 0;
             -- i2c_data_to_send <= data_to_send;
         elsif i2c_slave_state = stop and falling_edge(i2c_scl) then

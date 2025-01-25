@@ -36,6 +36,14 @@ module test_CPU_wh_AXI();
   wire                                    [2:0] state_dbg;
   logic                                   oled_select0 = 1'b0;
 
+  //I2C
+  wire SDA;
+  wire SCL;
+  wire [31:0] i2c_address_tb;
+  wire i2c_rw_n_tb;
+  wire [31:0] i2c_data_tb;
+  wire [31:0] i2c_data_to_send_tb;
+
   logic on_programming = 1'b1;
   int istruction_count = 0;
    
@@ -58,6 +66,9 @@ module test_CPU_wh_AXI();
   bit [63:0]                              mtestRDataL; 
   test_design_axi_vip_0_3_mst_t           mst_agent_0;
 
+  pullup(SDA);
+  pullup(SCL);
+
   `BD_WRAPPER DUT(
     .reset_rtl(reset),
     .sys_clock(clock), 
@@ -73,9 +84,23 @@ module test_CPU_wh_AXI();
     .switches_0   (switches),
     .leds_0(LEDs),
     .state_dbg_0(state_dbg),
-    .oled_select0_0(oled_select0) 
+    .oled_select0_0(oled_select0),
+    .SDA_0(SDA),
+    .SCL_0(SCL)
   ); 
   
+  //I2C Slave
+  slave_interface slave_tb (
+    .i2c_scl(SCL),
+    .i2c_sda(SDA),
+    .res(reset),
+    .i2c_address_tb(i2c_address_tb),
+    .i2c_rw_n_tb(i2c_rw_n_tb),
+    .i2c_data_tb(i2c_data_tb),
+    .i2c_data_to_send(i2c_data_to_send_tb)
+  );
+
+
   //Programm
   localparam logic [31:0] BASE_ADDR = 32'h40000000;
   // Data to be written
@@ -143,6 +168,33 @@ module test_CPU_wh_AXI();
     32'h00032803,
     32'h03e87813,
     32'h0000006f
+  };
+
+  logic [31:0] testI2C [] = '{
+    32'h400202b7,
+    32'h01028293,
+    32'h05600313,
+    32'h07600393,
+    32'h00100e13,
+    32'h00100e93,
+    32'h00628223,
+    32'h00728623,
+    32'h01c28823,
+    32'h01d28023,
+    32'h028000ef,
+    32'h00300e93,
+    32'h01d28023,
+    32'h01c000ef,
+    32'h00828e83,
+    32'h01d12023,
+    32'h01428e83,
+    32'h01ce8463,
+    32'h00000e93,
+    32'hffd12e23,
+    32'h00028f03,
+    32'h004f7f13,
+    32'hfe0f1ce3,
+    32'h00008067
   };
 
   // Setup VIP agents
@@ -325,6 +377,12 @@ module test_CPU_wh_AXI();
     LOAD_PROGRAM(and_array, BASE_ADDR);
     istruction_count = 0;
     doAndiTest();
+    printLog();
+
+    writeCREG(32'b00); //Reset CPU
+    LOAD_PROGRAM(testI2C, BASE_ADDR);
+    istruction_count = 0;
+    doI2CTest();
     printLog();
 
     #200ns;
@@ -1157,6 +1215,184 @@ module test_CPU_wh_AXI();
     end  
   endtask    
 
+  wire i2c_busy_tb;
+  assign i2c_busy_tb = DUT.test_design_i.CPU_0.U0.i2c_driver.busy;
+
+  wire i2c_rw_n_driver_tb;
+  assign i2c_rw_n_driver_tb = DUT.test_design_i.CPU_0.U0.i2c_driver.rw_n;
+
+  task automatic doI2CTest;
+    string message;
+    begin
+      $display("Testing I2C module");
+      writeCREG(32'b11); //Set CPU in RUN 
+
+      test_n = 1;     
+      wait (instruction_tb ==  32'h01d28023); // Instruction: sb t4, 0(t0) (AKA I2C_START)
+      @(instruction_tb);
+      #1;
+      validating = 1'b1;
+      if (i2c_busy_tb == 1) begin
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = "FAILED -> i2c_busy_tb was";
+      end
+      addToLog(test_n, testPassed, message, i2c_busy_tb, $sformatf("#%0da", test_n));
+      if(i2c_rw_n_driver_tb == 0) begin     //IF is WRITE
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = "FAILED -> i2c_rw_n_driver_tb was";
+      end
+      addToLog(test_n, testPassed, message, i2c_rw_n_driver_tb, $sformatf("#%0db", test_n));
+      #1;
+      validating = 1'b0;
+
+      test_n = 2;
+      wait (instruction_tb ==  32'h00028f03); // Instruction: lb t5, 0(t0) (AKA Read i2c CREG)
+      @(instruction_tb);
+      #1;
+      validating = 1'b1;
+      if (regFile[29][2] == 1) begin
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = "FAILED -> regFile[30] was";
+      end
+      addToLog(test_n, testPassed, message, regFile[29][2]);
+      #1;
+      validating = 1'b0;
+
+      test_n = 3;       //andi   t5, t5, 0b100
+      @(instruction_tb);
+      #1;
+      validating = 1'b1;
+      if (regFile[29][2] == 1) begin
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = "FAILED -> regFile[30] was";
+      end
+      #1;
+      validating = 1'b0;
+      addToLog(test_n, testPassed, message, regFile[29][2]);
+      wait (instruction_tb ==  32'h00008067); // Instruction: ret   (AKA i2c transaction done)
+      #1;
+
+      test_n = 4;
+      validating = 1'b1;
+      if(i2c_data_tb == 32'h76) begin
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = "FAILED -> i2c_data_tb was";
+      end
+      addToLog(test_n, testPassed, message, i2c_data_tb, $sformatf("#%0da", test_n));
+      if(i2c_address_tb == 32'h56) begin
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = "FAILED -> i2c_address_tb was";
+      end
+      addToLog(test_n, testPassed, message, i2c_address_tb, $sformatf("#%0db", test_n));
+      #1;
+      validating = 1'b0;
+
+      test_n = 5;
+      wait(instruction_tb == 32'h01d28023); // Instruction: sb t4, 0(t0) (AKA I2C_START)
+      @(instruction_tb);
+      #1;
+      validating = 1'b1;
+      if(i2c_busy_tb == 1) begin
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = "FAILED -> i2c_busy_tb was";
+      end
+      addToLog(test_n, testPassed, message, i2c_busy_tb, $sformatf("#%0da", test_n));
+      if(i2c_rw_n_driver_tb == 1) begin     //IF is READ
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = "FAILED -> i2c_rw_n_driver_tb was";
+      end
+      addToLog(test_n, testPassed, message, i2c_rw_n_driver_tb, $sformatf("#%0db", test_n));
+      #1;
+      validating = 1'b0;
+
+      test_n = 6;
+      wait(instruction_tb == 32'h00028f03); // Instruction: lb t5, 0(t0) (AKA Read i2c CREG)
+      @(instruction_tb);
+      #1;
+      validating = 1'b1;
+      if (regFile[29][2] == 1) begin
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = "FAILED -> regFile[30] was";
+      end
+      addToLog(test_n, testPassed, message, regFile[29][2]);
+      #1;
+
+      test_n = 7;       //andi   t5, t5, 0b100
+      @(instruction_tb);
+      #1;
+      validating = 1'b1;
+      if (regFile[29][2] == 1) begin
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = "FAILED -> regFile[30] was";
+      end
+      #1;
+      validating = 1'b0;
+      addToLog(test_n, testPassed, message, regFile[29][2]);
+
+      wait(instruction_tb == 32'h00008067); // Instruction: ret   (AKA i2c transaction done)
+      #1;
+
+      test_n = 8;
+      validating = 1'b1;
+      #1;
+      validating = 1'b0;
+
+      
+
+      
+
+      // @(i2c_busy_tb == 1'b0);
+      
+      // test_n = 1;
+      // validating = 1'b1;
+      // //Check instruction   lui     t1, 0x40020
+      // if(regFile[5] == 32'h40020000) begin
+      //   testPassed = 1;
+      //   message = "OK";
+      // end else begin
+      //   testPassed = 0;
+      //   message = "FAILED -> regFile[6] was";
+      // end
+      // addToLog(test_n, testPassed, message, regFile[5]);
+      // #1;
+      // validating = 1'b0;
+      // @(posedge clock);
+      // #1;
+
+    
+
+    end
+  endtask
 
   always @(state_tb, reset) begin
     if (reset == 0) begin

@@ -217,6 +217,8 @@ begin
             dato := unsigned(d_in.axi_data);
         elsif en_bus_reg.en_GPIO then
             dato := unsigned(d_in.GPIO_data);
+        elsif en_bus_reg.en_I2C then
+            dato := unsigned(d_in.I2C_data);
         end if ;
 
         --Sign extension
