@@ -3,7 +3,7 @@
 
 MEMORY
 {
-	INSTR(X) : ORIGIN = 0x40000000, LENGTH = 4096 
+	INSTR(RX) : ORIGIN = 0x40000000, LENGTH = 4096 
 	RAM(RWX) : ORIGIN = 0x40010000, LENGTH = 8192
 }
 
@@ -19,6 +19,7 @@ SECTIONS
 	} > INSTR 
 
 	.const : {
+		*(.rodata*)
 		*(.const*)
 		_econst = .;
 	} > RAM

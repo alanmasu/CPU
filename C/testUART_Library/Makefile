@@ -12,6 +12,7 @@ TARGET = bin/main.elf
 # Compilatore e flag
 CFLAGS = -Iinclude $(addprefix -I, $(wildcard libraries/*/include)) -ffreestanding -nostdlib -O1
 LDFLAGS = -T $(LINKER) -e main
+# LDFLAGS = -e main
 
 # Directory principali
 SRC_DIR = src

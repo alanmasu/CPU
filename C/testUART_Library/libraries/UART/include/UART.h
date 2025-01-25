@@ -4,9 +4,11 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define UART_BASE_ADDR 0xE0001000
-#define UART_FIFO_ADDR 0xE0001030
-#define UART_STATUS_ADDR 0xE000102C
+#define UART_BASE_ADDR      0xE0001000
+#define UART_INT_STS_ADDR   0xE0001014
+#define UART_FIFO_ADDR      0xE0001030
+#define UART_RTRIG_ADDR     0xE0001020
+#define UART_STATUS_ADDR    0xE000102C
 
 //* UART TX FIFO full bit
 #define UART_TXFULL (1 << 4)
@@ -16,6 +18,8 @@
 #define UART_RXFULL (1 << 2)
 //* UART RX FIFO empty bit
 #define UART_RXEMPTY (1 << 1)
+
+#define UART_INT_STS_RXTIMEOUT (1 << 8)
 
 #ifndef NULL
   #define NULL ((void*)0)

@@ -1,0 +1,89 @@
+import argparse
+from elftools.elf.elffile import ELFFile
+
+def extract_section_data(elf, section_name):
+    """Restituisce i dati della sezione, il suo indirizzo e la sua dimensione."""
+    section = elf.get_section_by_name(section_name)
+    if section:
+        return section.data(), section['sh_addr'], section['sh_size']
+    else:
+        return None, None, None
+
+def extract_text_section_to_c(file_path, output_path, programName):
+    try:
+        with open(file_path, 'rb') as f:
+            elf = ELFFile(f)
+            
+            # Estrazione dei dati delle sezioni
+            text_data, text_address, text_size = extract_section_data(elf, '.text')
+            const_data, const_address, const_size = extract_section_data(elf, '.const')
+            _, bss_address, bss_size = extract_section_data(elf, '.bss')
+            
+            # Converte i byte della sezione .text in formato esadecimale
+            text_instructions = []
+            if text_data:
+                for i in range(0, len(text_data), 4):
+                    word = text_data[i:i+4]
+                    hex_word = ''.join(f'{byte:02x}' for byte in reversed(word))
+                    text_instructions.append(hex_word)
+            
+            # Converte i byte della sezione .const (.rodata) in formato esadecimale
+            const_instructions = []
+            if const_data:
+                for i in range(0, len(const_data), 4):
+                    word = const_data[i:i+4]
+                    hex_word = ''.join(f'{byte:02x}' for byte in reversed(word))
+                    const_instructions.append(hex_word)
+            
+            # Genera il contenuto del file .c
+            c_content = "#include <stdint.h>\n\n"
+            
+            # Aggiunge le #define per indirizzi e dimensioni
+            c_content += f"#define {programName}_TEXT_ADDR 0x{text_address:08x}\n"
+            c_content += f"#define {programName}_TEXT_SIZE {text_size}\n"
+            if const_address is not None:
+                c_content += f"#define {programName}_CONST_ADDR 0x{const_address:08x}\n"
+                c_content += f"#define {programName}_CONST_SIZE {const_size}\n"
+            else:
+                c_content += "// .const section non trovata\n"
+            if bss_address is not None:
+                c_content += f"#define {programName}_BSS_ADDR 0x{bss_address:08x}\n"
+                c_content += f"#define {programName}_BSS_SIZE {bss_size}\n"
+            else:
+                c_content += "// .bss section non trovata\n"
+            c_content += "\n"
+            
+            # Aggiunge i dati della sezione .text
+            c_content += f"const uint32_t {programName}_text[] = {{\n"
+            c_content += ',\n'.join(f"    0x{instr}" for instr in text_instructions)
+            c_content += ",\n    0\n};\n\n"
+            
+            # Aggiunge i dati della sezione .const (.rodata), se presenti
+            if const_data:
+                c_content += f"const uint32_t {programName}_const[] = {{\n"
+                c_content += ',\n'.join(f"    0x{instr}" for instr in const_instructions)
+                c_content += ",\n    0\n};\n\n"
+            else:
+                c_content += f"// Nessun dato nella sezione .const\n\n"
+            
+            # Salva il file .c
+            with open(output_path, 'w') as out_file:
+                out_file.write(c_content)
+            
+            print(f"File .c generato con successo: '{output_path}'.")
+
+    except Exception as e:
+        print(f"Errore durante l'estrazione della sezione .text: {e}")
+
+def main():
+    parser = argparse.ArgumentParser(description="Estrai le sezioni .text, .const e .bss da un file ELF e generala come file .c.")
+    parser.add_argument("file", help="Percorso del file ELF da elaborare")
+    parser.add_argument("output", help="Percorso del file .c di output")
+    parser.add_argument("program", help="Nome della variabile creata nel file .c")
+    args = parser.parse_args()
+    
+    # Chiama la funzione con i file specificati dall'utente
+    extract_text_section_to_c(args.file, args.output, args.program)
+
+if __name__ == "__main__":
+    main()
