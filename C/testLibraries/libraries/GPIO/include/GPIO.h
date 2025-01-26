@@ -1,0 +1,88 @@
+#ifndef __GPIO_H__
+#define __GPIO_H__
+
+#include <stdint.h>
+#include <stdbool.h>
+
+#define GPIO0_PORT_ADDR          0x40020000
+#define GPIO0_PORT_DIR_ADDR      0x40020004
+#define GPIO0_PORT_DATA_ADDR     0x40020008
+
+#define GPIO0_PORT_A_ADDR        0x40020000
+#define GPIO0_PORT_A_DIR_ADDR    0x40020004
+#define GPIO0_PORT_A_DATA_ADDR   0x40020008
+
+#define GPIO0_PORT_B_ADDR        0x40020001
+#define GPIO0_PORT_B_DIR_ADDR    0x40020005
+#define GPIO0_PORT_B_DATA_ADDR   0x40020009
+
+#define GPIO0_PORT_C_ADDR        0x40020002
+#define GPIO0_PORT_C_DIR_ADDR    0x40020006
+#define GPIO0_PORT_C_DATA_ADDR   0x4002000A
+
+#define GPIO0_PORT_D_ADDR        0x40020003
+#define GPIO0_PORT_D_DIR_ADDR    0x40020007
+#define GPIO0_PORT_D_DATA_ADDR   0x4002000B
+
+#define PIN0 0b00000001
+#define PIN1 0b00000010
+#define PIN2 0b00000100
+#define PIN3 0b00001000
+#define PIN4 0b00010000
+#define PIN5 0b00100000
+#define PIN6 0b01000000
+#define PIN7 0b10000000
+
+#define INPUT   0
+#define OUTPUT  1
+
+typedef struct GPIOReg_t{
+    unsigned int GPIO0 : 1;
+    unsigned int GPIO1 : 1;
+    unsigned int GPIO2 : 1;
+    unsigned int GPIO3 : 1;
+    unsigned int GPIO4 : 1;
+    unsigned int GPIO5 : 1;
+    unsigned int GPIO6 : 1;
+    unsigned int GPIO7 : 1;
+} GPIOReg_t;
+
+typedef struct GPIOPort_t{
+    GPIOReg_t PORT_A;
+    GPIOReg_t PORT_B;
+    GPIOReg_t PORT_C;
+    GPIOReg_t PORT_D;
+} GPIOPort_t;
+
+typedef struct GPIODir_t{
+    GPIOReg_t PORT_A_DIR;
+    GPIOReg_t PORT_B_DIR;
+    GPIOReg_t PORT_C_DIR;
+    GPIOReg_t PORT_D_DIR;
+} GPIODir_t;
+
+typedef struct GPIOData_t{
+    GPIOReg_t PORT_A_DATA;
+    GPIOReg_t PORT_B_DATA;
+    GPIOReg_t PORT_C_DATA;
+    GPIOReg_t PORT_D_DATA;
+} GPIOData_t;
+
+
+uint8_t gpioRead(const uint8_t* port, uint8_t pin);
+
+void gpioSetDir(uint8_t* port, uint8_t pin, bool dir);
+uint8_t gpioGetDir(const uint8_t* port, uint8_t pin);
+
+void gpioSetData(uint8_t* port, uint8_t pin, bool data);
+uint8_t gpioGetData(const uint8_t* port, uint8_t pin);
+
+void gpioToggle(uint8_t* port, uint8_t pin);
+void gpioSet(uint8_t* port, uint8_t pin);
+void gpioClear(uint8_t* port, uint8_t pin);
+
+extern GPIOPort_t* GPIO0Port;
+extern GPIODir_t*  GPIO0Dir;
+extern GPIOData_t* GPIO0Data;
+
+#endif // __GPIO_H__

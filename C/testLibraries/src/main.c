@@ -1,30 +1,9 @@
 #include <main.h>
 #include <UART.h>
-// #include <string.h>
+#include <GPIO.h>
+#include <utilities.h>
 
-#define DISPLAY_BASE_ADDR 0x40001018
-#define DELAY_COUNT 1250000
-
-int strcmp(const char* str1, const char* str2){
-    while(*str1 && *str2){
-        if(*str1 != *str2){
-            return 0;
-        }
-        str1++;
-        str2++;
-    }
-    return 1;
-}
-
-void wait(uint32_t time){
-    if (time == 0){
-        time = DELAY_COUNT;
-    }
-    
-    for (uint32_t i = 0; i < time; i++){
-        // Do nothing
-    }
-}
+extern uint32_t _econst;
 
 int main(int argc, char const *argv[]){
 
@@ -32,12 +11,31 @@ int main(int argc, char const *argv[]){
 
     UARTWrite((uint8_t*)data, 14);
 
+    GPIO0Dir->PORT_A_DIR.GPIO0 = OUTPUT;
+    GPIO0Dir->PORT_A_DIR.GPIO1 = OUTPUT;
+    gpioSetDir((uint8_t*)GPIO0_PORT_A_DIR_ADDR, PIN2, OUTPUT);
+    gpioSetDir((uint8_t*)GPIO0_PORT_A_DIR_ADDR, PIN3, OUTPUT);
+
+    GPIO0Dir->PORT_A_DIR.GPIO4 = INPUT;
+    GPIO0Dir->PORT_A_DIR.GPIO5 = INPUT;
+    gpioSetDir((uint8_t*)GPIO0_PORT_A_DIR_ADDR, PIN6, INPUT);
+    gpioSetDir((uint8_t*)GPIO0_PORT_A_DIR_ADDR, PIN7, INPUT);
+
+    GPIO0Data->PORT_A_DATA.GPIO0 = 1;
+    gpioSetData((uint8_t*)GPIO0_PORT_A_DATA_ADDR, PIN2, 1);
+    gpioToggle((uint8_t*)GPIO0_PORT_A_DATA_ADDR, PIN3);
+    gpioSet((uint8_t*)GPIO0_PORT_A_DATA_ADDR, PIN4);
+
+    UARTWrite("GPIO Setted\n", 12);
+
+    wait(DELAY_COUNT * 3);
+
+
     char buffer[20];
 
     while(1){
         UARTRead((uint8_t*)buffer, 1);
-        // wait(0);
-        // UARTWrite((uint8_t*)buffer, 4);
+
         if(buffer[0] == '1'){
             // Display the message
             *((uint32_t*)DISPLAY_BASE_ADDR) = 1;
