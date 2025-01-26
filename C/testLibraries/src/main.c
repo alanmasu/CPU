@@ -21,7 +21,7 @@ int main(int argc, char const *argv[]){
     gpioSetDir((uint8_t*)GPIO0_PORT_A_DIR_ADDR, PIN7, INPUT);
 
     GPIO0Data->PORT_A_DATA.GPIO0 = 1;
-    gpioSetData((uint8_t*)GPIO0_PORT_A_DATA_ADDR, PIN1, 1);
+    gpioSetValue((uint8_t*)GPIO0_PORT_A_DATA_ADDR, PIN1, 1);
     gpioToggle((uint8_t*)GPIO0_PORT_A_DATA_ADDR, PIN2);
     gpioSet((uint8_t*)GPIO0_PORT_A_DATA_ADDR, PIN3);
 
@@ -34,24 +34,10 @@ int main(int argc, char const *argv[]){
 
     char buffer[20];
     while(1){
-        // *((uint8_t*)(DISPLAY_BASE_ADDR + 3)) = gpioRead((uint8_t*)GPIO0_PORT_A_ADDR, PIN4);
-        // *((uint8_t*)(DISPLAY_BASE_ADDR + 2)) = *((volatile uint8_t*)GPIO0_PORT_A_ADDR) >> 4;
-        // *((uint8_t*)(DISPLAY_BASE_ADDR + 1)) = *((volatile uint8_t*)GPIO0_PORT_A_ADDR) & (1<<4);
-        // *((uint8_t*)(DISPLAY_BASE_ADDR + 0)) = (*((volatile uint8_t*)GPIO0_PORT_A_ADDR) & (1<<4)) == (1<<4);
-        // *((uint32_t*)DISPLAY_BASE_ADDR) = gpioRead((uint8_t*)GPIO0_PORT_A_ADDR, (1 << 4));
         for(int i = 0; i < 4; ++i){
-            uint8_t data = gpioRead((uint8_t*)GPIO0_PORT_A_ADDR, 1 << (i + 4));
-            gpioSetData((uint8_t*)GPIO0_PORT_A_DATA_ADDR, 1 << i, data);
-            *((uint8_t*)(DISPLAY_BASE_ADDR + 3)) = *((uint8_t*)GPIO0_PORT_A_ADDR) >> 4;
-            *((uint8_t*)(DISPLAY_BASE_ADDR + 1)) = i;
-            *((uint8_t*)(DISPLAY_BASE_ADDR + 0)) = data;
-            wait(DELAY_COUNT * 3);
+            uint8_t value = gpioReadByNum((uint8_t*)GPIO0_PORT_A_ADDR, i + 4);
+            gpioSetValueByNum((uint8_t*)GPIO0_PORT_A_DATA_ADDR, i, value);
         }
-        // *((uint8_t*)(DISPLAY_BASE_ADDR)) = gpioRead((uint8_t*)GPIO0_PORT_A_ADDR, PIN4);
-
-        // GPIO0Data->PORT_A_DATA.GPIO0 = GPIO0Port->PORT_A.GPIO4;
-        // // GPIO0Data->PORT_A_DATA.GPIO1 = GPIO0Port->PORT_A.GPIO5;
-        // gpioSetData((uint8_t*)GPIO0_PORT_A_DATA_ADDR, PIN1, GPIO0Port->PORT_A.GPIO5);
     }
     while(1);
     return 0;
