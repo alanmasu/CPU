@@ -68,18 +68,123 @@ typedef struct __attribute__((packed)) GPIOData_t{
     GPIOReg_t PORT_D_DATA;
 } GPIOData_t;
 
+/**!
+ * @brief Read the value of a pin in a port
+ * 
+ * @param [in] port The address of the port
+ * @param [in] pinN The number of the pin in the port
+ * 
+ * @return The value of the pin
+ * 
+*/
+uint8_t gpioReadByNum(const uint8_t* port, uint8_t pinN);
 
+/**!
+ * @brief Read the value of a pin in a port
+ * 
+ * @param [in] port The address of the port
+ * @param [in] pin The mask of the pin in the port
+ * 
+ * @return The value of the pin
+ * 
+*/
 uint8_t gpioRead(const uint8_t* port, uint8_t pin);
 
+/**!
+ * @brief Set the direction of a pin in a port
+ * 
+ * @param [in] port The address of the port
+ * @param [in] pin The mask of the pin in the port
+ * @param [in] dir The direction of the pin
+ * 
+*/
 void gpioSetDir(uint8_t* port, uint8_t pin, bool dir);
+
+/**!
+ * @brief Get the direction of a pin in a port
+ * 
+ * @param [in] port The address of the port
+ * @param [in] pin The mask of the pin in the port
+ * 
+ * @return The direction of the pin
+ * 
+*/
 uint8_t gpioGetDir(const uint8_t* port, uint8_t pin);
 
-void gpioSetData(uint8_t* port, uint8_t pin, bool data);
-uint8_t gpioGetData(const uint8_t* port, uint8_t pin);
+/**!
+ * @brief Set the value of a pin in a port
+ * 
+ * @param [in] port The address of the port
+ * @param [in] pinN The number of the pin in the port
+ * @param [in] data The value of the pin
+ * 
+ * @return none
+*/
+void gpioSetValueByNum(uint8_t* port, uint8_t pinN, bool data);
 
+/**!
+ * @brief Get the value of a pin in a port
+ * 
+ * @param [in] port The address of the port
+ * @param [in] pinN The number of the pin in the port
+ * 
+ * @return The value of the pin
+ * 
+*/
+uint8_t gpioGetValueByNum(const uint8_t* port, uint8_t pinN);
+
+/**!
+ * @brief Set the value of a pin in a port
+ * 
+ * @param [in] port The address of the port
+ * @param [in] pin The mask of the pin in the port
+ * @param [in] data The value of the pin
+ * 
+ * @return none
+*/
+void gpioSetValue(uint8_t* port, uint8_t pin, bool data);
+
+/**!
+ * @brief Get the value of a pin in a port
+ * 
+ * @param [in] port The address of the port
+ * @param [in] pin The mask of the pin in the port
+ * 
+ * @return The value of the pin
+ * 
+*/
+uint8_t gpioGetValue(const uint8_t* port, uint8_t pin);
+
+/**!
+ * @brief Toggle the value of a pin in a port
+ * 
+ * @param [in] port The address of the port
+ * @param [in] pin The mask of the pin in the port
+ * 
+ * @return none
+*/
 void gpioToggle(uint8_t* port, uint8_t pin);
+
+/**!
+ * @brief Set the value of a pin in a port
+ * 
+ * @param [in] port The address of the port
+ * @param [in] pin The mask of the pin in the port
+ * 
+ * @return none
+*/
 void gpioSet(uint8_t* port, uint8_t pin);
+
+/**!
+ * @brief Clear the value of a pin in a port
+ * 
+ * @param [in] port The address of the port
+ * @param [in] pin The mask of the pin in the port
+ * 
+ * @return none
+*/
 void gpioClear(uint8_t* port, uint8_t pin);
+
 
 extern volatile GPIOPort_t* GPIO0Port;
 extern volatile GPIODir_t*  GPIO0Dir;
