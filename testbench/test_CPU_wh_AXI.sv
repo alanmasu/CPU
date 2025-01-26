@@ -197,6 +197,16 @@ module test_CPU_wh_AXI();
     32'h00008067
   };
 
+  logic [31:0] testAxiProgram [] = '{
+      32'h00000013,
+      32'h40000537,
+      32'h02050513,
+      32'h00a52023,
+      32'h00052583,
+      32'h00b12023,
+      32'h0000006f
+  };
+
   // Setup VIP agents
   initial begin
     //Slave vip agent initialization
@@ -383,6 +393,12 @@ module test_CPU_wh_AXI();
     LOAD_PROGRAM(testI2C, BASE_ADDR);
     istruction_count = 0;
     doI2CTest();
+    printLog();
+
+    writeCREG(32'b00); //Reset CPU
+    LOAD_PROGRAM(testAxiProgram, BASE_ADDR);
+    istruction_count = 0;
+    doAXITest();
     printLog();
 
     #200ns;
@@ -1393,6 +1409,77 @@ module test_CPU_wh_AXI();
 
     end
   endtask
+
+   task automatic doAXITest;
+    string message;
+    begin
+      $display("Testing AXI Store after Load");
+      writeCREG(32'b11); //Set CPU in RUN 
+      
+      wait (state_tb == fetch); //wait until the CPU has executed the next instruction
+      wait (state_tb == fetch); //wait until the CPU has executed the next instruction
+      @(instruction_tb);
+      #1;
+
+
+
+      test_n = 1;
+      validating = 1'b1;
+      //Check instruction   lui     a0, 0x40000
+      if(regFile[9] == 32'h40000000) begin
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = "FAILED -> regFile[10] was";
+      end
+      addToLog(test_n, testPassed, message, regFile[9]);
+      #1;
+      validating = 1'b0;      
+      @(instruction_tb);
+
+      test_n = 2;
+      wait (state_tb == fetch); //wait until the CPU has executed the next instruction
+      #1;
+      validating = 1'b1;
+      //Check instruction   addi   a0, a0, 0x20
+      if (regFile[9] == 32'h40000020) begin
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = "FAILED -> regFile[10] was";
+      end
+      addToLog(test_n, testPassed, message, regFile[9]);
+      #1;
+      validating = 1'b0;
+      @(instruction_tb);
+
+      //SKIP instruction   lw    a0, 0(a0)
+      wait (state_tb == fetch); //wait until the CPU has executed the next instruction
+      @(instruction_tb);
+      #1;
+
+      test_n = 3;
+      wait (state_tb == fetch); //wait until the CPU has executed the next instruction
+      #1;
+      validating = 1'b1;
+      //Check instruction   lw    a1, 0(a0)
+      if (regFile[10] == 32'h40000020) begin
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = "FAILED -> regFile[11] was";
+      end
+      addToLog(test_n, testPassed, message, regFile[10]);
+      #1;
+      validating = 1'b0;
+      @(instruction_tb);
+
+
+    end
+  endtask 
 
   always @(state_tb, reset) begin
     if (reset == 0) begin

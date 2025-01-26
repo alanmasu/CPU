@@ -594,7 +594,7 @@ begin
     axi_stall_dbg   <= AXI_stall;
     instruction_dbg <= instruction_fetched;
     CREG_CTR_dbg    <= control_reg(CREG_CTR)(7 downto 0);
-    rd_addr_dbg     <= rd_addr_in;
+    rd_addr_dbg     <= rd_addr_in_decode;
     
     gpio_for_loop: for i in 0 to 31 generate
         -- gpio_state_dbg(i) <= '1' when to_X01(GPIO(i)) = '1' else '0';
@@ -824,11 +824,14 @@ begin
                                 mem_we <= '0';
                                 mem_ena <= '0';                                   
                         end case;
+                        if is_axi_load = '1' then
+                            regFile_we <= '1';
+                        end if;
                     elsif AXI_stall = '1' then
                         pc_load <= '0';
                         regFile_we <= '0';
                         mem_we <= '0';
-                        mem_ena <= '0';
+                        mem_ena <= '0';                        
                     end if ;
                 when others => 
                     pc_load <= '0';
