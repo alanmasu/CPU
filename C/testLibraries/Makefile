@@ -49,6 +49,10 @@ dump: $(TARGET)
 sections: $(TARGET)
 	$(READELF) -S $(TARGET)
 
+# Regola per estrarre i simboli
+symbols: $(TARGET)
+	$(READELF) -s $(TARGET)
+
 # Pulizia dei file generati
 clean:
 	rm -rf $(OBJ_DIR) $(TARGET)

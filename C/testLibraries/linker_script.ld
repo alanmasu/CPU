@@ -14,13 +14,14 @@ SECTIONS
 	.text : {
 		*(.text.main)
 		*(.text*)
-		_etext = .;
-		
+		. = ALIGN(4);
+		_etext = .;		
 	} > INSTR 
 
 	.const : {
 		*(.rodata*)
 		*(.const*)
+		. = ALIGN(4);
 		_econst = .;
 	} > RAM
 
@@ -29,12 +30,15 @@ SECTIONS
 		__bss_start = .;
 		*(.bss*)
 		*(COMMON)
+		. = ALIGN(4);
 		_ebss = .;
 	} > RAM
 
 	.data : {
 		_sdata = .;
 		*(.data*)
+		*(.sdata*)
+		. = ALIGN(4);
 		PROVIDE( __global_pointer$ = .);
 		_edata = .;
 	} > RAM

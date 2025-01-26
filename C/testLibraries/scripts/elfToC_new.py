@@ -17,6 +17,7 @@ def extract_text_section_to_c(file_path, output_path, programName):
             # Estrazione dei dati delle sezioni
             text_data, text_address, text_size = extract_section_data(elf, '.text')
             const_data, const_address, const_size = extract_section_data(elf, '.const')
+            data_data, data_address, data_size = extract_section_data(elf, '.data')
             _, bss_address, bss_size = extract_section_data(elf, '.bss')
             
             # Converte i byte della sezione .text in formato esadecimale
@@ -34,6 +35,14 @@ def extract_text_section_to_c(file_path, output_path, programName):
                     word = const_data[i:i+4]
                     hex_word = ''.join(f'{byte:02x}' for byte in reversed(word))
                     const_instructions.append(hex_word)
+                    
+            # Converte i byte della sezione .data (.rodata) in formato esadecimale
+            data_instructions = []
+            if data_data:
+                for i in range(0, len(data_data), 4):
+                    word = data_data[i:i+4]
+                    hex_word = ''.join(f'{byte:02x}' for byte in reversed(word))
+                    data_instructions.append(hex_word)
             
             # Genera il contenuto del file .c
             c_content = "#include <stdint.h>\n\n"
@@ -46,11 +55,19 @@ def extract_text_section_to_c(file_path, output_path, programName):
                 c_content += f"#define {programName}_CONST_SIZE {const_size}\n"
             else:
                 c_content += "// .const section non trovata\n"
+                
             if bss_address is not None:
                 c_content += f"#define {programName}_BSS_ADDR 0x{bss_address:08x}\n"
                 c_content += f"#define {programName}_BSS_SIZE {bss_size}\n"
             else:
                 c_content += "// .bss section non trovata\n"
+                
+            if data_address is not None:
+                c_content += f"#define {programName}_DATA_ADDR 0x{data_address:08x}\n"
+                c_content += f"#define {programName}_DATA_SIZE {data_size}\n"
+            else:
+                c_content += "// .data section non trovata\n"
+            
             c_content += "\n"
             
             # Aggiunge i dati della sezione .text
@@ -65,6 +82,14 @@ def extract_text_section_to_c(file_path, output_path, programName):
                 c_content += ",\n    0\n};\n\n"
             else:
                 c_content += f"// Nessun dato nella sezione .const\n\n"
+            
+            # Aggiunge i dati della sezione .data, se presenti
+            if data_data:
+                c_content += f"const uint32_t {programName}_data[] = {{\n"
+                c_content += ',\n'.join(f"    0x{instr}" for instr in data_instructions)
+                c_content += ",\n    0\n};\n\n"
+            else:
+                c_content += f"// Nessun dato nella sezione .data\n\n"
             
             # Salva il file .c
             with open(output_path, 'w') as out_file:

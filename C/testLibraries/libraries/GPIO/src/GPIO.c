@@ -4,7 +4,7 @@
 #include <stdbool.h>
 
 uint8_t gpioRead(const uint8_t* port, uint8_t pin){
-    return *port & pin == pin;
+    return (*port & pin) == pin;
 }
 
 void gpioSetDir(uint8_t* port, uint8_t pin, bool dir){
@@ -14,7 +14,10 @@ void gpioSetDir(uint8_t* port, uint8_t pin, bool dir){
         *port = *port & ~pin;
     }
 }
-uint8_t gpioGetDir(const uint8_t* port, uint8_t pin);
+
+uint8_t gpioGetDir(const uint8_t* port, uint8_t pin){
+    return (*port & pin) == pin;
+}
 
 void gpioSetData(uint8_t* port, uint8_t pin, bool data){
     if(data == 1){
@@ -39,6 +42,6 @@ void gpioClear(uint8_t* port, uint8_t pin){
     *port = *port & ~pin;
 }
 
-GPIOPort_t* GPIO0Port = (GPIOPort_t*)GPIO0_PORT_ADDR;
-GPIODir_t*  GPIO0Dir  = (GPIODir_t*) GPIO0_PORT_DIR_ADDR;
-GPIOData_t* GPIO0Data = (GPIOData_t*)GPIO0_PORT_DATA_ADDR;
+volatile GPIOPort_t* GPIO0Port = (GPIOPort_t*)GPIO0_PORT_ADDR;
+volatile GPIODir_t*  GPIO0Dir  = (GPIODir_t*) GPIO0_PORT_DIR_ADDR;
+volatile GPIOData_t* GPIO0Data = (GPIOData_t*)GPIO0_PORT_DATA_ADDR;

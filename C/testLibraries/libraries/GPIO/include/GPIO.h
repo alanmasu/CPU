@@ -36,7 +36,7 @@
 #define INPUT   0
 #define OUTPUT  1
 
-typedef struct GPIOReg_t{
+typedef struct __attribute__((packed)) GPIOReg_t{
     unsigned int GPIO0 : 1;
     unsigned int GPIO1 : 1;
     unsigned int GPIO2 : 1;
@@ -47,21 +47,21 @@ typedef struct GPIOReg_t{
     unsigned int GPIO7 : 1;
 } GPIOReg_t;
 
-typedef struct GPIOPort_t{
+typedef struct __attribute__((packed)) GPIOPort_t{
     GPIOReg_t PORT_A;
     GPIOReg_t PORT_B;
     GPIOReg_t PORT_C;
     GPIOReg_t PORT_D;
 } GPIOPort_t;
 
-typedef struct GPIODir_t{
+typedef struct __attribute__((packed)) GPIODir_t{
     GPIOReg_t PORT_A_DIR;
     GPIOReg_t PORT_B_DIR;
     GPIOReg_t PORT_C_DIR;
     GPIOReg_t PORT_D_DIR;
 } GPIODir_t;
 
-typedef struct GPIOData_t{
+typedef struct __attribute__((packed)) GPIOData_t{
     GPIOReg_t PORT_A_DATA;
     GPIOReg_t PORT_B_DATA;
     GPIOReg_t PORT_C_DATA;
@@ -81,8 +81,8 @@ void gpioToggle(uint8_t* port, uint8_t pin);
 void gpioSet(uint8_t* port, uint8_t pin);
 void gpioClear(uint8_t* port, uint8_t pin);
 
-extern GPIOPort_t* GPIO0Port;
-extern GPIODir_t*  GPIO0Dir;
-extern GPIOData_t* GPIO0Data;
+extern volatile GPIOPort_t* GPIO0Port;
+extern volatile GPIODir_t*  GPIO0Dir;
+extern volatile GPIOData_t* GPIO0Data;
 
 #endif // __GPIO_H__

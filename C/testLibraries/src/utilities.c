@@ -14,6 +14,7 @@ int strcmp(const char* str1, const char* str2){
     return 1;
 }
 
+__attribute__((optimize("O0"))) 
 void wait(uint32_t time){
     if (time == 0){
         time = DELAY_COUNT;
