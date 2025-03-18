@@ -34,19 +34,21 @@
   task automatic doQueuedTests;
     logic testPassed = 0;
     string message;
+    xil_axi_prot_t protType = 3'b000;
+    xil_axi_resp_t RResp;
     begin
       if (check_queue_size > 0) begin
         for (int i = 0; i < check_queue_size; i++) begin
           check_record_t check_record = check_queue.pop_front();
           check_queue_size--;
-          mtestADDR = check_record.addr;
+          // mtestADDR = check_record.addr;
           axi4Lite_read( 
-            mtestADDR, 
-            mtestProtectionType, 
-            mtestRDataL[31:0], 
-            mtestRresp 
+            check_record.addr, 
+            protType, 
+            check_record.readed_data, 
+            RResp 
           );
-          check_record.readed_data = mtestRDataL[31:0];
+          // check_record.readed_data = mtestRDataL[31:0];
           if (check_record.readed_data == check_record.assert_data) begin
             check_record.resoult = 1;
             message = check_record.messageOnPass;

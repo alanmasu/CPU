@@ -238,9 +238,9 @@ module test_CPU_wh_AXI();
   //Reset
   initial begin
     reset <= 1'b0;
-    #10ns;
+    #200ns;
     reset <= 1'b1;
-    repeat (5) @(negedge clock); 
+    // repeat (5) @(negedge clock); 
   end
 
   //Clock generation
@@ -378,6 +378,8 @@ module test_CPU_wh_AXI();
 
   //Testbench
   initial begin
+    wait(reset == 1);
+
     LOAD_PROGRAM(data_array, BASE_ADDR);
     S_AXI_TEST();
     doQueuedTests();

@@ -146,6 +146,10 @@ entity CPU is
         gpio_state_dbg  : OUT STD_LOGIC_VECTOR(31 downto 0);
         gpio_dbg        : OUT STD_LOGIC_VECTOR(31 downto 0);
 
+        I2C_busy_dbg    : OUT STD_LOGIC;
+        I2C_err_dbg     : OUT STD_LOGIC;
+        I2C_CSREG_dbg   : OUT STD_LOGIC_VECTOR(31 downto 0);
+
         -- Buttons
         btn_up          : IN STD_LOGIC;
         btn_down        : IN STD_LOGIC;
@@ -182,7 +186,6 @@ architecture Behavioral of CPU is
     signal res          : std_logic := '0';
     signal res_tmp      : std_logic := '0';
     signal run          : std_logic := '0';
-    signal run_reg      : std_logic := '0';
 
     -- BLINK
     signal blink_counter : unsigned(RUN_BLINK_COUNTER_SIZE-1 downto 0) := (others => '0');
@@ -557,7 +560,11 @@ begin
         dina => mem_wb_data_out,
         douta => d_bus_in.I2C_data,
         scl => SCL,
-        sda => SDA
+        sda => SDA,
+        -- DEBUG
+        busy_dbg => I2C_busy_dbg,
+        err_dbg => I2C_err_dbg,
+        CSR => I2C_CSREG_dbg
     );
 
     -- OLED Display

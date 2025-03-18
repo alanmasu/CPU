@@ -22,7 +22,7 @@
 `define BD_INST_NAME test_design_axi_recursive_i
 `define BD_WRAPPER test_design_axi_recursive_wrapper
 
-// import types_pkg::*;
+import types_pkg::*;
 // import constant_package::*;
 
 // Import the AXI VIP Package
@@ -63,6 +63,9 @@ module test_CPU_AXI_recursive();
   // Master VIP
   axi_transaction                         wr_transaction;   
   xil_axi_uint                            mst_agent_verbosity = 0;  
+  test_design_axi_recursive_axi_vip_0_0_mst_t           mst_agent_0;
+
+  // AXI VIP Variables
   xil_axi_uint                            mtestID;  
   xil_axi_ulong                           mtestADDR;  
   xil_axi_len_t                           mtestBurstLength;  
@@ -77,7 +80,6 @@ module test_CPU_AXI_recursive();
   xil_axi_resp_t[255:0]                   mtestRresp;  
   bit [63:0]                              mtestWDataL; 
   bit [63:0]                              mtestRDataL; 
-  test_design_axi_recursive_axi_vip_0_0_mst_t           mst_agent_0;
 
   `BD_WRAPPER DUT(
     .reset_0(reset),
@@ -98,6 +100,17 @@ module test_CPU_AXI_recursive();
     .SDA_0(SDA),
     .SCL_0(SCL)
   ); 
+
+  ////////////////// PROGRAMS ///////////////////////
+  logic [31:0] testAxiProgram [] = '{
+    32'h00000013,
+    32'h40000537,
+    32'h02050513,
+    32'h00a52023,
+    32'h00052583,
+    32'h00b12023,
+    32'h0000006f
+  };
 
   always begin
     clock <= 1'b1;
@@ -124,14 +137,6 @@ module test_CPU_AXI_recursive();
     mst_agent_0.start_master();
     mtestADDR = 32'h40010000;
     @(posedge reset);
-    mst_agent_0.AXI4LITE_READ_BURST( 
-      mtestADDR, 
-      mtestProtectionType, 
-      mtestRDataL, 
-      mtestRresp 
-    );
-    $finish;
-
   end
 
   initial begin
@@ -151,22 +156,61 @@ module test_CPU_AXI_recursive();
       );
     end
   endtask
-    
 
+  task automatic axi4Lite_write(input xil_axi_ulong addr, input xil_axi_prot_t prot, input bit [63:0] data, output xil_axi_resp_t resp);
+    begin
+      mtestADDR = addr;
+      mst_agent_0.AXI4LITE_WRITE_BURST( 
+        addr, 
+        prot, 
+        data, 
+        resp 
+      );
+    end
+  endtask
+    
+  //Testbench
   initial begin
-    @(posedge reset);
-    #1;
-    mtestADDR = 32'h40001000; 
-    mtestWDataL[31:0] = 32'b11;   
-    mst_agent_0.AXI4LITE_WRITE_BURST( 
-      mtestADDR, 
-      mtestProtectionType, 
-      mtestWDataL, 
-      mtestBresp 
-    ); 
-    #10;
-    $finish;
+    run = 1;
+    @(posedge reset); // Wait for reset to be asserted
+
+    LOAD_PROGRAM(testAxiProgram, 32'h40000000);
+    axi4Lite_write(32'h40001000, 3'b000, 32'd3, mtestBresp);
+
+    testAxiController();
+  
+    #90us;
+    // run = 0;
+
+    // $finish;
   end
 
+
+  //Test task
+  // CPU State
+  state_type state_tb;
+  // /test_CPU_AXI_recursive/DUT/test_design_axi_recursive_i/CPU_0/U0/run
+  assign state_tb = DUT.test_design_axi_recursive_i.CPU_0.U0.state;
+  // wire run_tb;
+  // assign run_tb = DUT.BD_INST_NAME.CPU_0.U0.run;
+  // wire res_tb;
+
+  task testAxiController();
+    begin
+
+    end
+  endtask
+
+  integer instructionCount = 0;
+
+  always @(state_tb, reset) begin
+    if(reset == 0) begin
+      instructionCount = 0;
+    end else begin
+      if(state_tb == fetch && run == 1) begin
+        instructionCount++;
+      end
+    end
+  end
 
 endmodule
