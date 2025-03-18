@@ -1410,7 +1410,7 @@ module test_CPU_wh_AXI();
     end
   endtask
 
-   task automatic doAXITest;
+  task automatic doAXITest;
     string message;
     begin
       $display("Testing AXI Store after Load");

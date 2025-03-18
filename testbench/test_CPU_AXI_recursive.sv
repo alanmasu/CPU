@@ -23,19 +23,20 @@
 `define BD_WRAPPER test_design_axi_recursive_wrapper
 
 // import types_pkg::*;
-import constant_package::*;
+// import constant_package::*;
 
 // Import the AXI VIP Package
 import axi_vip_pkg::*;
-import test_design_axi_recursive_axi_vip_0_1_pkg::*;
+import test_design_axi_recursive_axi_vip_0_0_pkg::*;
 import test_design_axi_recursive_axi_vip_1_0_pkg::*;
 
 module test_CPU_AXI_recursive();
+  `include "testUtilities.svh" 
 
   bit                                     clock = 1;
   bit                                     clock100MHz = 1;
   bit                                     reset;
-  bit                                     run = 1;
+  bit                                     run = 0;
   wire                                    aliveLed;
   wire [31:0]                             GPIO = 'z;
   logic [31:0]                            GPIO_sig = '0;
@@ -57,7 +58,7 @@ module test_CPU_AXI_recursive();
   axi_monitor_transaction                 slave_moniter_transaction_queue[$];  
   xil_axi_uint                            slave_moniter_transaction_queue_size =0;  
   xil_axi_uint                            slv_agent_verbosity = 0;  
-  test_design_axi_recursive_axi_vip_1_0_passthrough_mem_t       slv_agent_0;
+  test_design_axi_recursive_axi_vip_1_0_passthrough_mem_t       slv_agent_1;
 
   // Master VIP
   axi_transaction                         wr_transaction;   
@@ -76,7 +77,7 @@ module test_CPU_AXI_recursive();
   xil_axi_resp_t[255:0]                   mtestRresp;  
   bit [63:0]                              mtestWDataL; 
   bit [63:0]                              mtestRDataL; 
-  test_design_axi_recursive_axi_vip_0_1_mst_t           mst_agent_0;
+  test_design_axi_recursive_axi_vip_0_0_mst_t           mst_agent_0;
 
   `BD_WRAPPER DUT(
     .reset_0(reset),
@@ -104,26 +105,68 @@ module test_CPU_AXI_recursive();
     clock <= 1'b0;
     #5ns;
   end
-
+  
   // Configure the PassThrough VIP
   initial begin
-    slv_agent_0 = new("PassThrough VIP", test_CPU_AXI_recursive.DUT.test_design_axi_recursive_i.axi_vip_0.inst.IF);
-    slv_agent_0.vif_proxy.set_dummy_drive_type(XIL_AXI_VIF_DRIVE_NONE);
-    slv_agent_0.set_agent_tag("Slave VIP");
-    slv_agent_0.set_verbosity(slv_agent_verbosity);
-    slv_agent_0.start_slave();
+    slv_agent_1 = new("PassThrough VIP", test_CPU_AXI_recursive.DUT.test_design_axi_recursive_i.axi_vip_1.inst.IF);
+    slv_agent_1.vif_proxy.set_dummy_drive_type(XIL_AXI_VIF_DRIVE_NONE);
+    slv_agent_1.set_agent_tag("Slave VIP");
+    slv_agent_1.set_verbosity(slv_agent_verbosity);
+    slv_agent_1.start_monitor();
   end
 
-  //Configure the Master VIP
+  // Configure the Master VIP
   initial begin
-    mst_agent_0 = new("Master VIP", test_CPU_AXI_recursive.DUT.test_design_axi_recursive_i.axi_vip_1.inst.IF);
+    mst_agent_0 = new("Master VIP", test_CPU_AXI_recursive.DUT.test_design_axi_recursive_i.axi_vip_0.inst.IF);
     mst_agent_0.vif_proxy.set_dummy_drive_type(XIL_AXI_VIF_DRIVE_NONE); 
     mst_agent_0.set_agent_tag("Master VIP"); 
     mst_agent_0.set_verbosity(mst_agent_verbosity); 
     mst_agent_0.start_master();
+    mtestADDR = 32'h40010000;
+    @(posedge reset);
+    mst_agent_0.AXI4LITE_READ_BURST( 
+      mtestADDR, 
+      mtestProtectionType, 
+      mtestRDataL, 
+      mtestRresp 
+    );
+    $finish;
+
   end
 
-  
+  initial begin
+    reset = 0;
+    #200;
+    reset = 1;
+  end
+
+  task automatic axi4Lite_read(input xil_axi_ulong addr, input xil_axi_prot_t prot, output bit [63:0] data, output xil_axi_resp_t resp);
+    begin
+      mtestADDR = addr;
+      mst_agent_0.AXI4LITE_READ_BURST( 
+        addr, 
+        prot, 
+        data, 
+        resp 
+      );
+    end
+  endtask
+    
+
+  initial begin
+    @(posedge reset);
+    #1;
+    mtestADDR = 32'h40001000; 
+    mtestWDataL[31:0] = 32'b11;   
+    mst_agent_0.AXI4LITE_WRITE_BURST( 
+      mtestADDR, 
+      mtestProtectionType, 
+      mtestWDataL, 
+      mtestBresp 
+    ); 
+    #10;
+    $finish;
+  end
 
 
 endmodule
