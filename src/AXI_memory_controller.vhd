@@ -333,7 +333,7 @@ begin
 				write_response <= (others => '0');
 			else
 				axi_bready <= '0';
-				if M_AXI_BVALID = '1' then
+				if M_AXI_BVALID = '1' and axi_bready = '0' then
 					write_response(1 downto 0) <= M_AXI_BRESP;
 					axi_bready <= '1';
 				end if ;

@@ -178,11 +178,12 @@ module test_CPU_AXI_recursive();
     axi4Lite_write(32'h40001000, 3'b000, 32'd3, mtestBresp);
 
     testAxiController();
-  
-    #90us;
+
+    #700ns;
+    // #9us;
     // run = 0;
 
-    // $finish;
+    $finish;
   end
 
 
