@@ -1141,9 +1141,9 @@ module test_AXI_ctrl( );
         #1;
         validating = 1'b0;
 
-        // Test 6: AXI TEST BRESP
+        // Test 1: AXI TEST BRESP
         $display("Starting NEW AXI TESTS...");
-        testN = 6;
+        testN = 1;
         @ (posedge clock);
         #1;
         test_type = AXI;
@@ -1151,7 +1151,14 @@ module test_AXI_ctrl( );
         en_1 = 1'b1;
         we_1 = 4'b1111;
         mem_opcode = 3'b010; //SW
-        rs2_value = 32'h00000000;
+        address_1 = 32'h00000000;
+        write_data_1 = 32'h40010000;
+
+        wait(stall_1 == 1'b1); //Wait transaction starts
+        wait(stall_1 == 1'b0); //Wait reatransactiond ends
+        
+        #1;
+
 
         // #50us;
 

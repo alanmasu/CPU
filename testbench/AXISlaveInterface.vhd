@@ -129,6 +129,9 @@ architecture arch_imp of AXISlaveInterface is
 	signal read_data 	: std_logic_vector(31 downto 0) 	:= (others => '0');
 	signal write_response 	: std_logic_vector(2 downto 0) 	:= (others => '0');
 	signal read_response 	: std_logic_vector(2 downto 0)	:= (others => '0');
+
+	type bresp_type is (idle, waiting_write_ch, write_done, counting);
+	signal bresp_state : bresp_type := idle;
 begin
 	-- I/O Connections assignments
 
@@ -330,17 +333,30 @@ begin
 	      axi_bresp   <= "00"; --need to work more on the responses
 		  bresp_cnt <= 0;	   
 	    else
-	      if (axi_awready = '1' and S_AXI_AWVALID = '1' and axi_wready = '1' and S_AXI_WVALID = '1' and axi_bvalid = '0'  ) then
-	        axi_bresp  <= "00"; 
-			if bresp_cnt = 10 then
-	        	axi_bvalid <= '1';
-				bresp_cnt <= 0;
-			else
-				bresp_cnt <= bresp_cnt + 1;
-			end if;
-	      elsif (S_AXI_BREADY = '1' and axi_bvalid = '1') then   --check if bready is asserted while bvalid is high)
-	        axi_bvalid <= '0';                                 -- (there is a possibility that bready is always asserted high)
-	      end if;
+        case( bresp_state ) is
+          when IDLE =>
+            bresp_state <= waiting_write_ch;
+            bresp_cnt <= 0;
+          when waiting_write_ch =>
+            axi_bvalid <= '0';
+	          if (axi_awready = '1' and S_AXI_AWVALID = '1' and axi_wready = '1' and S_AXI_WVALID = '1' and axi_bvalid = '0'  ) then
+              axi_bresp  <= "00"; 
+              bresp_state <= counting;
+            end if;
+          when counting =>
+            if bresp_cnt = 5 then
+              axi_bvalid <= '1';
+              bresp_cnt <= 0;
+              bresp_state <= write_done;
+            else
+              bresp_cnt <= bresp_cnt + 1;
+            end if;
+          when write_done =>
+            if (S_AXI_BREADY = '1' and axi_bvalid = '1') then
+              axi_bvalid <= '0';
+              bresp_state <= waiting_write_ch;
+            end if;
+        end case ;
 	    end if;
 	  end if;                   
 	end process; 
