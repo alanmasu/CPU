@@ -221,7 +221,9 @@ begin
 						axi_arvalid <= '1';	
 						if M_AXI_ARREADY = '1' then
 							read_state <= waiting;
-							axi_arvalid <= '0';
+							if axi_arvalid = '1' then
+								axi_arvalid <= '0';
+							end if ;
 						end if ;	
 					when waiting =>
 						if M_AXI_RVALID = '1' then
@@ -264,7 +266,9 @@ begin
 						axi_awvalid <= '1';
 						if(M_AXI_AWREADY = '1')	then
 							awrite_state <= wait_end;	
-							axi_awvalid <= '0';
+							if axi_awvalid = '1' then
+								axi_awvalid <= '0';
+							end if ;
 						end if ;
 					when wait_end =>
 					   	awrite_end <= '1';
@@ -307,7 +311,9 @@ begin
 						axi_wvalid <= '1';
 						if M_AXI_WREADY = '1' then
 							dwrite_state <= wait_end;
-							axi_wvalid <= '0';
+							if axi_wvalid = '1' then
+								axi_wvalid <= '0';
+							end if ;
 						end if ;
 					when wait_end =>
 					   dwrite_end <= '1';
