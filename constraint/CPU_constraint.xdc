@@ -77,19 +77,31 @@ set_property PACKAGE_PIN V9  [get_ports {I2C_CSREG_s_dbg_0[2]}];  # "JB9"
 # | O  O  O  O  O  O |  <-- PMOD Header
 # | O  O  O  O  O  O |      (12-pin standard)
 # +-------------------+
-#   6  5  2P 2N 1P 1N
-#  12 11  4P 4N 3P 3N
+#   6  5  2N 2P 1N 1P
+#  12 11  4N 4P 3N 3P
 # ----------------------------------------------------------------------------
 # JC Pmod - Bank 13
 # ---------------------------------------------------------------------------- 
-set_property PACKAGE_PIN AB6 [get_ports {state_dbg_0[0]}];  # "JC1_N"
 set_property PACKAGE_PIN AB7 [get_ports {state_dbg_0[1]}];  # "JC1_P"
-set_property PACKAGE_PIN AA4 [get_ports {state_dbg_0[2]}];  # "JC2_N"
-set_property PACKAGE_PIN Y4  [get_ports {I2C_state_dbg_0[0]}];  # "JC2_P"
-set_property PACKAGE_PIN T6  [get_ports {I2C_state_dbg_0[1]}];  # "JC3_N"
+set_property PACKAGE_PIN AB6 [get_ports {state_dbg_0[0]}];  # "JC1_N"
+set_property PACKAGE_PIN Y4  [get_ports {state_dbg_0[2]}];  # "JC2_P"
+set_property PACKAGE_PIN AA4 [get_ports {I2C_state_dbg_0[0]}];  # "JC2_N"
 set_property PACKAGE_PIN R6  [get_ports {I2C_state_dbg_0[2]}];  # "JC3_P"
-set_property PACKAGE_PIN U4  [get_ports {I2C_state_dbg_0[3]}];  # "JC4_N"
-# set_property PACKAGE_PIN T4  [get_ports {JC4_P}];  # "JC4_P"
+set_property PACKAGE_PIN T6  [get_ports {I2C_state_dbg_0[1]}];  # "JC3_N"
+set_property PACKAGE_PIN T4  [get_ports {I2C_state_dbg_0[3]}];  # "JC4_P"
+# set_property PACKAGE_PIN U4  [get_ports {I2C_state_dbg_0[3]}];  # "JC4_N"
+
+
+# set_property PACKAGE_PIN AB7 [get_ports {state_dbg_0[1]}];  # "JC1_P"
+# set_property PACKAGE_PIN AB6 [get_ports {state_dbg_0[0]}];  # "JC1_N"
+# set_property PACKAGE_PIN Y4  [get_ports {I2C_state_dbg_0[0]}];  # "JC2_P"
+# set_property PACKAGE_PIN AA4 [get_ports {state_dbg_0[2]}];  # "JC2_N"
+# set_property PACKAGE_PIN R6  [get_ports {I2C_state_dbg_0[2]}];  # "JC3_P"
+# set_property PACKAGE_PIN T6  [get_ports {I2C_state_dbg_0[1]}];  # "JC3_N"
+# # set_property PACKAGE_PIN T4  [get_ports {JC4_P}];  # "JC4_P"
+# set_property PACKAGE_PIN U4  [get_ports {I2C_state_dbg_0[3]}];  # "JC4_N"
+
+
 
 # ----------------------------------------------------------------------------
 # JD Pmod - Bank 13

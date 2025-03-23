@@ -92,6 +92,12 @@ begin
         I2C_state_dbg => i2c_state_dbg
     );
 
+    ---------------- DEBUG ----------------
+    busy_dbg <= busy;
+    err_dbg <= err;
+    CSR <= regFile(I2C_REG_CONTROL);
+    ---------------- END DEBUG ----------------
+
     regFile_proc : process(clk, res)
         variable regAddress : integer;
         variable address : unsigned(31 downto 0);
