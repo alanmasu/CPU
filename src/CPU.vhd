@@ -149,6 +149,8 @@ entity CPU is
         I2C_busy_dbg    : OUT STD_LOGIC;
         I2C_err_dbg     : OUT STD_LOGIC;
         I2C_CSREG_dbg   : OUT STD_LOGIC_VECTOR(31 downto 0);
+        I2C_CSREG_s_dbg : OUT STD_LOGIC_VECTOR(2 downto 0);
+        I2C_state_dbg   : OUT STD_LOGIC_VECTOR(3 downto 0);
 
         -- Buttons
         btn_up          : IN STD_LOGIC;
@@ -312,7 +314,7 @@ architecture Behavioral of CPU is
 
     --DEBUG
     signal state_dbg_sig : std_logic_vector(2 downto 0);
-
+    signal i2c_CSREG_internal : std_logic_vector(31 downto 0);
 begin
     --Fetch
     axi_bram_controller_i: axi_bram_ctrl_0
@@ -564,7 +566,8 @@ begin
         -- DEBUG
         busy_dbg => I2C_busy_dbg,
         err_dbg => I2C_err_dbg,
-        CSR => I2C_CSREG_dbg
+        CSR => i2c_CSREG_internal,
+        i2c_state_dbg => I2C_state_dbg
     );
 
     -- OLED Display
@@ -617,6 +620,10 @@ begin
         state_dbg_sig <= std_logic_vector(to_unsigned(state_integer,3));
     end process ; -- control_reg_file
     state_dbg <= state_dbg_sig;
+
+    -- I2C
+    I2C_CSREG_dbg   <= i2c_CSREG_internal;
+    I2C_CSREG_s_dbg <= i2c_CSREG_internal(2 downto 0);
     ----------------------------------- END DEBUG -----------------------------------
 
 
