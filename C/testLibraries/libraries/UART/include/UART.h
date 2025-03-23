@@ -30,5 +30,6 @@ void UARTWrite (const uint8_t* data, uint32_t size);
 
 void UARTRead (uint8_t* data, uint32_t size);
 
+void UARTPrint(const char* str);
 
 #endif // __UART_H__

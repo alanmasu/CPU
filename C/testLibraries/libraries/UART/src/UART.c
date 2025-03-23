@@ -31,3 +31,11 @@ void UARTRead (uint8_t* data, uint32_t size){
         data[i] = (*fifoReg);
     }
 }
+
+void UARTPrint(const char* str){
+    while(*str){
+        UARTWrite((uint8_t*)str, 1);
+        ++str;
+    }
+}
+
