@@ -41,6 +41,13 @@ $(OBJ_DIR)/%.o: %.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
+# Regola per compilare per la simulazione
+CFLAGS_SIM = "$(CFLAGS) -DSIMULATION"
+sim:
+	$(MAKE) -s CFLAGS=$(CFLAGS_SIM) all
+# $(MAKE) -s CFLAGS=$(CFLAGS_SIM) TARGET="bin/mainSim.elf" all
+
+
 # Regola per eseguire objdump
 dump: $(TARGET)
 	$(OBJDUMP) -d $(TARGET)

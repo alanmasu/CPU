@@ -146,10 +146,6 @@ entity CPU is
         gpio_state_dbg  : OUT STD_LOGIC_VECTOR(31 downto 0);
         gpio_dbg        : OUT STD_LOGIC_VECTOR(31 downto 0);
 
-        I2C_busy_dbg    : OUT STD_LOGIC;
-        I2C_err_dbg     : OUT STD_LOGIC;
-        I2C_CSREG_dbg   : OUT STD_LOGIC_VECTOR(31 downto 0);
-
         -- Buttons
         btn_up          : IN STD_LOGIC;
         btn_down        : IN STD_LOGIC;
@@ -312,7 +308,6 @@ architecture Behavioral of CPU is
 
     --DEBUG
     signal state_dbg_sig : std_logic_vector(2 downto 0);
-
 begin
     --Fetch
     axi_bram_controller_i: axi_bram_ctrl_0
@@ -560,11 +555,7 @@ begin
         dina => mem_wb_data_out,
         douta => d_bus_in.I2C_data,
         scl => SCL,
-        sda => SDA,
-        -- DEBUG
-        busy_dbg => I2C_busy_dbg,
-        err_dbg => I2C_err_dbg,
-        CSR => I2C_CSREG_dbg
+        sda => SDA
     );
 
     -- OLED Display
@@ -805,7 +796,7 @@ begin
                             mem_ena <= '1';
                         when "00100" => --Load
                             mem_ena <= '1';
-                            regFile_we <= '1';
+                            regFile_we <= '0';
                         when "00001" => --Jump 
                             regFile_we <= '1';   
                         when others =>

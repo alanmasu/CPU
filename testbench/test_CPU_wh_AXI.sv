@@ -170,13 +170,15 @@ module test_CPU_wh_AXI();
     32'h0000006f
   };
 
-  logic [31:0] testI2C [] = '{
+logic [31:0] testI2C [] = '{
     32'h400202b7,
     32'h01028293,
     32'h05600313,
     32'h07600393,
     32'h00100e13,
     32'h00100e93,
+    32'h400104b7,
+    32'h19448493,
     32'h00628223,
     32'h00728623,
     32'h01c28823,
@@ -191,11 +193,14 @@ module test_CPU_wh_AXI();
     32'h01ce8463,
     32'h00000e93,
     32'hffd12e23,
-    32'h00028f03,
+    32'h40010f37,
+    32'h194f2f03,
+    32'h000f4f03,
+    32'h0fff7f13,
     32'h004f7f13,
-    32'hfe0f1ce3,
+    32'hfe0f16e3,
     32'h00008067
-  };
+};
 
   logic [31:0] testAxiProgram [] = '{
       32'h00000013,
@@ -1243,6 +1248,14 @@ module test_CPU_wh_AXI();
     string message;
     begin
       $display("Testing I2C module");
+      mtestWDataL[31:0] = 32'h40020010;
+      mtestADDR[31:0] = 32'h40010194;
+      mst_agent_0.AXI4LITE_WRITE_BURST(
+          mtestADDR,
+          mtestProtectionType, 
+          mtestWDataL, 
+          mtestBresp 
+      );
       writeCREG(32'b11); //Set CPU in RUN 
 
       test_n = 1;     
@@ -1270,7 +1283,7 @@ module test_CPU_wh_AXI();
       validating = 1'b0;
 
       test_n = 2;
-      wait (instruction_tb ==  32'h00028f03); // Instruction: lb t5, 0(t0) (AKA Read i2c CREG)
+      wait (instruction_tb ==  32'h000f4f03); // Instruction: lbu t5, 0(t5) (AKA Read i2c CREG)
       @(instruction_tb);
       #1;
       validating = 1'b1;
@@ -1348,7 +1361,7 @@ module test_CPU_wh_AXI();
       validating = 1'b0;
 
       test_n = 6;
-      wait(instruction_tb == 32'h00028f03); // Instruction: lb t5, 0(t0) (AKA Read i2c CREG)
+      wait(instruction_tb == 32'h000f4f03); // Instruction: lbu t5, 0(t5) (AKA Read i2c CREG)
       @(instruction_tb);
       #1;
       validating = 1'b1;
