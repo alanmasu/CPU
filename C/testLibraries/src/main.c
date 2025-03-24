@@ -86,7 +86,7 @@ int main(int argc, char const *argv[]){
     wait(0);
 
     //STARTING THE CONVERSION
-    // while(1){
+    while(1){
         *data = 0x00;
         i2cState = i2cSetupWrite(PB200_221_ADDR, data, 1);
         if(i2cState == I2C_READY){
@@ -127,15 +127,17 @@ int main(int argc, char const *argv[]){
 
         uint8_t lenReaded = 0;
         i2cState = i2cGetReaded(data, &lenReaded);
-        uint16_t* display = (uint16_t*)DISPLAY_BASE_ADDR;
-        *display = *((uint16_t*)data);
+        uint32_t* display = (uint32_t*)DISPLAY_BASE_ADDR;
+        *display = *((uint32_t*)data);
+        
         wait(0);
-        gpioToggle((uint8_t*)GPIO0_PORT_A_DATA_ADDR, PIN0);
+        wait(0);
+        // gpioToggle((uint8_t*)GPIO0_PORT_A_DATA_ADDR, PIN0);
 
         *buff = 0x05;
 
-        while(1);
-    // }
+        // while(1);
+    }
 
     return 0;
 }
