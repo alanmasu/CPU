@@ -6,8 +6,6 @@
 
 #define PB200_221_ADDR 0x4B
 
-
-
 int main(int argc, char const *argv[]){
     I2CStatus_t i2cState;
 
@@ -25,24 +23,7 @@ int main(int argc, char const *argv[]){
 
     uint8_t* buff = (uint8_t*)&(GPIO0Data->PORT_A_DATA);
 
-
-
     UARTPrint("\nStarting the program...[FROM RISC-V]\nPlease SET the second switch to 1 (SWITCH[1]).\n\n");
-    // __asm__("mv a0, %0\n\t"
-    //         "li a1, 4 \n\t"
-    //         "call UARTWrite\n\t"
-    //         : 
-    //         : "r"   (I2C0RegFile)
-    // );
-    // // UARTWrite((uint8_t*)&val, 4);
-    // UARTPrint("\n");
-    // uint32_t* display = (uint32_t*)DISPLAY_BASE_ADDR;
-    // *display = *((uint32_t*)&I2C0RegFile);
-
-    gpioToggle((uint8_t*)GPIO0_PORT_A_DATA_ADDR, PIN0); //ON
-    wait(0);
-    gpioToggle((uint8_t*)GPIO0_PORT_A_DATA_ADDR, PIN0); //OFF
-    wait(0);
 
     //Setting UP the resolution
     wait(0);
@@ -132,11 +113,9 @@ int main(int argc, char const *argv[]){
         
         wait(0);
         wait(0);
-        // gpioToggle((uint8_t*)GPIO0_PORT_A_DATA_ADDR, PIN0);
 
         *buff = 0x05;
 
-        // while(1);
     }
 
     return 0;
