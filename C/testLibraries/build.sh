@@ -5,6 +5,7 @@ if [ "$1" = "-sim" ]; then
     # python3  scripts/elfToSvh.py bin/main.elf ~/workspace/TestCPU/src/programs/testLibProgram.svh LibProgram
     python3  scripts/elfToSvh.py bin/main.elf bin/testLibProgram.svh LibProgram
 else 
+    make clean
     make dump > bin/dump.txt
     python3  scripts/elfToC_new.py bin/main.elf ~/workspace/TestCPU/src/programs/testLibProgram.h LibProgram
     python3  scripts/elfToC_new.py bin/main.elf bin/testLibProgram.h LibProgram
