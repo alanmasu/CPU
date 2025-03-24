@@ -15,6 +15,7 @@ main:
     li      t2, 0x76        # Data to be written/readed
     li      t3, 0x01        # Number of bytes to be written/readed
     li      t4, 0b01        # I2C Control Register 0b11 -> Write and Start
+    li      s1, 0x40010194  # Address of the pointer to I2CReg Address (Leggi dalla ram l'indirizzo)
 
 test:
     # Write Data
@@ -37,9 +38,13 @@ test:
     li      t4, 0x00        # Data Length is not correct
 test_l:
     sw     t4, -4(sp)       # Store Data Length             TEST #3
+
 wait_busy:
-    lb      t5, 0(t0)       # Read Control Register
+    lui     t5, 0x40010
+    lw      t5, 0x0194(t5)  # Load I2CReg Address
+    lbu     t5, 0(t5)       # Read Control Register
+    zext.b  t5, t5          # Zero Extend to 32 bits
     andi    t5, t5, 0b100   # Mask I2C busy BIT
-    bnez    t5, wait_busy  # Wait until I2C is not busy
+    bnez    t5, wait_busy   # Wait until I2C is not busy
     ret
     

@@ -13,15 +13,19 @@ int main(int argc, char const *argv[]){
 
     GPIO0Dir->PORT_A_DIR.GPIO0 = OUTPUT;
     GPIO0Data->PORT_A_DATA.GPIO0 = 0;
+
     int32_t val = 0;
     UARTPrint("\nStarting the program...[FROM RISC-V]\nPlease SET the second switch to 1 (SWITCH[1]).\n\n Mem[0x40010194] = ");
-    __asm__("lw t0, %1\n\t"
-            "lw %0, 0(t0)\n\t"
-            : "=r"  (val)
-            : "m"   (I2C0RegFile)
-    );
-    UARTWrite((uint8_t*)&val, 4);
-    UARTPrint("\n");
+    // __asm__("mv a0, %0\n\t"
+    //         "li a1, 4 \n\t"
+    //         "call UARTWrite\n\t"
+    //         : 
+    //         : "r"   (I2C0RegFile)
+    // );
+    // // UARTWrite((uint8_t*)&val, 4);
+    // UARTPrint("\n");
+    uint32_t* display = (uint32_t*)DISPLAY_BASE_ADDR;
+    *display = *((uint32_t*)&I2C0RegFile);
 
     //Setting UP the resolution
     wait(0);

@@ -812,7 +812,7 @@ begin
                             mem_ena <= '1';
                         when "00100" => --Load
                             mem_ena <= '1';
-                            regFile_we <= '1';
+                            regFile_we <= '0';
                         when "00001" => --Jump 
                             regFile_we <= '1';   
                         when others =>
