@@ -10,8 +10,9 @@ LINKER  = linker_script.ld
 TARGET = bin/main.elf
 
 # Compilatore e flag
-CFLAGS = -Iinclude $(addprefix -I, $(wildcard libraries/*/include)) -ffreestanding -nostdlib -O1
-LDFLAGS = -T $(LINKER) -e main
+# CFLAGS = -Iinclude $(addprefix -I, $(wildcard libraries/*/include)) -ffreestanding -nostdlib -Os 
+CFLAGS = -Iinclude $(addprefix -I, $(wildcard libraries/*/include)) -ffreestanding -O1 -ffunction-sections -Wl,--gc-sections
+LDFLAGS = -T $(LINKER) -e main 
 # LDFLAGS = -e main
 
 # Directory principali

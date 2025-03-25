@@ -3,11 +3,14 @@
 #include <GPIO.h>
 #include <I2C.h>
 #include <utilities.h>
+//#include <printf.h>
 
 #define PB200_221_ADDR 0x4B
 
 int main(int argc, char const *argv[]){
     I2CStatus_t i2cState;
+
+    // printf("Hello World!\n%d\n", 1234);
 
     GPIO0Dir->PORT_A_DIR.GPIO0 = OUTPUT;
     GPIO0Data->PORT_A_DATA.GPIO0 = 0;
