@@ -48,20 +48,14 @@ sim:
 	$(MAKE) -s CFLAGS=$(CFLAGS_SIM) all
 # $(MAKE) -s CFLAGS=$(CFLAGS_SIM) TARGET="bin/mainSim.elf" all
 
-LIB_OBJ_FILES = $(shell find obj/libraries -type f -name "*.o")
-HEADERS_FILES = $(shell find libraries -type f -name "*.h")
+
 RIPES_DIR = ~/RISC-V/RipesFiles
-OBJ_CP_DIR = $(RIPES_DIR)/obj
-HEADERS_CP_DIR = $(RIPES_DIR)/include
-LINKER_CP_DIR = $(RIPES_DIR)
+CFLAGS_RIPES = "$(CFLAGS) -DRIPES"
 ripes:
-	@echo $(LIB_OBJ_FILES)
-	@echo $(HEADERS_FILES)
-	mkdir -p $(OBJ_CP_DIR)
-	mkdir -p $(HEADERS_CP_DIR)
-	cp $(LIB_OBJ_FILES) $(OBJ_CP_DIR)
-	cp $(HEADERS_FILES) $(HEADERS_CP_DIR)
-	cp $(LINKER) $(LINKER_CP_DIR)
+	$(MAKE) -s clean
+	$(MAKE) -s LDFLAGS="-e main" all
+	cp $(TARGET) $(RIPES_DIR)/main.elf
+
 
 # Regola per eseguire objdump
 dump: $(TARGET)
