@@ -45,7 +45,7 @@ SECTIONS
 		*(.data*)
 		*(.sdata*)
 		. = ALIGN(4);
-		PROVIDE( __global_pointer = .);
+		PROVIDE( __global_pointer$ = .);
 		_edata = .;
 	} > RAM
 	

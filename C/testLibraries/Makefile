@@ -11,7 +11,7 @@ TARGET = bin/main.elf
 
 # Compilatore e flag
 # CFLAGS = -Iinclude $(addprefix -I, $(wildcard libraries/*/include)) -ffreestanding -nostdlib -Os 
-CFLAGS = -Iinclude $(addprefix -I, $(wildcard libraries/*/include)) -ffreestanding -O1 -ffunction-sections -Wl,--gc-sections
+CFLAGS = -Iinclude $(addprefix -I, $(wildcard libraries/*/include)) -ffreestanding -Os -ffunction-sections -Wl,--gc-sections
 LDFLAGS = -T $(LINKER) -e main 
 # LDFLAGS = -e main
 
