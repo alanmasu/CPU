@@ -1,5 +1,6 @@
 import argparse
 from elftools.elf.elffile import ELFFile
+from elftools.elf.sections import SymbolTableSection
 
 def extract_section_data(elf, section_name):
     """Restituisce i dati della sezione, il suo indirizzo e la sua dimensione."""
@@ -8,6 +9,15 @@ def extract_section_data(elf, section_name):
         return section.data(), section['sh_addr'], section['sh_size']
     else:
         return None, None, None
+
+def get_symbol_address(elf, symbol_name):
+    """Trova l'indirizzo di un simbolo nell'ELF."""
+    for section in elf.iter_sections():
+        if isinstance(section, SymbolTableSection):
+            for symbol in section.iter_symbols():
+                if symbol.name == symbol_name:
+                    return symbol.entry.st_value
+    return None
 
 def extract_text_section_to_c(file_path, output_path, programName):
     try:
@@ -19,6 +29,9 @@ def extract_text_section_to_c(file_path, output_path, programName):
             const_data, const_address, const_size = extract_section_data(elf, '.const')
             data_data, data_address, data_size = extract_section_data(elf, '.data')
             _, bss_address, bss_size = extract_section_data(elf, '.bss')
+            
+            # Ottenere il valore del simbolo __global_pointer
+            global_pointer_val = get_symbol_address(elf, '__global_pointer$')
             
             # Converte i byte della sezione .text in formato esadecimale
             text_instructions = []
@@ -68,6 +81,10 @@ def extract_text_section_to_c(file_path, output_path, programName):
             else:
                 c_content += "// .data section non trovata\n"
             
+            # Aggiunta della define per __global_pointer
+            if global_pointer_val is not None:
+                c_content += f"\n#define GLOBAL_POINTER_VAL 0x{global_pointer_val:08x}\n"
+                        
             c_content += "\n"
             
             # Aggiunge i dati della sezione .text
@@ -109,6 +126,7 @@ def main():
     
     # Chiama la funzione con i file specificati dall'utente
     extract_text_section_to_c(args.file, args.output, args.program)
+    
 
 if __name__ == "__main__":
     main()

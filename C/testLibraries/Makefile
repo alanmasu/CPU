@@ -10,8 +10,9 @@ LINKER  = linker_script.ld
 TARGET = bin/main.elf
 
 # Compilatore e flag
-CFLAGS = -Iinclude $(addprefix -I, $(wildcard libraries/*/include)) -ffreestanding -nostdlib -O1
-LDFLAGS = -T $(LINKER) -e main
+# CFLAGS = -Iinclude $(addprefix -I, $(wildcard libraries/*/include)) -ffreestanding -nostdlib -Os 
+CFLAGS = -Iinclude $(addprefix -I, $(wildcard libraries/*/include)) -ffreestanding -Os -ffunction-sections -Wl,--gc-sections
+LDFLAGS = -T $(LINKER) -e main 
 # LDFLAGS = -e main
 
 # Directory principali
@@ -46,6 +47,14 @@ CFLAGS_SIM = "$(CFLAGS) -DSIMULATION"
 sim:
 	$(MAKE) -s CFLAGS=$(CFLAGS_SIM) all
 # $(MAKE) -s CFLAGS=$(CFLAGS_SIM) TARGET="bin/mainSim.elf" all
+
+
+RIPES_DIR = ~/RISC-V/RipesFiles
+CFLAGS_RIPES = "$(CFLAGS) -DRIPES"
+ripes:
+	$(MAKE) -s clean
+	$(MAKE) -s LDFLAGS="-e main" all
+	cp $(TARGET) $(RIPES_DIR)/main.elf
 
 
 # Regola per eseguire objdump

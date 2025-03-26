@@ -51,9 +51,7 @@ entity I2C_driver is
            data_length_out : out STD_LOGIC_VECTOR (clog2(BYTE_BUFF_SIZE) downto 0);     -- Data length out: lunghezza dei dati letti oppure dei dati scritti prima di un NACK
            busy, error : out STD_LOGIC;                                                 -- Busy/Error
            sda : inout STD_LOGIC;                                                       -- SDA
-           scl : inout STD_LOGIC;                                                        -- SCL
-           -- DEBUG
-           I2C_state_dbg : out STD_LOGIC_VECTOR(3 downto 0)                             -- I2C State
+           scl : inout STD_LOGIC
     );
 end I2C_driver;
 
@@ -76,15 +74,6 @@ architecture Behavioral of I2C_driver is
     constant quarter_cycle : unsigned (freq2dim(FREQ_KHZ, S_FREQ_KHZ) - 1  downto 0) := total_cycle/4;  --62  cicli * 10 ns - 1 ciclo * 10 ns
     
 begin
-    ------------------------- DEBUG -------------------------
-    state_dbg_pro : process( i2c_state )
-        variable state_integer : integer := 0;
-    begin
-        state_integer := stato_t'pos(i2c_state);
-        I2C_state_dbg <= std_logic_vector(to_unsigned(state_integer, I2C_state_dbg'length));
-    end process ; -- state_dbg_pro
-    ------------------------- END DEBUG ---------------------
-
     msf : process( clk, res) begin
         if res = '0' then
             i2c_state <= idle;

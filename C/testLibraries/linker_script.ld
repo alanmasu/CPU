@@ -12,11 +12,17 @@ SECTIONS
 	. = 0x40000000;
 	. = ALIGN(4);
 	.text : {
+		*(.init)
 		*(.text.main)
 		*(.text*)
 		. = ALIGN(4);
 		_etext = .;		
 	} > INSTR 
+
+	.entry : {
+		. = . + 12;
+		. = ALIGN(4);
+	} > RAM
 
 	.const : {
 		*(.rodata*)

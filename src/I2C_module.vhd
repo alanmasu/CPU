@@ -50,12 +50,7 @@ entity I2C_module is
         wea     : in STD_LOGIC_VECTOR(3 downto 0);
         addra   : in STD_LOGIC_VECTOR(31 downto 0);
         dina    : in STD_LOGIC_VECTOR(31 downto 0);
-        douta   : out STD_LOGIC_VECTOR(31 downto 0);
-        --DEBUG
-        busy_dbg: out STD_LOGIC;
-        err_dbg : out STD_LOGIC;
-        CSR     : out STD_LOGIC_VECTOR(31 downto 0);
-        i2c_state_dbg : out STD_LOGIC_VECTOR(3 downto 0)
+        douta   : out STD_LOGIC_VECTOR(31 downto 0)
     );
 end I2C_module;
 
@@ -87,16 +82,8 @@ begin
         busy => busy,
         error => err,
         sda => sda,
-        scl => scl,
-        -- DEBUG
-        I2C_state_dbg => i2c_state_dbg
+        scl => scl
     );
-
-    ---------------- DEBUG ----------------
-    busy_dbg <= busy;
-    err_dbg <= err;
-    CSR <= regFile(I2C_REG_CONTROL);
-    ---------------- END DEBUG ----------------
 
     regFile_proc : process(clk, res)
         variable regAddress : integer;
