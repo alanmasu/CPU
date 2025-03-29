@@ -313,13 +313,13 @@ begin
         ena <= '1';           -- Enable I2C
         wea <= "0011";        -- Write only first byte
         addra <= x"0000001C"; -- Writing to I2C_REG_WDATA
-        dina  <= x"0F00CCFF";  
+        dina  <= x"0F00C2FE";  
         wait until rising_edge(clk);
         wait for 1 ns;
         ena  <= '0';           -- Disable I2C
         wea <= "0000";         -- Read only first byte
         validating <= '1';
-        if i2c_regFile(I2C_REG_WDATA) = x"0000CCFF" then
+        if i2c_regFile(I2C_REG_WDATA) = x"0000C2FE" then
             resoult <= '1';
             report "Test #" & integer'image(test_n) & ": OK";
         else
@@ -367,10 +367,10 @@ begin
         wait until i2c_regFile(I2C_REG_CONTROL)(I2C_CREG_BUSY_BIT) = '0';
         wait for 1 ns;
         validating <= '1';
-        if i2c_data_tb = x"0000_CCFF" then
+        if i2c_data_tb = x"0000_C2FE" then
             resoult <= '1';
             report "Test #" & integer'image(test_n) & ": OK";
-        elsif i2c_data_tb = x"0000_FFCC" then
+        elsif i2c_data_tb = x"0000_FEC2" then
             report "Test #" & integer'image(test_n) & ": WARNING: Endiannes is WRONG -> i2c_data_tb was " & integer'image(stdv2int(i2c_data_tb));
         else
             resoult <= '0';
@@ -396,10 +396,10 @@ begin
         wait until i2c_regFile(I2C_REG_CONTROL)(I2C_CREG_BUSY_BIT) = '0';
         wait for 1 ns;
         validating <= '1';
-        if i2c_regFile(I2C_REG_RDATA) = x"0000_CCFF" then
+        if i2c_regFile(I2C_REG_RDATA) = x"0000_C2FE" then
             resoult <= '1';
             report "Test #" & integer'image(test_n) & ": OK";
-        elsif i2c_regFile(I2C_REG_RDATA) = x"0000_FFCC" then
+        elsif i2c_regFile(I2C_REG_RDATA) = x"0000_FEC2" then
             report "Test #" & integer'image(test_n) & ": WARNING: Endianes is WRONG -> i2c_data_tb was " & integer'image(stdv2int(i2c_data_tb));
         else
             resoult <= '0';
