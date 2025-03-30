@@ -62,8 +62,8 @@ I2CStatus_t i2cGetReaded(uint8_t* data, uint8_t* len){
         return I2C_NOT_FOUND;
     }
 
-    *len = I2C0RegFile->lenOut - 1;
-    uint8_t* tmp = (uint8_t*)&I2C0RegFile->rData + *len;
+    *len = I2C0RegFile->lenOut;
+    uint8_t* tmp = (uint8_t*)&I2C0RegFile->rData + I2C0RegFile->lenOut - 1;
     for(int i = 0; i < *len; ++i){
         *data = *tmp;
         tmp--;
