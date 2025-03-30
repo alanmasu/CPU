@@ -1,3 +1,10 @@
+/**!
+ * @file    I2C.c
+ * 
+ * @author  Alan Masutti (@alanmasu)
+ * @date    30/03/2025
+*/
+
 #include <I2C.h>
 
 #include <stdint.h>

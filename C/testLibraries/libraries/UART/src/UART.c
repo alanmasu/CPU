@@ -1,3 +1,10 @@
+/**!
+ * @file    UART.c
+ * 
+ * @author  Alan Masutti (@alanmasu)
+ * @date    30/03/2025
+ * 
+*/
 #include <UART.h>
 
 void UARTWrite (const uint8_t* data, uint32_t size){

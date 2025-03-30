@@ -1,3 +1,12 @@
+/**!
+ * @file    I2C.h
+ * @brief   I2C Library
+ * 
+ * @details This library is used to communicate with I2C devices on the RISC-V, it uses the I2C0 peripheral.
+ * 
+ * @author  Alan Masutti (@alanmasu) 
+ * @date    30/03/2025
+*/
 #ifndef __I2C_H__
 #define __I2C_H__
 
@@ -46,7 +55,7 @@ I2CStatus_t i2cSetupRead(uint8_t slaveAddr, uint8_t len);
  * @brief Setup the I2C to write to a slave device
  * 
  * @param slaveAddr The address of the slave device
- * @param [in] data The data to write
+ * @param[in] data The data to write
  * @param len The number of bytes to write
  * @return I2CStatus_t The status of the I2C
 */
@@ -69,8 +78,8 @@ I2CStatus_t i2cWaitTransaction();
 /**!
  * @brief Get the readed data from the I2C
  * 
- * @param [out] data The data readed
- * @param [out] len The number of bytes readed
+ * @param[out] data The data readed
+ * @param[out] len The number of bytes readed
  * @return I2CStatus_t The status of the I2C
 */
 I2CStatus_t i2cGetReaded(uint8_t* data, uint8_t* len);

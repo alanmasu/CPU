@@ -1,3 +1,14 @@
+/**!
+ * @file    GPIO.h
+ * @brief   GPIO Library
+ * 
+ * @details This library is used to control the GPIO pins on the RISC-V,
+ *          it uses the GPIO0 peripheral.
+ * 
+ * @author  Alan Masutti (@alanmasu)
+ * @date    30/03/2025
+*/
+
 #ifndef __GPIO_H__
 #define __GPIO_H__
 
@@ -71,8 +82,8 @@ typedef struct __attribute__((packed)) GPIOData_t{
 /**!
  * @brief Read the value of a pin in a port
  * 
- * @param [in] port The address of the port
- * @param [in] pinN The number of the pin in the port
+ * @param[in] port The address of the port
+ * @param[in] pinN The number of the pin in the port
  * 
  * @return The value of the pin
  * 
@@ -82,8 +93,8 @@ uint8_t gpioReadByNum(const uint8_t* port, uint8_t pinN);
 /**!
  * @brief Read the value of a pin in a port
  * 
- * @param [in] port The address of the port
- * @param [in] pin The mask of the pin in the port
+ * @param[in] port The address of the port
+ * @param[in] pin The mask of the pin in the port
  * 
  * @return The value of the pin
  * 
@@ -93,9 +104,9 @@ uint8_t gpioRead(const uint8_t* port, uint8_t pin);
 /**!
  * @brief Set the direction of a pin in a port
  * 
- * @param [in] port The address of the port
- * @param [in] pin The mask of the pin in the port
- * @param [in] dir The direction of the pin
+ * @param[in] port The address of the port
+ * @param[in] pin The mask of the pin in the port
+ * @param[in] dir The direction of the pin
  * 
 */
 void gpioSetDir(uint8_t* port, uint8_t pin, bool dir);
@@ -103,8 +114,8 @@ void gpioSetDir(uint8_t* port, uint8_t pin, bool dir);
 /**!
  * @brief Get the direction of a pin in a port
  * 
- * @param [in] port The address of the port
- * @param [in] pin The mask of the pin in the port
+ * @param[in] port The address of the port
+ * @param[in] pin The mask of the pin in the port
  * 
  * @return The direction of the pin
  * 
@@ -114,9 +125,9 @@ uint8_t gpioGetDir(const uint8_t* port, uint8_t pin);
 /**!
  * @brief Set the value of a pin in a port
  * 
- * @param [in] port The address of the port
- * @param [in] pinN The number of the pin in the port
- * @param [in] data The value of the pin
+ * @param[in] port The address of the port
+ * @param[in] pinN The number of the pin in the port
+ * @param[in] data The value of the pin
  * 
  * @return none
 */
@@ -125,8 +136,8 @@ void gpioSetValueByNum(uint8_t* port, uint8_t pinN, bool data);
 /**!
  * @brief Get the value of a pin in a port
  * 
- * @param [in] port The address of the port
- * @param [in] pinN The number of the pin in the port
+ * @param[in] port The address of the port
+ * @param[in] pinN The number of the pin in the port
  * 
  * @return The value of the pin
  * 
@@ -136,9 +147,9 @@ uint8_t gpioGetValueByNum(const uint8_t* port, uint8_t pinN);
 /**!
  * @brief Set the value of a pin in a port
  * 
- * @param [in] port The address of the port
- * @param [in] pin The mask of the pin in the port
- * @param [in] data The value of the pin
+ * @param[in] port The address of the port
+ * @param[in] pin The mask of the pin in the port
+ * @param[in] data The value of the pin
  * 
  * @return none
 */
@@ -147,8 +158,8 @@ void gpioSetValue(uint8_t* port, uint8_t pin, bool data);
 /**!
  * @brief Get the value of a pin in a port
  * 
- * @param [in] port The address of the port
- * @param [in] pin The mask of the pin in the port
+ * @param[in] port The address of the port
+ * @param[in] pin The mask of the pin in the port
  * 
  * @return The value of the pin
  * 
@@ -158,8 +169,8 @@ uint8_t gpioGetValue(const uint8_t* port, uint8_t pin);
 /**!
  * @brief Toggle the value of a pin in a port
  * 
- * @param [in] port The address of the port
- * @param [in] pin The mask of the pin in the port
+ * @param[in] port The address of the port
+ * @param[in] pin The mask of the pin in the port
  * 
  * @return none
 */
@@ -168,8 +179,8 @@ void gpioToggle(uint8_t* port, uint8_t pin);
 /**!
  * @brief Set the value of a pin in a port
  * 
- * @param [in] port The address of the port
- * @param [in] pin The mask of the pin in the port
+ * @param[in] port The address of the port
+ * @param[in] pin The mask of the pin in the port
  * 
  * @return none
 */
@@ -178,8 +189,8 @@ void gpioSet(uint8_t* port, uint8_t pin);
 /**!
  * @brief Clear the value of a pin in a port
  * 
- * @param [in] port The address of the port
- * @param [in] pin The mask of the pin in the port
+ * @param[in] port The address of the port
+ * @param[in] pin The mask of the pin in the port
  * 
  * @return none
 */
