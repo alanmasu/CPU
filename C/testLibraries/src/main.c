@@ -64,22 +64,33 @@ int main(int argc, char const *argv[]){
     wait(0);
     wait(0);
 
-    if(i2cState == I2C_OK){
-        UARTPrint("I2C OK @0b\n");
-    }
-    else if(i2cState == I2C_NOT_FOUND){
-        UARTPrint("I2C Not Found @0b\n");
-    }
+    // if(i2cState == I2C_OK){
+    //     UARTPrint("I2C OK @0b\n");
+    // }
+    // else if(i2cState == I2C_NOT_FOUND){
+    //     UARTPrint("I2C Not Found @0b\n");
+    // }
     // else if(i2cState == I2C_BUSY){
     //     UARTPrint("I2C Busy @0b\n");
     // }
     // else if(i2cState == I2C_READY){
     //     UARTPrint("I2C Ready @0b\n");
-    // }else if(i2cState == I2C_ERROR){
+    // }
+    // else if(i2cState == I2C_ERROR){
     //     UARTPrint("I2C Error @0b\n");
-    // }else if(i2cState == I2C_FULL){
+    // }
+    // else if(i2cState == I2C_FULL){
     //     UARTPrint("I2C Full @0b\n");
     // }
+
+    switch (i2cState){
+        case I2C_OK:
+            UARTPrint("I2C OK @0b\n");
+            break;
+        case I2C_NOT_FOUND:
+            UARTPrint("I2C Not Found @0b\n");
+            break;
+    }
 
     // *buff = 0x00;
 
