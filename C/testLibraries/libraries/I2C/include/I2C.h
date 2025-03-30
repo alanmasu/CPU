@@ -32,16 +32,54 @@ typedef enum I2CStatus_t{
     I2C_NOT_FOUND
 }I2CStatus_t;
 
+/**!
+ * @brief Setup the I2C to read from a slave device
+ * 
+ * @param slaveAddr The address of the slave device
+ * @param len The number of bytes to read
+ * @return I2CStatus_t The status of the I2C
+*/
 
 I2CStatus_t i2cSetupRead(uint8_t slaveAddr, uint8_t len);
-I2CStatus_t i2cSetupWrite(uint8_t slaveAddr, uint8_t* data, uint8_t len);
+
+/**!
+ * @brief Setup the I2C to write to a slave device
+ * 
+ * @param slaveAddr The address of the slave device
+ * @param [in] data The data to write
+ * @param len The number of bytes to write
+ * @return I2CStatus_t The status of the I2C
+*/
+I2CStatus_t i2cSetupWrite(uint8_t slaveAddr, const uint8_t* data, uint8_t len);
+
+/**!
+ * @brief Start the I2C transaction
+ * 
+ * @return I2CStatus_t The status of the I2C
+*/
 I2CStatus_t i2cStartTransaction();
+
+/**!
+ * @brief Wait for the I2C transaction to finish
+ * 
+ * @return none
+*/
 void i2cWaitTransaction();
+
+/**!
+ * @brief Get the readed data from the I2C
+ * 
+ * @param [out] data The data readed
+ * @param [out] len The number of bytes readed
+ * @return I2CStatus_t The status of the I2C
+*/
 I2CStatus_t i2cGetReaded(uint8_t* data, uint8_t* len);
 
 
 
-
+/**!
+ * @brief The I2C register file
+*/
 extern volatile I2CRegFile_t* I2C0RegFile;
 
 

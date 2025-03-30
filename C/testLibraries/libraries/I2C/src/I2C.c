@@ -18,7 +18,7 @@ I2CStatus_t i2cSetupRead(uint8_t slaveAddr, uint8_t len){
     return I2C_READY;
 }
 
-I2CStatus_t i2cSetupWrite(uint8_t slaveAddr, uint8_t* data, uint8_t len){
+I2CStatus_t i2cSetupWrite(uint8_t slaveAddr, const uint8_t* data, uint8_t len){
     if(len > 4){
         return I2C_FULL;
     }
@@ -28,8 +28,10 @@ I2CStatus_t i2cSetupWrite(uint8_t slaveAddr, uint8_t* data, uint8_t len){
     I2C0RegFile->slaveAddr = slaveAddr;
     I2C0RegFile->lenIn = len;
     I2C0RegFile->controlReg.RW_N = 0;
+    I2C0RegFile->wData = 0;
     for(int i = 0; i < len; ++i){
-        I2C0RegFile->wData = data[i];
+        I2C0RegFile->wData = I2C0RegFile->wData << 8;
+        I2C0RegFile->wData |= data[i];
     }
 
     return I2C_READY;
