@@ -45,6 +45,8 @@ architecture Behavioral of test_ID is
     signal op_class, rd_addr_in, rd_addr_out : std_logic_vector(4 downto 0) := (others => '0'); 
     signal comparator_opcode, mem_opcode : std_logic_vector(2 downto 0):= (others => '0') ;
     signal alu_opcode : std_logic_vector(3 downto 0) := (others => '0');
+
+    signal new_test : std_logic := '0';
 begin
     dut : entity work.istruction_decode
     port map(
@@ -64,7 +66,8 @@ begin
         a_pcn => a_pcn,
         b_immn => b_immn,
         npc_in => npc_in,
-        npc_out => npc_out
+        npc_out => npc_out,
+        immediate_out => immediate_out
     );
 
     clk_gen : process begin
@@ -114,6 +117,28 @@ begin
 --            wait for 10 ns;
 --        end loop ; -- test_for  
         wait for 10 ns;  
+        
+
+        ---------------------- NEW TEST ----------------------
+        wait until rising_edge(clk);
+        new_test <= '1';
+        instruction <= x"0d9000ef";
+        wait for 11 ns;
+        if immediate_out /= x"000008d8" then
+            report "TEST #1 FAILED: Error: immediate_out /= 0x8d8";
+        else
+            report "TEST #1 Passed";    
+        end if;
+        
+        wait until rising_edge(clk);
+        instruction <= x"0a5000ef";
+        wait for 11 ns;
+        if immediate_out /= x"000008a4" then
+            report "TEST #2 FAILED: Error: immediate_out /= 0x8a4";
+        else
+            report "TEST #2 Passed";    
+        end if;
+
         wait;
     end process ; --test_pro
 end Behavioral;

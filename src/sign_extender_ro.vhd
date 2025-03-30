@@ -52,13 +52,11 @@ begin
         imm20 := (others => '0');
         imm <= (others => '0');
         if opcode = opcode_jal then
-            imm20(19) := instruction(31);
-            imm20(18 downto 11) := instruction(19 downto 12);
-            imm20(10 downto 1) := instruction(30 downto 21);
-            imm20(0) := '0';
-            imm12 := (others => imm20(19));
-            imm(31 downto 20) <= imm12(11 downto 0);
-            imm(19 downto 0) <= imm20;
+            imm(31 downto 20) <= (others => instruction(31));   -- 11bit di scarto + il 20esimo bit
+            imm(19 downto 12) <= instruction(19 downto 12);     -- 8 bit
+            imm(11) <= instruction(20);                         -- 12esimo bit
+            imm(10 downto 1) <= instruction(30 downto 21);      -- 10 bit
+            imm(0) <= '0';                                      -- 1 bit
         elsif opcode = opcode_store then
             imm20 := (others => instruction(31));
             imm12(11 downto 5) := instruction(31 downto 25);
