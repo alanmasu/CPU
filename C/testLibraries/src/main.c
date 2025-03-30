@@ -22,9 +22,38 @@ void testI2CRead(){
     DisplayData->data[3] = lenReaded;
 }
 
+void printI2CState( I2CStatus_t i2cState, const char* message){
+    switch (i2cState){
+        case I2C_OK:
+            UARTPrint("I2C OK ");
+            break;
+        case I2C_NOT_FOUND:
+            UARTPrint("I2C Not Found ");
+            break;
+        case I2C_BUSY:
+            UARTPrint("I2C Busy ");
+            break;
+        case I2C_READY:
+            UARTPrint("I2C Ready ");
+            break;
+        case I2C_ERROR: 
+            UARTPrint("I2C Error ");
+            break;
+        case I2C_FULL:
+            UARTPrint("I2C Full ");
+            break;
+        default:
+            UARTPrint("I2C Unknown ");
+            break;
+    }
+    UARTPrint(message);
+    UARTPrint("\n");
+}
 
 int main(int argc, char const *argv[]){
     I2CStatus_t i2cState;
+    I2CStatus_t i2cState_testC;
+    I2CStatus_t i2cState_testG;
 
     // printf("Hello World!\n%d\n", 1234);
 
@@ -46,47 +75,47 @@ int main(int argc, char const *argv[]){
 
     wait(0);
 
+    //TEST 0a & 0b: Testing Invalid address
     uint32_t test = 0x2034;
     i2cState = i2cSetupWrite(0x20,(uint8_t*) &test, 2);
+    printI2CState(i2cState, "@0a");
     if(i2cState == I2C_READY){
-        UARTPrint("I2C Ready, sending 0x2034\n");
-        i2cState = i2cStartTransaction();
-    }else if(i2cState == I2C_BUSY){
-        UARTPrint("I2C Busy @0a\n");
-    }else if(i2cState == I2C_ERROR){
-        UARTPrint("I2C Error @0a\n");
-    }else if(i2cState == I2C_FULL){
-        UARTPrint("I2C Full @0a\n");
+        UARTPrint("\tSending 0x2034\n");
+        i2cStartTransaction();
     }
-    *buff = 0xFF;
+
     i2cState = i2cWaitTransaction();
-
+    printI2CState(i2cState, "@0b");
     wait(0);
     wait(0);
 
-    switch (i2cState){
-        case I2C_OK:
-            UARTPrint("I2C OK @0b\n");
-            break;
-        case I2C_NOT_FOUND:
-            UARTPrint("I2C Not Found @0b\n");
-            break;
-        case I2C_BUSY:
-            UARTPrint("I2C Busy @0b\n");
-            break;
-        case I2C_READY:
-            UARTPrint("I2C Ready @0b\n");
-            break;
-        case I2C_ERROR: 
-            UARTPrint("I2C Error @0b\n");
-            break;
-        case I2C_FULL:
-            UARTPrint("I2C Full @0b\n");
-            break;
-        default:
-            UARTPrint("I2C Unknown @0b\n");
-            break;
-    }
+    //TEST 0c & 0d: Testing Valid address but reading out of the registers range (the first is valid, 2nd, 3rd and 4th are invalid)
+    test = 0x2FFF44;
+    i2cState = i2cSetupWrite(PB200_221_ADDR, (uint8_t*) &test, 3);
+    i2cState_testC = i2cStartTransaction();
+
+    i2cSetupRead(PB200_221_ADDR, 4);
+    i2cStartTransaction();
+    i2cState = i2cWaitTransaction();
+    printI2CState(i2cState_testC, "@0c");
+    printI2CState(i2cState, "@0d");
+
+    //TEST 0e & 0f: Testing Valid address and writing out of the registers range (the first is valid, 2nd, 3rd and 4th are invalid)
+    test = 0x2FFF55;
+    i2cState = i2cSetupWrite(PB200_221_ADDR, (uint8_t*) &test, 3);
+    if(i2cState == I2C_READY) *buff = 0x06;
+    // printI2CState(i2cState, "@0e");
+    i2cStartTransaction();
+    i2cState_testG = i2cWaitTransaction();
+    
+
+    test = 0xF3F2F1F0;
+    i2cSetupWrite(PB200_221_ADDR, (uint8_t*) &test, 4);
+    i2cStartTransaction();
+    i2cState = i2cWaitTransaction();
+    printI2CState(i2cState_testG, "@0f");
+    printI2CState(i2cState, "@0g");
+
 
     //Setting UP the resolution
     wait(0);
