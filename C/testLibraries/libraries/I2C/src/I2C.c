@@ -46,10 +46,27 @@ I2CStatus_t i2cStartTransaction(){
 }
 
 __attribute__((optimize("O0")))
-void i2cWaitTransaction(){
+I2CStatus_t i2cWaitTransaction(){
     while(I2C0RegFile->controlReg.BUSY){
         // Do nothing
     }
+    if(I2C0RegFile->controlReg.ERROR){
+        return I2C_NOT_FOUND;
+    }
+    if(!I2C0RegFile->controlReg.RW_N){   // Write
+        if(I2C0RegFile->lenOut == I2C0RegFile->lenIn + 1){
+            return I2C_OK;
+        }else{
+            return I2C_ERROR; //NACK
+        }
+    }else{                               // Read
+        if(I2C0RegFile->lenOut == I2C0RegFile->lenIn){
+            return I2C_OK;
+        }else{
+            return I2C_ERROR; //NACK
+        }
+    }
+    return I2C_READY;
 }
 
 
@@ -58,12 +75,9 @@ I2CStatus_t i2cGetReaded(uint8_t* data, uint8_t* len){
         return I2C_BUSY;
     }
     if(I2C0RegFile->controlReg.ERROR){
-        return I2C_ERROR;
-    }
-    if(I2C0RegFile->lenOut == 1){ // Only address
         return I2C_NOT_FOUND;
     }
-
+    
     *len = I2C0RegFile->lenOut;
     uint8_t* tmp = (uint8_t*)&I2C0RegFile->rData + I2C0RegFile->lenOut - 1;
     for(int i = 0; i < *len; ++i){
@@ -71,5 +85,10 @@ I2CStatus_t i2cGetReaded(uint8_t* data, uint8_t* len){
         tmp--;
         data++;
     }
+
+    if(I2C0RegFile->lenOut != I2C0RegFile->lenIn){ // Readed a NACK
+        return I2C_ERROR;
+    }
+
     return I2C_OK;
 }

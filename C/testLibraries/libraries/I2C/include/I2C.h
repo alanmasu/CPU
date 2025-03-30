@@ -62,9 +62,9 @@ I2CStatus_t i2cStartTransaction();
 /**!
  * @brief Wait for the I2C transaction to finish
  * 
- * @return none
+ * @return The state after the transaction
 */
-void i2cWaitTransaction();
+I2CStatus_t i2cWaitTransaction();
 
 /**!
  * @brief Get the readed data from the I2C

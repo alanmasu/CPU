@@ -44,6 +44,52 @@ int main(int argc, char const *argv[]){
 
     UARTPrint("\nStarting the program...[FROM RISC-V]\nPlease SET the second switch to 1 (SWITCH[1]).\n\n");
 
+    wait(0);
+
+    uint32_t test = 0x2034;
+    i2cState = i2cSetupWrite(0x20,(uint8_t*) &test, 2);
+    if(i2cState == I2C_READY){
+        UARTPrint("I2C Ready, sending 0x2034\n");
+        i2cState = i2cStartTransaction();
+    }else if(i2cState == I2C_BUSY){
+        UARTPrint("I2C Busy @0a\n");
+    }else if(i2cState == I2C_ERROR){
+        UARTPrint("I2C Error @0a\n");
+    }else if(i2cState == I2C_FULL){
+        UARTPrint("I2C Full @0a\n");
+    }
+    *buff = 0xFF;
+    i2cState = i2cWaitTransaction();
+
+    wait(0);
+    wait(0);
+
+    if(i2cState == I2C_OK){
+        UARTPrint("I2C OK @0b\n");
+    }
+    else if(i2cState == I2C_NOT_FOUND){
+        UARTPrint("I2C Not Found @0b\n");
+    }
+    // else if(i2cState == I2C_BUSY){
+    //     UARTPrint("I2C Busy @0b\n");
+    // }
+    // else if(i2cState == I2C_READY){
+    //     UARTPrint("I2C Ready @0b\n");
+    // }else if(i2cState == I2C_ERROR){
+    //     UARTPrint("I2C Error @0b\n");
+    // }else if(i2cState == I2C_FULL){
+    //     UARTPrint("I2C Full @0b\n");
+    // }
+
+    // *buff = 0x00;
+
+    // wait(0);
+    // wait(0);
+    // wait(0);
+    // UARTPrint("I2C State: ");
+    // UARTWrite((uint8_t*) &i2cState, 1);
+    // UARTPrint("\n");
+
     //Setting UP the resolution
     wait(0);
     uint8_t data[4];
