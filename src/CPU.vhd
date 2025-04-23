@@ -661,12 +661,12 @@ begin
             control_reg(CREG_STATE) <= std_logic_vector(to_unsigned(state_integer,32));
             control_reg(CREG_INST) <= instruction_fetched;
             --IO
-            control_reg(CREG_IO)(0) <= btn_up;
-            control_reg(CREG_IO)(1) <= btn_down;
-            control_reg(CREG_IO)(2) <= btn_left;
-            control_reg(CREG_IO)(3) <= btn_right;
-            control_reg(CREG_IO)(4) <= switches(0);
-            control_reg(CREG_IO)(5) <= switches(1);
+            control_reg(CREG_IO)(CREG_BTN_UP_BIT) <= btn_up;
+            control_reg(CREG_IO)(CREG_BTN_DOWN_BIT) <= btn_down;
+            control_reg(CREG_IO)(CREG_BTN_LEFT_BIT) <= btn_left;
+            control_reg(CREG_IO)(CREG_BTN_RIGHT_BIT) <= btn_right;
+            control_reg(CREG_IO)(CREG_SWITCH0_BIT) <= switches(0);
+            control_reg(CREG_IO)(CREG_SWITCH1_BIT) <= switches(1);
 
         end if;
     end process ; -- control_reg_file

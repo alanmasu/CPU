@@ -33,6 +33,9 @@ package constant_package is
         constant CREG_BTN_DOWN_BIT  : integer := 1;
         constant CREG_BTN_LEFT_BIT  : integer := 2;
         constant CREG_BTN_RIGHT_BIT : integer := 3;
+        constant CREG_SWITCH0_BIT   : integer := 4;
+        constant CREG_SWITCH1_BIT   : integer := 5;
+        
         constant CREG_LED0_BIT      : integer := 24;
         constant CREG_LED1_BIT      : integer := 25;
         constant CREG_LED2_BIT      : integer := 26;
