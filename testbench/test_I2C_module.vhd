@@ -405,10 +405,38 @@ begin
             resoult <= '0';
             report "Test #" & integer'image(test_n) & ": FAILED -> i2c_regFile(I2C_REG_RDATA) was " & integer'image(stdv2int(i2c_regFile(I2C_REG_RDATA)));
         end if;
+        wait for 1 ns;
+        validating <= '0';
 
+        -- Test 13 Len > 4
+        test_n <= 13;
+        ena <= '1';           -- Enable I2C
+        wea <= "0001";        -- Write only first byte
+        addra <= x"00000020"; -- Writing to I2C_REG_LEN
+        dina  <= x"0F000005"; -- Writing 0x05 as Length
+        wait until rising_edge(clk);
+        wait for 1 ns;
         
-
-
+        addra <= x"00000010"; -- Writing to I2C_REG_CONTROL
+        dina  <= x"00000011"; -- Start a read
+        wait until rising_edge(clk);
+        ena <= '0';           -- Disable I2C
+        wait until rising_edge(clk);
+        wait until rising_edge(clk);
+        wait for 1 ns;
+        validating <= '1';
+        if i2c_regFile(I2C_REG_CONTROL)(I2C_CREG_ERROR_BIT) = '1' then
+            resoult <= '1';
+            report "Test #" & integer'image(test_n) & ": OK";
+        else
+            resoult <= '0';
+            report "Test #" & integer'image(test_n) & ": FAILED -> i2c_regFile(I2C_REG_CONTROL)(I2C_CREG_ERROR_BIT) was " & integer'image(stdv2int(i2c_regFile(I2C_REG_CONTROL)(I2C_CREG_ERROR_BIT downto I2C_CREG_ERROR_BIT)));
+        end if;
+        -- wait until (i2c_regFile(0)(I2C_CREG_BUSY_BIT) = '1'); -- Wait transaction to start
+        -- wait until (i2c_regFile(0)(I2C_CREG_BUSY_BIT) = '0'); -- Wait transaction to finish
+        
+        -- TODO: testare i NAK
+        
         -- wait;
         assert false report "End of test" severity failure;
     end process ; -- test_pro
