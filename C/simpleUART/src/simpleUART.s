@@ -28,7 +28,7 @@ main:
     call    delay
     sw      t6, 0x44(t0) #carriage return
     call    delay
-    lui     t0, 0x40001  #CREG_BASE
+    lui     t0, 0x40004  #CREG_BASE
     li      t1, 2
     sw      t1, 0(t0) #trap the CPU
 L1:
