@@ -1,3 +1,10 @@
+/**!
+ * @file    UART.c
+ * 
+ * @author  Alan Masutti (@alanmasu)
+ * @date    30/03/2025
+ * 
+*/
 #include <UART.h>
 
 void UARTWrite (const uint8_t* data, uint32_t size){
@@ -31,3 +38,11 @@ void UARTRead (uint8_t* data, uint32_t size){
         data[i] = (*fifoReg);
     }
 }
+
+void UARTPrint(const char* str){
+    while(*str){
+        UARTWrite((uint8_t*)str, 1);
+        ++str;
+    }
+}
+

@@ -3,7 +3,7 @@
 
 MEMORY
 {
-	INSTR(RX) : ORIGIN = 0x40000000, LENGTH = 4096 
+	INSTR(X) : ORIGIN = 0x40000000, LENGTH = 4096 
 	RAM(RWX) : ORIGIN = 0x40010000, LENGTH = 8192
 }
 
@@ -12,22 +12,13 @@ SECTIONS
 	. = 0x40000000;
 	. = ALIGN(4);
 	.text : {
-		*(.init)
-		*(.text.main)
 		*(.text*)
-		. = ALIGN(4);
-		_etext = .;		
+		_etext = .;
+		
 	} > INSTR 
 
-	.entry : {
-		. = . + 12;
-		. = ALIGN(4);
-	} > RAM
-
 	.const : {
-		*(.rodata*)
 		*(.const*)
-		. = ALIGN(4);
 		_econst = .;
 	} > RAM
 
@@ -36,15 +27,12 @@ SECTIONS
 		__bss_start = .;
 		*(.bss*)
 		*(COMMON)
-		. = ALIGN(4);
 		_ebss = .;
 	} > RAM
 
 	.data : {
 		_sdata = .;
 		*(.data*)
-		*(.sdata*)
-		. = ALIGN(4);
 		PROVIDE( __global_pointer$ = .);
 		_edata = .;
 	} > RAM

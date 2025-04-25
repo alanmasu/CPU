@@ -1,3 +1,11 @@
+-- File: slave_interface.vhd
+-- Author: Alan Masutti (@alanmasu)
+-- Problemi:
+--  - Non riesco a gestire correttamente la lettura di più byte.
+-- Note:
+--  - Potrebbe avere senso dividere la parte di controllo e la parte di shiftregister in due, 
+--    inserendo un clock di interfaccia, un baudrate calculator e poter gestire correttamente
+--    anche le read di più byte.
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
@@ -80,6 +88,12 @@ begin
                 end if;
             elsif i2c_slave_state = stop then
                 temp_data := to_X01(i2c_sda);
+                -- if i2c_rw_n_tb = '1' then  
+                --     i2c_data_count := i2c_data_count + 1;
+                --     i2c_data_count := 1;
+                --     i2c_sda <= data_to_send(32 - i2c_data_count -((byte_count-1) * 8));
+                --     i2c_slave_state <= data;
+                -- end if ;   
             end if;
         elsif i2c_slave_state = ack1 and falling_edge(i2c_scl) then
             i2c_sda <= '0';
@@ -96,7 +110,9 @@ begin
             if i2c_rw_n_tb = '0' then
                 -- i2c_data_to_send <= i2c_data_tb sll shamt;                
                 i2c_data_to_send <= i2c_data_tb sll 32 - (byte_count * 8);                
-                data_to_send(31 downto 32-i2c_data_count) := i2c_data_tb(i2c_data_count-1 downto 0);
+                -- data_to_send(31 downto 32-i2c_data_count) := i2c_data_tb(i2c_data_count-1 downto 0);
+                data_to_send := i2c_data_tb sll 32 - (byte_count * 8);  
+                -- data_to_send := data_to_send sll (4 - byte_count) * 8;
             end if;
             i2c_slave_state <= idle;
             i2c_sda <= 'Z';

@@ -182,7 +182,6 @@ architecture Behavioral of CPU is
     signal res          : std_logic := '0';
     signal res_tmp      : std_logic := '0';
     signal run          : std_logic := '0';
-    signal run_reg      : std_logic := '0';
 
     -- BLINK
     signal blink_counter : unsigned(RUN_BLINK_COUNTER_SIZE-1 downto 0) := (others => '0');
@@ -309,7 +308,6 @@ architecture Behavioral of CPU is
 
     --DEBUG
     signal state_dbg_sig : std_logic_vector(2 downto 0);
-
 begin
     --Fetch
     axi_bram_controller_i: axi_bram_ctrl_0
@@ -798,7 +796,7 @@ begin
                             mem_ena <= '1';
                         when "00100" => --Load
                             mem_ena <= '1';
-                            regFile_we <= '1';
+                            regFile_we <= '0';
                         when "00001" => --Jump 
                             regFile_we <= '1';   
                         when others =>

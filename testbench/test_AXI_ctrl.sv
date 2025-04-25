@@ -90,6 +90,14 @@ module test_AXI_ctrl( );
   
     mem_ctrl_test_axi_vip_0_0_slv_mem_t     slv_mem_t;
 
+    //DUT New signals
+    logic en_1 = 1'b0;
+    logic[3:0] we_1 = 4'b0;
+    logic[31:0] address_1 = 32'h00000000;
+    logic[31:0] write_data_1 = 32'h00000000;
+    logic[31:0] read_data_1 = 32'h00000000;
+    logic stall_1 = 1'b0;
+
     //For testing
     test_type_t test_type = SETUP;
     memory_write_back mem(
@@ -130,7 +138,13 @@ module test_AXI_ctrl( );
         .address_0(address_out),
         .write_data_0(d_out),
         .read_data_0(axi_data_out),
-        .stall_0(stall)
+        .stall_0(stall),
+        .en_1(en_1),
+        .we_1(we_1),
+        .address_1(address_1),
+        .write_data_1(write_data_1),
+        .read_data_1(read_data_1),
+        .stall_1(stall_1)
     );
 
     GPIO DUT2(
@@ -200,6 +214,7 @@ module test_AXI_ctrl( );
     
     initial begin
         reset = 1'b0;
+        // #200;
         #18;
         reset = 1'b1;
     end
@@ -233,7 +248,7 @@ module test_AXI_ctrl( );
     assign mem_out_tb = mem.mem_out;
     
     initial begin
-
+        // @(posedge reset);
         #19;
 
         //Setup the memory controller
@@ -1126,8 +1141,27 @@ module test_AXI_ctrl( );
         #1;
         validating = 1'b0;
 
+        // Test 1: AXI TEST BRESP
+        $display("Starting NEW AXI TESTS...");
+        testN = 1;
+        @ (posedge clock);
+        #1;
+        test_type = AXI;
+        op_class = 5'b01000; //Store
+        en_1 = 1'b1;
+        we_1 = 4'b1111;
+        mem_opcode = 3'b010; //SW
+        address_1 = 32'h00000000;
+        write_data_1 = 32'h40010000;
+
+        wait(stall_1 == 1'b1); //Wait transaction starts
+        wait(stall_1 == 1'b0); //Wait reatransactiond ends
+        
+        #1;
+
 
         // #50us;
+
 
         #100;
         en_in = 1'b0;
