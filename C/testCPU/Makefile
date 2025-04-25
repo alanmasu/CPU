@@ -34,7 +34,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.s
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 # Analisi del binario
-dump: $(OUT)
+dump: all
 	$(OBJDUMP) -d $(OUT)
 
 sections: $(OUT)
@@ -42,3 +42,6 @@ sections: $(OUT)
 
 clean:
 	rm -rf $(OBJ_DIR) $(OUT_DIR)
+	mkdir -p $(OBJ_DIR) $(OUT_DIR)
+
+.PHONY: all clean dump sections hardware

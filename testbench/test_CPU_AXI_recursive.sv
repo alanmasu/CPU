@@ -175,7 +175,7 @@ module test_CPU_AXI_recursive();
     @(posedge reset); // Wait for reset to be asserted
 
     LOAD_PROGRAM(testAxiProgram, 32'h40000000);
-    axi4Lite_write(32'h40001000, 3'b000, 32'd3, mtestBresp);
+    axi4Lite_write(32'h40004000, 3'b000, 32'd3, mtestBresp);
 
     testAxiController();
 

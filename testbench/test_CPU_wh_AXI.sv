@@ -112,7 +112,7 @@ module test_CPU_wh_AXI();
     32'h0011a023,
     32'h0001a203,
     32'h00120a63,
-    32'h40001337,
+    32'h40004337,
     32'h00200713,
     32'h00e32023,
     32'h00028067,
@@ -129,7 +129,7 @@ module test_CPU_wh_AXI();
     32'h00c62023,
     32'h00062683,
     32'h0000006f,
-    32'h00112023, // Start of cat_registers
+    32'h00112023,
     32'hfe212e23,
     32'hfe312c23,
     32'hfe412a23,
@@ -534,7 +534,7 @@ logic [31:0] testI2C [] = '{
       mtestQOS = 0; 
 
 
-      mtestADDR = 32'h40001000; 
+      mtestADDR = 32'h40004000; 
       mtestWDataL[31:0] = data;   
       mst_agent_0.AXI4LITE_WRITE_BURST( 
         mtestADDR, 
@@ -565,14 +565,7 @@ logic [31:0] testI2C [] = '{
       mtestQOS = 0; 
 
       //Imposto la CPU in RUN and NON in RESET
-      mtestADDR = 32'h40001000; 
-      mtestWDataL[31:0] = 32'b11;   
-      mst_agent_0.AXI4LITE_WRITE_BURST( 
-        mtestADDR, 
-        mtestProtectionType, 
-        mtestWDataL, 
-        mtestBresp 
-      );  
+      writeCREG(32'b11);
 
       //Istruzione no. 1 
       test_n = 1;
@@ -712,7 +705,7 @@ logic [31:0] testI2C [] = '{
       end
       addToLog(test_n, testPassed, message, regFile[4], "#8a");
       
-      if(instruction_tb == 32'h40001337) begin 
+      if(instruction_tb == 32'h40004337) begin 
         testPassed = 1;
         message = "OK";
       end else begin
@@ -729,8 +722,8 @@ logic [31:0] testI2C [] = '{
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
       #1;                       //wait to be after the rising edge of the clock
       validating = 1'b1;
-      //Check instruction       LUI x6, 0x40001
-      if(regFile[5] == 32'h40001000) begin 
+      //Check instruction       LUI x6, 0x40004
+      if(regFile[5] == 32'h40004000) begin 
         testPassed = 1;
         message = "OK";
       end else begin
@@ -1000,7 +993,7 @@ logic [31:0] testI2C [] = '{
       //Reset the CPU
       test_n = 24;
       validating = 1'bZ;
-      mtestADDR = 32'h40001000;
+      mtestADDR = 32'h40004000;
       mtestWDataL[31:0] = '0;
       mst_agent_0.AXI4LITE_WRITE_BURST( 
         mtestADDR, 
@@ -1039,7 +1032,7 @@ logic [31:0] testI2C [] = '{
       // Start the CPU
       test_n = 26;
       run = 1;
-      mtestADDR = 32'h40001000;
+      mtestADDR = 32'h40004000;
       mtestWDataL[31:0] = 32'b11;
       mst_agent_0.AXI4LITE_WRITE_BURST( 
         mtestADDR, 
@@ -1114,7 +1107,7 @@ logic [31:0] testI2C [] = '{
 
       //Writing to PS-PL GPIO registers
       test_n = 29;
-      mtestADDR = 32'h40001010;
+      mtestADDR = 32'h40004010;
       mst_agent_0.AXI4LITE_READ_BURST( 
         mtestADDR, 
         mtestProtectionType, 
@@ -1144,7 +1137,7 @@ logic [31:0] testI2C [] = '{
 
       //Writing to PS-PL GPIO registers
       test_n = 30;
-      mtestADDR = 32'h40001010;
+      mtestADDR = 32'h40004010;
       mtestWDataL[31:24] = 8'b00000111;
       mtestWDataL[23:0] = 24'b0;
       mst_agent_0.AXI4LITE_WRITE_BURST( 
@@ -1663,12 +1656,12 @@ endmodule
 //     nop    #mv     x4, x1           # LOADS do not wowk for now; to continue whit testing, we need to set x4 = x1
 //     beq    x4, x1, L1       # if x4 == x1, goto L1 // instr=0xff9ff06f
 // L2:
-//     lui    x6, 0x40001      # x6 <- 0x40001
+//     lui    x6, 0x40004      # x6 <- 0x40004
 //     li     x14, 2           # x14 <- 2
 //     sw     x14, 0(x6)       # Mem[x6] <- 2 //res = 1 && run = 0 
 //     jalr   x0, 0(x5)        # goto L3 (aka ret x5)
 // L1:
-//     jal    x5, L2           # else, goto L2 // instr=400012b7 // x5 = PC + 4 = 0x40000028
+//     jal    x5, L2           # else, goto L2 // instr=400042b7 // x5 = PC + 4 = 0x40000028
 // L3:
 //     auipc  x7, 4            # x7 <- PC + 4 // x7 = 0x40004030
 //     sw     x7, -8(x8)       # Mem[x8] <- x7 // Mem[0x40011ff8] = 0x40004030

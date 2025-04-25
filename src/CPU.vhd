@@ -356,7 +356,7 @@ begin
         clkb => bram_clk_a_i,
         enb => instr_enb,
         web => bram_we_a_i,
-        addrb => bram_addr_a_i(11 downto 2),
+        addrb => bram_addr_a_i(13 downto 2),
         dinb => bram_wrdata_a_i,
         doutb => instr_doutb
     );
