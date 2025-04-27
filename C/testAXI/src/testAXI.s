@@ -15,11 +15,11 @@ main:
     sw a0, 0(a0)
     lw a1, 0(a0)
     sw a1, 0(sp)
-    li a0, 0xE000102C
-    sw a0, 0(a0)
+    li t1, 0xE000102C
+    sw t1, 0(t1)
     li s1, 0
-    lw a1, 0(a0)
-    andi a1, a1, 2
+    lw t4, 0(t1)
+    andi t4, t4, 2
     j       .                #Fine del programma    
 
     
