@@ -123,6 +123,7 @@ entity CPU is
         run_out         : OUT STD_LOGIC;
 
         --DEBUG
+        pc_dbg          : OUT STD_LOGIC_VECTOR(31 downto 0);
         run_dbg         : OUT STD_LOGIC;
         run_in_dbg      : OUT STD_LOGIC;
         res_dbg         : OUT STD_LOGIC;
@@ -585,6 +586,7 @@ begin
     );
 
     ----------------------------------- DEBUG -----------------------------------
+    pc_dbg <= std_logic_vector(pc_fetched);
     run_dbg <= run;
     run_in_dbg <= run_in;
     res_dbg <= res;
