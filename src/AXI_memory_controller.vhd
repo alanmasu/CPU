@@ -160,6 +160,9 @@ architecture implementation of AXI_memory_controller is
 
 	signal stall_int : std_logic := '0';
 
+	-- WE registered
+	signal we_reg : std_logic_vector(3 downto 0);
+
 begin
 
 	-------- DEBUG -------
@@ -200,11 +203,12 @@ begin
 			    stall_int <= '0';
 			elsif stall_int = '0' then
 				stall_int <= en;
+				we_reg <= we;
 			elsif stall_int = '1' then
 				if read_state = idle and awrite_state = idle and dwrite_state = idle then
-					if we = "0000" then
+					if we_reg = "0000" then
 						stall_int <= '0';
-					elsif we /= "0000" and axi_bready = '1' then
+					elsif we_reg /= "0000" and axi_bready = '1' then
 						stall_int <= '0';
 					end if ;
                     -- stall_int <= '0';

@@ -247,6 +247,8 @@ module test_AXI_ctrl( );
     wire [31:0] mem_out_tb;
     assign mem_out_tb = mem.mem_out;
     
+    time t0;
+
     initial begin
         // @(posedge reset);
         #19;
@@ -1155,9 +1157,20 @@ module test_AXI_ctrl( );
         write_data_1 = 32'h40010000;
 
         wait(stall_1 == 1'b1); //Wait transaction starts
+        we_1 = 4'b0000;
+        en_1 = 1'b0;
+        t0 = $time;
         wait(stall_1 == 1'b0); //Wait reatransactiond ends
-        
+        validating = 1'b1;
+        if($time - t0 > 60) begin
+            $display("Test #%0d: OK", testN);
+        end else begin
+            $display("Test #%0d: FAILED -> t0 was %0d", testN, $time - t0);
+        end 
         #1;
+        validating = 1'b0;
+        
+
 
 
         // #50us;
