@@ -146,6 +146,11 @@ entity CPU is
         gpio_state_dbg  : OUT STD_LOGIC_VECTOR(31 downto 0);
         gpio_dbg        : OUT STD_LOGIC_VECTOR(31 downto 0);
 
+        read_state_dbg : out std_logic_vector(2 downto 0);
+		awrite_state_dbg : out std_logic_vector(2 downto 0);
+		dwrite_state_dbg : out std_logic_vector(2 downto 0);
+		bready_dbg : out std_logic;
+
         -- Buttons
         btn_up          : IN STD_LOGIC;
         btn_down        : IN STD_LOGIC;
@@ -524,7 +529,13 @@ begin
 		M_AXI_RDATA => M_AXI_RDATA,
 		M_AXI_RRESP => M_AXI_RRESP,
 		M_AXI_RVALID => M_AXI_RVALID,
-		M_AXI_RREADY => M_AXI_RREADY
+		M_AXI_RREADY => M_AXI_RREADY,
+
+        ----- DEBUG ----
+        read_state_dbg => read_state_dbg,
+        awrite_state_dbg => awrite_state_dbg,
+        dwrite_state_dbg => dwrite_state_dbg,
+        bready_dbg => bready_dbg
     );
 
     -- GPIO

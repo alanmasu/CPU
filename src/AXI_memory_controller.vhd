@@ -30,6 +30,14 @@ entity AXI_memory_controller is
 		address, write_data : in std_logic_vector(31 downto 0);
 		read_data : out std_logic_vector(31 downto 0);
 		stall : out std_logic;
+		
+		------ DEBUG -----
+		read_state_dbg : out std_logic_vector(2 downto 0);
+		awrite_state_dbg : out std_logic_vector(2 downto 0);
+		dwrite_state_dbg : out std_logic_vector(2 downto 0);
+		bready_dbg : out std_logic;
+		------ END DEBUG -----
+		
 		-- User ports ends
 		-- Do not modify the ports beyond this line
 
@@ -153,6 +161,14 @@ architecture implementation of AXI_memory_controller is
 	signal stall_int : std_logic := '0';
 
 begin
+
+	-------- DEBUG -------
+	read_state_dbg <= std_logic_vector(to_unsigned(read_state_t'pos(read_state), 3));
+	awrite_state_dbg <= std_logic_vector(to_unsigned(write_state_t'pos(awrite_state), 3));
+	dwrite_state_dbg <= std_logic_vector(to_unsigned(write_state_t'pos(dwrite_state), 3));
+	bready_dbg <= axi_bready;
+	-------- END DEBUG -------
+
 	-- I/O Connections assignments
 
 	--Adding the offset address to the base addr of the slave
