@@ -222,13 +222,19 @@ logic [31:0] testI2C [] = '{
 };
 
   logic [31:0] testAxiProgram [] = '{
-      32'h00000013,
-      32'h40000537,
-      32'h02050513,
-      32'h00a52023,
-      32'h00052583,
-      32'h00b12023,
-      32'h0000006f
+    32'h00000013,
+    32'h40000537,
+    32'h02050513,
+    32'h00a52023,
+    32'h00052583,
+    32'h00b12023,
+    32'he0001537,
+    32'h02c50513,
+    32'h00a52023,
+    32'h00000493,
+    32'h00052583,
+    32'h0025f593,
+    32'h0000006f
   };
 
   // Setup VIP agents
@@ -1631,6 +1637,108 @@ logic [31:0] testI2C [] = '{
       validating = 1'b0;
       @(instruction_tb);
 
+      //SKIP instruction   sw   a1, 0(sp)
+      wait (state_tb == fetch); //wait until the CPU has executed the next instruction
+      #1;
+
+      @(instruction_tb);
+
+
+      test_n = 4;
+      wait (state_tb == fetch); //wait until the CPU has executed the next instruction
+      #1;
+      validating = 1'b1;
+      //Check instruction   lui  a0, 0xE0001
+      if (regFile[9] == 32'hE0001000) begin
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = "FAILED -> regFile[10] was";
+      end
+      addToLog(test_n, testPassed, message, regFile[9]);
+      #1;
+      validating = 1'b0;
+      @(instruction_tb);
+
+      test_n = 5;
+      wait (state_tb == fetch); //wait until the CPU has executed the next instruction
+      #1;
+      validating = 1'b1;
+      //Check instruction   addi a0, a0, 0x2C
+      if (regFile[9] == 32'hE000102C) begin
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = "FAILED -> regFile[10] was";
+      end
+      addToLog(test_n, testPassed, message, regFile[9]);
+      #1;
+      validating = 1'b0;
+      @(instruction_tb);
+
+      test_n = 6;
+      wait (state_tb == fetch); //wait until the CPU has executed the next instruction
+      #1;
+      validating = 1'b1;
+      //Check instruction   sw    a0, 0(a0)
+      addToLog(test_n, 1, $sformatf("SKIPPED -> You need to check it: if a WRITE AXI transaction is done at %0t on CPU_0.M_AXI interface at Address: 0x%x and value: 2 -> TEST OK", $time, regFile[9]), 0);
+      #1;
+      validating = 1'b0;
+      @(instruction_tb);
+
+      test_n = 7;
+      wait (state_tb == fetch); //wait until the CPU has executed the next instruction
+      #1;
+      validating = 1'b1;
+      //Check instruction   li  s1, 0
+      if (regFile[8] == 32'h0) begin
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = "FAILED -> regFile[12] was";
+      end  
+      addToLog(test_n, testPassed, message, regFile[8]);
+      #1;
+      validating = 1'b0;
+      @(instruction_tb);
+
+
+      test_n = 8;
+      wait (state_tb == fetch); //wait until the CPU has executed the next instruction
+      #1;
+      validating = 1'b1;
+      //Check instruction   lw    a1, 0(a0)
+      if (regFile[10] == 32'hE000102C) begin
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = "FAILED -> regFile[11] was";
+      end
+      addToLog(test_n, testPassed, message, regFile[10]);
+      #1;
+      validating = 1'b0;
+      @(instruction_tb);
+
+      test_n = 9;
+      wait (state_tb == fetch); //wait until the CPU has executed the next instruction
+      #1;
+      validating = 1'b1;
+      //Check instruction   andi a1, a1, 2
+      if (regFile[10] == 32'h0) begin
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = "FAILED -> regFile[11] was";
+      end
+      addToLog(test_n, testPassed, message, regFile[10]);
+      #1;
+      validating = 1'b0;
+      // @(instruction_tb);
 
     end
   endtask 
