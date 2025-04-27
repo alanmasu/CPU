@@ -7,10 +7,12 @@
 
 #define PB200_221_ADDR 0x4B
 
-typedef union DisplayData_t{
+typedef union Word_t{
     uint8_t data[4];
     uint32_t value;
-} DisplayData_t;
+} Word_t;
+
+typedef Word_t DisplayData_t;
 
 DisplayData_t* DisplayData = (DisplayData_t*)DISPLAY_BASE_ADDR;
 
@@ -202,7 +204,7 @@ int main(int argc, char const *argv[]){
         uint8_t lenReaded = 0;
         i2cState = i2cGetReaded(data, &lenReaded);
         
-        DisplayData->value = *((uint32_t*)data);
+        DisplayData->value = *((uint32_t*)data) / 128;
         DisplayData->data[3] = lenReaded;
         ///// END OLD CODE /////
 
