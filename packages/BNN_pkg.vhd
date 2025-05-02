@@ -45,15 +45,16 @@ package body BNN_pkg is
         variable h_next : int_array := (others => 0);  -- Altezze per peso alla fase successiva
         variable level  : integer := 0;
         variable max_k  : integer := 0;
-        variable j      : integer := 0;
         variable groups : integer;
-        variable reminder    : integer;
         variable still_running : boolean;
     begin
         -- Inizializza: tutti i bit in peso 0
         h_curr(0) := X;
         max_k := 0;
-    
+        
+        -- report " ";
+        -- report "get_popcount_levels called with X: " & integer'image(X);
+
         while true loop
             -- Verifica se tutte le colonne sono ≤ 3
             still_running := false;
@@ -68,7 +69,10 @@ package body BNN_pkg is
                 exit;
             end if;
     
-            -- Reset del buffer per la prossima fase
+            -- Incrementa solo se serve davvero compressione
+            level := level + 1;
+    
+            -- Reset buffer per la prossima fase
             h_next := (others => 0);
     
             -- Applica compressori 6:3 o passa direttamente i bit
@@ -79,7 +83,7 @@ package body BNN_pkg is
                     h_next(k + 1) := h_next(k + 1) + groups;  -- peso 2^(k+1)
                     h_next(k + 2) := h_next(k + 2) + groups;  -- peso 2^(k+2)
                 else
-                    h_next(k) := h_next(k) + h_curr(k);  -- trasporto diretto
+                    h_next(k) := h_next(k) + 1;  -- trasporto diretto
                 end if;
             end loop;
     
@@ -93,10 +97,7 @@ package body BNN_pkg is
                     exit;
                 end if;
             end loop;
-    
-            level := level + 1;
         end loop;
-    
         return level;
     end function;
 end package body;
