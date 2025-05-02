@@ -58,12 +58,51 @@ def get_popcount_levels(X):
     print(f"Livelli richiesti: {level}")
     return level
 
+def get_weights(X: int, target_level: int) -> list[int]:
+    from math import ceil, log2
+
+    max_cols = int(log2(X)) + 5
+    h_curr = [0] * max_cols
+    h_next = [0] * max_cols
+    h_curr[0] = X
+    max_k = 0
+    level = 0
+
+    while True:
+        still_running = any(h_curr[k] > 3 for k in range(max_k + 1))
+
+        if not still_running or level == target_level:
+            break
+
+        level += 1
+        h_next = [0] * max_cols
+
+        for k in range(max_k + 1):
+            if h_curr[k] > 3:
+                groups = (h_curr[k] + 5) // 6
+                h_next[k] += groups
+                h_next[k + 1] += groups
+                h_next[k + 2] += groups
+            else:
+                h_next[k] += h_curr[k]  # Trasferisce un singolo bit residuo
+
+        h_curr = h_next[:]
+        for i in reversed(range(max_k + 3)):
+            if h_curr[i] > 0:
+                max_k = i
+                break
+
+    return h_curr[:max_k + 1]
+
 if __name__ == "__main__":
-    get_popcount_levels(3)
-    get_popcount_levels(6)
-    get_popcount_levels(7)
-    get_popcount_levels(18)
-    get_popcount_levels(19)
-    get_popcount_levels(36)
-    get_popcount_levels(37)  # Sostituisci con il valore che vuoi testare
-    get_popcount_levels(128)
+    # get_popcount_levels(3)
+    # get_popcount_levels(6)
+    # get_popcount_levels(7)
+    # get_popcount_levels(18)
+    # get_popcount_levels(19)
+    # get_popcount_levels(36)
+    # get_popcount_levels(37)  # Sostituisci con il valore che vuoi testare
+    # get_popcount_levels(128)
+    for i in range(1, get_popcount_levels(72) + 1):
+        print(f"Livello {i}: {get_weights(72, i)}")
+    
