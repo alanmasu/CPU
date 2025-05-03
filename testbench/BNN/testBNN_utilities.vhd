@@ -181,6 +181,52 @@ begin
             end if;
         end loop ; -- level_loop
 
+        report "";
+        report "";
+        report "Testing utility functions";
+        report "";
+        if get_layer_outputs(72, 3) /= 13 then
+            report "Test get_layer_outputs FAILED; was " & integer'image(get_layer_outputs(72, 3));
+        else
+            report "Test get_layer_outputs OK";
+        end if;
+
+        if get_layer_inputs(72, 3) /= 18 then
+            report "Test get_layer_inputs FAILED; was " & integer'image(get_layer_inputs(72, 3));
+        else
+            report "Test get_layer_inputs OK";
+        end if;
+
+        if get_layer_compressors(72, 3) /= 3 then
+            report "Test get_layer_compressors FAILED; was " & integer'image(get_layer_compressors(72, 3));
+        else
+            report "Test get_layer_compressors OK";
+        end if;
+
+        if get_layer_weight_size(72, 3, 0) /= 2 then
+            report "Test get_layer_weight_size (A) FAILED; was " & integer'image(get_layer_weight_size(72, 3, 0));
+        else
+            report "Test get_layer_weight_size (A) OK";
+        end if;
+
+        if get_layer_weight_size(72, 3, 31) /= 0 then
+            report "Test get_layer_weight_size (B) FAILED; was " & integer'image(get_layer_weight_size(72, 3, 31));
+        else
+            report "Test get_layer_weight_size (B) OK";
+        end if;
+
+        if get_layer_compressors_n(72, 4, 4) /= 1 then
+            report "Test get_layer_compressor_n (A) FAILED; was " & integer'image(get_layer_compressorS_n(72, 3, 4));
+        else
+            report "Test get_layer_compressor_n (A) OK";
+        end if;
+
+        if get_layer_compressors_n(72, 4, 31) /= 0 then
+            report "Test get_layer_compressor_n (B) FAILED; was " & integer'image(get_layer_compressorS_n(72, 3, 31));
+        else
+            report "Test get_layer_compressor_n (B) OK";
+        end if;
+
         wait;
     end process;
 end Behavioral;

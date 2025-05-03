@@ -43,6 +43,17 @@ package BNN_pkg is
     function get_layer_info(X : integer; level : integer) return layer_info_t;
 
     function get_info(matrix : layer_info_t; row_index : natural) return integer_array_t;
+
+    function get_layer_outputs(X : integer; level : integer) return integer;
+
+    function get_layer_inputs(X : integer; level : integer) return integer;
+    
+    function get_layer_compressors(X : integer; level : integer) return integer;
+
+    function get_layer_weight_size(X : integer; level : integer; weight : integer ) return integer;
+    
+    function get_layer_compressors_n(X : integer; level : integer; weight : integer) return integer;
+
 end package ;
 
 package body BNN_pkg is
@@ -171,5 +182,57 @@ package body BNN_pkg is
         return row;
     end function;
     
+    function get_layer_outputs(X : integer; level : integer) return integer is
+        variable length : integer := 0;
+        variable layer_info : layer_info_t(0 to 1, 0 to clog2(X)) := (others => (others => 0));
+    begin
+        layer_info := get_layer_info(X, level);
+        length := 0;
+        for i in layer_info'range(2) loop
+            length := length + layer_info(0, i);
+        end loop;
+        return length;  -- ritorna solo la parte usata
+    end function;
+
+    function get_layer_inputs(X : integer; level : integer) return integer is
+    begin
+        return get_layer_outputs(X, level - 1);
+    end function;
+
+    function get_layer_compressors(X : integer; level : integer) return integer is
+        variable length : integer := 0;
+        variable layer_info : layer_info_t(0 to 1, 0 to clog2(X)) := (others => (others => 0));
+    begin
+        layer_info := get_layer_info(X, level);
+        length := 0;
+        for i in layer_info'range(2) loop
+            length := length + layer_info(1, i);
+        end loop;
+        return length;  -- ritorna solo la parte usata
+    end function;
+
+    function get_layer_weight_size(X : integer; level : integer; weight : integer) return integer is
+        variable layer_info : layer_info_t(0 to 1, 0 to clog2(X)) := (others => (others => 0));
+    begin 
+        layer_info := get_layer_info(X, level);
+        if weight < layer_info'length(2) then
+            return layer_info(0, weight);
+        else
+            return 0;
+        end if;
+    end function;
+
+    function get_layer_compressors_n(X : integer; level : integer; weight : integer) return integer is
+        variable layer_info : layer_info_t(0 to 1, 0 to clog2(X)) := (others => (others => 0));
+    begin 
+        layer_info := get_layer_info(X, level);
+        if weight < layer_info'length(2) then
+            return layer_info(1, weight);
+        else
+            return 0;
+        end if;
+    end function;
+
+
 end package body;
             
