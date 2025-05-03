@@ -37,7 +37,7 @@ entity testUtilities is
 end entity;
 
 architecture Behavioral of testUtilities is
-    type h_type is array (natural range <>) of integer_array(0 to clog2(72));
+    type h_type is array (natural range <>) of integer_array_t(0 to clog2(72));
     constant h : h_type(0 to get_popcount_levels(72)) := (
         --     0   1   2   3   4   5   6   7
         0 => (72,  0,  0,  0,  0,  0,  0,  0),
@@ -46,7 +46,15 @@ architecture Behavioral of testUtilities is
         3 => ( 2,  1,  2,  3,  4,  1,  0,  0),
         4 => ( 2,  1,  2,  3,  1,  2,  1,  0)
     );
-    function int_array_to_string(arr: integer_array) return string is
+    constant c : h_type(0 to get_popcount_levels(72)) := (
+        --     0   1   2   3   4   5   6   7
+        1 => (12,  0,  0,  0,  0,  0,  0,  0),
+        2 => ( 2,  2,  2,  0,  0,  0,  0,  0),
+        3 => ( 0,  1,  1,  1,  0,  0,  0,  0),
+        4 => ( 0,  0,  0,  0,  1,  0,  0,  0),
+        0 => ( 0,  0,  0,  0,  0,  0,  0,  0)
+    );
+    function int_array_to_string(arr: integer_array_t) return string is
         variable L : line;
         variable S : string(1 to 512);  -- dimensione massima della stringa
         variable len : natural;
@@ -74,7 +82,7 @@ architecture Behavioral of testUtilities is
       end function;
 begin
     process is
-        variable weights : integer_array(0 to clog2(72));
+        variable weights : integer_array_t(0 to clog2(72));
     begin
         if get_popcount_levels(3) /= 0 then
             report "Test #1 FAILED";
@@ -146,56 +154,28 @@ begin
         ---------------- TESTING get_weights ----------------
         report "";
         report "";
-        report "Testing get_weights function";
+        report "Testing get_layer_info function (on weights)";
         report "";
-        -- weights := get_weights(72, 0);
-        -- for i in 0 to clog2(72) loop
-        --     if weights(i) /= 0 then
-        --         report "weights0(" & integer'image(i) & "): " & integer'image(weights(i));
-        --     end if;
-        -- end loop;
-
-        -- report "";
-
-        -- weights := get_weights(72, 1);
-        -- for i in 0 to clog2(72) loop
-        --     if weights(i) /= 0 then
-        --         report "weights1(" & integer'image(i) & "): " & integer'image(weights(i));
-        --     end if;
-        -- end loop;
-        
-        -- report "";
-
-        -- weights := get_weights(72, 2);
-        -- for i in 0 to clog2(72) loop
-        --     if weights(i) /= 0 then
-        --         report "weights2(" & integer'image(i) & "): " & integer'image(weights(i));
-        --     end if;
-        -- end loop;
-
-        -- report "";
-
-        -- weights := get_weights(72, 3);
-        -- for i in 0 to clog2(72) loop
-        --     if weights(i) /= 0 then
-        --         report "weights3(" & integer'image(i) & "): " & integer'image(weights(i));
-        --     end if;
-        -- end loop;
-
-        -- report "";
-
-        -- weights := get_weights(72, 4);
-        -- for i in 0 to clog2(72) - 1 loop
-        --     if weights(i) /= 0 then
-        --         report "weights4(" & integer'image(i) & "): " & integer'image(weights(i));
-        --     end if;
-        -- end loop;
-
-        level_loop : for level in 0 to get_popcount_levels(72) loop
+        for level in 0 to get_popcount_levels(72) loop
             -- report "level(" & integer'image(level) & "): ";
-            weights := get_weights(72, level);
+            weights := get_info(get_layer_info(72, level), 0);
             if weights /= h(level) then
                 report "Test #" & integer'image(level) & " FAILED: weights was " & int_array_to_string(weights);
+            else
+                report "Test #" & integer'image(level) & " OK";
+            end if;
+        end loop ; -- level_loop
+        
+        ---------------- TESTING get_layer_info ----------------
+        report "";
+        report "";
+        report "Testing get_layer_info function (on compressors)";
+        report "";
+        for level in 0 to get_popcount_levels(72) loop
+            -- report "level(" & integer'image(level) & "): ";
+            weights := get_info(get_layer_info(72, level), 1);
+            if weights /= c(level) then
+                report "Test #" & integer'image(level) & " FAILED: compressors was " & int_array_to_string(weights);
             else
                 report "Test #" & integer'image(level) & " OK";
             end if;

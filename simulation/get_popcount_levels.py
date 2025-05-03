@@ -120,10 +120,10 @@ def myAlgorithm(X: int, target_level: int):
         n_compressors.append([0] * clog2(X))
         for k in range(len(H[j])):
             if H[j][k] > 3:
-                n_compressors[j][k] = (H[j][k] + 5) // 6
-                H[j + 1][k] += n_compressors[j][k]
-                H[j + 1][k + 1] += n_compressors[j][k]
-                H[j + 1][k + 2] += n_compressors[j][k]
+                n_compressors[j + 1][k] = (H[j][k] + 5) // 6
+                H[j + 1][k] += n_compressors[j + 1][k]
+                H[j + 1][k + 1] += n_compressors[j + 1][k]
+                H[j + 1][k + 2] += n_compressors[j + 1][k]
             else:
                 H[j + 1][k] += H[j][k]
         j += 1
@@ -142,7 +142,7 @@ if __name__ == "__main__":
     # get_popcount_levels(37)  # Sostituisci con il valore che vuoi testare
     # get_popcount_levels(128)
     X = 72
-    for i in range(1, get_popcount_levels(X) + 1):
+    for i in range(0, get_popcount_levels(X) + 1):
         print(f"Livello {i}: {myAlgorithm(X, i)}")
 
     # print("\n")

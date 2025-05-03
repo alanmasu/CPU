@@ -37,8 +37,12 @@ use work.utilities_pkg.all;
 package BNN_pkg is
     function get_popcount_levels(x : integer) return integer;
 
-    type integer_array is array (natural range <>) of integer;
-    function get_weights(X : integer; level : integer) return integer_array;
+    type integer_array_t is array (natural range <>) of integer;
+    type layer_info_t is array (natural range <>, natural range <>) of integer;
+
+    function get_layer_info(X : integer; level : integer) return layer_info_t;
+
+    function get_info(matrix : layer_info_t; row_index : natural) return integer_array_t;
 end package ;
 
 package body BNN_pkg is
@@ -104,18 +108,17 @@ package body BNN_pkg is
         return level;
     end function;
 
-    function get_weights(X : integer; level : integer) return integer_array is
+    function get_layer_info(X : integer; level : integer) return layer_info_t is
         constant max_k_guess : integer := clog2(X);
-        type level_array is array(0 to max_k_guess) of integer;
     
-        variable h_curr : level_array := (others => 0);
-        variable h_next : level_array := (others => 0);
-        variable temp    : level_array := (others => 0);
+        variable h_curr : integer_array_t(0 to max_k_guess) := (others => 0);
+        variable h_next : integer_array_t(0 to max_k_guess) := (others => 0);
+        variable temp   : integer_array_t(0 to max_k_guess) := (others => 0);
+        variable groups : integer_array_t(0 to max_k_guess) := (others => 0);
     
         variable current_level : integer := 0;
         variable max_k  : integer := 0;
-        variable groups : integer;
-        variable result : integer_array(0 to max_k_guess) := (others => 0);
+        variable result : layer_info_t(0 to 1, 0 to max_k_guess) := (others => (others => 0));
     begin
         h_curr(0) := X;
         max_k := 0;
@@ -124,19 +127,21 @@ package body BNN_pkg is
             if current_level = level then
                 -- Costruisci risultato e restituisci solo il vettore attuale
                 for k in 0 to max_k loop
-                    result(k) := h_curr(k);
+                    result(0, k) := h_curr(k);
+                    result(1, k) := groups(k);
                 end loop;
                 exit;
             end if;
     
             h_next := (others => 0);
+            groups := (others => 0);
     
             for k in 0 to max_k loop
                 if h_curr(k) > 3 then
-                    groups := (h_curr(k) + 5) / 6;
-                    h_next(k)     := h_next(k)     + groups;
-                    h_next(k + 1) := h_next(k + 1) + groups;
-                    h_next(k + 2) := h_next(k + 2) + groups;
+                    groups(k) := (h_curr(k) + 5) / 6;
+                    h_next(k)     := h_next(k)     + groups(k);
+                    h_next(k + 1) := h_next(k + 1) + groups(k);
+                    h_next(k + 2) := h_next(k + 2) + groups(k);
                 else
                     h_next(k) := h_next(k) + h_curr(k);  -- trasporto diretto
                 end if;
@@ -155,6 +160,15 @@ package body BNN_pkg is
         end loop;
     
         return result;  -- taglia il risultato solo fino all’ultimo peso usato
+    end function;
+
+    function get_info(matrix : layer_info_t; row_index : natural) return integer_array_t is
+        variable row : integer_array_t(matrix'range(2));
+    begin
+        for j in matrix'range(2) loop
+            row(j) := matrix(row_index, j);
+        end loop;
+        return row;
     end function;
     
 end package body;
