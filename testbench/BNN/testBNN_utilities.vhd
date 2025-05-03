@@ -30,6 +30,7 @@ use IEEE.NUMERIC_STD.ALL;
 
 library work;
 use work.BNN_pkg.all;
+use work.utilities_pkg.all;
 
 entity testUtilities is
 end entity;
@@ -37,7 +38,11 @@ end entity;
 architecture Behavioral of testUtilities is
 
 begin
-    process begin
+    process is
+        variable weights0 : integer_array(0 to clog2(72));
+        variable weights1 : integer_array(0 to clog2(72));
+        variable weights2 : integer_array(0 to clog2(72));
+    begin
         if get_popcount_levels(3) /= 0 then
             report "Test #1 FAILED";
         else
@@ -94,7 +99,6 @@ begin
         else
             report "Test #10 PASSED";
         end if;
-
         -- report "level(3): " & integer'image(get_popcount_levels(3));
         -- report "level(6): " & integer'image(get_popcount_levels(6));
         -- report "level(7): " & integer'image(get_popcount_levels(7));
@@ -105,6 +109,37 @@ begin
         -- report "level(72): " & integer'image(get_popcount_levels(72));
         -- report "level(72): " & integer'image(get_popcount_levels(73));
         -- report "level(128): " & integer'image(get_popcount_levels(128));
+
+        ---------------- TESTING get_weights ----------------
+        report "";
+        report "";
+        report "Testing get_weights function";
+        report "";
+        weights0 := get_weights(72, 1);
+        for i in 0 to clog2(72) loop
+            if weights0(i) /= 0 then
+                report "weights1(" & integer'image(i) & "): " & integer'image(weights0(i));
+            end if;
+        end loop;
+        
+        report "";
+
+        weights0 := get_weights(72, 2);
+        for i in 0 to clog2(72) loop
+            if weights0(i) /= 0 then
+                report "weights2(" & integer'image(i) & "): " & integer'image(weights0(i));
+            end if;
+        end loop;
+
+        report "";
+
+        weights0 := get_weights(72, 3);
+        for i in 0 to clog2(72) loop
+            if weights0(i) /= 0 then
+                report "weights3(" & integer'image(i) & "): " & integer'image(weights0(i));
+            end if;
+        end loop;
+
         wait;
     end process;
 end Behavioral;

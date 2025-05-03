@@ -36,6 +36,9 @@ use work.utilities_pkg.all;
 
 package BNN_pkg is
     function get_popcount_levels(x : integer) return integer;
+
+    type integer_array is array (natural range <>) of integer;
+    function get_weights(X : integer; level : integer) return integer_array;
 end package ;
 
 package body BNN_pkg is
@@ -100,5 +103,59 @@ package body BNN_pkg is
         end loop;
         return level;
     end function;
+
+    function get_weights(X : integer; level : integer) return integer_array is
+        constant max_k_guess : integer := clog2(X);
+        type level_array is array(0 to max_k_guess) of integer;
+    
+        variable h_curr : level_array := (others => 0);
+        variable h_next : level_array := (others => 0);
+        variable temp    : level_array := (others => 0);
+    
+        variable current_level : integer := 0;
+        variable max_k  : integer := 0;
+        variable groups : integer;
+        variable result : integer_array(0 to max_k_guess) := (others => 0);
+    begin
+        h_curr(0) := X;
+        max_k := 0;
+    
+        while current_level <= level loop
+            if current_level = level then
+                -- Costruisci risultato e restituisci solo il vettore attuale
+                for k in 0 to max_k loop
+                    result(k) := h_curr(k);
+                end loop;
+                exit;
+            end if;
+    
+            h_next := (others => 0);
+    
+            for k in 0 to max_k loop
+                if h_curr(k) > 3 then
+                    groups := (h_curr(k) + 5) / 6;
+                    h_next(k)     := h_next(k)     + groups;
+                    h_next(k + 1) := h_next(k + 1) + groups;
+                    h_next(k + 2) := h_next(k + 2) + groups;
+                else
+                    h_next(k) := h_next(k) + 1;
+                end if;
+            end loop;
+    
+            h_curr := h_next;
+    
+            for i in max_k + 3 downto 0 loop
+                if h_curr(i) > 0 then
+                    max_k := i;
+                    exit;
+                end if;
+            end loop;
+    
+            current_level := current_level + 1;
+        end loop;
+    
+        return result;  -- taglia il risultato solo fino all’ultimo peso usato
+    end function;
+    
 end package body;
             
