@@ -86,7 +86,7 @@ package body BNN_pkg is
                     h_next(k + 1) := h_next(k + 1) + groups;  -- peso 2^(k+1)
                     h_next(k + 2) := h_next(k + 2) + groups;  -- peso 2^(k+2)
                 else
-                    h_next(k) := h_next(k) + 1;  -- trasporto diretto
+                    h_next(k) := h_next(k) + h_curr(k);  -- trasporto diretto
                 end if;
             end loop;
     
@@ -138,13 +138,13 @@ package body BNN_pkg is
                     h_next(k + 1) := h_next(k + 1) + groups;
                     h_next(k + 2) := h_next(k + 2) + groups;
                 else
-                    h_next(k) := h_next(k) + 1;
+                    h_next(k) := h_next(k) + h_curr(k);  -- trasporto diretto
                 end if;
             end loop;
     
             h_curr := h_next;
     
-            for i in max_k + 3 downto 0 loop
+            for i in max_k + 2 downto 0 loop
                 if h_curr(i) > 0 then
                     max_k := i;
                     exit;
