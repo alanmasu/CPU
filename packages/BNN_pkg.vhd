@@ -54,6 +54,12 @@ package BNN_pkg is
     
     function get_layer_compressors_n(X : integer; level : integer; weight : integer) return integer;
 
+    function acc_layers_compressors(X : integer; level : integer; weight : integer) return integer;
+
+    function get_layer_weights(X : integer; level : integer) return integer;
+
+    function get_h_max(X : integer; level : integer) return integer;
+
 end package ;
 
 package body BNN_pkg is
@@ -226,6 +232,9 @@ package body BNN_pkg is
         variable layer_info : layer_info_t(0 to 1, 0 to clog2(X)) := (others => (others => 0));
     begin 
         layer_info := get_layer_info(X, level);
+        if weight < 0 then
+            return 0;
+        end if;
         if weight < layer_info'length(2) then
             return layer_info(1, weight);
         else
@@ -233,6 +242,48 @@ package body BNN_pkg is
         end if;
     end function;
 
+    function acc_layers_compressors(X : integer; level : integer; weight : integer) return integer is
+        variable layer_info : layer_info_t(0 to 1, 0 to clog2(X)) := (others => (others => 0));
+        variable length : integer := 0;
+    begin
+        layer_info := get_layer_info(X, level);
+        length := 0;
+        for i in 0 to layer_info'length(2) loop
+            if(i = weight) then
+                exit;
+            end if;
+            length := length + layer_info(1, i);
+        end loop;
+
+        return length;  -- ritorna solo la parte usata
+    end function;   
+
+    function get_layer_weights(X : integer; level : integer) return integer is
+        variable layer_info : layer_info_t(0 to 1, 0 to clog2(X)) := (others => (others => 0));
+        variable length : integer := 0;
+    begin
+        layer_info := get_layer_info(X, level);
+        length := 0;
+        for i in layer_info'range(2) loop
+            if layer_info(0, i) > 0 then
+                length := i;
+            end if;
+        end loop;
+        return length;  -- ritorna solo la parte usata
+    end function;
+
+    function get_h_max(X : integer; level : integer) return integer is
+        variable layer_info : layer_info_t(0 to 1, 0 to clog2(X)) := (others => (others => 0));
+        variable max_h : integer := 0;
+    begin
+        layer_info := get_layer_info(X, level);
+        for i in layer_info'range(2) loop
+            if layer_info(0, i) > max_h then
+                max_h := layer_info(0, i);
+            end if;
+        end loop;
+        return max_h;
+    end function;
 
 end package body;
             

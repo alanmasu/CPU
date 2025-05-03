@@ -227,6 +227,23 @@ begin
             report "Test get_layer_compressor_n (B) OK";
         end if;
 
+        if (acc_layers_compressors(72, 2, 2)) /= 4 then
+            report "Test acc_layers_compressors FAILED; was " & integer'image(acc_layers_compressors(72, 2, 2));
+        else
+            report "Test acc_layers_compressors OK";
+        end if;
+
+        if get_layer_weights(72, 2) /= 4 then
+            report "Test get_layer_weights FAILED; was " & integer'image(get_layer_weights(72, 2));
+        else
+            report "Test get_layer_weights OK";
+        end if;
+
+        if get_h_max(72, 2) /= 6 then
+            report "Test get_h_max FAILED; was " & integer'image(get_h_max(72, 2));
+        else
+            report "Test get_h_max OK";
+        end if;
         wait;
     end process;
 end Behavioral;
