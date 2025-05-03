@@ -38,7 +38,7 @@ def get_popcount_levels(X):
                 # print(f"      h_next[{k+1}] = {h_next[k+1]}")
                 # print(f"      h_next[{k+2}] = {h_next[k+2]}")
             else:
-                h_next[k] += 1
+                h_next[k] += h_curr[k]  
 
         h_curr = h_next.copy()
 
@@ -94,6 +94,44 @@ def get_weights(X: int, target_level: int) -> list[int]:
 
     return h_curr[:max_k + 1]
 
+# Funzione per calcolare la massima altezza di un livello
+## @param H: lista delle altezze di tutti i livelli
+## @return max_h: massima altezza
+def maxHeight(H: list[list[int]], j:int ) -> int:
+    max_h = 0
+    for i in range(len(H[j])):
+        if H[j][i] > max_h:
+            max_h = H[j][i]
+    return max_h
+
+def myAlgorithm(X: int, target_level: int):
+    # Funzione che calcola 
+    H = [[X]]
+
+    
+    # inputList = [0] * clog2(X)
+    # ouputList = [0] * clog2(X)
+    n_compressors = [[0]]
+    i = 0
+    j = 0
+    # print(maxHeight(H, j))
+    while maxHeight(H, j) > 3:
+        H.append([0] * clog2(X))
+        n_compressors.append([0] * clog2(X))
+        for k in range(len(H[j])):
+            if H[j][k] > 3:
+                n_compressors[j][k] = (H[j][k] + 5) // 6
+                H[j + 1][k] += n_compressors[j][k]
+                H[j + 1][k + 1] += n_compressors[j][k]
+                H[j + 1][k + 2] += n_compressors[j][k]
+            else:
+                H[j + 1][k] += H[j][k]
+        j += 1
+        
+    return H[target_level], n_compressors[target_level]
+    
+
+
 if __name__ == "__main__":
     # get_popcount_levels(3)
     # get_popcount_levels(6)
@@ -103,6 +141,12 @@ if __name__ == "__main__":
     # get_popcount_levels(36)
     # get_popcount_levels(37)  # Sostituisci con il valore che vuoi testare
     # get_popcount_levels(128)
-    for i in range(1, get_popcount_levels(72) + 1):
-        print(f"Livello {i}: {get_weights(72, i)}")
-    
+    X = 72
+    for i in range(1, get_popcount_levels(X) + 1):
+        print(f"Livello {i}: {myAlgorithm(X, i)}")
+
+    # print("\n")
+
+    # X = 73
+    # for i in range(1, get_popcount_levels(X) + 1):
+    #     print(f"Livello {i}: {myAlgorithm(X, i)}")
