@@ -244,6 +244,30 @@ begin
         else
             report "Test get_h_max OK";
         end if;
+
+        if acc_in_position(72, 3, 0) /= 0 then
+            report "Test acc_in_position (A) FAILED; was " & integer'image(acc_in_position(72, 3, 0));
+        else
+            report "Test acc_in_position (A) OK";
+        end if;
+
+        if acc_in_position(72, 3, 4) /= 16 then
+            report "Test acc_in_position (B) FAILED; was " & integer'image(acc_in_position(72, 3, 4));
+        else
+            report "Test acc_in_position (B) OK";
+        end if;
+
+        if get_weight_input_n(72, 3, 0) /= 2 then
+            report "Test get_weight_input_n (A) FAILED; was " & integer'image(get_weight_input_n(72, 3, 0));
+        else
+            report "Test get_weight_input_n (A) OK";
+        end if;
+
+        if get_weight_input_n(72, 3, 4) /= 2 then
+            report "Test get_weight_input_n (B) FAILED; was " & integer'image(get_weight_input_n(72, 3, 4));
+        else
+            report "Test get_weight_input_n (B) OK";
+        end if;
         wait;
     end process;
 end Behavioral;

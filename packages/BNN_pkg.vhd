@@ -40,26 +40,44 @@ package BNN_pkg is
     type integer_array_t is array (natural range <>) of integer;
     type layer_info_t is array (natural range <>, natural range <>) of integer;
 
+    --! @brief Funzione per calcolare le altezze ed il numero di compressori per il livellp
+    --! @param X: Bit del popcounter
+    --! @param level: Livello interessato
+    --! @returns layer_info_t: Una matrice che contiene due array [0:clog2[X]] contenente le altezze (0) ed il numero di compressori (1)
     function get_layer_info(X : integer; level : integer) return layer_info_t;
 
+    --! @brief Funzione per convertire la lista in integer_array_t
     function get_info(matrix : layer_info_t; row_index : natural) return integer_array_t;
 
+    --! @brief Funzione per calcolare il numero di bit in uscita
     function get_layer_outputs(X : integer; level : integer) return integer;
 
+    --! @brief Funzione per calcolare il numero di bit in ingresso
     function get_layer_inputs(X : integer; level : integer) return integer;
     
+    --! @brief Funzione per calcolare il numero di compressori
     function get_layer_compressors(X : integer; level : integer) return integer;
 
+    --! @brief Funzione per calcolare l'altezza del peso
     function get_layer_weight_size(X : integer; level : integer; weight : integer ) return integer;
     
+    --! @brief Funzione per calcolare il numero di compressori per il peso
     function get_layer_compressors_n(X : integer; level : integer; weight : integer) return integer;
 
+    --! @brief Funzione per calcolare il numero di compressori accumulati al peso 'weight'
     function acc_layers_compressors(X : integer; level : integer; weight : integer) return integer;
 
+    --! @brief Funzione per calcolare il peso massimo di un livello
     function get_layer_weights(X : integer; level : integer) return integer;
 
+    --! @brief Funzione per calcolare l'altezza massima di un livello
     function get_h_max(X : integer; level : integer) return integer;
 
+    --! @brief Funzione per calcolare la posizione del primo bit in ingresso relativo al perso 'weight'
+    function acc_in_position(X : integer; level : integer; weight : integer) return integer;
+
+    --! @brief Funzione per calcolare il numero di ingressi relativi al peso 'weight'
+    function get_weight_input_n(X : integer; level : integer; weight : integer) return integer;
 end package ;
 
 package body BNN_pkg is
@@ -284,6 +302,30 @@ package body BNN_pkg is
         end loop;
         return max_h;
     end function;
+
+    function acc_in_position(X : integer; level : integer; weight : integer) return integer is
+        variable layer_info : layer_info_t(0 to 1, 0 to clog2(X)) := (others => (others => 0));
+        variable length : integer := 0;
+    begin
+        layer_info := get_layer_info(X, level - 1);
+        length := 0;
+        for i in 0 to layer_info'length(2) loop
+            if(i = weight) then
+                exit;
+            end if;
+            length := length + layer_info(0, i);
+        end loop;
+        return length;  -- ritorna solo la parte usata
+    end function;
+
+    function get_weight_input_n(X : integer; level : integer; weight : integer) return integer is
+        variable layer_info : layer_info_t(0 to 1, 0 to clog2(X)) := (others => (others => 0));
+        variable length : integer := 0;
+    begin
+        layer_info := get_layer_info(X, level - 1);
+        return layer_info(0, weight);
+    end function;
+        
 
 end package body;
             

@@ -43,6 +43,9 @@ entity compressor_layer is
 end compressor_layer;
 
 architecture Behavioral of compressor_layer is
+    -- Definizione costante per la stampa
+    constant DEBUG : boolean := true;
+
     type compressor_in_t is array (natural range <>) of STD_LOGIC_VECTOR (5 downto 0);
     type compressor_out_t is array (natural range <>) of STD_LOGIC_VECTOR (2 downto 0);
 
@@ -63,15 +66,19 @@ begin
     begin
         if_gen : if get_layer_compressors_n(X, L, k) /= 0 generate
             process begin 
-                report "Generating compressors for weight " & integer'image(k);
+                if (DEBUG) then
+                    report "Generating compressors for weight " & integer'image(k);
+                end if;
                 wait;
             end process;
             k_compressors : for c in 1 to get_layer_compressors_n(X, L, k) generate
                 constant comp_n : integer := acc_layers_compressors(X, L, k) + c;
             begin
                 process begin 
-                    report "    Generating compressor " & integer'image(c) & " for weight " & integer'image(k);
-                    report "      comp_n = " & integer'image(comp_n);
+                    if(DEBUG) then
+                        report "    Generating compressor " & integer'image(c) & " for weight " & integer'image(k);
+                        report "      comp_n = " & integer'image(comp_n);
+                    end if;
                     wait;
                 end process;    
                 
@@ -86,7 +93,7 @@ begin
         end generate ; -- if-genertate
     end generate ; -- gen_weights_cmp
 
-    process (compressor_out) is
+    process (compressor_out, din) is
         type bit_count_t is array (0 to get_layer_weights(X, L)) of integer;
 
         -- Variabile per tenere traccia del numero di compressori connessi
@@ -104,6 +111,14 @@ begin
         variable index_of_output : integer := 0;
         -- Indice per tenere traccia dei bit usati nel vettore di input iniziale
         variable index_of_input : integer := 0;
+
+        variable pos_from_out : integer := 0;
+        variable pos_to_out : integer := 0;
+        variable pos_from_in : integer := 0;
+        variable pos_to_in : integer := 0;
+
+        -- For input loop
+        variable in_bit_used : integer := 0;
     begin   
         comp_n := 1;
         bit_count_array := (others => 0);
@@ -111,11 +126,15 @@ begin
         index_of_output := 0;
         index_of_input := 0;
 
-        report "Compressor layer weights " & integer'image(get_layer_weights(X, L - 1)) & " Execution " & integer'image(execution);
-        execution := execution + 1;
+        if DEBUG and execution = 0 and execution = 0 then
+            report "";
+            
+        end if;
 
         for weight in 0 to get_layer_weights(X, L - 1) loop
-            report "Connecting " & integer'image(get_layer_compressors_n(X, L, weight)) & " compressors of weight " & integer'image(weight);
+            if DEBUG and execution = 0 then
+                report "Connecting " & integer'image(get_layer_compressors_n(X, L, weight)) & " compressors of weight " & integer'image(weight);
+            end if;
             if get_layer_compressors_n(X, L, weight) /= 0 then
                 for comp in 1 to get_layer_compressors_n(X, L, weight) loop
                     -- -- LSB
@@ -127,9 +146,11 @@ begin
                     output_weights(weight + 2)(bit_count_array(weight + 2)) := compressor_out(comp_n)(2);
                     
                     -- Report the output weights
-                    report "    output_weights(" & integer'image(weight) & ")(" & integer'image(bit_count_array(weight)) & ") <= compressor_out(" & integer'image(comp_n) & ")(0)";
-                    report "    output_weights(" & integer'image(weight + 1) & ")(" & integer'image(bit_count_array(weight + 1)) & ") <= compressor_out(" & integer'image(comp_n) & ")(1)";
-                    report "    output_weights(" & integer'image(weight + 2) & ")(" & integer'image(bit_count_array(weight + 2)) & ") <= compressor_out(" & integer'image(comp_n) & ")(2)"; 
+                    if DEBUG and execution = 0 then
+                        report "    output_weights(" & integer'image(weight) & ")(" & integer'image(bit_count_array(weight)) & ") <= compressor_out(" & integer'image(comp_n) & ")(0)";
+                        report "    output_weights(" & integer'image(weight + 1) & ")(" & integer'image(bit_count_array(weight + 1)) & ") <= compressor_out(" & integer'image(comp_n) & ")(1)";
+                        report "    output_weights(" & integer'image(weight + 2) & ")(" & integer'image(bit_count_array(weight + 2)) & ") <= compressor_out(" & integer'image(comp_n) & ")(2)"; 
+                    end if;
                     -- Update the bit count array
                     bit_count_array(weight) := bit_count_array(weight) + 1;
                     bit_count_array(weight + 1) := bit_count_array(weight + 1) + 1;
@@ -137,29 +158,81 @@ begin
                     
                     -- Update the compressor number
                     comp_n := comp_n + 1;
-
                 end loop;
+            elsif get_weight_input_n(X, L, weight) /= 0 then
+                pos_from_out := get_weight_input_n(X, L, weight) + bit_count_array(weight);
+                pos_to_out := bit_count_array(weight);
+                pos_from_in := acc_in_position(X, L, weight) + get_weight_input_n(X, L, weight);
+                pos_to_in := acc_in_position(X, L, weight);
+                -- output_weights(weight)(pos_from_out downto pos_to_out) := din(pos_from_in downto pos_to_in);
+                if DEBUG and execution = 0 then
+                    report "    output_weights(" & integer'image(weight) & ")(" & integer'image(pos_from_out) & " downto " & integer'image(pos_to_out) & ") <= din(" & integer'image(comp_n) & ")(" & integer'image(pos_from_in) & " downto " & integer'image(pos_to_in) & ")";
+                end if;
+                bit_count_array(weight) := bit_count_array(weight) + get_weight_input_n(X, L, weight);
             end if;
         end loop;
-        
-        report "Connecting OUPUTS";
+
+        if DEBUG and execution = 0 then
+            report "";
+            report "Connecting OUPUTS";
+        end if;
 
         output_for : for weight in 0 to get_layer_weights(X, L) loop
-            dout(index_of_output + bit_count_array(weight) - 1 downto index_of_output) <= output_weights(weight)(bit_count_array(weight) - 1 downto 0);
-
-            report "    dout(" & integer'image(index_of_output + bit_count_array(weight) - 1) & " downto " & integer'image(index_of_output) & ") <= output_weights(" & integer'image(weight) & ")(" & integer'image(bit_count_array(weight) - 1) & " downto 0)";
+            dout(index_of_output + get_layer_weight_size(X, L, weight) - 1 downto index_of_output) <= output_weights(weight)(get_layer_weight_size(X, L, weight) - 1 downto 0);
+            if DEBUG and execution = 0 then
+                report "    dout(" & integer'image(index_of_output + get_layer_weight_size(X, L, weight) - 1) & " downto " & integer'image(index_of_output) & ") <= output_weights(" & integer'image(weight) & ")(" & integer'image(get_layer_weight_size(X, L, weight) - 1) & " downto 0)";
+            end if;
             
-            index_of_output := index_of_output + bit_count_array(weight);
+            index_of_output := index_of_output + get_layer_weight_size(X, L, weight);
         end loop ; -- output_for
 
-        report "Connecting INPUTS";
-        for compressor in 1 to get_layer_compressors(X, L) loop
-            for bit_n in 0 to 5 loop
-                compressor_in(compressor)(bit_n) <= din(index_of_input + bit_n);
-                report "    compressor_in(" & integer'image(compressor) & ")(" & integer'image(bit_n) & ") <= din(" & integer'image(index_of_input + bit_n) & ")";
-            end loop;
-            index_of_input := index_of_input + 6;
+        if DEBUG and execution = 0 then
+            report "";
+            report "Connecting INPUTS";
+        end if;
+        
+        -- for compressor in 1 to get_layer_compressors(X, L) loop
+        --     for bit_n in 0 to 5 loop
+        --         compressor_in(compressor)(bit_n) <= din(index_of_input + bit_n);
+        --         if DEBUG and execution = 0 then
+        --             report "    compressor_in(" & integer'image(compressor) & ")(" & integer'image(bit_n) & ") <= din(" & integer'image(index_of_input + bit_n) & ")";
+        --         end if; 
+        --     end loop;
+        --     index_of_input := index_of_input + 6;
+        -- end loop;
+
+        for weight in 0 to get_layer_weights(X, L) loop
+            if(get_layer_compressors_n(X, L, weight) /= 0) then
+                in_bit_used := get_layer_weight_size(X, L - 1, weight);
+                if DEBUG and execution = 0 then
+                    report "    Connecting compressors of weight " & integer'image(weight);
+                end if; 
+
+                for compressor in 1 to get_layer_compressors_n(X, L, weight) loop
+                    for bit_n in 0 to 5 loop
+                        if in_bit_used > 0 then
+                            compressor_in(compressor)(bit_n) <= din(index_of_input + bit_n);
+                            if DEBUG and execution = 0 then
+                                report "    compressor_in(" & integer'image(compressor) & ")(" & integer'image(bit_n) & ") <= din(" & integer'image(index_of_input + bit_n) & ")";
+                            end if;
+                            in_bit_used := in_bit_used - 1;
+                        else 
+                            compressor_in(compressor)(bit_n) <= '0';
+                            if DEBUG and execution = 0 then
+                                report "    compressor_in(" & integer'image(compressor) & ")(" & integer'image(bit_n) & ") <= '0'";
+                            end if;
+                        end if;
+                    end loop;
+                    index_of_input := index_of_input + 6;
+                end loop;  
+            else 
+                index_of_input := index_of_input + get_weight_input_n(X, L, weight);
+            end if;
         end loop;
+
+        if DEBUG and execution = 0 then
+            execution := execution + 1;
+        end if;
     end process;
 
 end Behavioral ; -- Behavioral
