@@ -209,6 +209,7 @@ begin
                     report "    Connecting compressors of weight " & integer'image(weight);
                 end if; 
 
+                index_of_input := acc_in_position(X, L, weight);
                 for compressor in 1 to get_layer_compressors_n(X, L, weight) loop
                     index_of_input := acc_in_position(X, L, weight);
                     for bit_n in 0 to 5 loop
