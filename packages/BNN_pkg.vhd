@@ -24,6 +24,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 use IEEE.numeric_std.all;
 use IEEE.math_real.all;
+use std.textio.all;
 
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx leaf cells in this code.
@@ -80,9 +81,49 @@ package BNN_pkg is
 
     --! @brief Funzione per calcolare il numero di ingressi relativi al peso 'weight'
     function get_weight_input_n(X : integer; level : integer; weight : integer) return integer;
+
+    --! @brief Funzione per calcolare la posizione del primo bit in uscita relativo al perso 'weight'
+    function acc_out_position(X : integer; level : integer; weight : integer) return integer;
 end package ;
 
 package body BNN_pkg is
+
+    function int_array_to_string(arr: integer_array_t; pos: integer := -1) return string is
+        variable L : line;
+        variable S : string(1 to 512);  -- dimensione massima della stringa
+        variable len : natural;
+        variable pos_in : integer := 0;
+    begin
+        write(L, string'("["));
+        if pos < 0 or pos > arr'high then
+            pos_in := arr'high;  -- se pos è fuori range, lo mettiamo all'ultimo
+        else 
+            pos_in := pos;
+        end if;
+        for i in arr'range loop
+            write(L, integer'image(arr(i)));
+            if i /= arr'high and i /= pos_in then
+                write(L, string'(", "));
+            end if;
+            if i = pos_in then
+                exit;
+            end if;
+        end loop;
+        write(L, string'("]"));
+
+        -- Copia la line in una stringa statica
+        len := L'length;
+        if len > S'length then
+            len := S'length;  -- tronca se troppo lunga
+        end if;
+
+        for i in 1 to len loop
+            S(i) := L.all(i);
+        end loop;
+
+        return S(1 to len);  -- ritorna solo la parte usata
+    end function;
+
     function get_popcount_levels(X : integer) return integer is
         type int_array is array (0 to clog2(X) + 4) of integer;
         variable h_curr : int_array := (others => 0);  -- Altezze per peso alla fase corrente
@@ -327,7 +368,11 @@ package body BNN_pkg is
         layer_info := get_layer_info(X, level - 1);
         return layer_info(0, weight);
     end function;
-        
 
+    --! @brief Funzione per calcolare la posizione del primo bit in uscita relativo al perso 'weight'
+    function acc_out_position(X : integer; level : integer; weight : integer) return integer is
+    begin
+        return acc_in_position(X, level + 1, weight);
+    end function;     
 end package body;
             

@@ -54,35 +54,41 @@ architecture Behavioral of testUtilities is
         4 => (0 =>  0, 1 =>  0, 2 =>  0, 3 => 0, 4 => 1, 5 => 0, 6 => 0, 7 => 0, others => 0),
         0 => (0 =>  0, 1 =>  0, 2 =>  0, 3 => 0, 4 => 0, 5 => 0, 6 => 0, 7 => 0, others => 0)
     );
-    function int_array_to_string(arr: integer_array_t; pos: integer) return string is
+    function int_array_to_string(arr: integer_array_t; pos: integer := -1) return string is
         variable L : line;
         variable S : string(1 to 512);  -- dimensione massima della stringa
         variable len : natural;
-      begin
+        variable pos_in : integer := 0;
+    begin
         write(L, string'("["));
+        if pos < 0 or pos > arr'high then
+            pos_in := arr'high;  -- se pos è fuori range, lo mettiamo all'ultimo
+        else 
+            pos_in := pos;
+        end if;
         for i in arr'range loop
-          write(L, integer'image(arr(i)));
-          if i /= arr'high then
-            write(L, string'(", "));
-          end if;
-          if i = pos then
-            exit;
-          end if;
+            write(L, integer'image(arr(i)));
+            if i /= arr'high and i /= pos_in then
+                write(L, string'(", "));
+            end if;
+            if i = pos_in then
+                exit;
+            end if;
         end loop;
         write(L, string'("]"));
-    
+
         -- Copia la line in una stringa statica
         len := L'length;
         if len > S'length then
-          len := S'length;  -- tronca se troppo lunga
+            len := S'length;  -- tronca se troppo lunga
         end if;
-    
+
         for i in 1 to len loop
-          S(i) := L.all(i);
+            S(i) := L.all(i);
         end loop;
-    
+
         return S(1 to len);  -- ritorna solo la parte usata
-      end function;
+    end function;
 begin
     process is
         variable weights : integer_array_t;
@@ -184,6 +190,8 @@ begin
             end if;
         end loop ; -- level_loop
 
+
+        ---------------- TESTING Utility Functions ----------------
         report "";
         report "";
         report "Testing utility functions";
@@ -270,6 +278,18 @@ begin
             report "Test get_weight_input_n (B) FAILED; was " & integer'image(get_weight_input_n(72, 3, 4));
         else
             report "Test get_weight_input_n (B) OK";
+        end if;
+
+        if acc_out_position(72, 3, 5) /= 12 then
+            report "Test acc_out_position (A) FAILED; was " & integer'image(acc_out_position(72, 3, 5));
+        else
+            report "Test acc_out_position (A) OK";
+        end if;
+
+        if acc_out_position(72, 4, 5) /= 9 then
+            report "Test acc_out_position (B) FAILED; was " & integer'image(acc_out_position(72, 4, 5));
+        else
+            report "Test acc_out_position (B) OK";
         end if;
         wait;
     end process;
