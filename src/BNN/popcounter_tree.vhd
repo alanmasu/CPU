@@ -38,7 +38,7 @@ entity popcounter_tree is
         DEBUG : boolean := false;
         FORCE_DEBUG : boolean := false;
         DEBUG_LAYERS : boolean := false;
-        FORCE_DEBUG_LAYERS : boolean := false;
+        FORCE_DEBUG_LAYERS : boolean := false
     );
     Port ( 
         din : in STD_LOGIC_VECTOR (X-1 downto 0);

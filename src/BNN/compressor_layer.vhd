@@ -68,7 +68,7 @@ begin
         if_gen : if get_layer_compressors_n(X, L, k) /= 0 generate
             process begin 
                 if (DEBUG) then
-                    report "Generating compressors for weight " & integer'image(k);
+                    report "    Generating compressors for weight " & integer'image(k);
                 end if;
                 wait;
             end process;
@@ -77,8 +77,8 @@ begin
             begin
                 process begin 
                     if(DEBUG) then
-                        report "    Generating compressor " & integer'image(c) & " for weight " & integer'image(k);
-                        report "      comp_n = " & integer'image(comp_n);
+                        report "        Generating compressor " & integer'image(c) & " for weight " & integer'image(k);
+                        report "        comp_n = " & integer'image(comp_n);
                     end if;
                     wait;
                 end process;    
@@ -140,7 +140,7 @@ begin
         ------------- CONNECTING COMPRESSORS OUT ----------------
         for weight in 0 to get_layer_weights(X, L - 1) loop
             if (DEBUG and execution = 0) or FORCE_DEBUG then
-                report "Connecting " & integer'image(get_layer_compressors_n(X, L, weight)) & " compressors of weight " & integer'image(weight);
+                report "    Connecting " & integer'image(get_layer_compressors_n(X, L, weight)) & " compressors of weight " & integer'image(weight);
             end if;
             if get_layer_compressors_n(X, L, weight) /= 0 then
                 for comp in 1 to get_layer_compressors_n(X, L, weight) loop
@@ -154,9 +154,9 @@ begin
                     
                     -- Report the output weights
                     if (DEBUG and execution = 0) or FORCE_DEBUG then
-                        report "    output_weights(" & integer'image(weight) & ")(" & integer'image(bit_count_array(weight)) & ") <= compressor_out(" & integer'image(comp_n) & ")(0)";
-                        report "    output_weights(" & integer'image(weight + 1) & ")(" & integer'image(bit_count_array(weight + 1)) & ") <= compressor_out(" & integer'image(comp_n) & ")(1)";
-                        report "    output_weights(" & integer'image(weight + 2) & ")(" & integer'image(bit_count_array(weight + 2)) & ") <= compressor_out(" & integer'image(comp_n) & ")(2)"; 
+                        report "        output_weights(" & integer'image(weight) & ")(" & integer'image(bit_count_array(weight)) & ") <= compressor_out(" & integer'image(comp_n) & ")(0)";
+                        report "        output_weights(" & integer'image(weight + 1) & ")(" & integer'image(bit_count_array(weight + 1)) & ") <= compressor_out(" & integer'image(comp_n) & ")(1)";
+                        report "        output_weights(" & integer'image(weight + 2) & ")(" & integer'image(bit_count_array(weight + 2)) & ") <= compressor_out(" & integer'image(comp_n) & ")(2)"; 
                     end if;
                     -- Update the bit count array
                     bit_count_array(weight) := bit_count_array(weight) + 1;
@@ -173,7 +173,7 @@ begin
                 pos_to_in := acc_in_position(X, L, weight);
                 output_weights(weight)(pos_from_out downto pos_to_out) := din(pos_from_in downto pos_to_in);
                 if (DEBUG and execution = 0) or FORCE_DEBUG then
-                    report "    output_weights(" & integer'image(weight) & ")(" & integer'image(pos_from_out) & " downto " & integer'image(pos_to_out) & ") <= din(" & integer'image(pos_from_in) & " downto " & integer'image(pos_to_in) & ")";
+                    report "        output_weights(" & integer'image(weight) & ")(" & integer'image(pos_from_out) & " downto " & integer'image(pos_to_out) & ") <= din(" & integer'image(pos_from_in) & " downto " & integer'image(pos_to_in) & ")";
                 end if;
                 bit_count_array(weight) := bit_count_array(weight) + get_weight_input_n(X, L, weight);
             end if;
@@ -181,14 +181,14 @@ begin
 
         if (DEBUG and execution = 0) or FORCE_DEBUG then
             report "";
-            report "Connecting OUPUTS";
+            report "    Connecting OUPUTS";
         end if;
 
         ------------- CONNECTING dout ----------------
         output_for : for weight in 0 to get_layer_weights(X, L) loop
             dout(index_of_output + get_layer_weight_size(X, L, weight) - 1 downto index_of_output) <= output_weights(weight)(get_layer_weight_size(X, L, weight) - 1 downto 0);
             if (DEBUG and execution = 0) or FORCE_DEBUG then
-                report "    dout(" & integer'image(index_of_output + get_layer_weight_size(X, L, weight) - 1) & " downto " & integer'image(index_of_output) & ") <= output_weights(" & integer'image(weight) & ")(" & integer'image(get_layer_weight_size(X, L, weight) - 1) & " downto 0)";
+                report "        dout(" & integer'image(index_of_output + get_layer_weight_size(X, L, weight) - 1) & " downto " & integer'image(index_of_output) & ") <= output_weights(" & integer'image(weight) & ")(" & integer'image(get_layer_weight_size(X, L, weight) - 1) & " downto 0)";
             end if;
             
             index_of_output := index_of_output + get_layer_weight_size(X, L, weight);
@@ -196,7 +196,7 @@ begin
 
         if (DEBUG and execution = 0) or FORCE_DEBUG then
             report "";
-            report "Connecting INPUTS";
+            report "    Connecting INPUTS";
         end if;
         
         ------------- CONNECTING INPUTS ----------------
@@ -206,17 +206,16 @@ begin
             if(get_layer_compressors_n(X, L, weight) /= 0) then
                 in_bit_used := get_layer_weight_size(X, L - 1, weight);
                 if (DEBUG and execution = 0) or FORCE_DEBUG then
-                    report "    Connecting compressors of weight " & integer'image(weight);
+                    report "        Connecting compressors of weight " & integer'image(weight);
                 end if; 
 
                 index_of_input := acc_in_position(X, L, weight);
                 for compressor in 1 to get_layer_compressors_n(X, L, weight) loop
-                    index_of_input := acc_in_position(X, L, weight);
                     for bit_n in 0 to 5 loop
                         if in_bit_used > 0 then
                             compressor_in(compressor_n)(bit_n) <= din(index_of_input);
                             if (DEBUG and execution = 0) or FORCE_DEBUG then
-                                report "    compressor_in(" & integer'image(compressor_n) & ")(" & integer'image(bit_n) & ") <= din(" & integer'image(index_of_input) & ") that was " & integer'image(to_integer(unsigned(din(index_of_input downto index_of_input))));
+                                report "        compressor_in(" & integer'image(compressor_n) & ")(" & integer'image(bit_n) & ") <= din(" & integer'image(index_of_input) & ") that was " & integer'image(to_integer(unsigned(din(index_of_input downto index_of_input))));
                                 -- report "    index_of_input = " & integer'image(index_of_input);
                             end if;
                             in_bit_used := in_bit_used - 1;
@@ -224,7 +223,7 @@ begin
                         else 
                             compressor_in(compressor_n)(bit_n) <= '0';
                             if (DEBUG and execution = 0) or FORCE_DEBUG then
-                                report "    compressor_in(" & integer'image(compressor_n) & ")(" & integer'image(bit_n) & ") <= '0'";
+                                report "        compressor_in(" & integer'image(compressor_n) & ")(" & integer'image(bit_n) & ") <= '0'";
                             end if;
                         end if;
                     end loop;

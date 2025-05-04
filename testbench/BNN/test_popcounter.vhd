@@ -43,8 +43,9 @@ architecture Behavioral of test_popcounter is
     constant X : integer := 72;
 
     constant DEBUG : boolean := true;
+    constant DEBUG_TB : boolean := false;
     constant FORCE_DEBUG : boolean := false;
-    constant DEBUG_LAYERS : boolean := false;
+    constant DEBUG_LAYERS : boolean := true;
     constant FORCE_DEBUG_LAYERS : boolean := false;
     constant ACT_MAX : integer := 10;
 
@@ -87,8 +88,8 @@ begin
 
     dut: entity work.popcounter_tree
     generic map (
-        X => X;
-        
+        X => X,
+
         DEBUG => DEBUG,
         FORCE_DEBUG => FORCE_DEBUG,
         DEBUG_LAYERS => DEBUG_LAYERS,
@@ -105,6 +106,7 @@ begin
         reset <= '1';
 
         input_data <= (5 => '1', 4 => '1', 3 => '1', 2 => '1', 1 => '1', 0 => '1', others => '0');
+        -- input_data <= (0 => '1', others => '0');
         wait for 10 ns;
 
         input_data <= (5 => '1', 4 => '1', 3 => '1', 2 => '1', 1 => '0', 0 => '0', others => '0');
@@ -113,55 +115,55 @@ begin
         wait;
     end process;
 
-    -- combinational_pro : process( output_data ) is
-    --     variable output_bit : integer := 0;    
-    --     variable out_from   : integer := 0;
-    --     variable out_to     : integer := 0;
+    combinational_pro : process( output_data ) is
+        variable output_bit : integer := 0;    
+        variable out_from   : integer := 0;
+        variable out_to     : integer := 0;
 
-    --     variable activation : integer := 0;
-    -- begin
-    --     output_bit := 0;    
-    --     out_from   := 0;
-    --     out_to     := 0;
+        variable activation : integer := 0;
+    begin
+        output_bit := 0;    
+        out_from   := 0;
+        out_to     := 0;
 
-    --     if (DEBUG and activation < ACT_MAX) or FORCE_DEBUG then
-    --         report "";
-    --         -- report 
-    --     end if;
+        if (DEBUG_TB and activation < ACT_MAX) or FORCE_DEBUG then
+            report "";
+            -- report 
+        end if;
 
-    --     weights_for : for weight in 0 to get_layer_weights(X, L) loop
-    --         out_to   := output_bit;
-    --         out_from := output_bit + get_layer_weight_size(X, L, weight) - 1;
+        weights_for : for weight in 0 to get_layer_weights(X, L) loop
+            out_to   := output_bit;
+            out_from := output_bit + get_layer_weight_size(X, L, weight) - 1;
 
-    --         weights(weight) <= sum_std_vector(output_data(out_from downto out_to));
-    --         stdv_array(weight) (get_layer_weight_size(X, L, weight) - 1 downto 0) <= output_data(out_from downto out_to);
+            weights(weight) <= sum_std_vector(output_data(out_from downto out_to));
+            stdv_array(weight) (get_layer_weight_size(X, L, weight) - 1 downto 0) <= output_data(out_from downto out_to);
             
-    --         if (DEBUG and activation < ACT_MAX) or FORCE_DEBUG then
-    --             report "Weight(" & integer'image(weight) & ") := sum_std_vector(output_data(" & integer'image(out_from) & " downto " & integer'image(out_to) & ")) = " & integer'image(weights(weight)); 
-    --             report "stdv_array(" & integer'image(weight) & ")(" & integer'image(get_layer_weight_size(X, L, weight) - 1) & " downto 0) <= output_data(" & integer'image(out_from) & " downto " & integer'image(out_to) & ")";
-    --         end if;
+            if (DEBUG_TB and activation < ACT_MAX) or FORCE_DEBUG then
+                report "Weight(" & integer'image(weight) & ") := sum_std_vector(output_data(" & integer'image(out_from) & " downto " & integer'image(out_to) & ")) = " & integer'image(weights(weight)); 
+                report "stdv_array(" & integer'image(weight) & ")(" & integer'image(get_layer_weight_size(X, L, weight) - 1) & " downto 0) <= output_data(" & integer'image(out_from) & " downto " & integer'image(out_to) & ")";
+            end if;
 
-    --         output_bit := out_from + 1;
-    --     end loop ; -- weights_for
-    --     activation := activation + 1;
-    -- end process ; -- combinational_pro
+            output_bit := out_from + 1;
+        end loop ; -- weights_for
+        activation := activation + 1;
+    end process ; -- combinational_pro
 
-    -- sum_pro : process( weights ) is
-    --     variable sum : integer := 0;
-    --     variable power2 : integer := 1;
-    -- begin
-    --     sum := 0;
-    --     power2 := 1;
+    sum_pro : process( weights ) is
+        variable sum : integer := 0;
+        variable power2 : integer := 1;
+    begin
+        sum := 0;
+        power2 := 1;
 
-    --     sum_for : for i in weights'range loop
-    --         sum := sum + weights(i) * power2;
-    --         if (DEBUG) or FORCE_DEBUG then
-    --             report "Sum(" & integer'image(i) & ") := " & integer'image(weights(i)) & " * " & integer'image(power2) & " = " & integer'image(sum);
-    --         end if;
-    --         power2 := power2 * 2;
-    --     end loop ; -- sum_for
-    --     sum_s <= sum;
-    --     power2_s <= power2;
-    -- end process ; -- sum_pro
+        sum_for : for i in weights'range loop
+            sum := sum + weights(i) * power2;
+            if (DEBUG_TB) or FORCE_DEBUG then
+                report "Sum(" & integer'image(i) & ") := " & integer'image(weights(i)) & " * " & integer'image(power2) & " = " & integer'image(sum);
+            end if;
+            power2 := power2 * 2;
+        end loop ; -- sum_for
+        sum_s <= sum;
+        power2_s <= power2;
+    end process ; -- sum_pro
 
 end Behavioral;
