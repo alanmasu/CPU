@@ -37,24 +37,24 @@ entity testUtilities is
 end entity;
 
 architecture Behavioral of testUtilities is
-    type h_type is array (natural range <>) of integer_array_t(0 to clog2(72));
+    type h_type is array (natural range <>) of integer_array_t;
     constant h : h_type(0 to get_popcount_levels(72)) := (
         --     0   1   2   3   4   5   6   7
-        0 => (72,  0,  0,  0,  0,  0,  0,  0),
-        1 => (12, 12, 12,  0,  0,  0,  0,  0),
-        2 => ( 2,  4,  6,  4,  2,  0,  0,  0),
-        3 => ( 2,  1,  2,  3,  4,  1,  0,  0),
-        4 => ( 2,  1,  2,  3,  1,  2,  1,  0)
+        0 => (0 => 72, 1 =>  0, 2 =>  0, 3 => 0, 4 => 0, 5 => 0, 6 => 0, 7 => 0, others => 0),
+        1 => (0 => 12, 1 => 12, 2 => 12, 3 => 0, 4 => 0, 5 => 0, 6 => 0, 7 => 0, others => 0),
+        2 => (0 =>  2, 1 =>  4, 2 =>  6, 3 => 4, 4 => 2, 5 => 0, 6 => 0, 7 => 0, others => 0),
+        3 => (0 =>  2, 1 =>  1, 2 =>  2, 3 => 3, 4 => 4, 5 => 1, 6 => 0, 7 => 0, others => 0),
+        4 => (0 =>  2, 1 =>  1, 2 =>  2, 3 => 3, 4 => 1, 5 => 2, 6 => 1, 7 => 0, others => 0)
     );
     constant c : h_type(0 to get_popcount_levels(72)) := (
         --     0   1   2   3   4   5   6   7
-        1 => (12,  0,  0,  0,  0,  0,  0,  0),
-        2 => ( 2,  2,  2,  0,  0,  0,  0,  0),
-        3 => ( 0,  1,  1,  1,  0,  0,  0,  0),
-        4 => ( 0,  0,  0,  0,  1,  0,  0,  0),
-        0 => ( 0,  0,  0,  0,  0,  0,  0,  0)
+        1 => (0 => 12, 1 =>  0, 2 =>  0, 3 => 0, 4 => 0, 5 => 0, 6 => 0, 7 => 0, others => 0),
+        2 => (0 =>  2, 1 =>  2, 2 =>  2, 3 => 0, 4 => 0, 5 => 0, 6 => 0, 7 => 0, others => 0),
+        3 => (0 =>  0, 1 =>  1, 2 =>  1, 3 => 1, 4 => 0, 5 => 0, 6 => 0, 7 => 0, others => 0),
+        4 => (0 =>  0, 1 =>  0, 2 =>  0, 3 => 0, 4 => 1, 5 => 0, 6 => 0, 7 => 0, others => 0),
+        0 => (0 =>  0, 1 =>  0, 2 =>  0, 3 => 0, 4 => 0, 5 => 0, 6 => 0, 7 => 0, others => 0)
     );
-    function int_array_to_string(arr: integer_array_t) return string is
+    function int_array_to_string(arr: integer_array_t; pos: integer) return string is
         variable L : line;
         variable S : string(1 to 512);  -- dimensione massima della stringa
         variable len : natural;
@@ -64,6 +64,9 @@ architecture Behavioral of testUtilities is
           write(L, integer'image(arr(i)));
           if i /= arr'high then
             write(L, string'(", "));
+          end if;
+          if i = pos then
+            exit;
           end if;
         end loop;
         write(L, string'("]"));
@@ -82,7 +85,7 @@ architecture Behavioral of testUtilities is
       end function;
 begin
     process is
-        variable weights : integer_array_t(0 to clog2(72));
+        variable weights : integer_array_t;
     begin
         if get_popcount_levels(3) /= 0 then
             report "Test #1 FAILED";
@@ -160,7 +163,7 @@ begin
             -- report "level(" & integer'image(level) & "): ";
             weights := get_info(get_layer_info(72, level), 0);
             if weights /= h(level) then
-                report "Test #" & integer'image(level) & " FAILED: weights was " & int_array_to_string(weights);
+                report "Test #" & integer'image(level) & " FAILED: weights was " & int_array_to_string(weights, clog2(72));
             else
                 report "Test #" & integer'image(level) & " OK";
             end if;
@@ -175,7 +178,7 @@ begin
             -- report "level(" & integer'image(level) & "): ";
             weights := get_info(get_layer_info(72, level), 1);
             if weights /= c(level) then
-                report "Test #" & integer'image(level) & " FAILED: compressors was " & int_array_to_string(weights);
+                report "Test #" & integer'image(level) & " FAILED: compressors was " & int_array_to_string(weights, clog2(72));
             else
                 report "Test #" & integer'image(level) & " OK";
             end if;

@@ -35,10 +35,12 @@ use work.utilities_pkg.all;
 
 
 package BNN_pkg is
+    constant X_MAX : integer := 31;
+    
     function get_popcount_levels(x : integer) return integer;
 
-    type integer_array_t is array (natural range <>) of integer;
-    type layer_info_t is array (natural range <>, natural range <>) of integer;
+    type integer_array_t is array (0 to X_MAX) of integer;
+    type layer_info_t is array (0 to 1, 0 to X_MAX) of integer;
 
     --! @brief Funzione per calcolare le altezze ed il numero di compressori per il livellp
     --! @param X: Bit del popcounter
@@ -146,14 +148,14 @@ package body BNN_pkg is
     function get_layer_info(X : integer; level : integer) return layer_info_t is
         constant max_k_guess : integer := clog2(X);
     
-        variable h_curr : integer_array_t(0 to max_k_guess) := (others => 0);
-        variable h_next : integer_array_t(0 to max_k_guess) := (others => 0);
-        variable temp   : integer_array_t(0 to max_k_guess) := (others => 0);
-        variable groups : integer_array_t(0 to max_k_guess) := (others => 0);
+        variable h_curr : integer_array_t := (others => 0);
+        variable h_next : integer_array_t := (others => 0);
+        variable temp   : integer_array_t := (others => 0);
+        variable groups : integer_array_t := (others => 0);
     
         variable current_level : integer := 0;
         variable max_k  : integer := 0;
-        variable result : layer_info_t(0 to 1, 0 to max_k_guess) := (others => (others => 0));
+        variable result : layer_info_t := (others => (others => 0));
     begin
         h_curr(0) := X;
         max_k := 0;
@@ -198,7 +200,7 @@ package body BNN_pkg is
     end function;
 
     function get_info(matrix : layer_info_t; row_index : natural) return integer_array_t is
-        variable row : integer_array_t(matrix'range(2));
+        variable row : integer_array_t;
     begin
         for j in matrix'range(2) loop
             row(j) := matrix(row_index, j);
@@ -208,7 +210,7 @@ package body BNN_pkg is
     
     function get_layer_outputs(X : integer; level : integer) return integer is
         variable length : integer := 0;
-        variable layer_info : layer_info_t(0 to 1, 0 to clog2(X)) := (others => (others => 0));
+        variable layer_info : layer_info_t := (others => (others => 0));
     begin
         layer_info := get_layer_info(X, level);
         length := 0;
@@ -225,7 +227,7 @@ package body BNN_pkg is
 
     function get_layer_compressors(X : integer; level : integer) return integer is
         variable length : integer := 0;
-        variable layer_info : layer_info_t(0 to 1, 0 to clog2(X)) := (others => (others => 0));
+        variable layer_info : layer_info_t := (others => (others => 0));
     begin
         layer_info := get_layer_info(X, level);
         length := 0;
@@ -236,7 +238,7 @@ package body BNN_pkg is
     end function;
 
     function get_layer_weight_size(X : integer; level : integer; weight : integer) return integer is
-        variable layer_info : layer_info_t(0 to 1, 0 to clog2(X)) := (others => (others => 0));
+        variable layer_info : layer_info_t := (others => (others => 0));
     begin 
         layer_info := get_layer_info(X, level);
         if weight < layer_info'length(2) then
@@ -247,7 +249,7 @@ package body BNN_pkg is
     end function;
 
     function get_layer_compressors_n(X : integer; level : integer; weight : integer) return integer is
-        variable layer_info : layer_info_t(0 to 1, 0 to clog2(X)) := (others => (others => 0));
+        variable layer_info : layer_info_t := (others => (others => 0));
     begin 
         layer_info := get_layer_info(X, level);
         if weight < 0 then
@@ -261,7 +263,7 @@ package body BNN_pkg is
     end function;
 
     function acc_layers_compressors(X : integer; level : integer; weight : integer) return integer is
-        variable layer_info : layer_info_t(0 to 1, 0 to clog2(X)) := (others => (others => 0));
+        variable layer_info : layer_info_t := (others => (others => 0));
         variable length : integer := 0;
     begin
         layer_info := get_layer_info(X, level);
@@ -277,7 +279,7 @@ package body BNN_pkg is
     end function;   
 
     function get_layer_weights(X : integer; level : integer) return integer is
-        variable layer_info : layer_info_t(0 to 1, 0 to clog2(X)) := (others => (others => 0));
+        variable layer_info : layer_info_t := (others => (others => 0));
         variable length : integer := 0;
     begin
         layer_info := get_layer_info(X, level);
@@ -291,7 +293,7 @@ package body BNN_pkg is
     end function;
 
     function get_h_max(X : integer; level : integer) return integer is
-        variable layer_info : layer_info_t(0 to 1, 0 to clog2(X)) := (others => (others => 0));
+        variable layer_info : layer_info_t := (others => (others => 0));
         variable max_h : integer := 0;
     begin
         layer_info := get_layer_info(X, level);
@@ -304,7 +306,7 @@ package body BNN_pkg is
     end function;
 
     function acc_in_position(X : integer; level : integer; weight : integer) return integer is
-        variable layer_info : layer_info_t(0 to 1, 0 to clog2(X)) := (others => (others => 0));
+        variable layer_info : layer_info_t := (others => (others => 0));
         variable length : integer := 0;
     begin
         layer_info := get_layer_info(X, level - 1);
@@ -319,7 +321,7 @@ package body BNN_pkg is
     end function;
 
     function get_weight_input_n(X : integer; level : integer; weight : integer) return integer is
-        variable layer_info : layer_info_t(0 to 1, 0 to clog2(X)) := (others => (others => 0));
+        variable layer_info : layer_info_t := (others => (others => 0));
         variable length : integer := 0;
     begin
         layer_info := get_layer_info(X, level - 1);

@@ -166,7 +166,7 @@ begin
                 pos_to_in := acc_in_position(X, L, weight);
                 -- output_weights(weight)(pos_from_out downto pos_to_out) := din(pos_from_in downto pos_to_in);
                 if DEBUG and execution = 0 then
-                    report "    output_weights(" & integer'image(weight) & ")(" & integer'image(pos_from_out) & " downto " & integer'image(pos_to_out) & ") <= din(" & integer'image(comp_n) & ")(" & integer'image(pos_from_in) & " downto " & integer'image(pos_to_in) & ")";
+                    report "    output_weights(" & integer'image(weight) & ")(" & integer'image(pos_from_out) & " downto " & integer'image(pos_to_out) & ") <= din(" & integer'image(pos_from_in) & " downto " & integer'image(pos_to_in) & ")";
                 end if;
                 bit_count_array(weight) := bit_count_array(weight) + get_weight_input_n(X, L, weight);
             end if;
