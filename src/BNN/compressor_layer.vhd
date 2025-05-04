@@ -37,8 +37,8 @@ entity compressor_layer is
         L : integer := 1;
 
         -- Definizione costante per la stampa
-        DEBUG : boolean := true;
-        FORCE_DEBUG : boolean := true
+        DEBUG : boolean := false;
+        FORCE_DEBUG : boolean := false
     );
     port (
         din  : in  STD_LOGIC_VECTOR (get_layer_inputs(X, L)  - 1 downto 0);
