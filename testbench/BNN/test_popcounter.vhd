@@ -45,7 +45,7 @@ architecture Behavioral of test_popcounter is
     constant DEBUG : boolean := true;
     constant DEBUG_TB : boolean := false;
     constant FORCE_DEBUG : boolean := false;
-    constant DEBUG_LAYERS : boolean := true;
+    constant DEBUG_LAYERS : boolean := false;
     constant FORCE_DEBUG_LAYERS : boolean := false;
     constant ACT_MAX : integer := 10;
 
@@ -54,6 +54,7 @@ architecture Behavioral of test_popcounter is
 
     signal input_data  : STD_LOGIC_VECTOR (X - 1 downto 0) := (others => '0');
     signal output_data : STD_LOGIC_VECTOR (get_layer_outputs(X, get_popcount_levels(X)) - 1 downto 0) := (others => '0');
+    signal my_sum : STD_LOGIC_VECTOR (clog2(X) - 1 downto 0) := (others => '0');
 
     --------------------- FOR SUM ---------------------
     constant L: integer := get_popcount_levels(X);
@@ -100,6 +101,17 @@ begin
         dout => output_data
     );
     
+    dut2: entity work.ternary_adder
+    generic map (
+        X => X,
+
+        DEBUG => false,
+        FORCE_DEBUG => FORCE_DEBUG
+    )
+    port map (
+        din => output_data,
+        dout => my_sum
+    );
 
     process begin
         wait for 10 ns;
@@ -165,5 +177,17 @@ begin
         sum_s <= sum;
         power2_s <= power2;
     end process ; -- sum_pro
+
+    process is 
+        variable my_sum_int : integer := 0;
+    begin
+        wait on my_sum;
+        wait for 1 ns;
+        my_sum_int := stdv_to_integer(my_sum);
+        -- report "my_sum_int = " & integer'image(my_sum_int);
+        if my_sum_int /= sum_s then
+            assert false report "Test ternary adder FAILED => my_sum was " & integer'image(my_sum_int) & " != " & integer'image(sum_s) severity error;
+        end if;
+    end process;
 
 end Behavioral;

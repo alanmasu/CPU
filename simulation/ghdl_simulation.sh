@@ -23,7 +23,7 @@ case $1 in
         ghdl -c packages/utilities_pkg.vhd packages/BNN_pkg.vhd src/BNN/compressor_6_3.vhd src/BNN/compressor_layer.vhd testbench/BNN/test_compressor_layer.vhd -r test_compressor_layer --stop-time=100ns
         ;;
     "popcounter")
-        ghdl -c packages/utilities_pkg.vhd packages/BNN_pkg.vhd src/BNN/compressor_6_3.vhd src/BNN/compressor_layer.vhd src/BNN/popcounter_tree.vhd testbench/BNN/test_popcounter.vhd -r test_popcounter --stop-time=100ns > simulation/sim.txt
+        ghdl -c packages/utilities_pkg.vhd packages/BNN_pkg.vhd src/BNN/compressor_6_3.vhd src/BNN/compressor_layer.vhd src/BNN/ternary_adder.vhd src/BNN/popcounter_tree.vhd testbench/BNN/test_popcounter.vhd -r test_popcounter --stop-time=100ns #> simulation/sim.txt
         ;;
     "all")
         ghdl -c packages/utilities_pkg.vhd packages/BNN_pkg.vhd testbench/BNN/testBNN_utilities.vhd -r testUtilities
