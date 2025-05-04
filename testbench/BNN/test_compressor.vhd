@@ -63,12 +63,11 @@ begin
     dout_u <= unsigned(dout);
 
     test_pro : process begin
+        error <= '0';
         test_for : for i in 0 to 63 loop
             din <= to_unsigned(i, 6);
             wait for 1 ns;
-            if dout_u = count_ones(std_logic_vector(din)) then
-                error <= '0';
-            else
+            if dout_u /= count_ones(std_logic_vector(din)) then
                 error <= '1';
             end if ;
         end loop test_for; -- test_for       
