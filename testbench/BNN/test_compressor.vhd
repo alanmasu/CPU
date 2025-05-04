@@ -36,10 +36,15 @@ architecture Behavioral of test_compressor is
     signal din : unsigned(5 downto 0) := (others => '0');
     signal dout : std_logic_vector(2 downto 0);
     signal dout_u : unsigned(2 downto 0);
+
+    signal dout2 : std_logic_vector(1 downto 0);
+    signal dout2_u : unsigned(1 downto 0);
+
+
     signal clk : std_logic := '0';
     signal reset : std_logic := '0';
     signal error : std_logic := '0';
-    
+
     -- Funzione per contare gli '1'
     function count_ones(v : std_logic_vector) return unsigned is
         variable count : unsigned (2 downto 0) := (others => '0');
@@ -60,7 +65,14 @@ begin
         dout => dout
     );
     
+    dut2 : entity work.compressor_3_2
+    port map (
+        din => std_logic_vector(din(2 downto 0)),
+        dout => dout2
+    );
+
     dout_u <= unsigned(dout);
+    dout2_u <= unsigned(dout2);
 
     test_pro : process begin
         error <= '0';
@@ -72,10 +84,25 @@ begin
             end if ;
         end loop test_for; -- test_for       
         if error = '0' then
-            report "Test PASSED";
+            report "Test compressor 6:3 PASSED";
         else
-            report "Test FAILED";
+            report "Test compressor 6:3 FAILED";
         end if;
+
+        error <= '0';
+        test_for2 : for i in 0 to 2 loop
+            din <= to_unsigned(i, 6);
+            wait for 1 ns;
+            if dout2_u /= count_ones(std_logic_vector(din(2 downto 0))) then
+                error <= '1';
+            end if ;
+        end loop test_for2; -- test_for
+        if error = '0' then
+            report "Test compressor 3:2 PASSED";
+        else
+            report "Test compressor 3:2 FAILED";
+        end if; 
+
         wait;
     end process ; -- test_pro
    

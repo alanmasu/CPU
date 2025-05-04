@@ -16,8 +16,8 @@ case $1 in
     "bnn_utilities")
         ghdl -c packages/utilities_pkg.vhd packages/BNN_pkg.vhd testbench/BNN/testBNN_utilities.vhd -r testUtilities
         ;;
-    "compressor_6_3")
-        ghdl -c src/BNN/compressor_6_3.vhd testbench/BNN/test_compressor.vhd -r test_compressor
+    "compressors")
+        ghdl -c src/BNN/compressor_6_3.vhd src/BNN/compressor_3_2.vhd testbench/BNN/test_compressor.vhd -r test_compressor
         ;;
     "compressor_layer")
         ghdl -c packages/utilities_pkg.vhd packages/BNN_pkg.vhd src/BNN/compressor_6_3.vhd src/BNN/compressor_layer.vhd testbench/BNN/test_compressor_layer.vhd -r test_compressor_layer --stop-time=100ns
@@ -32,7 +32,7 @@ case $1 in
         ;;
     *)
         echo "Unknown simulation process: $1"
-        echo "Available processes: all, compressor_6_3, bnn_utilities, compressor_layer, popcounter"
+        echo "Available processes: all, compressors, bnn_utilities, compressor_layer, popcounter"
         return 1
         ;;
 esac
