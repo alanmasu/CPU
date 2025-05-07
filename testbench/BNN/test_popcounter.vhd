@@ -42,7 +42,7 @@ end test_popcounter;
 architecture Behavioral of test_popcounter is
     constant X : integer := 72;
 
-    constant DEBUG : boolean := true;
+    constant DEBUG : boolean := false;
     constant DEBUG_TB : boolean := false;
     constant FORCE_DEBUG : boolean := false;
     constant DEBUG_LAYERS : boolean := false;
@@ -50,11 +50,16 @@ architecture Behavioral of test_popcounter is
     constant ACT_MAX : integer := 10;
 
     signal reset : std_logic := '0';
+    signal clk   : std_logic := '0';
 
 
     signal input_data  : STD_LOGIC_VECTOR (X - 1 downto 0) := (others => '0');
     signal output_data : STD_LOGIC_VECTOR (get_layer_outputs(X, get_popcount_levels(X)) - 1 downto 0) := (others => '0');
     signal my_sum : STD_LOGIC_VECTOR (clog2(X) - 1 downto 0) := (others => '0');
+    signal my_sum_p : STD_LOGIC_VECTOR (clog2(X) - 1 downto 0) := (others => '0');  -- Uscita dal popcounter
+
+    signal test_n    : integer := 0;
+    signal validating : std_logic := '0';
 
     --------------------- FOR SUM ---------------------
     constant L: integer := get_popcount_levels(X);
@@ -105,7 +110,7 @@ begin
     generic map (
         X => X,
 
-        DEBUG => false,
+        DEBUG => DEBUG,
         FORCE_DEBUG => FORCE_DEBUG
     )
     port map (
@@ -113,15 +118,72 @@ begin
         dout => my_sum
     );
 
-    process begin
+    dut3: entity work.popcounter
+    generic map (
+        X => X,
+
+        DEBUG => DEBUG,
+        FORCE_DEBUG => FORCE_DEBUG,
+        DEBUG_LAYERS => DEBUG_LAYERS,
+        FORCE_DEBUG_LAYERS => FORCE_DEBUG_LAYERS
+    )
+    port map (
+        din => input_data,
+        dout => my_sum_p
+    );
+
+    clk_process : process begin
+        clk <= not clk;
+        wait for 5 ns;
+    end process;
+
+    res_process: process begin
+        reset <= '0';
         wait for 10 ns;
         reset <= '1';
+        wait;
+    end process;
 
+    process begin
+        wait until reset = '1';
+
+        test_n <= 1;
         input_data <= (5 => '1', 4 => '1', 3 => '1', 2 => '1', 1 => '1', 0 => '1', others => '0');
-        -- input_data <= (0 => '1', others => '0');
-        wait for 10 ns;
+        wait until rising_edge(clk);
+        validating <= '1';
+        if sum_s = 6 then
+            report "Test " & integer'image(test_n) & " OK";
+        else
+            report "Test " & integer'image(test_n) & " FAILED => sum_s was " & integer'image(sum_s);
+        end if;
+        wait for 1 ns;
+        validating <= '0';
 
+        test_n <= 2;
         input_data <= (5 => '1', 4 => '1', 3 => '1', 2 => '1', 1 => '0', 0 => '0', others => '0');
+        wait until rising_edge(clk);
+        validating <= '1';
+        if sum_s = 4 then
+            report "Test " & integer'image(test_n) & " OK";
+        else
+            report "Test " & integer'image(test_n) & " FAILED => sum_s was " & integer'image(sum_s);
+        end if;
+        wait for 1 ns;
+        validating <= '0';
+
+        test_n <= 3;
+        input_data <= (others => '1');
+        wait until rising_edge(clk);
+        validating <= '1';
+        if sum_s = 72 then
+            report "Test " & integer'image(test_n) & " OK";
+        else
+            report "Test " & integer'image(test_n) & " FAILED => sum_s was " & integer'image(sum_s);
+        end if;
+        wait for 1 ns;
+        validating <= '0';
+
+
 
         wait for 10 ns;
         wait;
@@ -180,13 +242,19 @@ begin
 
     process is 
         variable my_sum_int : integer := 0;
+        variable my_sum_p_int : integer := 0;
     begin
         wait on my_sum;
         wait for 1 ns;
         my_sum_int := stdv_to_integer(my_sum);
+        my_sum_p_int := stdv_to_integer(my_sum_p);
         -- report "my_sum_int = " & integer'image(my_sum_int);
         if my_sum_int /= sum_s then
             assert false report "Test ternary adder FAILED => my_sum was " & integer'image(my_sum_int) & " != " & integer'image(sum_s) severity error;
+        end if;
+
+        if my_sum_p_int /= sum_s then
+            assert false report "Test popcounter FAILED => my_sum_p was " & integer'image(my_sum_p_int) & " != " & integer'image(sum_s) severity error;
         end if;
     end process;
 
