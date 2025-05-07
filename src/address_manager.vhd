@@ -53,6 +53,10 @@ begin
             en_out.en_AXI <= is_in_space(address, AXI) or is_in_space(address, ROM) or is_in_space(address, CREG_FILE);
             en_out.en_GPIO <= is_in_space(address, GPIO);
             en_out.en_I2C <= is_in_space(address, I2C);
+            en_out.en_BTPU_CREG <= is_in_space(address, BTPU_CREG_FILE);
+            en_out.en_BTPU_W_MEM <= is_in_space(address, BTPU_W_MEM);
+            en_out.en_BTPU_IO0_MEM <= is_in_space(address, BTPU_IO0_MEM);
+            en_out.en_BTPU_IO1_MEM <= is_in_space(address, BTPU_IO1_MEM);
         else 
             en_out <= (others => '0');
         end if ;
