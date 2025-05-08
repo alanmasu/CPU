@@ -7,7 +7,7 @@ use work.types_pkg.all;
 
 package memory_pkg is
     --MEMORY model
-    type memory_space_type_t is (ROM, CREG_FILE, RAM, IO, GPIO, I2C, AXI, RESERVED);
+    type memory_space_type_t is (ROM, CREG_FILE, RAM, IO, GPIO, I2C, AXI, BTPU_CREG_FILE, BTPU_W_MEM, BTPU_IO0_MEM, BTPU_IO1_MEM, RESERVED);
     type memory_addr_space_t is record
         lower_bound : unsigned(31 downto 0);
         upper_bound : unsigned(31 downto 0);
@@ -23,7 +23,11 @@ package memory_pkg is
         (lower_bound => x"40010000", upper_bound => x"4001FFFF", space_type => RAM),        --AXI DATA MEMORY (Mem upper bount = 0x40011FFF)
         (lower_bound => x"40020000", upper_bound => x"4002000F", space_type => GPIO),       --RISC-V GPIO
         (lower_bound => x"40020010", upper_bound => x"4002002F", space_type => I2C),        --RISC-V I2C
-        (lower_bound => x"40020030", upper_bound => x"7FFFFFFF", space_type => IO),         --RISC-V IO
+        (lower_bound => x"40020030", upper_bound => x"4002003F", space_type => BTPU_CREG_FILE),        --RISC-V I2C
+        (lower_bound => x"40030000", upper_bound => x"4003FFFF", space_type => BTPU_W_MEM),        --RISC-V I2C
+        (lower_bound => x"40040000", upper_bound => x"4004FFFF", space_type => BTPU_IO0_MEM),        --RISC-V I2C
+        (lower_bound => x"40050000", upper_bound => x"4005FFFF", space_type => BTPU_IO1_MEM),        --RISC-V I2C
+        (lower_bound => x"40060000", upper_bound => x"7FFFFFFF", space_type => IO),         --RISC-V IO
         (lower_bound => x"80000000", upper_bound => x"DFFFFFFF", space_type => RESERVED),   
         (lower_bound => x"E0000000", upper_bound => x"E02FFFFF", space_type => AXI),        --PS IO
         (lower_bound => x"E0300000", upper_bound => x"E0FFFFFF", space_type => RESERVED),

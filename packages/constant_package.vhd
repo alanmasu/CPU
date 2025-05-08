@@ -72,4 +72,24 @@ package constant_package is
     constant I2C_REG_LEN     : integer := 4;
     constant I2C_REG_LEN_O   : integer := 5;
 
+
+    -- BTPU Register File Names
+    constant BTPU_REG_CONTROL : integer := 0;
+        constant BTPU_CREG_START_BIT : integer := 0;
+        constant BTPU_CREG_BUSY_BIT  : integer := 1;
+        constant BTPU_CREG_OMEM_SEL_BIT : integer := 2;
+        constant BTPU_CREG_BRAM_PORT_SEL_BIT : integer := 3;
+        constant BTPU_CREG_ACC_CLEAR_BIT : integer := 4;  
+        constant BTPU_CREG_MULTIPLE_ACCUM_BIT : integer := 5;
+
+    constant BTPU_W_ADDR : integer := 1;  -- Weigts start address
+    constant BTPU_I_ADDR : integer := 2;  -- Input start address
+    constant BTPU_O_ADDR : integer := 3;  -- Output start address
+    constant BTPU_SIZE   : integer := 4;  -- Number of elements to accumulate
+    constant BTPU_ACCUM  : integer := 5;  -- Number of accumulations
+    constant BTPU_STATUS : integer := 6;  -- Status
+    constant BTPU_SIGN_CMP:integer := 7;  -- Sign comparison value    
+    
+
+
 end package ;

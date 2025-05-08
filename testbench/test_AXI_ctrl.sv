@@ -82,6 +82,16 @@ module test_AXI_ctrl( );
     wire [31:0] i2c_address_tb;
     wire i2c_rw_n_tb;
 
+    //For BTPU
+    wire [31:0] btpu_douta;
+    
+    logic btpu_web;
+    logic btpu_enb;
+    logic [31:0] btpu_addrb;
+    logic [31:0] btpu_dinb;
+    wire [31:0] btpu_doutb;
+    
+
 
     //Master vip agent
     axi_transaction                         wr_transaction;   
@@ -164,7 +174,7 @@ module test_AXI_ctrl( );
     assign SDA = sda_tb;
 
     //slave interface
-    slave_interface DUT4(
+    slave_interface slave_interface_inst(
         .i2c_sda(SDA),
         .i2c_scl(SCL),
         .res(reset),
@@ -173,6 +183,26 @@ module test_AXI_ctrl( );
         .i2c_data_tb(i2c_data_tb),
         .i2c_data_to_send(i2c_data_to_send_tb)
     );
+
+    //BTPU
+    BTPU DUT4(
+        .clk(clock),
+        .res(reset),
+        .hs_clk(clock),
+
+        .ena(en_out),
+        .wea(we_out),
+        .addra(address_out),
+        .dina(d_out),
+        .douta(btpu_douta),
+
+        .enb(btpu_enb),
+        .web(btpu_web),
+        .addrb(btpu_addrb),
+        .dinb(btpu_dinb),
+        .doutb(btpu_doutb)
+    );
+
 
     genvar i;
     generate
@@ -187,6 +217,10 @@ module test_AXI_ctrl( );
 
     always @(gpio_data_out) begin
         d_in.gpio_data = gpio_data_out;
+    end
+
+    always @(btpu_douta) begin
+        d_in.btpu_data = btpu_douta;
     end
 
     always @(posedge clock) begin
@@ -594,6 +628,15 @@ module test_AXI_ctrl( );
         end
         #1;
         validating = 1'b0;
+
+        $display("\n\nTesting BTPU...\n");
+        test_n = 0;
+        reset = 1'b0;
+        @ (posedge clock);
+        reset = 1'b1;
+        @ (posedge clock);
+
+        test_n = 1;
 
 
         // #50us;
