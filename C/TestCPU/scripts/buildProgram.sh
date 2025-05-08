@@ -1,1 +1,0 @@
-objdump -s $1 -j .text --endian=little | grep -Po '[0-9a-fA-F]{8}' | for l in $(cat); do echo "${l:6:2}${l:4:2}${l:2:2}${l:0:2}"; done > $2

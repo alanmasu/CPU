@@ -38,6 +38,7 @@ use work.types_pkg.all;
 entity memory_write_back is
     Port ( 
         clk, res, jmp, we_in, en_in: in STD_LOGIC;
+        is_axi_load : in STD_LOGIC;
         mem_opcode : in STD_LOGIC_VECTOR(2 downto 0);
         op_class : in STD_LOGIC_VECTOR (4 downto 0);
         npc_in : in UNSIGNED (31 downto 0);
@@ -93,6 +94,12 @@ architecture Behavioral of memory_write_back is
         en_GPIO => '0',
         en_I2C => '0'
     );
+    signal en_bus_reg : en_bus_t := (
+        en_mem => '0', 
+        en_AXI => '0',
+        en_GPIO => '0',
+        en_I2C => '0'
+    );
     signal we, mem_wea : std_logic_vector(3 downto 0) := (others => '0');
 begin
     memory : data_memory
@@ -137,11 +144,11 @@ begin
         if op_class = "01000" then  --STORE
             case( mem_opcode ) is
                 when "010" =>   --SW
-                    dato := dato sll (0 - to_integer(unsigned(byte_address))) * 8;
+                    dato := dato sll (to_integer(unsigned(byte_address))) * 8;
                 when "001" =>   --SH
-                    dato := dato sll (2 - to_integer(unsigned(byte_address))) * 8;
+                    dato := dato sll (to_integer(unsigned(byte_address))) * 8;
                 when "000" =>   --SB
-                    dato := dato sll (3 - to_integer(unsigned(byte_address))) * 8;
+                    dato := dato sll (to_integer(unsigned(byte_address))) * 8;
                 when others =>
                     dato := dato;
             end case ;
@@ -159,11 +166,11 @@ begin
             if op_class = "01000" then  --STORE
                 case (mem_opcode) is
                     when "010" => --SW (32 bits) "1111"
-                        wea := "1111" srl to_integer(unsigned(byte_address)); 
-                    when "001" => --SH (16 bits) "1100"
-                        wea := "1100" srl to_integer(unsigned(byte_address));
-                    when "000" => --SB (8 bits)  "1000"
-                        wea := "1000" srl to_integer(unsigned(byte_address));
+                        wea := "1111" sll to_integer(unsigned(byte_address)); 
+                    when "001" => --SH (16 bits) "0011"
+                        wea := "0011" sll to_integer(unsigned(byte_address));
+                    when "000" => --SB (8 bits)  "0001"
+                        wea := "0001" sll to_integer(unsigned(byte_address));
                     when others => 
                         wea := "0000";
                 end case;
@@ -172,10 +179,29 @@ begin
         end if ;
     end process ; -- mem_wea_combinatory
 
+    ena_reg_pro : process( clk, res ) begin
+        if res = '0' then
+            en_bus_reg <= (
+                en_mem => '0',
+                en_AXI => '0',
+                en_GPIO => '0',
+                en_I2C => '0'
+            );
+        elsif rising_edge(clk) then
+            en_bus_reg <= en_bus;
+            if is_axi_load = '1' then
+                en_bus_reg <= en_bus_reg;
+            end if ;
+        end if ;
+        
+    end process ; -- ena_reg_pro
+
     --Source selection and sign extension
-    sign_extension : process( en_bus, mem_out, mem_opcode, op_class, byte_address, d_in ) is
+    sign_extension : process( en_bus_reg, mem_out, mem_opcode, op_class, byte_address, d_in ) is
         variable dato : unsigned(31 downto 0);
+        variable extensionBound : integer;
     begin
+        extensionBound := 32 - to_integer(unsigned(byte_address)) * 8;
         --Source seletion
         -- case( en_bus ) is
         --     when "01" => --MEMORY 
@@ -185,29 +211,42 @@ begin
         --     when others =>
         --         dato := dato;
         -- end case ;
-        if en_bus.en_mem = '1' then
+        if en_bus_reg.en_mem = '1' then
             dato := unsigned(mem_out);
-        elsif en_bus.en_AXI then
+        elsif en_bus_reg.en_AXI then
             dato := unsigned(d_in.axi_data);
-        elsif en_bus.en_GPIO then
+        elsif en_bus_reg.en_GPIO then
             dato := unsigned(d_in.GPIO_data);
+        elsif en_bus_reg.en_I2C then
+            dato := unsigned(d_in.I2C_data);
         end if ;
 
         --Sign extension
         if op_class = "00100" then   --LOAD
             case( mem_opcode ) is
                 when "010" =>   --LW
-                    dato := dato sll to_integer(unsigned(byte_address)) * 8;
+                    dato := dato srl to_integer(unsigned(byte_address)) * 8;
+                    if(extensionBound /= 32) then
+                        dato(31 downto extensionBound) := (others => dato(extensionBound - 1));
+                    end if;
                 when "001" =>   --LH
-                    dato := dato srl (2 - to_integer(unsigned(byte_address))) * 8;
+                    dato := dato srl (to_integer(unsigned(byte_address))) * 8;
+                    if(extensionBound < 16) then
+                        dato(15 downto extensionBound) := (others => dato(extensionBound - 1));
+                    end if;
                     dato(31 downto 16) := (others => dato(15));
                 when "101" =>   --LHU
-                    dato := dato srl (2 - to_integer(unsigned(byte_address))) * 8;
+                    dato := dato srl (to_integer(unsigned(byte_address))) * 8;
+                    if(extensionBound < 16) then
+                        dato(15 downto extensionBound) := (others => '0');
+                    end if;
+                    dato(31 downto 16) := (others => '0');
                 when "000" =>   --LB
-                    dato := dato srl (3 - to_integer(unsigned(byte_address))) * 8;
+                    dato := dato srl (to_integer(unsigned(byte_address))) * 8;
                     dato(31 downto 8) := (others => dato(7));
                 when "100" =>   --LBU
-                    dato := dato srl (3 - to_integer(unsigned(byte_address))) * 8;
+                    dato := dato srl (to_integer(unsigned(byte_address))) * 8;
+                    dato(31 downto 8) := (others => '0');
                 when others =>
                     dato := dato;
             end case ;
