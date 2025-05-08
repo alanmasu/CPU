@@ -369,7 +369,7 @@ module test_GPIO_prog_on_CPU();
       mtestQOS = 0; 
 
       //Imposto la CPU in RUN
-      mtestADDR = 32'h40001000; 
+      mtestADDR = 32'h40004000; 
       mtestWDataL[31:0] = 32'b1;   
       mst_agent_0.AXI4LITE_WRITE_BURST( 
         mtestADDR, 

@@ -1,7 +1,7 @@
 import argparse
 from elftools.elf.elffile import ELFFile
 
-def extract_text_section(file_path):
+def extract_text_section(file_path, programName):
     try:
         with open(file_path, 'rb') as f:
             elf = ELFFile(f)
@@ -23,7 +23,7 @@ def extract_text_section(file_path):
                 instructions.append(hex_word)
             
             # Genera l'array in formato SystemVerilog
-            systemverilog_array = "logic [31:0] data_array [] = '{\n"
+            systemverilog_array = "logic [31:0] " + programName + " [] = '{\n"
             systemverilog_array += ',\n'.join(f"    32'h{instr}" for instr in instructions)
             systemverilog_array += "\n};"
             
@@ -37,10 +37,11 @@ def extract_text_section(file_path):
 def main():
     parser = argparse.ArgumentParser(description="Estrai la sezione .text da un file ELF e generala come array SystemVerilog.")
     parser.add_argument("file", help="Percorso del file ELF da elaborare")
+    parser.add_argument("program", help="Nome della variabile creata nel file .c")
     args = parser.parse_args()
     
     # Chiama la funzione con il file specificato dall'utente
-    extract_text_section(args.file)
+    extract_text_section(args.file, args.program)
 
 if __name__ == "__main__":
     main()

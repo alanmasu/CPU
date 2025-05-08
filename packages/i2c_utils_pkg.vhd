@@ -72,9 +72,12 @@ package body i2c_utils_pkg is
     --! @return [unsigned] Counter value 
     function freq2count_u(f : integer; f_source : integer := 100000) return unsigned is
         variable counter : integer := 0;
+        variable counter_u : unsigned (freq2dim(f, f_source)-1 downto 0) := (others => '0');
     begin 
         counter := freq2count(f, f_source);
-        return to_unsigned(counter, freq2dim(f, f_source));
+        counter_u := to_unsigned(counter, freq2dim(f, f_source));
+        report integer'image(to_integer(counter_u));
+        return counter_u;
     end function;
 
     --@brief Frequency to dim std_logic_vector dimension

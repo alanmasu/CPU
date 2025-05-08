@@ -4,8 +4,9 @@ OBJDUMP = riscv32-unknown-elf-objdump
 READELF = riscv32-unknown-elf-readelf
 
 # File
-SRC     = src/test_CPU.s
-OUT     = bin/test_CPU.elf
+SRC     = src/simpleUART.s
+OUT     = bin/simpleUART.elf
+
 LINKER  = linker_script.ld
 
 # Flags di compilazione e linking

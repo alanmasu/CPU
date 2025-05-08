@@ -19,9 +19,68 @@ package constant_package is
     constant opcode_alu_op : std_logic_vector(6 downto 0) := "0110011";
 
     -- Control Registers
-    constant CREG_CTR : integer := 0;
-    constant CREG_RUN_BIT : integer := 0;
-    constant CREG_RES_BIT : integer := 1;
+    constant CREG_CTR               : integer := 0;
+        constant CREG_RUN_BIT       : integer := 0;
+        constant CREG_RES_BIT       : integer := 1;
+        constant CREG_RUN_C_BIT     : integer := 2;
+
+    constant CREG_PC                : integer := 1;
+    constant CREG_STATE             : integer := 2;
+    constant CREG_INST              : integer := 3;
+
+    constant CREG_IO                : integer := 4;
+        constant CREG_BTN_UP_BIT    : integer := 0;
+        constant CREG_BTN_DOWN_BIT  : integer := 1;
+        constant CREG_BTN_LEFT_BIT  : integer := 2;
+        constant CREG_BTN_RIGHT_BIT : integer := 3;
+        constant CREG_SWITCH0_BIT   : integer := 4;
+        constant CREG_SWITCH1_BIT   : integer := 5;
+        
+        constant CREG_LED0_BIT      : integer := 24;
+        constant CREG_LED1_BIT      : integer := 25;
+        constant CREG_LED2_BIT      : integer := 26;
+
+    constant CREG_OLED_CTR          : integer := 5;
+        constant CREG_OLED_SELECT_BIT1 : integer := 0;
+        constant CREG_OLED_SELECT_BIT2 : integer := 1;
+        
+    constant CREG_OLED_DATA         : integer := 6;
+
+    -- Registers Reset Values
+    constant CREG_RESET_VALUE : control_reg_t := (
+        0  => x"00000002", -- CREG_CTR [2:0] = run_val [R] | res_val [R|W] | run_c_val [R/W]
+        1  => x"00000000", -- CREG_PC
+        2  => x"00000000", -- CREG_STATE
+        3  => x"00000000", -- CREG_INST
+        4  => x"00000000", -- CREG_IO [31:29] = [LEDs] | CREG_IO[3:0] = BTN_R | BTN_L | BTN_D | BTN_U
+        5  => x"00000000", -- CREG_OLED_CTR [1:0] = oled_select [2:1] 
+        6  => x"00000000", -- CREG_OLED_DATA
+        7  => x"00000000", --
+        8  => x"00000000", --
+        9  => x"00000000", --
+        10 => x"00000000", --
+        11 => x"00000000", --
+        12 => x"00000000", --
+        13 => x"00000000", --
+        14 => x"00000000", --
+        15 => x"00000000", --
+        16 => x"00000000", -- 
+        17 => x"00000000", -- 
+        18 => x"00000000", -- 
+        19 => x"00000000", -- 
+        20 => x"00000000", -- 
+        21 => x"00000000", -- 
+        22 => x"00000000", --
+        23 => x"00000000", -- 
+        24 => x"00000000", --
+        25 => x"00000000", -- 
+        26 => x"00000000", -- 
+        27 => x"00000000", -- 
+        28 => x"00000000", -- 
+        29 => x"00000000", -- 
+        30 => x"00000000",  -- 
+        31 => x"00000000"  -- 
+    );
 
     -- Registers Reset Values
     constant REG_FILE_RESET_VALUE : ram_array := (

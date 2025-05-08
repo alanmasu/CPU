@@ -48,6 +48,7 @@ architecture Behavioral of test_GPIO is
     --TESTING
     signal esito : std_logic := '0';    
     signal GPIO_s : std_logic_vector(7 downto 0);
+    signal test_N : integer := 0;
 begin
     GPIO_s <= GPIO(7 downto 0);
 
@@ -77,10 +78,11 @@ begin
     test_pro : process is
     begin
         wait until res = '1'; -- wait for reset
+        
         -- TESTING INPUT
+        test_N <= 1;
         GPIO <= (others => '0');
         wait for 2 ns;
-
         if(GPIO = x"00000000") then
             esito <= '1';
             report "Test 1 OK";
@@ -88,12 +90,11 @@ begin
             esito <= '0';
             report "Test 1 FAILED";
         end if;
-
         wait for 8 ns;
-        
+
+        test_N <= 2;
         GPIO <= (others => '1');
         wait for 2 ns;
-
         if(GPIO = x"ffffffff") then
             esito <= '1';
             report "Test 2 OK";
@@ -104,6 +105,7 @@ begin
         wait for 8 ns;
 
         -- -- TESTING OUTPUT
+        test_N <= 3;
         ena <= '1';
         wea <= "0001";
         address <= x"00000004";
@@ -127,7 +129,9 @@ begin
             report "Test 3 FAILED";
         end if;
         wait for 8 ns;
+        
             -- Setting GPIO 0 as output (and releasing it from controll of the Testbench)
+        test_N <= 4;
         address <= x"00000004";
         wea <= "0001";
         d_in <= (1 => '1', 0 => '1', others => '0');
@@ -140,14 +144,14 @@ begin
             esito <= '0';
             report "Test 4 FAILED";
         end if; 
+        wait for 8 ns;
         
             -- Testing READING the driver
             --   Reading state register
-        wait for 8 ns;
+        test_N <= 5;
         address <= x"00000000";
         wea <= "0000";
         wait for 2 ns;
-
         if d_out = x"fffffffc" then
             esito <= '1';
             report "Test 5 OK";
@@ -155,12 +159,12 @@ begin
             esito <= '0';
             report "Test 5 FAILED";
         end if;
+        wait for 8 ns;
             
             --  Reading direction register
-        wait for 8 ns;
+        test_N <= 6;
         address <= x"00000004";
         wait for 2 ns;
-
         if d_out = x"00000003" then
             esito <= '1';
             report "Test 6 OK";
@@ -168,12 +172,12 @@ begin
             esito <= '0';
             report "Test 6 FAILED";
         end if;
+        wait for 8 ns;
 
             --  Reading output register
-        wait for 8 ns;
+        test_N <= 7;
         address <= x"00000008";
         wait for 2 ns;
-
         if d_out(1 downto 0) = "00" then
             esito <= '1';
             report "Test 7 OK";
@@ -181,9 +185,10 @@ begin
             esito <= '0';
             report "Test 7 FAILED";
         end if;
+        wait for 8 ns;
 
             -- TESTING ena functionality
-        wait for 8 ns;
+        test_N <= 8;
         ena <= '0';
         address <= x"00000000";
         wait for 2 ns;
@@ -195,11 +200,11 @@ begin
             esito <= '0';
             report "Test 8 FAILED";
         end if;
-
         wait for 8 ns;
+
+        test_N <= 9;
         GPIO(2) <= '0';
         wait for 2 ns;
-
         if GPIO = x"fffffff8" and d_out(2) = '0' then
             esito <= '1';
             report "Test 9 OK";
@@ -207,64 +212,7 @@ begin
             esito <= '0';
             report "Test 9 FAILED";
         end if;
-
-        wait;
-        -- GPIO <= "Z0";
-        -- dir(1) <= '1';      -- GPIO 1 is output
-        -- gpio_reg(1) <= '0'; -- GPIO 1 is LOW
-        -- wait for 2 ns;
-
-        -- if(GPIO = "00") then
-        --     esito <= '1';
-        --     report "Test 3 OK";
-        -- else
-        --     esito <= '0';
-        --     report "Test 3 FAILED";
-        -- end if;
-
-        -- wait for 8 ns;
-        
-        -- gpio_reg(1) <= '1';  -- GPIO 1 is HIGH
-        -- wait for 2 ns;
-
-        -- if(GPIO = "10") then
-        --     esito <= '1';
-        --     report "Test 4 OK";
-        -- else
-        --     esito <= '0';
-        --     report "Test 4 FAILED";
-        -- end if;
-
-        -- -- TESTING MIXED
-        -- wait for 8 ns;
-
-        -- GPIO(0) <= '1';     -- GPIO 0 is HIGH
-        -- gpio_reg(1) <= '0'; -- GPIO 1 is LOW
-
-        -- wait for 2 ns;
-        -- if(GPIO = "00") then
-        --     esito <= '1';
-        --     report "Test 5 OK";
-        -- else
-        --     esito <= '0';
-        --     report "Test 5 FAILED";
-        -- end if;
-
-        -- wait for 8 ns;
-
-        -- gpio_reg(1) <= '1';  -- GPIO 1 is HIGH
-        -- wait for 2 ns;
-
-        -- if(GPIO = "11") then
-        --     esito <= '1';
-        --     report "Test 6 OK";
-        -- else
-        --     esito <= '0';
-        --     report "Test 6 FAILED";
-        -- end if;
-
         
         wait;
     end process ; -- test_pr
-
 end Behavioral;

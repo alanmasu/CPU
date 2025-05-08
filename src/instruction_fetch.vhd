@@ -46,7 +46,7 @@ entity instruction_fetch is
         clkb : IN STD_LOGIC;
         enb : IN STD_LOGIC;
         web : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
-        addrb : IN STD_LOGIC_VECTOR(9 DOWNTO 0);
+        addrb : IN STD_LOGIC_VECTOR(11 DOWNTO 0);
         dinb : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
         doutb : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
     );
@@ -58,13 +58,13 @@ architecture Behavioral of instruction_fetch is
         clka : IN STD_LOGIC;
         ena : IN STD_LOGIC;
         wea : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
-        addra : IN STD_LOGIC_VECTOR(9 DOWNTO 0);
+        addra : IN STD_LOGIC_VECTOR(11 DOWNTO 0);
         dina : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
         douta : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
         clkb : IN STD_LOGIC;
         enb : IN STD_LOGIC;
         web : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
-        addrb : IN STD_LOGIC_VECTOR(9 DOWNTO 0);
+        addrb : IN STD_LOGIC_VECTOR(11 DOWNTO 0);
         dinb : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
         doutb : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
     );
@@ -79,7 +79,7 @@ begin
         clka => clk,
         ena => pc_load,
         wea => (others => '0'),
-        addra => std_logic_vector(pc_in(11 downto 2)),
+        addra => std_logic_vector(pc_in(13 downto 2)),
         dina => (others => '0'),
         douta => mem_out,
         clkb => clkb,

@@ -38,13 +38,15 @@ use work.types_pkg.all;
 
 entity CPU is
     generic (
-		C_M_AXI_ADDR_WIDTH	: integer	:= 32;
-		C_M_AXI_DATA_WIDTH	: integer	:= 32;
-        RUN_BLINK_COUNTER_SIZE : integer := 26
+		C_M_AXI_ADDR_WIDTH	   : integer	:= 32;
+		C_M_AXI_DATA_WIDTH	   : integer	:= 32;
+        RUN_BLINK_COUNTER_SIZE : integer    := 26;
+        IS_STANDALONE          : boolean    := false
 	);
     Port ( 
-        clk : IN std_logic;
-        res_in : IN std_logic;
+        clk         : IN std_logic;
+        clk_100MHz  : IN std_logic;
+        res_in      : IN std_logic;
 
         --S_AXI_I interface
         s_axi_i_awaddr : IN STD_LOGIC_VECTOR(19 DOWNTO 0);
@@ -118,19 +120,44 @@ entity CPU is
 
         -- RUN/RES
         run_in          : IN STD_LOGIC;
-        run_out         : OUT STD_LOGIC
+        run_out         : OUT STD_LOGIC;
+
+        -- Buttons
+        btn_up          : IN STD_LOGIC;
+        btn_down        : IN STD_LOGIC;
+        btn_left        : IN STD_LOGIC;
+        btn_right       : IN STD_LOGIC;
+        btn_center      : IN STD_LOGIC;
+        switches        : IN STD_LOGIC_VECTOR(1 downto 0);
+
+        -- LEDs
+        leds            : OUT STD_LOGIC_VECTOR(2 downto 0);
+
+        -- OLED Display
+        oled_select0 : in std_logic;
+        oled_sdin   : out std_logic;
+        oled_sclk   : out std_logic;
+        oled_dc     : out std_logic;
+        oled_res    : out std_logic;
+        oled_vbat   : out std_logic;
+        oled_vdd    : out std_logic
+        
     );
 end CPU;
 
 architecture Behavioral of CPU is
     
+    -- MACCHINA A STATI
     signal state : state_type := fetch;
+    signal is_axi_load : std_logic := '0';
+    signal rd_addr_out_reg : std_logic_vector(4 downto 0) := (others => '0');
+    signal op_class_reg : std_logic_vector(4 downto 0) := (others => '0');
+    signal mem_opcode_reg : std_logic_vector(2 downto 0) := (others => '0');
 
     -- RUN/RES
     signal res          : std_logic := '0';
     signal res_tmp      : std_logic := '0';
     signal run          : std_logic := '0';
-    signal run_reg      : std_logic := '0';
 
     -- BLINK
     signal blink_counter : unsigned(RUN_BLINK_COUNTER_SIZE-1 downto 0) := (others => '0');
@@ -193,7 +220,8 @@ architecture Behavioral of CPU is
     --Decode - MSF 
     signal regFile_we : std_logic := '0';
     --Decode - IN | Memory Writeback - OUT
-    signal rd_addr_in : std_logic_vector(4 downto 0) := (others => '0');
+    signal rd_addr_in : std_logic_vector(4 downto 0) := (others => '0');    -- Memory Writeback - OUT
+    signal rd_addr_in_decode : std_logic_vector(4 downto 0) := (others => '0'); -- Decode - IN
     signal rd_value_in : std_logic_vector(31 downto 0) := (others => '0');
     --Decode - OUT | Execute - IN
     signal rs1_value, rs2_value, immediate : std_logic_vector(31 downto 0) := (others => '0');
@@ -205,7 +233,6 @@ architecture Behavioral of CPU is
     signal op_class_decoded : std_logic_vector(4 downto 0) := (others => '0');
 
     --Execute - MSF
-    --
     --Execute - OUT | Memory Writeback - IN
     signal result, result_reg : std_logic_vector(31 downto 0) := (others => '0');
     signal npc_executed : unsigned(31 downto 0) := (others => '0');
@@ -217,6 +244,8 @@ architecture Behavioral of CPU is
 
     --Memory Writeback - IN
     signal d_bus_in : peripheral_data_t;
+    signal mem_wb_op_class : std_logic_vector(4 downto 0) := (others => '0');
+    signal mem_wb_mem_opcode : std_logic_vector(2 downto 0) := (others => '0');
 
     --Memory Writeback - OUT | Peripheral - IN
     signal mem_wb_en_out : en_bus_t := (
@@ -230,7 +259,7 @@ architecture Behavioral of CPU is
     signal mem_wb_addr_out : std_logic_vector(31 downto 0) := (others => '0');
     signal mem_wb_data_out : std_logic_vector(31 downto 0) := (others => '0');
 
-    --BRAM 
+        --BRAM 
     signal bram_rst_a_d : STD_LOGIC;
     signal bram_clk_a_d : STD_LOGIC;
     signal bram_en_a_d : STD_LOGIC;
@@ -238,25 +267,28 @@ architecture Behavioral of CPU is
     signal bram_addr_a_d : STD_LOGIC_VECTOR(19 DOWNTO 0);
     signal bram_wrdata_a_d : STD_LOGIC_VECTOR(31 DOWNTO 0);
     signal bram_rddata_a_d : STD_LOGIC_VECTOR(31 DOWNTO 0);
-    --Execute - MSF
+        --Execute - MSF
     signal mem_we : std_logic := '0';
     signal mem_ena : std_logic := '0';
 
-    --AXI Memory Controller
+        --AXI Memory Controller
     signal AXI_read_data : std_logic_vector(31 downto 0) := (others => '0');
     signal AXI_stall : std_logic := '0';
 
     --Control Register File
     signal control_reg_ena : std_logic := '0';
-    type control_reg_t is array (0 to 31) of std_logic_vector(31 downto 0);
     signal control_reg : control_reg_t := (others => (others => '0'));
+
+    --OLED
+    signal display_in : std_logic_vector(31 downto 0) := (others => '0');
+    signal oled_select : std_logic_vector(2 downto 0) := (others => '0');
 
 begin
     --Fetch
     axi_bram_controller_i: axi_bram_ctrl_0
     PORT MAP (
         s_axi_aclk      => clk,
-        s_axi_aresetn   => res,
+        s_axi_aresetn   => res_in,
         s_axi_awaddr    => s_axi_i_awaddr,
         s_axi_awprot    => s_axi_i_awprot,
         s_axi_awvalid   => s_axi_i_awvalid,
@@ -299,7 +331,7 @@ begin
         clkb => bram_clk_a_i,
         enb => instr_enb,
         web => bram_we_a_i,
-        addrb => bram_addr_a_i(11 downto 2),
+        addrb => bram_addr_a_i(13 downto 2),
         dinb => bram_wrdata_a_i,
         doutb => instr_doutb
     );
@@ -330,7 +362,7 @@ begin
         pc_in => pc_fetched,
         npc_in => npc_fetched,
         rd_value_in => rd_value_in,
-        rd_addr_in => rd_addr_in
+        rd_addr_in => rd_addr_in_decode
     );
     
     --Execute
@@ -368,7 +400,7 @@ begin
     axi_bram_controller_d: axi_bram_ctrl_0
     PORT MAP (
         s_axi_aclk      => clk,
-        s_axi_aresetn   => res,
+        s_axi_aresetn   => res_in,
         s_axi_awaddr    => s_axi_d_awaddr,
         s_axi_awprot    => s_axi_d_awprot,
         s_axi_awvalid   => s_axi_d_awvalid,
@@ -412,13 +444,14 @@ begin
         jmp => jmp_executed,
         we_in => mem_we,
         en_in => mem_ena,
-        mem_opcode => mem_opcode_executed,
-        op_class => op_class_executed,
+        mem_opcode => mem_wb_mem_opcode,
+        op_class => mem_wb_op_class,
         npc_in => npc_executed,
         alu_resoult => result,
         alu_resoult_reg => result_reg,
         rs2_value => rs2_value_executed,
         rd_addr_in => rd_addr_executed,
+        is_axi_load => is_axi_load,
 
         --Peripheral
         en_out => mem_wb_en_out,
@@ -479,7 +512,8 @@ begin
         wea => mem_wb_we_out,
         d_in => mem_wb_data_out,
         d_out => d_bus_in.GPIO_data,
-        GPIO => GPIO
+        GPIO => GPIO,
+        gpio_state_dbg => gpio_state_dbg
     );
 
     -- I2C
@@ -499,6 +533,21 @@ begin
         sda => SDA
     );
 
+    -- OLED Display
+    oled_display : entity work.oled_driver
+    port map(
+        clock => clk_100MHz,
+        reset => res_in,
+        poweroff => btn_center,
+        display_in => display_in,
+        oled_sdin => oled_sdin,
+        oled_sclk => oled_sclk,
+        oled_dc => oled_dc,
+        oled_res => oled_res,
+        oled_vbat => oled_vbat,
+        oled_vdd => oled_vdd
+    );
+    
     --Control Register File
         --Enable signals for Instruction Memory PortB and Control Register File
     ena_comb : process( bram_addr_a_i, bram_en_a_i) begin
@@ -514,7 +563,7 @@ begin
         if(check_bram_address(bram_addr_a_i, ROM) = '1') then
             bram_rddata_a_i <= instr_doutb;
         elsif(check_bram_address(bram_addr_a_i, CREG_FILE) = '1') then
-            reg_addr := to_integer(unsigned(bram_addr_a_i(4 downto 0)));
+            reg_addr := to_integer(unsigned(bram_addr_a_i(6 downto 2)));
             bram_rddata_a_i <= control_reg(reg_addr);
         end if;
         
@@ -523,15 +572,13 @@ begin
         --Control Register File Implementation
     control_reg_file : process( clk, res) is 
         variable reg_addr : integer;
+        variable state_integer : integer := 0;
     begin
         if(res = '0') then
-            control_reg <= (
-                0 => (1 => '1', others => '0'), -- CREG_CTR[RES_BIT] = 1
-                others => (others => '0')
-            );
+            control_reg <= CREG_RESET_VALUE;
         elsif(rising_edge(clk)) then
             if(control_reg_ena = '1') then
-                reg_addr := to_integer(unsigned(bram_addr_a_i(4 downto 0)));
+                reg_addr := to_integer(unsigned(bram_addr_a_i(6 downto 2)));
                 if (bram_we_a_i(0) = '1') then
                     control_reg(reg_addr)(7 downto 0) <= bram_wrdata_a_i(7 downto 0);
                 end if;
@@ -545,12 +592,27 @@ begin
                     control_reg(reg_addr)(31 downto 24) <= bram_wrdata_a_i(31 downto 24);
                 end if;
             end if;
+            state_integer := state_type'POS(state);
+            control_reg(CREG_CTR)(CREG_RUN_C_BIT) <= run;
+            control_reg(CREG_PC) <= std_logic_vector(pc_fetched);
+            control_reg(CREG_STATE) <= std_logic_vector(to_unsigned(state_integer,32));
+            control_reg(CREG_INST) <= instruction_fetched;
+            --IO
+            control_reg(CREG_IO)(CREG_BTN_UP_BIT) <= btn_up;
+            control_reg(CREG_IO)(CREG_BTN_DOWN_BIT) <= btn_down;
+            control_reg(CREG_IO)(CREG_BTN_LEFT_BIT) <= btn_left;
+            control_reg(CREG_IO)(CREG_BTN_RIGHT_BIT) <= btn_right;
+            control_reg(CREG_IO)(CREG_SWITCH0_BIT) <= switches(0);
+            control_reg(CREG_IO)(CREG_SWITCH1_BIT) <= switches(1);
+
         end if;
     end process ; -- control_reg_file
     
     -- Control Register File Signals
       -- Run
-    run <= control_reg(CREG_CTR)(CREG_RUN_BIT) and run_in;
+    run <=  control_reg(CREG_CTR)(CREG_RUN_BIT) and run_in when IS_STANDALONE = false else
+            control_reg(CREG_CTR)(CREG_RUN_BIT) or  run_in when IS_STANDALONE = true else
+            '0';
       -- Reset
     res <= res_tmp and res_in;
     reset_pro : process( clk ) begin
@@ -564,6 +626,39 @@ begin
         end if;
     end process ; -- reset_pro
 
+    -- PS-PL GPIO
+    leds(0) <= control_reg(CREG_IO)(CREG_LED0_BIT);
+    leds(1) <= control_reg(CREG_IO)(CREG_LED1_BIT);
+    leds(2) <= control_reg(CREG_IO)(CREG_LED2_BIT);
+
+    -- OLED Display
+    oled_select(2 downto 1) <= control_reg(CREG_OLED_CTR)(1 downto 0);
+    oled_select(0) <= oled_select0;
+
+    display_in_comb : process( 
+        oled_select,
+        pc_fetched, 
+        instruction_fetched,
+        control_reg(CREG_OLED_DATA),
+        state_dbg_sig
+    ) is 
+        variable index : integer;
+    begin
+        index := to_integer(unsigned(oled_select));
+        case( index ) is
+            when 0 =>
+                display_in <= std_logic_vector(pc_fetched);
+            when 1 =>
+                display_in <= instruction_fetched;
+            when 2 =>
+                display_in(2 downto 0) <= state_dbg_sig;
+                display_in(31 downto 3) <= (others => '0');
+            when 3 =>
+                display_in <= control_reg(CREG_OLED_DATA);
+            when others =>
+                display_in <= (others => '0');
+        end case ;
+    end process ; -- display_in_comb
 
     ------------------- Control Unit -------------------
     process(clk, res, run) begin
@@ -592,11 +687,42 @@ begin
         end if;
     end process;
 
+    rd_addr_pro : process( clk, res ) begin
+        if(res = '0') then
+            rd_addr_out_reg <= (others => '0');
+            op_class_reg <= (others => '0');
+            mem_opcode_reg <= (others => '0');
+        elsif(rising_edge(clk)) then 
+            case( is_axi_load ) is
+                when '0' =>
+                    if state = execute and op_class_executed = "00100" and mem_wb_en_out.en_AXI = '1' then 
+                        rd_addr_out_reg <= rd_addr_executed;
+                        op_class_reg <= op_class_executed;
+                        mem_opcode_reg <= mem_opcode_executed;
+                        is_axi_load <= '1';
+                    end if ;
+                when '1' =>
+                    if AXI_stall = '0' then
+                        is_axi_load <= '0';
+                    end if ;
+                when others =>
+                    is_axi_load <= '0';
+            end case ;
+        end if;
+    end process ; -- rd_addr_pro
+
+    rd_addr_in_decode   <= rd_addr_in           when is_axi_load = '0' else rd_addr_out_reg;
+    mem_wb_op_class     <= op_class_executed    when is_axi_load = '0' else op_class_reg;
+    mem_wb_mem_opcode   <= mem_opcode_executed  when is_axi_load = '0' else mem_opcode_reg;
+
     ena_mealy : process( state, AXI_stall, run, op_class_decoded ) begin
         if run = '1' then
             case state is
                 when idle =>
                     pc_load <= '1';
+                    mem_we <= '0';
+                    mem_ena <= '0';
+                    regFile_we <= '0';
                 when execute =>
                     pc_load <= '1';
                     case (op_class_decoded) is
@@ -607,7 +733,7 @@ begin
                             mem_ena <= '1';
                         when "00100" => --Load
                             mem_ena <= '1';
-                            regFile_we <= '1';
+                            regFile_we <= '0';
                         when "00001" => --Jump 
                             regFile_we <= '1';   
                         when others =>
@@ -624,7 +750,7 @@ begin
                                 mem_we <= '1';
                                 mem_ena <= '1';
                             when "00100" => --Load
-                                mem_ena <= '1';
+                                mem_ena <= '0';
                                 regFile_we <= '1';
                             when "00001" => --Jump 
                                 regFile_we <= '1';   
@@ -633,10 +759,14 @@ begin
                                 mem_we <= '0';
                                 mem_ena <= '0';                                   
                         end case;
+                        if is_axi_load = '1' then
+                            regFile_we <= '1';
+                        end if;
                     elsif AXI_stall = '1' then
                         pc_load <= '0';
                         regFile_we <= '0';
                         mem_we <= '0';
+                        mem_ena <= '0';                        
                     end if ;
                 when others => 
                     pc_load <= '0';
@@ -648,18 +778,19 @@ begin
             pc_load <= '0';
             regFile_we <= '0';
             mem_we <= '0';  
+            mem_ena <= '0';
         end if ;
     end process ; -- ena_mealy
 
     -- Alive LED / run_out
-    blink_counter_pro : process( clk, res, run ) is
+    blink_counter_pro : process( clk, res) is
         constant MAX : unsigned(RUN_BLINK_COUNTER_SIZE-1 downto 0) := (others => '1');
     begin
         if(res = '0') then
             blink_counter <= (others => '0');
             alive_led <= '0';
-        elsif(run = '1') then
-            if rising_edge(clk) then
+        elsif rising_edge(clk) then
+            if  run = '1' then
                 if blink_counter = MAX then
                     blink_counter <= (others => '0');
                 else
@@ -668,10 +799,10 @@ begin
                 if(blink_counter = MAX) then
                     alive_led <= not alive_led;
                 end if;
+            else 
+                blink_counter <= (others => '0');
+                alive_led <= '0';
             end if;
-        else 
-            blink_counter <= (others => '0');
-            alive_led <= '0';
         end if;            
     end process ; -- blink_counter_pro
 

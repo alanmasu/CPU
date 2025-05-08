@@ -152,6 +152,9 @@ architecture implementation of AXI_memory_controller is
 
 	signal stall_int : std_logic := '0';
 
+	-- WE registered
+	signal we_reg : std_logic_vector(3 downto 0);
+
 begin
 	-- I/O Connections assignments
 
@@ -179,14 +182,20 @@ begin
     --Signal to indicate that the values are not ready                                
     --stall <= '0' when read_state = idle and awrite_state = idle and dwrite_state = idle else '1';
     stall_pro : process( M_AXI_ACLK, M_AXI_ARESETN ) begin
-		if M_AXI_ARESETN = '0' then
-			stall_int <= '0';
-		elsif rising_edge(M_AXI_ACLK) then
-			if stall_int = '0' then
+		if rising_edge(M_AXI_ACLK) then
+		    if M_AXI_ARESETN = '0' then
+			    stall_int <= '0';
+			elsif stall_int = '0' then
 				stall_int <= en;
+				we_reg <= we;
 			elsif stall_int = '1' then
 				if read_state = idle and awrite_state = idle and dwrite_state = idle then
-					stall_int <= '0';
+					if we_reg = "0000" then
+						stall_int <= '0';
+					elsif we_reg /= "0000" and axi_bready = '1' then
+						stall_int <= '0';
+					end if ;
+                    -- stall_int <= '0';
 				end if ;
 			end if ;
 		end if ;
@@ -210,12 +219,15 @@ begin
 						if en = '1' and we = "0000" and stall_int = '0' then
 							--read_data <= (others => '0');
 							read_state <= write_addr;
+							axi_araddr <= address;
 						end if ;	
 					when write_addr => 
-						axi_araddr <= address;
 						axi_arvalid <= '1';	
 						if M_AXI_ARREADY = '1' then
 							read_state <= waiting;
+							if axi_arvalid = '1' then
+								axi_arvalid <= '0';
+							end if ;
 						end if ;	
 					when waiting =>
 						if M_AXI_RVALID = '1' then
@@ -258,6 +270,9 @@ begin
 						axi_awvalid <= '1';
 						if(M_AXI_AWREADY = '1')	then
 							awrite_state <= wait_end;	
+							if axi_awvalid = '1' then
+								axi_awvalid <= '0';
+							end if ;
 						end if ;
 					when wait_end =>
 					   	awrite_end <= '1';
@@ -286,16 +301,23 @@ begin
 				axi_wvalid <= '0';
 				dwrite_state <= dwrite_state;
 				dwrite_end <= '0';
+				-- axi_wstrb <= (others => '0');
 				case( dwrite_state ) is
 					when IDLE =>
 						if en = '1' and we /= "0000" and stall_int = '0' then
 							dwrite_state <= write;
 							axi_wdata <= write_data;
+							axi_wstrb <= we;
+						else
+						    axi_wstrb <= (others => '0');
 						end if ;	
 					when write => 
 						axi_wvalid <= '1';
 						if M_AXI_WREADY = '1' then
 							dwrite_state <= wait_end;
+							if axi_wvalid = '1' then
+								axi_wvalid <= '0';
+							end if ;
 						end if ;
 					when wait_end =>
 					   dwrite_end <= '1';
@@ -321,7 +343,7 @@ begin
 				write_response <= (others => '0');
 			else
 				axi_bready <= '0';
-				if M_AXI_BVALID = '1' then
+				if M_AXI_BVALID = '1' and axi_bready = '0' then
 					write_response(1 downto 0) <= M_AXI_BRESP;
 					axi_bready <= '1';
 				end if ;

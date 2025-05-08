@@ -51,7 +51,7 @@ entity I2C_driver is
            data_length_out : out STD_LOGIC_VECTOR (clog2(BYTE_BUFF_SIZE) downto 0);     -- Data length out: lunghezza dei dati letti oppure dei dati scritti prima di un NACK
            busy, error : out STD_LOGIC;                                                 -- Busy/Error
            sda : inout STD_LOGIC;                                                       -- SDA
-           scl : inout STD_LOGIC                                                        -- SCL
+           scl : inout STD_LOGIC
     );
 end I2C_driver;
 
@@ -73,9 +73,7 @@ architecture Behavioral of I2C_driver is
     constant half_cycle : unsigned (freq2dim(FREQ_KHZ, S_FREQ_KHZ) - 1  downto 0) := total_cycle/2;     --125 cicli * 10 ns - 1 ciclo * 10 ns
     constant quarter_cycle : unsigned (freq2dim(FREQ_KHZ, S_FREQ_KHZ) - 1  downto 0) := total_cycle/4;  --62  cicli * 10 ns - 1 ciclo * 10 ns
     
-
 begin
-
     msf : process( clk, res) begin
         if res = '0' then
             i2c_state <= idle;
@@ -128,16 +126,22 @@ begin
                         ack <= '0';
                         scl_count <= scl_count;
                         if en = '1' and unsigned(data_length) > 0 then
-                            error <= '0';
-                            busy <= '1';
-                            sda_int <= '0';
-                            data <= d_in;
-                            rw_n_int <= rw_n;
-                            data_length_int <= unsigned(data_length);
-                            addr(7 downto 1) <= addr_in;
-                            addr(0) <= rw_n;
-                            i2c_state <= start;
-                            scl_count <= (others => '0');
+                            if unsigned(data_length) > to_unsigned(BYTE_BUFF_SIZE, byte_count'length) then
+                                error <= '1';
+                                busy <= '0';
+                                i2c_state <= idle;
+                            else 
+                                error <= '0';
+                                busy <= '1';
+                                sda_int <= '0';
+                                data <= d_in;
+                                rw_n_int <= rw_n;
+                                data_length_int <= unsigned(data_length);
+                                addr(7 downto 1) <= addr_in;
+                                addr(0) <= rw_n;
+                                i2c_state <= start;
+                                scl_count <= (others => '0');
+                            end if;
                         end if;
                     when start =>
                         if scl_count < quarter_cycle then
@@ -266,5 +270,5 @@ begin
     --Equazioni
     sda <= 'Z' when sda_int = '1' else '0';
     scl <= 'Z' when scl_int = '1' else '0';
-    data_sel <= data(7 + to_integer(byte_count) * 8 downto to_integer(byte_count) * 8); --LITTLE ENDIAN
+    data_sel <= data(7 + to_integer(byte_count) * 8 downto to_integer(byte_count) * 8) when byte_count < to_unsigned(BYTE_BUFF_SIZE, byte_count'length) else (others => '0'); --LITTLE ENDIAN
 end Behavioral;

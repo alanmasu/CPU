@@ -18,8 +18,8 @@ package memory_pkg is
     type memory_model is array (natural range <>) of memory_addr_space_t;
     constant memory_map : memory_model(0 to 20) := (
         (lower_bound => x"00000000", upper_bound => x"3FFFFFFF", space_type => AXI),        --OCM & DDR
-        (lower_bound => x"40000000", upper_bound => x"40000FFF", space_type => ROM),        --AXI INSTRUCTION MEMORY
-        (lower_bound => x"40001000", upper_bound => x"4000FFFF", space_type => CREG_FILE),  --AXI FSM Control Register
+        (lower_bound => x"40000000", upper_bound => x"40003FFF", space_type => ROM),        --AXI INSTRUCTION MEMORY
+        (lower_bound => x"40004000", upper_bound => x"4000FFFF", space_type => CREG_FILE),  --AXI FSM Control Register
         (lower_bound => x"40010000", upper_bound => x"4001FFFF", space_type => RAM),        --AXI DATA MEMORY (Mem upper bount = 0x40011FFF)
         (lower_bound => x"40020000", upper_bound => x"4002000F", space_type => GPIO),       --RISC-V GPIO
         (lower_bound => x"40020010", upper_bound => x"4002002F", space_type => I2C),        --RISC-V I2C

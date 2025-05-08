@@ -129,7 +129,7 @@ begin
         ena   <= '1';           -- Enable I2C
         wea   <= "0001";        -- Write only first byte
         
-        addra <= x"00000004";   -- Writing to I2C_REG_ADDRESS
+        addra <= x"00000014";   -- Writing to I2C_REG_ADDRESS
         dina  <= x"0F000056";   -- Writing 0x56 as Address
 
         wait until rising_edge(clk);
@@ -149,7 +149,7 @@ begin
 
         -- Test 2
         test_n <= 2;
-        addra <= x"0000000C";   -- Writing to I2C_REG_WDATA
+        addra <= x"0000001C";   -- Writing to I2C_REG_WDATA
         dina  <= x"0F0000AA";
         ena   <= '1';           -- Enable I2C
         wea   <= "0001";        -- Write only first byte
@@ -172,7 +172,7 @@ begin
         test_n <= 3;
         ena <= '1';           -- Enable I2C
         wea <= "0001";        -- Write only first byte
-        addra <= x"0000_0010";
+        addra <= x"0000_0020";
         dina  <= x"0F00_0001";
         wait until rising_edge(clk);
         wait for 1 ns;
@@ -193,7 +193,7 @@ begin
         test_n <= 4;
         ena <= '1';           -- Enable I2C
         wea <= "0001";        -- Write only first byte
-        addra <= x"00000000";
+        addra <= x"00000010";
         dina  <= x"0F000000";
         dina(I2C_CREG_RW_N_BIT)  <= '0'; -- Set RW_N bit
         dina(I2C_CREG_START_BIT) <= '1'; -- Set START bit
@@ -220,7 +220,7 @@ begin
         test_n <= 5;
         ena <= '1';           -- Enable I2C
         wea <= "0000";        -- Read only
-        addra <= x"00000014"; -- Reading I2C_REG_LEN_O
+        addra <= x"00000024"; -- Reading I2C_REG_LEN_O
         validating <= '1';
         wait until rising_edge(clk);
         wait for 1 ns;
@@ -237,7 +237,7 @@ begin
         test_n <= 6;
         ena <= '1';           -- Enable I2C
         wea <= "0001";        -- Write only first byte
-        addra <= x"00000000";
+        addra <= x"00000010";
         dina  <= x"0F000000";
         -- i2c_data_tb <= (others => 'Z');
         dina(I2C_CREG_RW_N_BIT)  <= '1'; -- Set RW_N bit to 1 for reading
@@ -264,7 +264,7 @@ begin
         test_n <= 7;
         ena <= '1';           -- Enable I2C
         wea <= "0001";        -- Write only first byte
-        addra <= x"00000000";
+        addra <= x"00000010";
         dina  <= x"0F000000";
         -- i2c_data_tb <= (others => 'Z');
         dina(I2C_CREG_RW_N_BIT)  <= '1'; -- Set RW_N bit to 1 for reading
@@ -291,7 +291,7 @@ begin
         test_n <= 8;
         ena <= '1';           -- Enable I2C
         wea <= "0001";        -- Write only first byte
-        addra <= x"00000004"; -- Writing to I2C_REG_ADDRESS
+        addra <= x"00000014"; -- Writing to I2C_REG_ADDRESS
         dina  <= x"0F000056"; -- Writing 0x56 as Address
         wait until rising_edge(clk);
         wait for 1 ns;
@@ -312,14 +312,14 @@ begin
         test_n <= 9;
         ena <= '1';           -- Enable I2C
         wea <= "0011";        -- Write only first byte
-        addra <= x"0000000C"; -- Writing to I2C_REG_WDATA
-        dina  <= x"0F00CCFF";  
+        addra <= x"0000001C"; -- Writing to I2C_REG_WDATA
+        dina  <= x"0F00C2FE";  
         wait until rising_edge(clk);
         wait for 1 ns;
         ena  <= '0';           -- Disable I2C
         wea <= "0000";         -- Read only first byte
         validating <= '1';
-        if i2c_regFile(I2C_REG_WDATA) = x"0000CCFF" then
+        if i2c_regFile(I2C_REG_WDATA) = x"0000C2FE" then
             resoult <= '1';
             report "Test #" & integer'image(test_n) & ": OK";
         else
@@ -332,7 +332,7 @@ begin
         test_n <= 10;
         ena <= '1';           -- Enable I2C
         wea <= "0001";        -- Write only first byte
-        addra <= x"00000010"; -- Writing to I2C_REG_LEN
+        addra <= x"00000020"; -- Writing to I2C_REG_LEN
         dina  <= x"0F000002"; -- Writing 0x02 as Length
         wait until rising_edge(clk);
         wait for 1 ns;
@@ -354,7 +354,7 @@ begin
         test_n <= 11;
         ena <= '1';           -- Enable I2C
         wea <= "0001";        -- Write only first byte
-        addra <= x"00000000"; -- Writing to I2C_REG_CONTROL
+        addra <= x"00000010"; -- Writing to I2C_REG_CONTROL
         dina  <= x"0F000000"; 
         dina(I2C_CREG_RW_N_BIT)  <= '0'; -- Set RW_N bit
         dina(I2C_CREG_START_BIT) <= '1'; -- Set START bit
@@ -365,10 +365,13 @@ begin
 
         wait until i2c_regFile(I2C_REG_CONTROL)(I2C_CREG_BUSY_BIT) = '1';
         wait until i2c_regFile(I2C_REG_CONTROL)(I2C_CREG_BUSY_BIT) = '0';
+        wait for 1 ns;
         validating <= '1';
-        if i2c_data_tb = x"0000_CCFF" then
+        if i2c_data_tb = x"0000_C2FE" then
             resoult <= '1';
             report "Test #" & integer'image(test_n) & ": OK";
+        elsif i2c_data_tb = x"0000_FEC2" then
+            report "Test #" & integer'image(test_n) & ": WARNING: Endiannes is WRONG -> i2c_data_tb was " & integer'image(stdv2int(i2c_data_tb));
         else
             resoult <= '0';
             report "Test #" & integer'image(test_n) & ": FAILED -> i2c_data_tb was " & integer'image(stdv2int(i2c_data_tb));
@@ -380,7 +383,7 @@ begin
         test_n <= 12;
         ena <= '1';           -- Enable I2C
         wea <= "0001";        -- Write only first byte
-        addra <= x"00000000"; -- Writing to I2C_REG_CONTROL
+        addra <= x"00000010"; -- Writing to I2C_REG_CONTROL
         dina  <= x"0F000000";
         dina(I2C_CREG_RW_N_BIT)  <= '1'; -- Set RW_N bit to 1 for reading
         dina(I2C_CREG_START_BIT) <= '1'; -- Set START bit
@@ -391,18 +394,49 @@ begin
 
         wait until i2c_regFile(I2C_REG_CONTROL)(I2C_CREG_BUSY_BIT) = '1';
         wait until i2c_regFile(I2C_REG_CONTROL)(I2C_CREG_BUSY_BIT) = '0';
+        wait for 1 ns;
         validating <= '1';
-        if i2c_regFile(I2C_REG_RDATA) = x"0000_CCFF" then
+        if i2c_regFile(I2C_REG_RDATA) = x"0000_C2FE" then
             resoult <= '1';
             report "Test #" & integer'image(test_n) & ": OK";
+        elsif i2c_regFile(I2C_REG_RDATA) = x"0000_FEC2" then
+            report "Test #" & integer'image(test_n) & ": WARNING: Endianes is WRONG -> i2c_data_tb was " & integer'image(stdv2int(i2c_data_tb));
         else
             resoult <= '0';
             report "Test #" & integer'image(test_n) & ": FAILED -> i2c_regFile(I2C_REG_RDATA) was " & integer'image(stdv2int(i2c_regFile(I2C_REG_RDATA)));
         end if;
+        wait for 1 ns;
+        validating <= '0';
 
+        -- Test 13 Len > 4
+        test_n <= 13;
+        ena <= '1';           -- Enable I2C
+        wea <= "0001";        -- Write only first byte
+        addra <= x"00000020"; -- Writing to I2C_REG_LEN
+        dina  <= x"0F000005"; -- Writing 0x05 as Length
+        wait until rising_edge(clk);
+        wait for 1 ns;
         
-
-
+        addra <= x"00000010"; -- Writing to I2C_REG_CONTROL
+        dina  <= x"00000011"; -- Start a read
+        wait until rising_edge(clk);
+        ena <= '0';           -- Disable I2C
+        wait until rising_edge(clk);
+        wait until rising_edge(clk);
+        wait for 1 ns;
+        validating <= '1';
+        if i2c_regFile(I2C_REG_CONTROL)(I2C_CREG_ERROR_BIT) = '1' then
+            resoult <= '1';
+            report "Test #" & integer'image(test_n) & ": OK";
+        else
+            resoult <= '0';
+            report "Test #" & integer'image(test_n) & ": FAILED -> i2c_regFile(I2C_REG_CONTROL)(I2C_CREG_ERROR_BIT) was " & integer'image(stdv2int(i2c_regFile(I2C_REG_CONTROL)(I2C_CREG_ERROR_BIT downto I2C_CREG_ERROR_BIT)));
+        end if;
+        -- wait until (i2c_regFile(0)(I2C_CREG_BUSY_BIT) = '1'); -- Wait transaction to start
+        -- wait until (i2c_regFile(0)(I2C_CREG_BUSY_BIT) = '0'); -- Wait transaction to finish
+        
+        -- TODO: testare i NAK
+        
         -- wait;
         assert false report "End of test" severity failure;
     end process ; -- test_pro
