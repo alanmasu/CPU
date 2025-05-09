@@ -71,9 +71,13 @@ end BTPU;
 architecture Behavioral of BTPU is
     constant W_DIM : integer := (GRID_SIZE * GRID_SIZE);
     -- Matrix Arrays
-    type matrix_t is array (0 to GRID_SIZE - 1) of std_logic_vector(GRID_SIZE - 1 downto 0);
+    type matrix_t   is array (0 to GRID_SIZE - 1) of std_logic_vector(GRID_SIZE - 1 downto 0);
+    type popcount_t is array (0 to GRID_SIZE - 1, 0 to GRID_SIZE - 1) of std_logic_vector(clog2(GRID_SIZE) - 1 downto 0);
+    type acc_t  is array (0 to GRID_SIZE - 1, 0 to GRID_SIZE - 1) of std_logic_vector(ACC_SIZE - 1 downto 0);
     signal mac_activation_in : matrix_t;
     signal mac_weight_in     : matrix_t; 
+    signal mac_res           : popcount_t;
+    signal mac_acc           : acc_t;
     
     -- CREG
     signal control_reg : BTPU_regFile_t;
@@ -245,7 +249,9 @@ begin
                             a        => mac_activation_in(row),
                             b        => mac_weight_in(col),
                             size     => control_reg(BTPU_SIGN_CMP),
-                            res_sign => result_word(bit_number)
+                            res_sign => result_word(bit_number), 
+                            res      => mac_res(row, col),
+                            acc      => mac_acc(row, col)
                         );
                 end generate; -- behav_gen
 
@@ -285,7 +291,7 @@ begin
             elsif(rising_edge(clk)) then
                 if(ena.en_BTPU_CREG = '1') then
                     address := unsigned(addra) - BTPU_CREG_OFFSET;
-                    reg_addr := to_integer(address(6 downto 4));
+                    reg_addr := to_integer(address(6 downto 2));
                     if (wea(0) = '1') then
                         control_reg(reg_addr)(7 downto 0) <= dina(7 downto 0);
                     end if;
@@ -334,7 +340,7 @@ begin
         doutb <= bram_w_douta     when bram_w_ena    = '1' else
                  bram_IO0_douta   when bram_IO0_ena  = '1' else
                  bram_IO1_douta   when bram_IO1_ena  = '1' else
-                 creg_out         when ena.en_BTPU_CREG = '1' else
+                 creg_out         when is_in_space(addrb, BTPU_CREG_FILE) = '1' else
                  (others => '0');
 
     --------------- I/O Memory Selector -------------

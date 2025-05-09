@@ -1227,6 +1227,12 @@ module test_AXI_ctrl( );
     btpu_regfile_t btpu_creg_tb;
     assign btpu_creg_tb = DUT4.BTPU_inst.control_reg;
 
+    btpu_state_t btpu_state_tb;
+    assign btpu_state_tb = DUT4.BTPU_inst.state;
+
+    wire [31:0] btpu_busy_tb;
+    assign btpu_busy_tb = DUT4.BTPU_inst.busy;
+
     task automatic testBTU;
         bit memory_test;
     begin
@@ -1415,10 +1421,205 @@ module test_AXI_ctrl( );
         if(memory_test) begin
             $display("Test #%0d: OK", testN);
         end
+    end
+    endtask
 
+    task automatic testBTU_FSM;
+    begin
+        $display("Testing BTPU FSM...");
+        //////////////// TESTING BTPU State Machine ////////////////
+        testN = 6;
+        op_class = 5'b01000; //Store
+        en_in = 1'b1;
+        we_in = 1'b1;
+        mem_opcode = 3'b010; //SW
+        alu_resoult = 32'h40020030 + 0*4; //BTPU CREG base
+        rs2_value = 32'b0;
+        rs2_value[3] = 1'b0; //Set the BRAM_PORT_SEL_BIT
+        @ (posedge clock);
+        #1;
+        en_in = 1'b0;
+        validating = 1'b1;
+        if (btpu_creg_tb[0][3] == 1'b0) begin
+            $display("Test #%0da: OK", testN);
+        end else begin
+            $display("Test #%0da: FAILED -> btpu_creg_tb[0][3] was %0x", testN, btpu_creg_tb[0][3]);
+        end
+        #1;
+        validating = 1'b0;
 
+        op_class = 5'b01000; //Store
+        en_in = 1'b1;
+        we_in = 1'b1;
+        mem_opcode = 3'b010; //SW
+        alu_resoult = 32'h40020030 + 7*4; //BTPU SIGN_CMP Reg
+        rs2_value = 32'd64; 
+        @ (posedge clock);
+        #1;
+        en_in = 1'b0;
+        validating = 1'b1;
+        if (btpu_creg_tb[7] == 32'd64) begin
+            $display("Test #%0db: OK", testN);
+        end else begin
+            $display("Test #%0db: FAILED -> btpu_creg_tb[7] was %0x", testN, btpu_creg_tb[7]);
+        end
+        #1;
+        validating = 1'b0;
 
-        // testN = 1;
+        testN = 7;
+        op_class = 5'b01000; //Store
+        en_in = 1'b1;
+        we_in = 1'b1;
+        mem_opcode = 3'b010; //SW
+        alu_resoult = 32'h40020030 + 4*4; //BTPU SIZE Reg
+        rs2_value = 32'd2;
+        @ (posedge clock);
+        #1;
+        en_in = 1'b0;
+        validating = 1'b1;
+        if (btpu_creg_tb[4] == 32'd2) begin
+            $display("Test #%0d: OK", testN);
+        end else begin
+            $display("Test #%0d: FAILED -> btpu_creg_tb[4] was %0x", testN, btpu_creg_tb[4]);
+        end
+        #1;
+        validating = 1'b0;
+
+        testN = 8;
+        op_class = 5'b01000; //Store
+        en_in = 1'b1;
+        we_in = 1'b1;
+        mem_opcode = 3'b010; //SW
+        alu_resoult = 32'h40020030 + 5*4; //BTPU ACCUM Number Reg
+        rs2_value = 32'd2;
+        @ (posedge clock);
+        #1;
+        en_in = 1'b0;
+        validating = 1'b1;
+        if (btpu_creg_tb[5] == 32'd2) begin
+            $display("Test #%0d: OK", testN);
+        end else begin
+            $display("Test #%0d: FAILED -> btpu_creg_tb[5] was %0x", testN, btpu_creg_tb[5]);
+        end
+        #1;
+        validating = 1'b0;
+        
+        testN = 9;
+        op_class = 5'b01000; //Store
+        en_in = 1'b1;
+        we_in = 1'b1;
+        mem_opcode = 3'b010; //SW
+        alu_resoult = 32'h40020030 + 1*4; //BTPU W ADDR Reg
+        rs2_value = 32'b0;
+        @ (posedge clock);
+        #1;
+        en_in = 1'b0;
+        validating = 1'b1;
+        if (btpu_creg_tb[1] == 32'b0) begin
+            $display("Test #%0d: OK", testN);
+        end else begin
+            $display("Test #%0d: FAILED -> btpu_creg_tb[1] was %0x", testN, btpu_creg_tb[1]);
+        end
+        #1;
+        validating = 1'b0;
+
+        testN = 10;
+        op_class = 5'b01000; //Store
+        en_in = 1'b1;
+        we_in = 1'b1;
+        mem_opcode = 3'b010; //SW
+        alu_resoult = 32'h40020030 + 2*4; //BTPU I/O 0 ADDR Reg
+        rs2_value = 32'b0;
+        @ (posedge clock);
+        #1;
+        en_in = 1'b0;
+        validating = 1'b1;
+        if (btpu_creg_tb[2] == 32'b0) begin
+            $display("Test #%0d: OK", testN);
+        end else begin
+            $display("Test #%0d: FAILED -> btpu_creg_tb[2] was %0x", testN, btpu_creg_tb[2]);
+        end
+        #1;
+        validating = 1'b0;
+
+        testN = 11;
+        op_class = 5'b01000; //Store
+        en_in = 1'b1;
+        we_in = 1'b1;
+        mem_opcode = 3'b010; //SW
+        alu_resoult = 32'h40020030 + 3*4; //BTPU I/O 1 ADDR Reg
+        rs2_value = 32'd5;
+        @ (posedge clock);
+        #1;
+        en_in = 1'b0;
+        validating = 1'b1;
+        if (btpu_creg_tb[3] == 32'd5) begin
+            $display("Test #%0d: OK", testN);
+        end else begin
+            $display("Test #%0d: FAILED -> btpu_creg_tb[3] was %0x", testN, btpu_creg_tb[3]);
+        end
+        #1;
+        validating = 1'b0;
+
+        testN = 12;
+        op_class = 5'b01000; //Store
+        en_in = 1'b1;
+        we_in = 1'b1;
+        mem_opcode = 3'b010; //SW
+        alu_resoult = 32'h40020030 + 0*4; //BTPU CS Reg
+        rs2_value = 32'b0;
+        rs2_value[0] = 1'b1; //Start
+        rs2_value[2] = 1'b1; //Select the BTPU I/O 1 as the output
+        rs2_value[5] = 1'b1; //Enable multiple accumulation
+        @ (posedge clock);
+        #1;
+        en_in = 1'b0;
+        validating = 1'b1;
+        if (btpu_creg_tb[0][0] == 1'b1) begin
+            $display("Test #%0da: OK", testN);
+        end else begin
+            $display("Test #%0da: FAILED -> btpu_creg_tb[0] was %0x", testN, btpu_creg_tb[0]);
+        end
+        if (btpu_creg_tb[0][2] == 1'b1) begin 
+            $display("Test #%0db: OK", testN);
+        end else begin
+            $display("Test #%0db: FAILED -> btpu_creg_tb[2] was %0x", testN, btpu_creg_tb[2]);
+        end
+        if (btpu_creg_tb[0][5] == 1'b1) begin 
+            $display("Test #%0dc: OK", testN);
+        end else begin
+            $display("Test #%0dc: FAILED -> btpu_creg_tb[5] was %0x", testN, btpu_creg_tb[3]);
+        end
+        #1;
+        validating = 1'b0;
+
+        @ (posedge clock);
+        #1;
+        if (btpu_state_tb == fetching) begin
+            $display("Test #%0dd: OK", testN);
+        end else begin
+            $display("Test #%0dd: FAILED -> btpu_state_tb was %0x", testN, btpu_state_tb);
+        end
+        if(btpu_busy_tb == 1'b1) begin
+            $display("Test #%0de: OK", testN);
+        end else begin
+            $display("Test #%0de: FAILED -> btpu_busy_tb was %0x", testN, btpu_busy_tb);
+        end
+        @ (posedge clock);
+        #1;
+
+        if (btpu_creg_tb[0][1] == 1'b1) begin
+            $display("Test #%0da: OK", testN);
+        end else begin
+            $display("Test #%0da: FAILED -> btpu_creg_tb[1] was %0x", testN, btpu_creg_tb[1]);
+        end
+        if(btpu_creg_tb[6] == 32'd1) begin
+            $display("Test #%0db: OK", testN);
+        end else begin
+            $display("Test #%0db: FAILED -> btpu_creg_tb[6] was %0x", testN, btpu_creg_tb[6]);
+        end
+        #1;
+        validating = 1'b0;
     end
     endtask
 
@@ -1431,6 +1632,7 @@ module test_AXI_ctrl( );
         // testI2C();
         // testAXI_BRESP();
         testBTU();
+        testBTU_FSM();
         #100;
         en_in = 1'b0;
         $finish;

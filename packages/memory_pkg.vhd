@@ -23,7 +23,7 @@ package memory_pkg is
         (lower_bound => x"40010000", upper_bound => x"4001FFFF", space_type => RAM),        --AXI DATA MEMORY (Mem upper bount = 0x40011FFF)
         (lower_bound => x"40020000", upper_bound => x"4002000F", space_type => GPIO),       --RISC-V GPIO
         (lower_bound => x"40020010", upper_bound => x"4002002F", space_type => I2C),        --RISC-V I2C
-        (lower_bound => x"40020030", upper_bound => x"4002003F", space_type => BTPU_CREG_FILE),        --RISC-V I2C
+        (lower_bound => x"40020030", upper_bound => x"40020050", space_type => BTPU_CREG_FILE),        --RISC-V I2C
         (lower_bound => x"40030000", upper_bound => x"4003FFFF", space_type => BTPU_W_MEM),        --RISC-V I2C
         (lower_bound => x"40040000", upper_bound => x"4004FFFF", space_type => BTPU_IO0_MEM),        --RISC-V I2C
         (lower_bound => x"40050000", upper_bound => x"4005FFFF", space_type => BTPU_IO1_MEM),        --RISC-V I2C
@@ -92,12 +92,16 @@ package body memory_pkg is
     end function;
 
     function en_bus_t_to_slv(en_bus : en_bus_t) return std_logic_vector is
-        variable result : std_logic_vector(3 downto 0);
+        variable result : std_logic_vector(7 downto 0);
     begin
         result(0) := en_bus.en_mem;
         result(1) := en_bus.en_AXI;
         result(2) := en_bus.en_GPIO;
         result(3) := en_bus.en_I2C;
+        result(4) := en_bus.en_BTPU_CREG;
+        result(5) := en_bus.en_BTPU_W_MEM;
+        result(6) := en_bus.en_BTPU_IO0_MEM;
+        result(7) := en_bus.en_BTPU_IO1_MEM;
         return result;
     end function;
 
