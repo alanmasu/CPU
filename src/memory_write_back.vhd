@@ -99,7 +99,8 @@ architecture Behavioral of memory_write_back is
         en_mem => '0', 
         en_AXI => '0',
         en_GPIO => '0',
-        en_I2C => '0'
+        en_I2C => '0',
+        others => '0'
     );
     signal we, mem_wea : std_logic_vector(3 downto 0) := (others => '0');
 begin
@@ -186,7 +187,8 @@ begin
                 en_mem => '0',
                 en_AXI => '0',
                 en_GPIO => '0',
-                en_I2C => '0'
+                en_I2C => '0',
+                others => '0'
             );
         elsif rising_edge(clk) then
             en_bus_reg <= en_bus;

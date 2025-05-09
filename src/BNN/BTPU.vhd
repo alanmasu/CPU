@@ -43,7 +43,8 @@ entity BTPU is
     generic (
         ACC_SIZE : integer := 32;
         GRID_SIZE : integer := 32;
-        MEM_B_SIZE : integer := 1024
+        MEM_B_SIZE : integer := 1024;
+        SIMULATION : boolean := false
     );
     port ( 
         clk : in STD_LOGIC;
@@ -232,24 +233,41 @@ begin
             mac_col_gen : for col in 0 to GRID_SIZE - 1 generate
                 constant bit_number : integer := row * GRID_SIZE + col;
             begin 
-                mac_inst : entity work.BTPU_MAC
-                    generic map (
-                        X => GRID_SIZE,
-                        ACC_SIZE => ACC_SIZE
-                    )
-                    port map (
-                        acc_clk  => clk,
-                        acc_resn => acc_clear,
-                        a        => mac_activation_in(row),
-                        b        => mac_weight_in(col),
-                        size     => control_reg(BTPU_SIGN_CMP),
-                        res_sign => result_word(bit_number)
-                    );
+                behav_gen : if SIMULATION = false generate
+                    mac_inst : entity work.BTPU_MAC(Behavioral)
+                        generic map (
+                            X => GRID_SIZE,
+                            ACC_SIZE => ACC_SIZE
+                        )
+                        port map (
+                            acc_clk  => clk,
+                            acc_resn => acc_clear,
+                            a        => mac_activation_in(row),
+                            b        => mac_weight_in(col),
+                            size     => control_reg(BTPU_SIGN_CMP),
+                            res_sign => result_word(bit_number)
+                        );
+                end generate; -- behav_gen
+
+                sim_gen : if SIMULATION = true generate
+                    mac_inst : entity work.BTPU_MAC(SimulationArch)
+                        generic map (
+                            X => GRID_SIZE,
+                            ACC_SIZE => ACC_SIZE
+                        )
+                        port map (
+                            acc_clk  => clk,
+                            acc_resn => acc_clear,
+                            a        => mac_activation_in(row),
+                            b        => mac_weight_in(col),
+                            size     => control_reg(BTPU_SIGN_CMP),
+                            res_sign => result_word(bit_number)
+                        );
+                end generate; -- sim_gen
+
             end generate ; -- mac_col_gen
         end generate ; -- mac_row_gen
-
-
-
+        
     --------------- Control Register File -----------
         start           <= control_reg(BTPU_REG_CONTROL)(BTPU_CREG_START_BIT);
         o_mem_select    <= control_reg(BTPU_REG_CONTROL)(BTPU_CREG_OMEM_SEL_BIT);

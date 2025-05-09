@@ -16,7 +16,7 @@ package memory_pkg is
 
     -- Memory map
     type memory_model is array (natural range <>) of memory_addr_space_t;
-    constant memory_map : memory_model(0 to 20) := (
+    constant memory_map : memory_model(0 to 24) := (
         (lower_bound => x"00000000", upper_bound => x"3FFFFFFF", space_type => AXI),        --OCM & DDR
         (lower_bound => x"40000000", upper_bound => x"40003FFF", space_type => ROM),        --AXI INSTRUCTION MEMORY
         (lower_bound => x"40004000", upper_bound => x"4000FFFF", space_type => CREG_FILE),  --AXI FSM Control Register

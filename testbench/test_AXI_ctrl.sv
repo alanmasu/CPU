@@ -31,6 +31,10 @@ module test_AXI_ctrl( );
         logic en_axi;
         logic en_gpio;
         logic en_i2c;
+        logic en_BTPU_CREG;
+        logic en_BTPU_W_MEM;
+        logic en_BTPU_IO0_MEM;
+        logic en_BTPU_IO1_MEM;
     } en_bus_t;
 
     // typedef struct packed {
@@ -39,7 +43,7 @@ module test_AXI_ctrl( );
     //     bit[31:0] I2C_data;
     // } peripheral_data_t;
 
-    typedef enum {SETUP, ALU, MEMORY, AXI, GPIO, I2C } test_type_t;
+    typedef enum {SETUP, ALU, MEMORY, AXI, GPIO, I2C, B_TPU} test_type_t;
         
 
     bit clock, reset, jmp, we_in, en_in;
@@ -53,7 +57,7 @@ module test_AXI_ctrl( );
     bit[4:0] rd_addr_out;
     bit[31:0] rd_value_out;
     bit[31:0] pc_out;
-    en_bus_t en_out = '{en_mem: 1'b0, en_axi: 1'b0, en_gpio: 1'b0, en_i2c: 1'b0};
+    en_bus_t en_out = '{en_mem: 1'b0, en_axi: 1'b0, en_gpio: 1'b0, en_i2c: 1'b0, en_BTPU_CREG: 1'b0, en_BTPU_W_MEM: 1'b0, en_BTPU_IO0_MEM: 1'b0, en_BTPU_IO1_MEM: 1'b0};
     bit[3:0] we_out;
     bit[31:0] address_out;
     bit[31:0] d_out;
@@ -197,7 +201,7 @@ module test_AXI_ctrl( );
     );
 
     //BTPU
-    BTPU DUT4(
+    BTPU_wrapper DUT4(
         .clk(clock),
         .res(reset),
         .hs_clk(clock),
@@ -216,10 +220,10 @@ module test_AXI_ctrl( );
     );
 
 
-    genvar i;
+    genvar j;
     generate
-        for (i = 0; i < 32; i = i + 1) begin
-            pulldown(gpio_pins_wire[i]);  // Pulldown su ogni bit.
+        for (j = 0; j < 32; j = j + 1) begin
+            pulldown(gpio_pins_wire[j]);  // Pulldown su ogni bit.
         end
     endgenerate
     
@@ -282,12 +286,9 @@ module test_AXI_ctrl( );
     assign mem_out_tb = mem.mem_out;
     
     time t0;
-
-    initial begin
-        // @(posedge reset);
-        #19;
-
-        //Setup the memory controller
+    task automatic testMemory;
+    begin
+            //Setup the memory controller
         jmp = 1'b0;
         rd_addr_in = 5'b00101;
         #10;
@@ -840,10 +841,15 @@ module test_AXI_ctrl( );
         end
         #1;
         validating = 1'b0;
+        end 
+    endtask
 
-
+    task automatic testAXI;
+    begin
+        $display("Testing AXI\n\n");
+        testN = 0;
         ///////////////////// AXI TESTS /////////////////////////
-        @ (posedge clock);
+        // @ (posedge clock);
         #1;
         //IO test
         test_type = AXI;
@@ -919,7 +925,11 @@ module test_AXI_ctrl( );
             wait(stall == 1'b0); //Wait reatransactiond ends
         end
         en_in = 1'b0;
+    end
+    endtask
 
+    task automatic testGPIO;
+    begin
         ///////////////////// GPIO TESTS /////////////////////////
         @ (posedge clock);
         #1; ; //Sychronize with the clock
@@ -1021,7 +1031,11 @@ module test_AXI_ctrl( );
         end 
         #1;
         validating = 1'b0;
+    end
+    endtask
 
+    task automatic testI2C;
+    begin
         ///////////////////// I2C TESTS /////////////////////////
         $display("Starting I2C TESTS...");
         testN = 1;
@@ -1176,7 +1190,11 @@ module test_AXI_ctrl( );
         end
         #1;
         validating = 1'b0;
+    end
+    endtask
 
+    task automatic testAXI_BRESP;
+    begin
         // Test 1: AXI TEST BRESP
         $display("Starting NEW AXI TESTS...");
         testN = 1;
@@ -1203,29 +1221,66 @@ module test_AXI_ctrl( );
         end 
         #1;
         validating = 1'b0;
-        
+    end
+    endtask
 
+    wire [1023:0] BTPU_IO0_out_tb;
+    assign BTPU_IO0_out_tb = DUT4.BTPU_inst.bram_IO0_doutb;
 
+    task automatic testBTU;
+    begin
         $display("\n\nTesting BTPU...\n");
         testN = 0;
         reset = 1'b0;
         @ (posedge clock);
         reset = 1'b1;
         @ (posedge clock);
+        #1;
+        test_type = B_TPU;
+
 
         testN = 1;
+        op_class = 5'b01000; //Store
+        en_in = 1'b1;
+        we_in = 1'b1;
+        mem_opcode = 3'b010; //SW
+        for (int i=0; i < 128; ++i) begin
+            rs2_value = i;
+            alu_resoult = 32'h40030000 + i*4;
+            @ (posedge clock);
+            #1;
+        end
+        validating = 1'b1;
+        for (int i = 0; i < 32; ++i) begin
+            logic [31:0] val = BTPU_IO0_out_tb[i*32 +: 32];
+            if (val == i) begin
+                $display("Test #%0d-%0d: OK", testN, i);
+            end else begin
+                $display("Test #%0d-%0d: FAILED -> BTPU_IO0_out_tb[%0d:%0d] was %0x", testN, i, i*32 + 31, i*32, val);  
+            end
+        end
+        #1;
+        validating = 1'b0;
 
 
-        // #50us;
 
 
+        // testN = 1;
+    end
+    endtask
+
+    initial begin
+        // @(posedge reset);
+        #19;
+        testMemory();
+        testAXI();
+        testGPIO();
+        testI2C();
+        testAXI_BRESP();
+        testBTU();
         #100;
         en_in = 1'b0;
-
-
-
         $finish;
-
     end
 
 
