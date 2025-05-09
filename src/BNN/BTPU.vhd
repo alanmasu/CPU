@@ -197,7 +197,7 @@ begin
         IO1_mem_inst : BTPU_memory
             port map (
                 clka => clk,
-                ena => bram_IO0_ena,
+                ena => bram_IO1_ena,
                 wea => bram_wea,
                 addra => bram_addra,
                 dina => bram_dina,
@@ -276,6 +276,7 @@ begin
         multiple_acc    <= control_reg(BTPU_REG_CONTROL)(BTPU_CREG_MULTIPLE_ACCUM_BIT);
         control_reg_file : process( clk, res) is 
             variable reg_addr : integer;
+            variable address : unsigned(31 downto 0);
         begin
             if(res = '0') then
                 control_reg <= (
@@ -283,7 +284,8 @@ begin
                 );
             elsif(rising_edge(clk)) then
                 if(ena.en_BTPU_CREG = '1') then
-                    reg_addr := to_integer(unsigned(addra(6 downto 2)));
+                    address := unsigned(addra) - BTPU_CREG_OFFSET;
+                    reg_addr := to_integer(address(6 downto 4));
                     if (wea(0) = '1') then
                         control_reg(reg_addr)(7 downto 0) <= dina(7 downto 0);
                     end if;
@@ -303,6 +305,7 @@ begin
                     control_reg(BTPU_REG_CONTROL)(BTPU_CREG_START_BIT) <= '0';
                 end if ;
                 control_reg(BTPU_REG_CONTROL)(BTPU_CREG_BUSY_BIT) <= busy;
+                control_reg(BTPU_STATUS) <= std_logic_vector(to_unsigned(BTPU_state_t'POS(state), 32));
             end if;
         end process;
     
@@ -322,11 +325,17 @@ begin
                     '0';
 
     --------------- DOUT Selector -------------------
-        douta <= bram_w_douta   when ena.en_BTPU_W_MEM   = '1' else
-                bram_IO0_douta when ena.en_BTPU_IO0_MEM = '1' else
-                bram_IO1_douta when ena.en_BTPU_IO1_MEM = '1' else
-                creg_out       when ena.en_BTPU_CREG    = '1' else
-                (others => '0'); 
+        douta <= bram_w_douta   when ena.en_BTPU_W_MEM  = '1' else
+                 bram_IO0_douta when ena.en_BTPU_IO0_MEM = '1' else
+                 bram_IO1_douta when ena.en_BTPU_IO1_MEM = '1' else
+                 creg_out       when ena.en_BTPU_CREG    = '1' else
+                 (others => '0'); 
+
+        doutb <= bram_w_douta     when bram_w_ena    = '1' else
+                 bram_IO0_douta   when bram_IO0_ena  = '1' else
+                 bram_IO1_douta   when bram_IO1_ena  = '1' else
+                 creg_out         when ena.en_BTPU_CREG = '1' else
+                 (others => '0');
 
     --------------- I/O Memory Selector -------------
         bram_IO0_addrb <= std_logic_vector(bram_i_addr) when o_mem_select = '1' else std_logic_vector(bram_o_addr); 
@@ -362,31 +371,36 @@ begin
                         bram_o_we <= '0';
                         if start = '1' then
                             busy <= '1';
-                            state <= COUNTING;
+                            state <= FETCHING;
                             compute_size <= unsigned(control_reg(BTPU_SIZE));
                             bram_w_addrb <= unsigned(control_reg(BTPU_W_ADDR)(clog2(MEM_B_SIZE) - 1 downto 0));
                             bram_i_addr  <= unsigned(control_reg(BTPU_I_ADDR)(clog2(MEM_B_SIZE) - 1 downto 0));
                             bram_o_addr  <= unsigned(control_reg(BTPU_O_ADDR)(clog2(MEM_B_SIZE) - 1 downto 0));
                             acc_number   <= unsigned(control_reg(BTPU_ACCUM));
                         end if;
+                    when FETCHING =>
+                        busy <= '1';
+                        bram_w_enb <= '1';
+                        bram_i_en  <= '1';
+                        bram_o_en  <= '0';
                     when COUNTING =>
                         busy <= '1';
                         bram_w_enb   <= '1';
                         bram_i_en <= '1';
-                        bram_o_en <= '1';
                         if compute_size > 0 then
                             bram_w_addrb <= bram_w_addrb + 1;
                             bram_i_addr  <= bram_i_addr  + 1;
                             compute_size <= compute_size - 1;
                         else
+                            bram_o_en <= '1';
                             state <= WRITE_BACK;
+                            bram_o_we <= '1';
                         end if;
                     when WRITE_BACK =>
                         busy <= '1';
                         bram_w_enb   <= '0';
                         bram_i_en <= '0';
-                        bram_o_en <= '1';
-                        bram_o_we <= '1';
+                        bram_o_en <= '0';
                         bram_o_addr <= bram_o_addr + 1;
                         if multiple_acc = '1' then
                             acc_number <= acc_number - 1;
@@ -405,8 +419,7 @@ begin
                         bram_o_en <= '0';
                         bram_o_we <= '0';
                         force_acc_clear <= '1';
-                        state <= COUNTING;
-                        
+                        state <= FETCHING;                        
                 end case;
             end if ;
         end process ; -- state_machine

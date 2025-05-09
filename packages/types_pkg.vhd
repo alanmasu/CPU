@@ -37,7 +37,7 @@ package types_pkg is
     -- BTPU Register File type
     type BTPU_regFile_t is array(0 to 31) of std_logic_vector(31 downto 0);
     -- BTPU State type
-    type BTPU_state_t is (IDLE, COUNTING, WRITE_BACK, CLEAR_ACC);
+    type BTPU_state_t is (IDLE, FETCHING, COUNTING, WRITE_BACK, CLEAR_ACC);
     
     
 end package ;

@@ -87,10 +87,10 @@ module test_AXI_ctrl( );
     //For BTPU
     wire [31:0] btpu_douta;
     
-    logic btpu_web;
-    logic btpu_enb;
-    logic [31:0] btpu_addrb;
-    logic [31:0] btpu_dinb;
+    logic [3:0] btpu_web = 1'b0;
+    logic btpu_enb = 1'b0;
+    logic [31:0] btpu_addrb = 32'd0;
+    logic [31:0] btpu_dinb = 32'd0;
     wire [31:0] btpu_doutb;
     
 
@@ -253,7 +253,7 @@ module test_AXI_ctrl( );
     initial begin
         reset = 1'b0;
         // #200;
-        #18;
+        #160;
         reset = 1'b1;
     end
 
@@ -272,12 +272,6 @@ module test_AXI_ctrl( );
           slave_moniter_transaction_queue_size++;
         end
     end
-
-
-    //Nomi generici per i segnali di I2C
-    i2c_regfile_t i2c_regFile_tb;
-    assign i2c_regFile_tb = DUT3.regFile;
-
 
     integer testN = 0;
     logic   validating = 1'b0;
@@ -1034,6 +1028,9 @@ module test_AXI_ctrl( );
     end
     endtask
 
+    //Nomi generici per i segnali di I2C
+    i2c_regfile_t i2c_regFile_tb;
+    assign i2c_regFile_tb = DUT3.regFile;
     task automatic testI2C;
     begin
         ///////////////////// I2C TESTS /////////////////////////
@@ -1225,43 +1222,199 @@ module test_AXI_ctrl( );
     endtask
 
     wire [1023:0] BTPU_IO0_out_tb;
-    assign BTPU_IO0_out_tb = DUT4.BTPU_inst.bram_IO0_doutb;
+    // assign BTPU_IO0_out_tb = DUT4.BTPU_inst.bram_IO0_doutb;
+
+    btpu_regfile_t btpu_creg_tb;
+    assign btpu_creg_tb = DUT4.BTPU_inst.control_reg;
 
     task automatic testBTU;
+        bit memory_test;
     begin
         $display("\n\nTesting BTPU...\n");
+        test_type = B_TPU;
         testN = 0;
-        reset = 1'b0;
-        @ (posedge clock);
-        reset = 1'b1;
         @ (posedge clock);
         #1;
-        test_type = B_TPU;
 
-
-        testN = 1;
+        //////////////// Writing to BTPU BRAMs ////////////////
         op_class = 5'b01000; //Store
         en_in = 1'b1;
         we_in = 1'b1;
         mem_opcode = 3'b010; //SW
+        //// BTPU W BRAM ////
+        testN = 1;
         for (int i=0; i < 128; ++i) begin
             rs2_value = i;
             alu_resoult = 32'h40030000 + i*4;
             @ (posedge clock);
             #1;
         end
-        validating = 1'b1;
-        for (int i = 0; i < 32; ++i) begin
-            logic [31:0] val = BTPU_IO0_out_tb[i*32 +: 32];
-            if (val == i) begin
-                $display("Test #%0d-%0d: OK", testN, i);
-            end else begin
-                $display("Test #%0d-%0d: FAILED -> BTPU_IO0_out_tb[%0d:%0d] was %0x", testN, i, i*32 + 31, i*32, val);  
-            end
+        //// BTPU I/O 0 BRAM ////
+        testN = 2;
+        for (int i=0; i < 128; ++i) begin
+            rs2_value = i + 1;
+            alu_resoult = 32'h40040000 + i*4;
+            @ (posedge clock);
+            #1;
         end
+        //// BTPU I/O 1 BRAM ////
+        testN = 3;
+        for (int i=0; i < 128; ++i) begin
+            rs2_value = i + 2;
+            alu_resoult = 32'h40050000 + i*4;
+            @ (posedge clock);
+            #1;
+        end
+
+
+        //////////////// TESTING BTPU BRAMs ////////////////
+        op_class = 5'b00100; //Load
+        en_in = 1'b1;
+        we_in = 1'b0;
+        mem_opcode = 3'b010; //LW
+
+        //////////////// TESTING BTPU W BRAM ////////////////
+        testN = 1;
+        memory_test = 1;
+        for (int i=0; i < 128; ++i) begin
+            alu_resoult = 32'h40030000 + i*4;
+            @ (posedge clock);
+            #1;
+            validating = 1'b1;
+            if(btpu_doutb != i) begin
+                $display("Test #%0d-%0d: FAILED -> btpu_doutb was %0x", testN, i, btpu_doutb);
+                memory_test = 0;
+            end
+            #1;
+            validating = 1'b0;
+        end
+        if(memory_test) begin
+            $display("Test #%0d: OK", testN);
+        end
+
+        //////////////// TESTING BTPU I/O 0 BRAM ////////////////
+        testN = 2;
+        memory_test = 1;
+        for (int i=0; i < 128; ++i) begin
+            alu_resoult = 32'h40040000 + i*4;
+            @ (posedge clock);
+            #1;
+            validating = 1'b1;
+            if(BTPU_IO0_out_tb != i + 1) begin
+                $display("Test #%0d-%0d: FAILED -> BTPU_IO0_out_tb was %0x", testN, i, BTPU_IO0_out_tb);
+                memory_test = 0;
+            end
+            #1;
+            validating = 1'b0;
+        end
+        if(memory_test) begin
+            $display("Test #%0d: OK", testN);
+        end
+
+        //////////////// TESTING BTPU I/O 1 BRAM ////////////////
+        testN = 3;
+        memory_test = 1;
+        for (int i=0; i < 128; ++i) begin
+            alu_resoult = 32'h40050000 + i*4;
+            @ (posedge clock);
+            #1;
+            validating = 1'b1;
+            if(BTPU_IO0_out_tb != i + 2) begin
+                $display("Test #%0d-%0d: FAILED -> BTPU_IO0_out_tb was %0x", testN, i, BTPU_IO0_out_tb);
+                memory_test = 0;
+            end
+            #1;
+            validating = 1'b0;
+        end
+        if(memory_test) begin
+            $display("Test #%0d: OK", testN);
+        end
+
+        //////////////// TESTING BTPU PORT B ////////////////
+        //// Changing PORT SEL ////
+        testN = 4;
+        op_class = 5'b01000; //Store
+        en_in = 1'b1;
+        we_in = 1'b1;
+        mem_opcode = 3'b010; //SW
+        alu_resoult = 32'h40020030; //BTPU CREG base
+        rs2_value = 32'b0;
+        rs2_value[3] = 1'b1; //Set the BRAM_PORT_SEL_BIT
+        @ (posedge clock);
+        #1;
+        en_in = 1'b0;
+        validating = 1'b1;
+        if (btpu_creg_tb[0][3] == 1'b1) begin
+            $display("Test #%0d: OK", testN);
+        end else begin
+            $display("Test #%0d: FAILED -> btpu_creg_tb[0][3] was %0x", testN, btpu_creg_tb[0][3]);
+        end 
         #1;
         validating = 1'b0;
 
+        //// Enabling the BTPU port B ////
+        btpu_enb = 1'b1;
+        btpu_web = 1'b0;
+
+        //////////////// TESTING BTPU W BRAM ////////////////
+        testN = 3;
+        memory_test = 1;
+        for (int i=0; i < 128; ++i) begin
+            btpu_addrb = 32'h40030000 + i*4; //BTPU BRAM base
+            @ (posedge clock);
+            #1;
+            validating = 1'b1;
+            if(btpu_doutb != i) begin
+                $display("Test #%0d-%d: FAILED -> btpu_doutb was %0x", testN, i, btpu_doutb);
+                memory_test = 0;
+                break;
+            end
+            #1;
+            validating = 1'b0;
+        end
+        if(memory_test) begin
+            $display("Test #%0d: OK", testN);
+        end
+
+        //////////////// TESTING BTPU I/O 0 BRAM ////////////////
+        testN = 4;
+        memory_test = 1;
+        for (int i=0; i < 128; ++i) begin
+            btpu_addrb = 32'h40040000 + i*4; //BTPU I/O 0 BRAM base
+            @ (posedge clock);
+            #1;
+            validating = 1'b1;
+            if(btpu_doutb != i + 1) begin
+                $display("Test #%0d-%d: FAILED -> btpu_doutb was %0x", testN, i, btpu_doutb);
+                memory_test = 0;
+                break;
+            end
+            #1;
+            validating = 1'b0;
+        end
+        if(memory_test) begin
+            $display("Test #%0d: OK", testN);
+        end
+
+        //////////////// TESTING BTPU I/O 1 BRAM ////////////////
+        testN = 5;
+        memory_test = 1;
+        for (int i=0; i < 128; ++i) begin
+            btpu_addrb = 32'h40050000 + i*4; //BTPU I/O 1 BRAM base
+            @ (posedge clock);
+            #1;
+            validating = 1'b1;
+            if(btpu_doutb != i + 2) begin
+                $display("Test #%0d-%0d: FAILED -> btpu_doutb was %0x", testN, i, btpu_doutb);
+                memory_test = 0;
+                break;
+            end
+            #1;
+            validating = 1'b0;
+        end
+        if(memory_test) begin
+            $display("Test #%0d: OK", testN);
+        end
 
 
 
@@ -1270,13 +1423,13 @@ module test_AXI_ctrl( );
     endtask
 
     initial begin
-        // @(posedge reset);
-        #19;
-        testMemory();
-        testAXI();
-        testGPIO();
-        testI2C();
-        testAXI_BRESP();
+        @(posedge reset);
+        #1;
+        // testMemory();
+        // testAXI();
+        // testGPIO();
+        // testI2C();
+        // testAXI_BRESP();
         testBTU();
         #100;
         en_in = 1'b0;

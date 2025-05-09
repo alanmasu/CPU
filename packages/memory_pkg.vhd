@@ -46,6 +46,7 @@ package memory_pkg is
     -- Offset for peripherals
     constant GPIO_OFFSET    : unsigned(31 downto 0) := x"0000_0000";
     constant I2C_OFFSET     : unsigned(31 downto 0) := x"0000_0010";
+    constant BTPU_CREG_OFFSET : unsigned(31 downto 0) := x"0000_0030";
 
     --FUNCTIONS
     function is_in_space(addr : std_logic_vector(31 downto 0); space_type: memory_space_type_t) return std_logic;
