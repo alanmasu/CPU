@@ -44,7 +44,9 @@ entity BTPU is
         ACC_SIZE : integer := 32;
         GRID_SIZE : integer := 32;
         MEM_B_SIZE : integer := 1024;
-        SIMULATION : boolean := false
+        MAC_INST_N : integer := 256;
+        SIMULATION : boolean := false;
+        DEBUG      : boolean := false
     );
     port ( 
         clk : in STD_LOGIC;
@@ -70,15 +72,35 @@ end BTPU;
 
 architecture Behavioral of BTPU is
     constant W_DIM : integer := (GRID_SIZE * GRID_SIZE);
+    constant TILES_N : integer := (GRID_SIZE * GRID_SIZE) / MAC_INST_N;
+
+    signal res0 : std_logic_vector(255 downto 0) := (others => '0');
+    signal res1 : std_logic_vector(255 downto 0) := (others => '0');
+    signal res2 : std_logic_vector(255 downto 0) := (others => '0');
+    signal res3 : std_logic_vector(255 downto 0) := (others => '0');
+
     -- Matrix Arrays
-    type matrix_t   is array (0 to GRID_SIZE - 1) of std_logic_vector(GRID_SIZE - 1 downto 0);
-    type popcount_t is array (0 to GRID_SIZE - 1, 0 to GRID_SIZE - 1) of std_logic_vector(clog2(GRID_SIZE) - 1 downto 0);
-    type acc_t  is array (0 to GRID_SIZE - 1, 0 to GRID_SIZE - 1) of std_logic_vector(ACC_SIZE - 1 downto 0);
-    signal mac_activation_in : matrix_t;
-    signal mac_weight_in     : matrix_t; 
-    signal mac_res           : popcount_t;
-    signal mac_acc           : acc_t;
+    type matrix_t   is array (0 to GRID_SIZE  - 1) of std_logic_vector(GRID_SIZE - 1 downto 0);
+    type popcount_t is array (0 to MAC_INST_N - 1) of std_logic_vector(clog2(GRID_SIZE) - 1 downto 0);
+    type acc_t      is array (0 to MAC_INST_N - 1) of std_logic_vector(ACC_SIZE - 1 downto 0);
+    type mac_input  is array (0 to MAC_INST_N - 1) of std_logic_vector(GRID_SIZE - 1 downto 0);
+
+    type inst_choises_t is array (0 to TILES_N - 1) of std_logic_vector(GRID_SIZE - 1 downto 0);
+    type inst_input_t is array (0 to MAC_INST_N - 1) of inst_choises_t;
+
+    signal activations_matrix : matrix_t;
+    signal weights_matrix     : matrix_t; 
     
+    signal mac_a_in     : mac_input;
+    signal mac_b_in     : mac_input;
+    signal mac_size_in  : std_logic_vector(ACC_SIZE - 1 downto 0);
+    signal mac_sign_out : std_logic_vector(MAC_INST_N - 1 downto 0);
+    signal mac_res_out  : popcount_t;
+    signal mac_acc_out  : acc_t;
+
+    signal mac_inst_activations_choises : inst_input_t;
+    signal mac_inst_weights_choises     : inst_input_t;
+
     -- CREG
     signal control_reg : BTPU_regFile_t;
     
@@ -88,6 +110,7 @@ architecture Behavioral of BTPU is
     signal weigth_word      : STD_LOGIC_VECTOR(W_DIM - 1 downto 0) := (others => '0');
     signal activaction_word : STD_LOGIC_VECTOR(W_DIM - 1 downto 0) := (others => '0');
     signal result_word      : STD_LOGIC_VECTOR(W_DIM - 1 downto 0) := (others => '0');
+    signal tile_number      : unsigned(clog2(TILES_N) - 1 downto 0) := (others => '0');
      -- Memories signals
         signal bram_i_addr  : unsigned(clog2(MEM_B_SIZE) - 1 downto 0) := (others => '0');
         signal bram_o_addr  : unsigned(clog2(MEM_B_SIZE) - 1 downto 0) := (others => '0');
@@ -220,7 +243,7 @@ begin
             constant word_to_bit    : integer := i * 32;
             constant word_from_bit  : integer := word_to_bit + 31;
         begin 
-            mac_activation_in(i) <= activaction_word(word_from_bit downto word_to_bit);
+            activations_matrix(i) <= activaction_word(word_from_bit downto word_to_bit);
         end generate ; -- mac_activation_pop
 
     --------------- Weights Pop ---------------------
@@ -228,61 +251,140 @@ begin
             bit_pop : for bit in 0 to GRID_SIZE - 1 generate
                 constant bit_from_word : integer := bit * 32 + col;
             begin 
-                mac_weight_in(col)(bit) <= weigth_word(bit_from_word);
+                weights_matrix(col)(bit) <= weigth_word(bit_from_word);
             end generate ; -- bit_pop
         end generate ; -- mac_weigths_pop
 
     --------------- MAC Instantiation ---------------
-        mac_row_gen : for row in 0 to GRID_SIZE - 1 generate
-            mac_col_gen : for col in 0 to GRID_SIZE - 1 generate
-                constant bit_number : integer := row * GRID_SIZE + col;
-            begin 
-                behav_gen : if SIMULATION = false generate
-                    mac_inst : entity work.BTPU_MAC(Behavioral)
-                        generic map (
-                            X => GRID_SIZE,
-                            ACC_SIZE => ACC_SIZE
-                        )
-                        port map (
-                            acc_clk  => clk,
-                            acc_resn => acc_clear,
-                            a        => mac_activation_in(row),
-                            b        => mac_weight_in(col),
-                            size     => control_reg(BTPU_SIGN_CMP),
-                            res_sign => result_word(bit_number), 
-                            res      => mac_res(row, col),
-                            acc      => mac_acc(row, col)
-                        );
-                end generate; -- behav_gen
+        mac_inst_gen : for inst in 0 to MAC_INST_N - 1 generate
+            behav_gen : if SIMULATION = false generate
+                mac_inst : entity work.BTPU_MAC(Behavioral)
+                    generic map (
+                        X => GRID_SIZE,
+                        ACC_SIZE => ACC_SIZE
+                    )
+                    port map (
+                        acc_clk  => clk,
+                        acc_resn => acc_clear,
+                        a        => mac_a_in(inst),
+                        b        => mac_b_in(inst),
+                        size     => mac_size_in,
+                        res_sign => mac_sign_out(inst), 
+                        res      => mac_res_out(inst),
+                        acc      => mac_acc_out(inst)
+                    );
+            end generate; -- behav_gen
 
-                sim_gen : if SIMULATION = true generate
-                    mac_inst : entity work.BTPU_MAC(SimulationArch)
-                        generic map (
-                            X => GRID_SIZE,
-                            ACC_SIZE => ACC_SIZE
-                        )
-                        port map (
-                            acc_clk  => clk,
-                            acc_resn => acc_clear,
-                            a        => mac_activation_in(row),
-                            b        => mac_weight_in(col),
-                            size     => control_reg(BTPU_SIGN_CMP),
-                            res_sign => result_word(bit_number), 
-                            res      => mac_res(row, col),
-                            acc      => mac_acc(row, col)
-                        );
-                end generate; -- sim_gen
+            sim_gen : if SIMULATION = true generate
+                mac_inst : entity work.BTPU_MAC(SimulationArch)
+                    generic map (
+                        X => GRID_SIZE,
+                        ACC_SIZE => ACC_SIZE
+                    )
+                    port map (
+                        acc_clk  => clk,
+                        acc_resn => acc_clear,
+                        a        => mac_a_in(inst),
+                        b        => mac_b_in(inst),
+                        size     => mac_size_in,
+                        res_sign => mac_sign_out(inst), 
+                        res      => mac_res_out(inst),
+                        acc      => mac_acc_out(inst)
+                    );
+            end generate; -- sim_gen
 
-            end generate ; -- mac_col_gen
-        end generate ; -- mac_row_gen
+        end generate ; -- mac_inst_gen
+    --------------- Tile Selection ------------------
+        -- tile_selection : process( activations_matrix, weights_matrix, tile_number) is
+        --     variable inst_number : integer;
+        --     variable tile_row : integer;
+        --     variable tile_col : integer;
+        -- begin
+        --     tile_selector : for inst in 0 to MAC_INST_N - 1 loop
+        --         inst_number := inst + to_integer(tile_number) * MAC_INST_N;
+        --         tile_row := inst_number / GRID_SIZE;
+        --         tile_col := inst_number mod GRID_SIZE;
+        --         mac_a_in(inst) <= activations_matrix(tile_row);
+        --         mac_b_in(inst) <= weights_matrix(tile_col);
+        --     end loop ; -- tile_select
+        -- end process ; -- tile_selection
+
+        -- inst_for : for inst in 0 to MAC_INST_N - 1 generate
+        --     tile_for : for tile in 0 to TILES_N - 1 generate
+        --         constant inst_number : integer := inst + tile * MAC_INST_N;
+        --         constant tile_row    : integer := inst_number / GRID_SIZE;
+        --         constant tile_col    : integer := inst_number mod GRID_SIZE;
+        --     begin
+        --         tile_check : if tile = to_integer(tile_number) generate
+        --             mac_a_in(inst) <= activations_matrix(tile_row);
+        --             mac_b_in(inst) <= weights_matrix(tile_col);
+        --         end generate;
+        --     end generate; -- tile_for
+        -- end generate; -- inst_for
+
+        -- inst_for : for inst in 0 to MAC_INST_N - 1 generate
+        --     multiplexer_inst : process( activations_matrix, weights_matrix, tile_number) is
+        --         variable inst_number : integer;
+        --         variable tile_row : integer;
+        --         variable tile_col : integer;
+        --     begin
+        --         inst_number := inst + to_integer(tile_number) * MAC_INST_N;
+        --         tile_row := inst_number / GRID_SIZE;
+        --         tile_col := inst_number mod GRID_SIZE;
+        --         mac_a_in(inst) <= activations_matrix(tile_row);
+        --         mac_b_in(inst) <= weights_matrix(tile_col);
+        --     end process ; -- multiplexer_inst
+        -- end generate; -- inst_for
+
+        populate_inst_choises : for inst in 0 to MAC_INST_N - 1 generate
+            tile_for : for tile in 0 to TILES_N - 1 generate
+                constant inst_number : integer := inst + tile * MAC_INST_N;
+                constant tile_row    : integer := inst_number / GRID_SIZE;
+                constant tile_col    : integer := inst_number mod GRID_SIZE;
+            begin
+                mac_inst_activations_choises(inst)(tile) <= activations_matrix(tile_row);
+                mac_inst_weights_choises(inst)(tile)     <= weights_matrix(tile_col);
+            end generate; -- tile_for
+        end generate; -- populate_inst_choises
+
+        inst_for : for inst in 0 to MAC_INST_N - 1 generate
+            multiplexer_inst : process( mac_inst_activations_choises(inst), mac_inst_weights_choises(inst), tile_number) begin
+                mac_a_in(inst) <= mac_inst_activations_choises(inst)(to_integer(tile_number));
+                mac_b_in(inst) <= mac_inst_activations_choises(inst)(to_integer(tile_number));
+            end process ; -- multiplexer_inst
+        end generate; -- inst_for
         
+    --------------- Result Pop ----------------------
+        result_pop : for inst in 0 to MAC_INST_N - 1 generate
+            tile_for : for tile in 0 to TILES_N - 1 generate
+                constant inst_number : integer := inst + tile * MAC_INST_N;
+                constant tile_row    : integer := inst_number / GRID_SIZE;
+                constant tile_col    : integer := inst_number mod GRID_SIZE;
+                constant bit_n       : integer := tile_row * GRID_SIZE + tile_col;
+            begin
+                result_word(bit_n) <= mac_sign_out(inst) when unsigned(tile_number) = to_unsigned(tile, tile_number'length)
+                                    else 
+                                      result_word(bit_n);
+                process begin
+                    if DEBUG then
+                        report "connected result_word(" & integer'image(bit_n) & ") <= mac_sign_out(" & integer'image(inst) & ") when unsigned(tile_number) = " & integer'image(tile);
+                    end if;
+                    wait;
+                end process;
+            end generate; -- tile_for
+        end generate; -- result_pop
     --------------- Control Register File -----------
         start           <= control_reg(BTPU_REG_CONTROL)(BTPU_CREG_START_BIT);
         o_mem_select    <= control_reg(BTPU_REG_CONTROL)(BTPU_CREG_OMEM_SEL_BIT);
         bram_port_sel   <= control_reg(BTPU_REG_CONTROL)(BTPU_CREG_BRAM_PORT_SEL_BIT);
         acc_clear       <= control_reg(BTPU_REG_CONTROL)(BTPU_CREG_ACC_CLEAR_BIT) or force_acc_clear;
         multiple_acc    <= control_reg(BTPU_REG_CONTROL)(BTPU_CREG_MULTIPLE_ACCUM_BIT);
-        control_reg_file : process( clk, res, state, busy) is 
+        mac_size_in     <= control_reg(BTPU_SIGN_CMP);
+
+        -- control_reg(BTPU_REG_CONTROL)(BTPU_CREG_BUSY_BIT) <= busy;
+        -- control_reg(BTPU_STATUS) <= std_logic_vector(to_unsigned(BTPU_state_t'POS(state), 32));
+
+        control_reg_file : process( clk, res) is 
             variable reg_addr : integer;
             variable address : unsigned(31 downto 0);
         begin
@@ -308,11 +410,9 @@ begin
                     end if;
                     creg_out <= control_reg(reg_addr);
                 end if;
-
                 if start = '1' then
                     control_reg(BTPU_REG_CONTROL)(BTPU_CREG_START_BIT) <= '0';
                 end if ;
-            else
                 control_reg(BTPU_REG_CONTROL)(BTPU_CREG_BUSY_BIT) <= busy;
                 control_reg(BTPU_STATUS) <= std_logic_vector(to_unsigned(BTPU_state_t'POS(state), 32));
             end if;
@@ -395,13 +495,25 @@ begin
                         bram_w_enb <= '1';
                         bram_i_en  <= '1';
                         bram_o_en  <= '0';
-                        state <= COUNTING;
+                        state <= EXECUTE;
                         bram_w_addrb <= bram_w_addrb + 1;
                         bram_i_addr  <= bram_i_addr  + 1;
+                        tile_number <= (others => '0');
+                    when EXECUTE =>
+                        busy <= '1';
+                        bram_w_enb <= '1';
+                        bram_i_en  <= '1';
+                        bram_o_en  <= '0';
+                        tile_number <= tile_number + 1;
+                        if tile_number = to_unsigned(TILES_N - 1, tile_number'length) then
+                            tile_number <= (others => '0');
+                            state <= COUNTING;
+                        end if;
                     when COUNTING =>
                         busy <= '1';
                         bram_w_enb   <= '1';
                         bram_i_en <= '1';
+                        state <= EXECUTE;
                         if compute_size = 0 then
                             bram_w_enb <= '0';
                             bram_i_en  <= '0';
@@ -417,7 +529,7 @@ begin
                         else
                             bram_w_addrb <= bram_w_addrb + 1;
                             bram_i_addr  <= bram_i_addr  + 1;
-                            compute_size <= compute_size - 1;                            
+                            compute_size <= compute_size - 1;  
                         end if;
                     when WRITE_BACK =>
                         busy <= '1';
@@ -448,4 +560,10 @@ begin
                 end case;
             end if ;
         end process ; -- state_machine
+
+    --------------- Debug Signals -----------------
+        res0 <= result_word(255 downto 0);
+        res1 <= result_word(511 downto 256);
+        res2 <= result_word(767 downto 512);
+        res3 <= result_word(1023 downto 768);
 end Behavioral;

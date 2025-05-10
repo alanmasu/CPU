@@ -1221,6 +1221,8 @@ module test_AXI_ctrl( );
     end
     endtask
 
+    ////////////////////// ATTENTION //////////////////////////
+    //////// Hierarchical access not fully supported //////////
     wire [1023:0] BTPU_IO0_out_tb;
     // assign BTPU_IO0_out_tb = DUT4.BTPU_inst.bram_IO0_doutb;
 

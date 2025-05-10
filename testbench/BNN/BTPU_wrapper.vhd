@@ -37,7 +37,8 @@ architecture Behavioral of BTPU_wrapper is begin
     -- BTPU instantiation
     BTPU_inst : entity work.BTPU
     generic map (
-        SIMULATION => true
+        SIMULATION => true,
+        DEBUG => false
     )
     port map (
         clk => clk,
