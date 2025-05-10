@@ -1622,6 +1622,7 @@ module test_AXI_ctrl( );
         validating = 1'b0;
 
         @(btpu_busy_tb == 1'b0);
+        #10;
 
         
     end
