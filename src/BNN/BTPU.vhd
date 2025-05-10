@@ -267,7 +267,9 @@ begin
                             a        => mac_activation_in(row),
                             b        => mac_weight_in(col),
                             size     => control_reg(BTPU_SIGN_CMP),
-                            res_sign => result_word(bit_number)
+                            res_sign => result_word(bit_number), 
+                            res      => mac_res(row, col),
+                            acc      => mac_acc(row, col)
                         );
                 end generate; -- sim_gen
 
@@ -280,7 +282,7 @@ begin
         bram_port_sel   <= control_reg(BTPU_REG_CONTROL)(BTPU_CREG_BRAM_PORT_SEL_BIT);
         acc_clear       <= control_reg(BTPU_REG_CONTROL)(BTPU_CREG_ACC_CLEAR_BIT) or force_acc_clear;
         multiple_acc    <= control_reg(BTPU_REG_CONTROL)(BTPU_CREG_MULTIPLE_ACCUM_BIT);
-        control_reg_file : process( clk, res) is 
+        control_reg_file : process( clk, res, state, busy) is 
             variable reg_addr : integer;
             variable address : unsigned(31 downto 0);
         begin
@@ -310,6 +312,7 @@ begin
                 if start = '1' then
                     control_reg(BTPU_REG_CONTROL)(BTPU_CREG_START_BIT) <= '0';
                 end if ;
+            else
                 control_reg(BTPU_REG_CONTROL)(BTPU_CREG_BUSY_BIT) <= busy;
                 control_reg(BTPU_STATUS) <= std_logic_vector(to_unsigned(BTPU_state_t'POS(state), 32));
             end if;
@@ -378,38 +381,54 @@ begin
                         if start = '1' then
                             busy <= '1';
                             state <= FETCHING;
-                            compute_size <= unsigned(control_reg(BTPU_SIZE));
+                            compute_size <= unsigned(control_reg(BTPU_SIZE)) - 1;
+                            acc_number   <= unsigned(control_reg(BTPU_ACCUM)) - 1;
                             bram_w_addrb <= unsigned(control_reg(BTPU_W_ADDR)(clog2(MEM_B_SIZE) - 1 downto 0));
                             bram_i_addr  <= unsigned(control_reg(BTPU_I_ADDR)(clog2(MEM_B_SIZE) - 1 downto 0));
                             bram_o_addr  <= unsigned(control_reg(BTPU_O_ADDR)(clog2(MEM_B_SIZE) - 1 downto 0));
-                            acc_number   <= unsigned(control_reg(BTPU_ACCUM));
+                            bram_w_enb <= '1';
+                            bram_i_en  <= '1';
+                            bram_o_en  <= '0';
                         end if;
                     when FETCHING =>
                         busy <= '1';
                         bram_w_enb <= '1';
                         bram_i_en  <= '1';
                         bram_o_en  <= '0';
+                        state <= COUNTING;
+                        bram_w_addrb <= bram_w_addrb + 1;
+                        bram_i_addr  <= bram_i_addr  + 1;
                     when COUNTING =>
                         busy <= '1';
                         bram_w_enb   <= '1';
                         bram_i_en <= '1';
-                        if compute_size > 0 then
+                        if compute_size = 0 then
+                            bram_w_enb <= '0';
+                            bram_i_en  <= '0';
+                            bram_o_en  <= '1'; 
+                            bram_o_we  <= '1';
+                            state <= WRITE_BACK;
+                        elsif compute_size = 1 then
+                            bram_w_enb <= '0';
+                            bram_i_en  <= '0';
                             bram_w_addrb <= bram_w_addrb + 1;
                             bram_i_addr  <= bram_i_addr  + 1;
-                            compute_size <= compute_size - 1;
+                            compute_size <= compute_size - 1;  
                         else
-                            bram_o_en <= '1';
-                            state <= WRITE_BACK;
-                            bram_o_we <= '1';
+                            bram_w_addrb <= bram_w_addrb + 1;
+                            bram_i_addr  <= bram_i_addr  + 1;
+                            compute_size <= compute_size - 1;                            
                         end if;
                     when WRITE_BACK =>
                         busy <= '1';
-                        bram_w_enb   <= '0';
-                        bram_i_en <= '0';
-                        bram_o_en <= '0';
+                        bram_w_enb  <= '0';
+                        bram_i_en   <= '0';
+                        bram_o_en   <= '0';
                         bram_o_addr <= bram_o_addr + 1;
                         if multiple_acc = '1' then
                             acc_number <= acc_number - 1;
+                            compute_size <= unsigned(control_reg(BTPU_SIZE)) - 1;
+                            force_acc_clear <= '1';
                             state <= CLEAR_ACC;
                         end if ;
                         if acc_number = 0 or multiple_acc = '0' then
@@ -424,7 +443,7 @@ begin
                         bram_i_en <= '0';
                         bram_o_en <= '0';
                         bram_o_we <= '0';
-                        force_acc_clear <= '1';
+                        force_acc_clear <= '0';
                         state <= FETCHING;                        
                 end case;
             end if ;

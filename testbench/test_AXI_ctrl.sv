@@ -1605,21 +1605,25 @@ module test_AXI_ctrl( );
         end else begin
             $display("Test #%0de: FAILED -> btpu_busy_tb was %0x", testN, btpu_busy_tb);
         end
-        @ (posedge clock);
-        #1;
+        // @ (posedge clock);
+        // #1;
 
         if (btpu_creg_tb[0][1] == 1'b1) begin
-            $display("Test #%0da: OK", testN);
+            $display("Test #%0df: OK", testN);
         end else begin
-            $display("Test #%0da: FAILED -> btpu_creg_tb[1] was %0x", testN, btpu_creg_tb[1]);
+            $display("Test #%0df: FAILED -> btpu_creg_tb[1] was %0x", testN, btpu_creg_tb[1]);
         end
         if(btpu_creg_tb[6] == 32'd1) begin
-            $display("Test #%0db: OK", testN);
+            $display("Test #%0dg: OK", testN);
         end else begin
-            $display("Test #%0db: FAILED -> btpu_creg_tb[6] was %0x", testN, btpu_creg_tb[6]);
+            $display("Test #%0dg: FAILED -> btpu_creg_tb[6] was %0x", testN, btpu_creg_tb[6]);
         end
         #1;
         validating = 1'b0;
+
+        @(btpu_busy_tb == 1'b0);
+
+        
     end
     endtask
 
@@ -1633,7 +1637,7 @@ module test_AXI_ctrl( );
         // testAXI_BRESP();
         testBTU();
         testBTU_FSM();
-        #100;
+        // #100;
         en_in = 1'b0;
         $finish;
     end
