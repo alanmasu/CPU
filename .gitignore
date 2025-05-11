@@ -10,4 +10,4 @@ test_barrell.vhd
 pyEnv
 *obj
 .vscode
-sim.txt
+simulation/results/*

@@ -73,6 +73,7 @@ end BTPU;
 architecture Behavioral of BTPU is
     constant W_DIM : integer := (GRID_SIZE * GRID_SIZE);
     constant TILES_N : integer := (GRID_SIZE * GRID_SIZE) / MAC_INST_N;
+    constant tiles_n_u : unsigned(clog2(TILES_N) - 1 downto 0) := to_unsigned(TILES_N, clog2(TILES_N));
 
     signal res0 : std_logic_vector(255 downto 0) := (others => '0');
     signal res1 : std_logic_vector(255 downto 0) := (others => '0');
@@ -126,6 +127,7 @@ architecture Behavioral of BTPU is
         signal multiple_acc : std_logic := '0';
         signal acc_number   : unsigned(31 downto 0) := (others => '0');
         signal compute_size : unsigned(31 downto 0) := (others => '0');
+        signal compute_iteration : unsigned(31 downto 0) := (others => '0');
         signal force_acc_clear : std_logic := '0';
 
     -- BRAMs      LS Interface signals 
@@ -344,13 +346,20 @@ begin
             begin
                 mac_inst_activations_choises(inst)(tile) <= activations_matrix(tile_row);
                 mac_inst_weights_choises(inst)(tile)     <= weights_matrix(tile_col);
+                process begin
+                    if DEBUG then
+                        report "mac_inst_activations_choises(" & integer'image(inst) & ")(" & integer'image(tile) & ") <= activations_matrix(" & integer'image(tile_row) & ")";
+                        report "mac_inst_weights_choises    (" & integer'image(inst) & ")(" & integer'image(tile) & ") <= weights_matrix(" & integer'image(tile_col) & ")";
+                    end if;
+                    wait;
+                end process;
             end generate; -- tile_for
         end generate; -- populate_inst_choises
 
         inst_for : for inst in 0 to MAC_INST_N - 1 generate
             multiplexer_inst : process( mac_inst_activations_choises(inst), mac_inst_weights_choises(inst), tile_number) begin
                 mac_a_in(inst) <= mac_inst_activations_choises(inst)(to_integer(tile_number));
-                mac_b_in(inst) <= mac_inst_activations_choises(inst)(to_integer(tile_number));
+                mac_b_in(inst) <= mac_inst_weights_choises(inst)(to_integer(tile_number));
             end process ; -- multiplexer_inst
         end generate; -- inst_for
         
@@ -471,92 +480,68 @@ begin
                 bram_o_we <= '0';
             elsif rising_edge(hs_clk) then
                 force_acc_clear <= '0';
+                bram_w_enb <= '0';
+                bram_i_en  <= '0';
+                bram_o_en  <= '0';
+                bram_w_enb <= '0';
                 case state is
                     when IDLE =>
                         busy <= '0';
-                        bram_w_enb   <= '0';
-                        bram_i_en <= '0';
-                        bram_o_en <= '0';
-                        bram_o_we <= '0';
                         if start = '1' then
                             busy <= '1';
-                            state <= FETCHING;
+                            bram_w_enb <= '1';
+                            bram_i_en  <= '1';
                             compute_size <= unsigned(control_reg(BTPU_SIZE)) - 1;
+                            compute_iteration <= (others => '0');
                             acc_number   <= unsigned(control_reg(BTPU_ACCUM)) - 1;
                             bram_w_addrb <= unsigned(control_reg(BTPU_W_ADDR)(clog2(MEM_B_SIZE) - 1 downto 0));
                             bram_i_addr  <= unsigned(control_reg(BTPU_I_ADDR)(clog2(MEM_B_SIZE) - 1 downto 0));
                             bram_o_addr  <= unsigned(control_reg(BTPU_O_ADDR)(clog2(MEM_B_SIZE) - 1 downto 0));
-                            bram_w_enb <= '1';
-                            bram_i_en  <= '1';
-                            bram_o_en  <= '0';
+                            state <= FETCHING;
                         end if;
                     when FETCHING =>
                         busy <= '1';
-                        bram_w_enb <= '1';
-                        bram_i_en  <= '1';
+                        -- bram_w_enb <= '1';
+                        -- bram_i_en  <= '1';
                         bram_o_en  <= '0';
-                        state <= EXECUTE;
-                        bram_w_addrb <= bram_w_addrb + 1;
-                        bram_i_addr  <= bram_i_addr  + 1;
                         tile_number <= (others => '0');
+                        state <= EXECUTE;
                     when EXECUTE =>
                         busy <= '1';
-                        bram_w_enb <= '1';
-                        bram_i_en  <= '1';
-                        bram_o_en  <= '0';
                         tile_number <= tile_number + 1;
-                        if tile_number = to_unsigned(TILES_N - 1, tile_number'length) then
+                        if tile_number = tiles_n_u - 1 then
+                            bram_w_enb <= '1';
+                            bram_i_en  <= '1';
                             tile_number <= (others => '0');
-                            state <= COUNTING;
+                            bram_w_addrb <= bram_w_addrb + 1;
+                            bram_i_addr  <= bram_i_addr  + 1;
+                            compute_iteration <= compute_iteration + 1;
+                            state <= FETCHING;
+                            if compute_iteration = compute_size then
+                                bram_o_en  <= '1'; 
+                                bram_o_we  <= '1';
+                                state <= WRITE_BACK; 
+                            end if;
                         end if;
                     when COUNTING =>
-                        busy <= '1';
-                        bram_w_enb   <= '1';
-                        bram_i_en <= '1';
-                        state <= EXECUTE;
-                        if compute_size = 0 then
-                            bram_w_enb <= '0';
-                            bram_i_en  <= '0';
-                            bram_o_en  <= '1'; 
-                            bram_o_we  <= '1';
-                            state <= WRITE_BACK;
-                        elsif compute_size = 1 then
-                            bram_w_enb <= '0';
-                            bram_i_en  <= '0';
-                            bram_w_addrb <= bram_w_addrb + 1;
-                            bram_i_addr  <= bram_i_addr  + 1;
-                            compute_size <= compute_size - 1;  
-                        else
-                            bram_w_addrb <= bram_w_addrb + 1;
-                            bram_i_addr  <= bram_i_addr  + 1;
-                            compute_size <= compute_size - 1;  
-                        end if;
+                        state <= IDLE;
                     when WRITE_BACK =>
                         busy <= '1';
-                        bram_w_enb  <= '0';
-                        bram_i_en   <= '0';
-                        bram_o_en   <= '0';
                         bram_o_addr <= bram_o_addr + 1;
                         if multiple_acc = '1' then
                             acc_number <= acc_number - 1;
-                            compute_size <= unsigned(control_reg(BTPU_SIZE)) - 1;
+                            compute_iteration <= (others => '0');
                             force_acc_clear <= '1';
                             state <= CLEAR_ACC;
                         end if ;
                         if acc_number = 0 or multiple_acc = '0' then
-                            state <= IDLE;
                             busy <= '0';
-                            bram_o_en <= '0';
-                            bram_o_we <= '0';
+                            state <= IDLE;
                         end if;
                     when CLEAR_ACC =>
                         busy <= '1';
-                        bram_w_enb <= '0';
-                        bram_i_en <= '0';
-                        bram_o_en <= '0';
-                        bram_o_we <= '0';
                         force_acc_clear <= '0';
-                        state <= FETCHING;                        
+                        state <= EXECUTE;                        
                 end case;
             end if ;
         end process ; -- state_machine

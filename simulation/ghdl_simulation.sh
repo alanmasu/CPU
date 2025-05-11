@@ -32,6 +32,26 @@ case $1 in
                 testbench/BNN/test_popcounter.vhd \
                 -r test_popcounter --stop-time=100ns #> simulation/sim.txt
         ;;
+    "btpu")
+        ghdl -c \
+            packages/utilities_pkg.vhd \
+            packages/BNN_pkg.vhd \
+            packages/types_pkg.vhd \
+            packages/constant_package.vhd \
+            packages/memory_pkg.vhd \
+            src/BNN/compressor_6_3.vhd \
+            src/BNN/compressor_layer.vhd \
+            src/BNN/ternary_adder.vhd \
+            src/BNN/popcounter_tree.vhd \
+            src/BNN/popcounter.vhd \
+            src/BNN/binary_mac.vhd \
+            src/BNN/BTPU_MAC.vhd \
+            simulation/BTPU_memory.vhd \
+            src/BNN/BTPU.vhd \
+            simulation/BTPU_tb.vhd \
+            -r BTPU_tb \
+            > simulation/results/sim_btpu.txt
+        ;;
     "all")
         ghdl -c packages/utilities_pkg.vhd packages/BNN_pkg.vhd testbench/BNN/testBNN_utilities.vhd -r testUtilities
         echo ""
