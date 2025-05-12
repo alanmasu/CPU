@@ -23,21 +23,45 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
-
--- Uncomment the following library declaration if instantiating
--- any Xilinx leaf cells in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
+library work;
+use work.BNN_pkg.all;
+use work.utilities_pkg.all;
+use work.types_pkg.all;
+use work.constant_package.all;
+use work.memory_pkg.all;
 
 entity test_BTPU_memory is
 --  Port ( );
 end test_BTPU_memory;
 
 architecture Behavioral of test_BTPU_memory is
+    constant DEBUG : boolean := false;
     constant W_DIM : integer := 1024;
+    constant GRID_SIZE : integer := 32;
+    constant ACC_SIZE : integer := 32;
+    constant MAC_INST_N : integer := 256;
+    constant TILES_N : integer := (GRID_SIZE * GRID_SIZE) / MAC_INST_N;
+    
+    signal tile_number      : unsigned(clog2(TILES_N) - 1 downto 0) := (others => '0');
+    -- Matrix Arrays
+    type matrix_t   is array (0 to GRID_SIZE  - 1) of std_logic_vector(GRID_SIZE - 1 downto 0);
+    type popcount_t is array (0 to MAC_INST_N - 1) of std_logic_vector(clog2(GRID_SIZE) - 1 downto 0);
+    type acc_t      is array (0 to MAC_INST_N - 1) of std_logic_vector(ACC_SIZE - 1 downto 0);
+    type mac_input  is array (0 to MAC_INST_N - 1) of std_logic_vector(GRID_SIZE - 1 downto 0);
 
+    type inst_choises_t is array (0 to TILES_N - 1) of std_logic_vector(GRID_SIZE - 1 downto 0);
+    type inst_input_t is array (0 to MAC_INST_N - 1) of inst_choises_t;
+
+    signal activations_matrix : matrix_t;
+    signal weights_matrix     : matrix_t; 
+        
+    signal mac_a_in     : mac_input;
+    signal mac_b_in     : mac_input;
+        
+    signal mac_inst_activations_choises : inst_input_t;
+    signal mac_inst_weights_choises     : inst_input_t;
+    
+    --------------------------------------------------------------------------
     signal clk : std_logic := '0';
     signal rst : std_logic := '0';
 
@@ -45,7 +69,7 @@ architecture Behavioral of test_BTPU_memory is
     signal enb : std_logic := '0';
 
     signal addra : std_logic_vector(31 downto 0) := (others => '0');
-    signal addrb : std_logic_vector(31 downto 0);
+    signal addrb : std_logic_vector(31 downto 0) := (others => '0');
 
     signal dina : std_logic_vector(31 downto 0) := (others => '0');
     signal dinb : std_logic_vector(W_DIM-1 downto 0) := (others => '0');
@@ -55,6 +79,7 @@ architecture Behavioral of test_BTPU_memory is
 
     signal douta : std_logic_vector(31 downto 0) := (others => '0');
     signal doutb : std_logic_vector(W_DIM-1 downto 0) := (others => '0');
+    signal activaction_word : std_logic_vector(W_DIM-1 downto 0) := (others => '0');
 
 
     signal test_n : integer := 0;
@@ -109,44 +134,111 @@ begin
         rst <= '1';
         wait;
     end process ;
+    
+    
+    activaction_word <= doutb;
 
-    process begin
+
+    --------------- Activation Pop ------------------
+        mac_activation_pop : for i in 0 to GRID_SIZE - 1 generate
+            constant word_to_bit    : integer := i * 32;
+            constant word_from_bit  : integer := word_to_bit + 31;
+        begin 
+            activations_matrix(i) <= activaction_word(word_from_bit downto word_to_bit);
+        end generate ; -- mac_activation_pop
+
+    --------------- Weights Pop ---------------------
+        --    mac_weigths_pop : for col in 0 to GRID_SIZE - 1 generate
+        --        bit_pop : for bit in 0 to GRID_SIZE - 1 generate
+        --            constant bit_from_word : integer := bit * 32 + col;
+        --        begin 
+        --            weights_matrix(col)(bit) <= weigth_word(bit_from_word);
+        --        end generate ; -- bit_pop
+        --    end generate ; -- mac_weigths_pop
+
+    --------------- Tile Selection ------------------
+        populate_inst_choises : for inst in 0 to MAC_INST_N - 1 generate
+            tile_for : for tile in 0 to TILES_N - 1 generate
+                constant inst_number : integer := inst + tile * MAC_INST_N;
+                constant tile_row    : integer := inst_number / GRID_SIZE;
+                constant tile_col    : integer := inst_number mod GRID_SIZE;
+            begin
+                mac_inst_activations_choises(inst)(tile) <= activations_matrix(tile_row);
+                mac_inst_weights_choises(inst)(tile)     <= weights_matrix(tile_col);
+                process begin
+                    if DEBUG then
+                        report "mac_inst_activations_choises(" & integer'image(inst) & ")(" & integer'image(tile) & ") <= activations_matrix(" & integer'image(tile_row) & ")";
+                        report "mac_inst_weights_choises    (" & integer'image(inst) & ")(" & integer'image(tile) & ") <= weights_matrix(" & integer'image(tile_col) & ")";
+                    end if;
+                    wait;
+                end process;
+            end generate; -- tile_for
+        end generate; -- populate_inst_choises
+
+        inst_for : for inst in 0 to MAC_INST_N - 1 generate
+            multiplexer_inst : process( mac_inst_activations_choises(inst), mac_inst_weights_choises(inst), tile_number) begin
+                mac_a_in(inst) <= mac_inst_activations_choises(inst)(to_integer(tile_number));
+                mac_b_in(inst) <= mac_inst_weights_choises(inst)(to_integer(tile_number));
+            end process ; -- multiplexer_inst
+        end generate; -- inst_for
+
+
+    process is
+        variable thread : integer := 0;
+        variable col    : integer := 0;
+        variable row    : integer := 0;
+    begin
         wait until rst = '1';
         ena <= '1';
         wea <= "1";
         wait until rising_edge(clk);
         wait for 1 ns;
 
-        for i in 0 to 10 loop
+        --- Popola 4 righe da 1024
+        for i in 0 to 128 loop
             addra <= std_logic_vector(to_unsigned(i, 32));
             dina <= std_logic_vector(to_unsigned(i, 32));
             wait until rising_edge(clk);
             wait for 1 ns;
         end loop ; -- 
+        wea <= "0";
+        wait until rising_edge(clk);
+        wait for 1 ns;
 
-        for i in 0 to 10 loop
-            addra <= std_logic_vector(to_unsigned(i + 32, 32));
-            dina <= std_logic_vector(to_unsigned(i, 32));
+        --- Checking the BRAM Port A ---
+        test_n <= 1;
+        
+        for i in 0 to 128 loop
+            addra <= std_logic_vector(to_unsigned(i, 32));
             wait until rising_edge(clk);
             wait for 1 ns;
+            validating <= '1';
+            if (douta /= std_logic_vector(to_unsigned(i, 32))) then
+                result <= '0';
+                report "Test #" & integer'image(test_n) & " FAILED: at address " & integer'image(i) & " with value " & integer'image(i) & " dout was " & integer'image(to_integer(unsigned(douta)));
+            end if;
+            wait for 1 ns;
+            validating <= '0';
         end loop ; --
-        wea <= "0";
-        ena <= '0';
-
+        wait for 1 ns;
+        validating <= '0';
+        if result = '1' then
+            report "Test #" & integer'image(test_n) & " OK";
+        end if;
 
 
         --- Checking the BRAM Port B ---
-        test_n <= 1;
+        test_n <= 2;
         enb <= '1';
         web <= "0";
         result <= '1';
-        for i in 0 to 1 loop 
+        for i in 0 to 3 loop 
             addrb <= std_logic_vector(to_unsigned(i, 32));
             wait until rising_edge(clk);
             wait for 1 ns;
             validating <= '1';
-            for j in 0 to 10 loop
-                if (doutb( j*32 + 31 downto j * 32) /= std_logic_vector(to_unsigned(j, 32))) then
+            for j in 0 to 31 loop
+                if (doutb( j*32 + 31 downto j * 32) /= std_logic_vector(to_unsigned(i * 32 + j, 32))) then
                     result <= '0';
                     report "Test #" & integer'image(test_n) & " FAILED: at address " & integer'image(i) & " with value " & integer'image(j) & " dout was " & integer'image(to_integer(unsigned(doutb( j*32 + 31 downto j * 32))));
                 end if;
@@ -157,7 +249,61 @@ begin
         if result = '1' then
             report "Test #" & integer'image(test_n) & " OK";
         end if;
-        
+        wait for 1 ns;
+
+        --- Checking selector ---
+        test_n <= 3;
+        enb <= '1';
+        web <= "0";
+        result <= '1';
+        addrb <= std_logic_vector(to_unsigned(0, 32));
+        wait until rising_edge(clk);
+        wait for 1 ns;
+        validating <= '1';
+        for row in 0 to 31 loop 
+            if (activations_matrix(row) /= std_logic_vector(to_unsigned(row, 32))) then
+                result <= '0';
+                report "Test #" & integer'image(test_n) & " FAILED => activation_matrix(" & integer'image(row) & ") was: " & integer'image(to_integer(unsigned(activations_matrix(row))));
+            end if; 
+        end loop ; --
+        wait for 1 ns;
+        validating <= '0';
+        if result = '1' then
+            report "Test #" & integer'image(test_n) & " OK";
+        end if;
+        wait for 1 ns;
+
+        --- Checking selector ---
+        test_n <= 4;
+        enb <= '1';
+        web <= "0";
+        result <= '1';
+        addrb <= std_logic_vector(to_unsigned(0, 32));
+        wait until rising_edge(clk);
+        wait for 1 ns;
+        validating <= '1';
+        for instance in 0 to MAC_INST_N - 1 loop 
+        -- for instance in 0 to 2 loop 
+            for tile in 0 to TILES_N - 1 loop 
+                thread := tile * MAC_INST_N + instance;
+                row := thread / GRID_SIZE;
+                col := thread mod GRID_SIZE;
+                tile_number <= to_unsigned(tile, clog2(TILES_N));
+                wait for 1 ns;
+                if (mac_inst_activations_choises(instance)(tile) /= activations_matrix(row)) then
+                    result <= '0';
+                    report "Test #" & integer'image(test_n) & " FAILED => mac_inst_activations_choises(" & integer'image(instance) & ")(" & integer'image(tile) & ") [th: " & integer'image(thread) & " row: " & integer'image(row) & "] was: " & integer'image(to_integer(unsigned(mac_inst_activations_choises(instance)(tile))));
+                end if;
+            end loop ; --
+        end loop ; --
+        if result = '1' then
+            report "Test #" & integer'image(test_n) & " OK";
+        end if;
+        wait for 1 ns;
+
+
+
+
         assert false report "fine" severity failure;
     end process ; -- 
 
