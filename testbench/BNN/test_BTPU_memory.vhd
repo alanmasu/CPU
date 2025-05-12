@@ -112,6 +112,26 @@ architecture Behavioral of test_BTPU_memory is
     signal res2 : std_logic_vector(255 downto 0) := (others => '0');
     signal res3 : std_logic_vector(255 downto 0) := (others => '0');
 
+    ------------ Testing BTPU_MAC ------------
+    signal mac_a        : std_logic_vector(GRID_SIZE - 1 downto 0) := (others => '0');
+    signal mac_b        : std_logic_vector(GRID_SIZE - 1 downto 0) := (others => '0');
+    signal mac_sign_cmp : std_logic_vector(ACC_SIZE - 1 downto 0) := (others => '0');
+    signal mac_sign     : std_logic := '0';
+    signal mac_out      : std_logic_vector(clog2(GRID_SIZE) - 1 downto 0) := (others => '0');
+    signal mac_acc      : std_logic_vector(ACC_SIZE - 1 downto 0) := (others => '0');
+    signal mac_clear    : std_logic := '0';
+
+    function popcount_compute (input : std_logic_vector(GRID_SIZE - 1 downto 0)) return std_logic_vector is
+        variable result : unsigned(clog2(GRID_SIZE) - 1 downto 0) := (others => '0');
+    begin
+        for i in 0 to GRID_SIZE - 1 loop
+            if (input(i) = '1') then
+                result := result + to_unsigned(1, clog2(GRID_SIZE));
+            end if;
+        end loop;
+        return std_logic_vector(result);
+    end function;
+
 begin
 
     dut : BTPU_memory
@@ -130,25 +150,39 @@ begin
             doutb => doutb
         );
 
-    process begin
-        clk <= '1';
-        wait for 5 ns;
-        clk <= '0';
-        wait for 5 ns;
-    end process ; 
-    
-    process begin
-        rst <= '0';
-        wait for 9 ns;
-        rst <= '1';
-        wait;
-    end process ;
-    
-    
-    activaction_word <= doutb;
+    dut2 : entity work.BTPU_MAC
+        generic map (
+            X => GRID_SIZE,
+            ACC_SIZE => ACC_SIZE
+        )
+        PORT MAP (
+            acc_clk => clk,
+            acc_resn => mac_clear,
+            a => mac_a,
+            b => mac_b,
+            size => mac_sign_cmp,
+            res_sign => mac_sign,
+            res => mac_out,
+            acc => mac_acc
+        );
 
-
+    --------------- Clock and Reset -----------------
+        process begin
+            clk <= '1';
+            wait for 5 ns;
+            clk <= '0';
+            wait for 5 ns;
+        end process ; 
+        
+        process begin
+            rst <= '0';
+            wait for 9 ns;
+            rst <= '1';
+            wait;
+        end process ; 
+    
     --------------- Activation Pop ------------------
+        activaction_word <= doutb;
         mac_activation_pop : for i in 0 to GRID_SIZE - 1 generate
             constant word_to_bit    : integer := i * 32;
             constant word_from_bit  : integer := word_to_bit + 31;
@@ -211,11 +245,11 @@ begin
             end generate; -- tile_for
         end generate; -- result_pop
 
-    --------------- Debug Signals -----------------
-    res0 <= result_word(255 downto 0);
-    res1 <= result_word(511 downto 256);
-    res2 <= result_word(767 downto 512);
-    res3 <= result_word(1023 downto 768);
+    --------------- Debug Signals -------------------
+        res0 <= result_word(255 downto 0);
+        res1 <= result_word(511 downto 256);
+        res2 <= result_word(767 downto 512);
+        res3 <= result_word(1023 downto 768);
 
     --------------- Testing Process -----------------
     process is
@@ -363,6 +397,79 @@ begin
         if result = '1' then
             report "Test #" & integer'image(test_n) & " OK";
         end if;
+        wait for 1 ns;
+
+        --- Checking MAC ---
+        test_n <= 6;
+        result <= '1';
+        mac_clear <= '0';
+        wait until rising_edge(clk);
+        wait for 1 ns;
+        mac_clear <= '1';
+        wait for 1 ns;
+        
+        mac_sign_cmp <= std_logic_vector(to_unsigned(6, ACC_SIZE));
+        mac_a <= (5 => '1', 4 => '1', 3 => '1', 2 => '1', 1 => '1', 0 => '1', others => '0'); -- 6 uni
+        mac_b <= (others => '1'); -- 6 zero
+        wait until rising_edge(clk);
+        wait for 1 ns;
+
+        validating <= '1';
+        if (mac_out /= popcount_compute(mac_a xnor mac_b)) or mac_acc /= popcount_compute(mac_a xnor mac_b) then
+            report "Test #" & integer'image(test_n) & " FAILED => mac_out was: " & integer'image(to_integer(unsigned(mac_out))) & " expected: " & integer'image(to_integer(unsigned(popcount_compute(mac_a xnor mac_b))))
+                                                    & " | mac_acc was: " & integer'image(to_integer(unsigned(mac_acc))) & " expected: " & integer'image(to_integer(unsigned(popcount_compute(mac_a xnor mac_b))));
+        else 
+            report "Test #" & integer'image(test_n) & " OK";
+        end if;
+        wait for 1 ns;
+        validating <= '0';
+
+        test_n <= 7;
+        result <= '1';
+        wait for 1 ns;
+
+        validating <= '1';
+        if mac_sign /= '0' then
+            result <= '0';
+            report "Test #" & integer'image(test_n) & " FAILED => mac_sign was: 1 expected: 0";
+        else 
+            report "Test #" & integer'image(test_n) & " OK";
+        end if;
+        wait for 1 ns;
+        validating <= '0';
+
+        test_n <= 8;
+        result <= '1';
+        mac_a <= (5 => '1', 4 => '0', 3 => '0', 2 => '0', 1 => '0', 0 => '0', others => '0'); -- 1 uno
+        mac_b <= (others => '1'); -- 1 zero
+        wait until rising_edge(clk);
+        wait for 1 ns;
+        validating <= '1';
+        if (mac_out /= popcount_compute(mac_a xnor mac_b)) or mac_acc /= std_logic_vector(to_unsigned(7, ACC_SIZE)) then
+            report "Test #" & integer'image(test_n) & " FAILED => mac_out was: " & integer'image(to_integer(unsigned(mac_out))) & " expected: " & integer'image(to_integer(unsigned(popcount_compute(mac_a xnor mac_b))))
+                                                    & " | mac_acc was: " & integer'image(to_integer(unsigned(mac_acc))) & " expected: 7";
+        else 
+            report "Test #" & integer'image(test_n) & " OK";
+        end if;
+        wait for 1 ns;
+        validating <= '0';
+
+        test_n <= 9;
+        result <= '1';
+        wait for 1 ns;
+        validating <= '1';
+        if mac_sign /= '1' then
+            result <= '0';
+            report "Test #" & integer'image(test_n) & " FAILED => mac_sign was: 0 expected: 1";
+        else 
+            report "Test #" & integer'image(test_n) & " OK";
+        end if;
+        wait for 1 ns;
+        validating <= '0';
+
+
+
+
 
         assert false report "fine" severity failure;
     end process ; -- 

@@ -386,7 +386,7 @@ begin
         start           <= control_reg(BTPU_REG_CONTROL)(BTPU_CREG_START_BIT);
         o_mem_select    <= control_reg(BTPU_REG_CONTROL)(BTPU_CREG_OMEM_SEL_BIT);
         bram_port_sel   <= control_reg(BTPU_REG_CONTROL)(BTPU_CREG_BRAM_PORT_SEL_BIT);
-        acc_clear       <= control_reg(BTPU_REG_CONTROL)(BTPU_CREG_ACC_CLEAR_BIT) or force_acc_clear;
+        acc_clear       <= (not control_reg(BTPU_REG_CONTROL)(BTPU_CREG_ACC_CLEAR_BIT)) and (not force_acc_clear);
         multiple_acc    <= control_reg(BTPU_REG_CONTROL)(BTPU_CREG_MULTIPLE_ACCUM_BIT);
         mac_size_in     <= control_reg(BTPU_SIGN_CMP);
 

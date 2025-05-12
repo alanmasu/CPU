@@ -95,6 +95,7 @@ architecture SimulationArch of BTPU_MAC is
     signal accumulator : STD_LOGIC_VECTOR (ACC_SIZE - 1 downto 0) := (others => '0');
     signal popcount : STD_LOGIC_VECTOR (clog2(X) - 1 downto 0) := (others => '0');
     signal size_u   : unsigned(ACC_SIZE - 1 downto 0) := (others => '0');
+    signal product : STD_LOGIC_VECTOR (X - 1 downto 0) := (others => '0');
 begin
 
     popcounter_pro : process( a, b ) is
@@ -109,7 +110,7 @@ begin
             end if;
         end loop;
         popcount <= std_logic_vector(popcount_temp);
-        
+        product <= binary_product;
     end process ; -- popcounter_pro
 
     

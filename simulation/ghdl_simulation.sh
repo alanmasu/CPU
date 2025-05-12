@@ -46,9 +46,9 @@ case $1 in
             src/BNN/popcounter.vhd \
             src/BNN/binary_mac.vhd \
             src/BNN/BTPU_MAC.vhd \
-            simulation/BTPU_memory.vhd \
+            simulation/scr/BTPU_memory.vhd \
             src/BNN/BTPU.vhd \
-            simulation/BTPU_tb.vhd \
+            simulation/scr/BTPU_tb.vhd \
             -r BTPU_tb \
             > simulation/results/sim_btpu.txt
         ;;
