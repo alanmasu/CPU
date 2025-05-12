@@ -49,6 +49,11 @@ architecture Behavioral of test_BTPU_memory is
     type acc_t      is array (0 to MAC_INST_N - 1) of std_logic_vector(ACC_SIZE - 1 downto 0);
     type mac_input  is array (0 to MAC_INST_N - 1) of std_logic_vector(GRID_SIZE - 1 downto 0);
 
+    signal activaction_word : std_logic_vector(W_DIM - 1 downto 0) := (others => '0');
+    signal result_word      : std_logic_vector(W_DIM - 1 downto 0) := (others => '0');
+
+    signal mac_sign_out     : std_logic_vector(MAC_INST_N - 1 downto 0) := (others => '0');
+
     type inst_choises_t is array (0 to TILES_N - 1) of std_logic_vector(GRID_SIZE - 1 downto 0);
     type inst_input_t is array (0 to MAC_INST_N - 1) of inst_choises_t;
 
@@ -79,7 +84,6 @@ architecture Behavioral of test_BTPU_memory is
 
     signal douta : std_logic_vector(31 downto 0) := (others => '0');
     signal doutb : std_logic_vector(W_DIM-1 downto 0) := (others => '0');
-    signal activaction_word : std_logic_vector(W_DIM-1 downto 0) := (others => '0');
 
 
     signal test_n : integer := 0;
@@ -102,6 +106,11 @@ architecture Behavioral of test_BTPU_memory is
             doutb : OUT STD_LOGIC_VECTOR(1023 DOWNTO 0)
         );
     END COMPONENT;
+
+    signal res0 : std_logic_vector(255 downto 0) := (others => '0');
+    signal res1 : std_logic_vector(255 downto 0) := (others => '0');
+    signal res2 : std_logic_vector(255 downto 0) := (others => '0');
+    signal res3 : std_logic_vector(255 downto 0) := (others => '0');
 
 begin
 
@@ -181,8 +190,34 @@ begin
                 mac_b_in(inst) <= mac_inst_weights_choises(inst)(to_integer(tile_number));
             end process ; -- multiplexer_inst
         end generate; -- inst_for
+    
+    --------------- Result Pop ----------------------
+        result_pop : for inst in 0 to MAC_INST_N - 1 generate
+            tile_for : for tile in 0 to TILES_N - 1 generate
+                constant inst_number : integer := inst + tile * MAC_INST_N;
+                constant tile_row    : integer := inst_number / GRID_SIZE;
+                constant tile_col    : integer := inst_number mod GRID_SIZE;
+                constant bit_n       : integer := tile_row * GRID_SIZE + tile_col;
+            begin
+                result_word(bit_n) <= mac_sign_out(inst) when unsigned(tile_number) = to_unsigned(tile, tile_number'length)
+                                    else 
+                                    result_word(bit_n);
+                process begin
+                    if DEBUG then
+                        report "connected result_word(" & integer'image(bit_n) & ") <= mac_sign_out(" & integer'image(inst) & ") when unsigned(tile_number) = " & integer'image(tile);
+                    end if;
+                    wait;
+                end process;
+            end generate; -- tile_for
+        end generate; -- result_pop
 
+    --------------- Debug Signals -----------------
+    res0 <= result_word(255 downto 0);
+    res1 <= result_word(511 downto 256);
+    res2 <= result_word(767 downto 512);
+    res3 <= result_word(1023 downto 768);
 
+    --------------- Testing Process -----------------
     process is
         variable thread : integer := 0;
         variable col    : integer := 0;
@@ -281,9 +316,9 @@ begin
         addrb <= std_logic_vector(to_unsigned(0, 32));
         wait until rising_edge(clk);
         wait for 1 ns;
+        enb <= '0';
         validating <= '1';
         for instance in 0 to MAC_INST_N - 1 loop 
-        -- for instance in 0 to 2 loop 
             for tile in 0 to TILES_N - 1 loop 
                 thread := tile * MAC_INST_N + instance;
                 row := thread / GRID_SIZE;
@@ -296,13 +331,38 @@ begin
                 end if;
             end loop ; --
         end loop ; --
+        wait for 1 ns;
+        validating <= '0';
         if result = '1' then
             report "Test #" & integer'image(test_n) & " OK";
         end if;
         wait for 1 ns;
 
-
-
+        --- Checking Result Selector ---
+        test_n <= 5;
+        result <= '1';
+        for tile in 0 to TILES_N - 1 loop 
+            tile_number <= to_unsigned(tile, clog2(TILES_N));
+            wait for 1 ns;
+            for mac in 0 to (MAC_INST_N / GRID_SIZE) - 1 loop 
+                mac_sign_out(mac * 32 + 31 downto mac * 32) <= std_logic_vector(to_unsigned(tile * (MAC_INST_N / GRID_SIZE) + mac, 32));
+            end loop ; --
+            wait for 1 ns;                
+        end loop ; --
+        wait for 1 ns;
+        
+        validating <= '1';
+        for i in 0 to (W_DIM / GRID_SIZE) - 1 loop 
+            if (result_word(i * GRID_SIZE + GRID_SIZE - 1 downto i * GRID_SIZE) /= std_logic_vector(to_unsigned(i, 32))) then
+                result <= '0';
+                report "Test #" & integer'image(test_n) & " FAILED => result_word(" & integer'image(i) & ") was: " & integer'image(to_integer(unsigned(result_word(i * GRID_SIZE + GRID_SIZE - 1 downto i * GRID_SIZE)))) & " expected: " & integer'image(i);
+            end if;
+        end loop ; --
+        wait for 1 ns;
+        validating <= '0';
+        if result = '1' then
+            report "Test #" & integer'image(test_n) & " OK";
+        end if;
 
         assert false report "fine" severity failure;
     end process ; -- 
