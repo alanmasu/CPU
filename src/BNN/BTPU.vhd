@@ -371,9 +371,21 @@ begin
                 constant tile_col    : integer := inst_number mod GRID_SIZE;
                 constant bit_n       : integer := tile_row * GRID_SIZE + tile_col;
             begin
-                result_word(bit_n) <= mac_sign_out(inst) when unsigned(tile_number) = to_unsigned(tile, tile_number'length)
-                                    else 
-                                      result_word(bit_n);
+                -- result_word(bit_n) <= mac_sign_out(inst) when unsigned(tile_number) = to_unsigned(tile, tile_number'length)
+                --                     else 
+                --                       result_word(bit_n);
+
+                result_bit_reg : process( clk, res )
+                begin
+                    if rising_edge(clk) then
+                        result_word(bit_n) <= result_word(bit_n);
+                        if res = '0' then
+                            result_word(bit_n) <= '0';
+                        elsif unsigned(tile_number) = to_unsigned(tile, tile_number'length) then
+                            result_word(bit_n) <= mac_sign_out(inst);
+                        end if;
+                    end if; 
+                end process ; -- result_bit_reg
                 process begin
                     if DEBUG then
                         report "connected result_word(" & integer'image(bit_n) & ") <= mac_sign_out(" & integer'image(inst) & ") when unsigned(tile_number) = " & integer'image(tile);

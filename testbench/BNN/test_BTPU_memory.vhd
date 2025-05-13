@@ -66,9 +66,11 @@ architecture Behavioral of test_BTPU_memory is
     signal mac_inst_activations_choises : inst_input_t;
     signal mac_inst_weights_choises     : inst_input_t;
     
+    signal comp : std_logic := '0';
+
     --------------------------------------------------------------------------
     signal clk : std_logic := '0';
-    signal rst : std_logic := '0';
+    signal res : std_logic := '0';
 
     signal ena : std_logic := '0';
     signal enb : std_logic := '0';
@@ -132,6 +134,17 @@ architecture Behavioral of test_BTPU_memory is
         return std_logic_vector(result);
     end function;
 
+    function popcount_compute_acc(input : std_logic_vector(GRID_SIZE - 1 downto 0)) return std_logic_vector is
+        variable result : unsigned(ACC_SIZE - 1 downto 0) := (others => '0');
+    begin
+        for i in 0 to GRID_SIZE - 1 loop
+            if (input(i) = '1') then
+                result := result + to_unsigned(1, ACC_SIZE);
+            end if;
+        end loop;
+        return std_logic_vector(result);
+    end function;
+
 begin
 
     dut : BTPU_memory
@@ -175,9 +188,9 @@ begin
         end process ; 
         
         process begin
-            rst <= '0';
+            res <= '0';
             wait for 9 ns;
-            rst <= '1';
+            res <= '1';
             wait;
         end process ; 
     
@@ -233,9 +246,17 @@ begin
                 constant tile_col    : integer := inst_number mod GRID_SIZE;
                 constant bit_n       : integer := tile_row * GRID_SIZE + tile_col;
             begin
-                result_word(bit_n) <= mac_sign_out(inst) when unsigned(tile_number) = to_unsigned(tile, tile_number'length)
-                                    else 
-                                    result_word(bit_n);
+                result_bit_reg : process( clk, res )
+                begin
+                    if rising_edge(clk) then
+                        result_word(bit_n) <= result_word(bit_n);
+                        if res = '0' then
+                            result_word(bit_n) <= '0';
+                        elsif unsigned(tile_number) = to_unsigned(tile, tile_number'length) then
+                            result_word(bit_n) <= mac_sign_out(inst);
+                        end if;
+                    end if; 
+                end process ; -- result_bit_reg
                 process begin
                     if DEBUG then
                         report "connected result_word(" & integer'image(bit_n) & ") <= mac_sign_out(" & integer'image(inst) & ") when unsigned(tile_number) = " & integer'image(tile);
@@ -252,12 +273,13 @@ begin
         res3 <= result_word(1023 downto 768);
 
     --------------- Testing Process -----------------
+    comp <= '0' when mac_acc = popcount_compute_acc(mac_a xnor mac_b) else '1';
     process is
         variable thread : integer := 0;
         variable col    : integer := 0;
         variable row    : integer := 0;
     begin
-        wait until rst = '1';
+        wait until res = '1';
         ena <= '1';
         wea <= "1";
         wait until rising_edge(clk);
@@ -375,13 +397,14 @@ begin
         --- Checking Result Selector ---
         test_n <= 5;
         result <= '1';
+        wait for 1 ns;
         for tile in 0 to TILES_N - 1 loop 
             tile_number <= to_unsigned(tile, clog2(TILES_N));
-            wait for 1 ns;
             for mac in 0 to (MAC_INST_N / GRID_SIZE) - 1 loop 
                 mac_sign_out(mac * 32 + 31 downto mac * 32) <= std_logic_vector(to_unsigned(tile * (MAC_INST_N / GRID_SIZE) + mac, 32));
             end loop ; --
-            wait for 1 ns;                
+            wait until rising_edge(clk);
+            wait for 1 ns;               
         end loop ; --
         wait for 1 ns;
         
@@ -408,18 +431,23 @@ begin
         mac_clear <= '1';
         wait for 1 ns;
         
-        mac_sign_cmp <= std_logic_vector(to_unsigned(6, ACC_SIZE));
+        mac_sign_cmp <= std_logic_vector(to_unsigned(7, ACC_SIZE));
         mac_a <= (5 => '1', 4 => '1', 3 => '1', 2 => '1', 1 => '1', 0 => '1', others => '0'); -- 6 uni
         mac_b <= (others => '1'); -- 6 zero
         wait until rising_edge(clk);
         wait for 1 ns;
 
         validating <= '1';
-        if (mac_out /= popcount_compute(mac_a xnor mac_b)) or mac_acc /= popcount_compute(mac_a xnor mac_b) then
-            report "Test #" & integer'image(test_n) & " FAILED => mac_out was: " & integer'image(to_integer(unsigned(mac_out))) & " expected: " & integer'image(to_integer(unsigned(popcount_compute(mac_a xnor mac_b))))
-                                                    & " | mac_acc was: " & integer'image(to_integer(unsigned(mac_acc))) & " expected: " & integer'image(to_integer(unsigned(popcount_compute(mac_a xnor mac_b))));
+        if mac_out /= popcount_compute(mac_a xnor mac_b) then
+            report "Test #" & integer'image(test_n) & "a FAILED => mac_out was: " & integer'image(to_integer(unsigned(mac_out))) & " expected: " & integer'image(to_integer(unsigned(popcount_compute(mac_a xnor mac_b))));
         else 
-            report "Test #" & integer'image(test_n) & " OK";
+            report "Test #" & integer'image(test_n) & "a OK";
+        end if;
+        if mac_acc /= popcount_compute_acc(mac_a xnor mac_b) then
+            result <= '0';
+            report "Test #" & integer'image(test_n) & "b FAILED => mac_acc was: " & integer'image(to_integer(unsigned(mac_acc))) & " expected: " & integer'image(to_integer(unsigned(popcount_compute(mac_a xnor mac_b))));
+        else 
+            report "Test #" & integer'image(test_n) & "b OK";
         end if;
         wait for 1 ns;
         validating <= '0';
@@ -445,11 +473,16 @@ begin
         wait until rising_edge(clk);
         wait for 1 ns;
         validating <= '1';
-        if (mac_out /= popcount_compute(mac_a xnor mac_b)) or mac_acc /= std_logic_vector(to_unsigned(7, ACC_SIZE)) then
-            report "Test #" & integer'image(test_n) & " FAILED => mac_out was: " & integer'image(to_integer(unsigned(mac_out))) & " expected: " & integer'image(to_integer(unsigned(popcount_compute(mac_a xnor mac_b))))
-                                                    & " | mac_acc was: " & integer'image(to_integer(unsigned(mac_acc))) & " expected: 7";
+        if mac_out /= popcount_compute(mac_a xnor mac_b) then
+            report "Test #" & integer'image(test_n) & "a FAILED => mac_out was: " & integer'image(to_integer(unsigned(mac_out))) & " expected: " & integer'image(to_integer(unsigned(popcount_compute(mac_a xnor mac_b))));
         else 
-            report "Test #" & integer'image(test_n) & " OK";
+            report "Test #" & integer'image(test_n) & "a OK";
+        end if;
+        if mac_acc /= std_logic_vector(to_unsigned(7, ACC_SIZE)) then
+            result <= '0';
+            report "Test #" & integer'image(test_n) & "b FAILED => mac_acc was: " & integer'image(to_integer(unsigned(mac_acc))) & " expected: 7";
+        else 
+            report "Test #" & integer'image(test_n) & "b OK";
         end if;
         wait for 1 ns;
         validating <= '0';
