@@ -48,20 +48,20 @@ end popcounter_tree;
 
 architecture Behavioral of popcounter_tree is
     
-    component compressor_layer is
-        generic (
-            X : integer := 128;
-            L : integer := 1;
+--    component compressor_layer is
+--        generic (
+--            X : integer := 128;
+--            L : integer := 1;
     
-            -- Definizione costante per la stampa
-            DEBUG : boolean := false;
-            FORCE_DEBUG : boolean := false
-        );
-        port (
-            din  : in  STD_LOGIC_VECTOR (get_layer_inputs(X, L)  - 1 downto 0);
-            dout : out STD_LOGIC_VECTOR (get_layer_outputs(X, L) - 1 downto 0)
-        ) ;
-    end component;
+--            -- Definizione costante per la stampa
+--            DEBUG : boolean := false;
+--            FORCE_DEBUG : boolean := false
+--        );
+--        port (
+--            din  : in  STD_LOGIC_VECTOR (get_layer_inputs(X, L)  - 1 downto 0);
+--            dout : out STD_LOGIC_VECTOR (get_layer_outputs(X, L) - 1 downto 0)
+--        ) ;
+--    end component;
 
     type stdv_array_t is array (natural range <>) of std_logic_vector(X-1 downto 0);
 
@@ -79,7 +79,7 @@ begin
                 wait;
             end process ; -- 
 
-            layer_comp : compressor_layer
+            layer_comp : entity work.compressor_layer
             generic map (
                 X => X,
                 L => layer,
@@ -90,51 +90,54 @@ begin
                 din  => din,
                 dout => layer_interconnect(layer)(get_layer_outputs(X, layer) - 1 downto 0)
             );
-        end generate;
-        others_layer : if layer > 1 and layer /= get_popcount_levels(X) generate 
-            process begin
-                if DEBUG then
-                    report "Generating layer " & integer'image(layer);
-                    report "    connecting din <= layer_interconnect(" & integer'image(layer - 1) & ")(" & integer'image(get_layer_inputs(X, layer)) & " downto 0)";
-                    report "    connecting dout <= layer_interconnect(" & integer'image(layer) & ")(" & integer'image(get_layer_outputs(X, layer)) & " downto 0)"; 
-                end if ;
-                wait;
-            end process ;
+        else generate
+            others_layer : if layer > 1 and layer /= get_popcount_levels(X) generate 
+                process begin
+                    if DEBUG then
+                        report "Generating layer " & integer'image(layer);
+                        report "    connecting din <= layer_interconnect(" & integer'image(layer - 1) & ")(" & integer'image(get_layer_inputs(X, layer)) & " downto 0)";
+                        report "    connecting dout <= layer_interconnect(" & integer'image(layer) & ")(" & integer'image(get_layer_outputs(X, layer)) & " downto 0)"; 
+                    end if ;
+                    wait;
+                end process ;
 
-            layer_comp : compressor_layer
-            generic map (
-                X => X,
-                L => layer,
-                DEBUG => DEBUG_LAYERS,
-                FORCE_DEBUG => FORCE_DEBUG_LAYERS
-            )
-            port map (
-                din  => layer_interconnect(layer - 1)(get_layer_inputs(X, layer) - 1 downto 0),
-                dout => layer_interconnect(layer)(get_layer_outputs(X, layer) - 1 downto 0)
-            );
-        end generate;
+                layer_comp : entity work.compressor_layer
+                generic map (
+                    X => X,
+                    L => layer,
+                    DEBUG => DEBUG_LAYERS,
+                    FORCE_DEBUG => FORCE_DEBUG_LAYERS
+                )
+                port map (
+                    din  => layer_interconnect(layer - 1)(get_layer_inputs(X, layer) - 1 downto 0),
+                    dout => layer_interconnect(layer)(get_layer_outputs(X, layer) - 1 downto 0)
+                );
+            else generate
+                final_layer : if layer = get_popcount_levels(X) generate
+                    process begin
+                        if DEBUG then
+                            report "Generating layer " & integer'image(layer);
+                            report "    connecting din <= layer_interconnect(" & integer'image(layer - 1) & ")(" & integer'image(get_layer_inputs(X, layer)) & " downto 0)";
+                            report "    connecting dout <= dout"; 
+                        end if ;
+                        wait;
+                    end process ;
 
-        final_layer : if layer = get_popcount_levels(X) generate
-            process begin
-                if DEBUG then
-                    report "Generating layer " & integer'image(layer);
-                    report "    connecting din <= layer_interconnect(" & integer'image(layer - 1) & ")(" & integer'image(get_layer_inputs(X, layer)) & " downto 0)";
-                    report "    connecting dout <= dout"; 
-                end if ;
-                wait;
-            end process ;
-
-            layer_comp : compressor_layer
-            generic map (
-                X => X,
-                L => layer,
-                DEBUG => DEBUG_LAYERS,
-                FORCE_DEBUG => FORCE_DEBUG_LAYERS
-            )
-            port map (
-                din  => layer_interconnect(layer - 1)(get_layer_inputs(X, layer) - 1 downto 0),
-                dout => dout
-            );
-        end generate;
+                    layer_comp : entity work.compressor_layer
+                    generic map (
+                        X => X,
+                        L => layer,
+                        DEBUG => DEBUG_LAYERS,
+                        FORCE_DEBUG => FORCE_DEBUG_LAYERS
+                    )
+                    port map (
+                        din  => layer_interconnect(layer - 1)(get_layer_inputs(X, layer) - 1 downto 0),
+                        dout => dout
+                    );
+                else generate
+                            
+                end generate; -- final_layer;
+            end generate; --others_layer; 
+        end generate ; -- initial_leyer
     end generate ; -- layers_gen
 end Behavioral;

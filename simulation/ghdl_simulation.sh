@@ -20,7 +20,7 @@ case $1 in
         ghdl -c src/BNN/compressor_6_3.vhd src/BNN/compressor_3_2.vhd testbench/BNN/test_compressor.vhd -r test_compressor
         ;;
     "compressor_layer")
-        ghdl -c packages/utilities_pkg.vhd packages/BNN_pkg.vhd src/BNN/compressor_6_3.vhd src/BNN/compressor_layer.vhd testbench/BNN/test_compressor_layer.vhd -r test_compressor_layer --stop-time=100ns
+        ghdl -c --std=08 packages/utilities_pkg.vhd packages/BNN_pkg.vhd src/BNN/compressor_6_3.vhd src/BNN/compressor_layer.vhd testbench/BNN/test_compressor_layer.vhd -r test_compressor_layer --stop-time=100ns
         ;;
     "popcounter")
         ghdl -c packages/utilities_pkg.vhd packages/BNN_pkg.vhd \

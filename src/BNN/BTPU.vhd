@@ -184,6 +184,24 @@ architecture Behavioral of BTPU is
                 doutb : OUT STD_LOGIC_VECTOR(1023 DOWNTO 0)
             );
         END COMPONENT;
+        
+        component BTPU_MAC is
+            generic (
+                X : integer := 32;
+                ACC_SIZE : integer := 16;
+                SIMULATION : boolean := false
+            );
+            port ( 
+                acc_clk : in STD_LOGIC;
+                acc_resn : in STD_LOGIC;
+                a : in STD_LOGIC_VECTOR (X - 1 downto 0);
+                b : in STD_LOGIC_VECTOR (X - 1 downto 0);
+                size : in STD_LOGIC_VECTOR (ACC_SIZE - 1 downto 0);
+                res_sign : out STD_LOGIC;
+                res : out STD_LOGIC_VECTOR (clog2(X) - 1 downto 0);
+                acc : out STD_LOGIC_VECTOR (ACC_SIZE - 1 downto 0)
+            );
+        end component;
 begin
 
     -- Instantiation of the   W   BRAM
@@ -259,8 +277,8 @@ begin
 
     --------------- MAC Instantiation ---------------
         mac_inst_gen : for inst in 0 to MAC_INST_N - 1 generate
-            behav_gen : if SIMULATION = false generate
-                mac_inst : entity work.BTPU_MAC(Behavioral)
+--            behav_gen : if SIMULATION = false generate
+                mac_inst : BTPU_MAC
                     generic map (
                         X => GRID_SIZE,
                         ACC_SIZE => ACC_SIZE
@@ -275,25 +293,25 @@ begin
                         res      => mac_res_out(inst),
                         acc      => mac_acc_out(inst)
                     );
-            end generate; -- behav_gen
+--            end generate; -- behav_gen
 
-            sim_gen : if SIMULATION = true generate
-                mac_inst : entity work.BTPU_MAC(SimulationArch)
-                    generic map (
-                        X => GRID_SIZE,
-                        ACC_SIZE => ACC_SIZE
-                    )
-                    port map (
-                        acc_clk  => clk,
-                        acc_resn => acc_clear,
-                        a        => mac_a_in(inst),
-                        b        => mac_b_in(inst),
-                        size     => mac_size_in,
-                        res_sign => mac_sign_out(inst), 
-                        res      => mac_res_out(inst),
-                        acc      => mac_acc_out(inst)
-                    );
-            end generate; -- sim_gen
+            -- sim_gen : if SIMULATION = true generate
+            --     mac_inst : entity work.BTPU_MAC(SimulationArch)
+            --         generic map (
+            --             X => GRID_SIZE,
+            --             ACC_SIZE => ACC_SIZE
+            --         )
+            --         port map (
+            --             acc_clk  => clk,
+            --             acc_resn => acc_clear,
+            --             a        => mac_a_in(inst),
+            --             b        => mac_b_in(inst),
+            --             size     => mac_size_in,
+            --             res_sign => mac_sign_out(inst), 
+            --             res      => mac_res_out(inst),
+            --             acc      => mac_acc_out(inst)
+            --         );
+            -- end generate; -- sim_gen
 
         end generate ; -- mac_inst_gen
     --------------- Tile Selection ------------------
