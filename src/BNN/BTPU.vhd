@@ -429,7 +429,15 @@ begin
                     if (wea(3) = '1') then
                         control_reg(reg_addr)(31 downto 24) <= dina(31 downto 24);
                     end if;
-                    creg_out <= control_reg(reg_addr);
+                    case reg_addr is
+                        when BTPU_REG_CONTROL =>
+                            creg_out <= control_reg(reg_addr);
+                            creg_out(BTPU_CREG_BUSY_BIT) <= busy;
+                        when BTPU_STATUS =>
+                            creg_out <= std_logic_vector(to_unsigned(BTPU_state_t'POS(state), 32));
+                        when others =>
+                            creg_out <= control_reg(reg_addr);
+                    end case;
                 end if;
                 if start = '1' then
                     control_reg(BTPU_REG_CONTROL)(BTPU_CREG_START_BIT) <= '0';

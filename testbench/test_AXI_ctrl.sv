@@ -1253,7 +1253,7 @@ module test_AXI_ctrl( );
         testN = 1;
         for (int i=0; i < 128; ++i) begin
             rs2_value = i;
-            alu_resoult = 32'h40030000 + i*4;
+            alu_resoult = 32'h40080000 + i*4;
             @ (posedge clock);
             #1;
         end
@@ -1261,7 +1261,7 @@ module test_AXI_ctrl( );
         testN = 2;
         for (int i=0; i < 128; ++i) begin
             rs2_value = i + 1;
-            alu_resoult = 32'h40040000 + i*4;
+            alu_resoult = 32'h400A0000 + i*4;
             @ (posedge clock);
             #1;
         end
@@ -1269,7 +1269,7 @@ module test_AXI_ctrl( );
         testN = 3;
         for (int i=0; i < 128; ++i) begin
             rs2_value = i + 2;
-            alu_resoult = 32'h40050000 + i*4;
+            alu_resoult = 32'h400C0000 + i*4;
             @ (posedge clock);
             #1;
         end
@@ -1285,7 +1285,7 @@ module test_AXI_ctrl( );
         testN = 1;
         memory_test = 1;
         for (int i=0; i < 128; ++i) begin
-            alu_resoult = 32'h40030000 + i*4;
+            alu_resoult = 32'h40080000 + i*4;
             @ (posedge clock);
             #1;
             validating = 1'b1;
@@ -1304,7 +1304,7 @@ module test_AXI_ctrl( );
         testN = 2;
         memory_test = 1;
         for (int i=0; i < 128; ++i) begin
-            alu_resoult = 32'h40040000 + i*4;
+            alu_resoult = 32'h400A0000 + i*4;
             @ (posedge clock);
             #1;
             validating = 1'b1;
@@ -1323,7 +1323,7 @@ module test_AXI_ctrl( );
         testN = 3;
         memory_test = 1;
         for (int i=0; i < 128; ++i) begin
-            alu_resoult = 32'h40050000 + i*4;
+            alu_resoult = 32'h400C0000 + i*4;
             @ (posedge clock);
             #1;
             validating = 1'b1;
@@ -1368,7 +1368,7 @@ module test_AXI_ctrl( );
         testN = 3;
         memory_test = 1;
         for (int i=0; i < 128; ++i) begin
-            btpu_addrb = 32'h40030000 + i*4; //BTPU BRAM base
+            btpu_addrb = 32'h40080000 + i*4; //BTPU BRAM base
             @ (posedge clock);
             #1;
             validating = 1'b1;
@@ -1388,7 +1388,7 @@ module test_AXI_ctrl( );
         testN = 4;
         memory_test = 1;
         for (int i=0; i < 128; ++i) begin
-            btpu_addrb = 32'h40040000 + i*4; //BTPU I/O 0 BRAM base
+            btpu_addrb = 32'h400A0000 + i*4; //BTPU I/O 0 BRAM base
             @ (posedge clock);
             #1;
             validating = 1'b1;
@@ -1408,7 +1408,7 @@ module test_AXI_ctrl( );
         testN = 5;
         memory_test = 1;
         for (int i=0; i < 128; ++i) begin
-            btpu_addrb = 32'h40050000 + i*4; //BTPU I/O 1 BRAM base
+            btpu_addrb = 32'h400C0000 + i*4; //BTPU I/O 1 BRAM base
             @ (posedge clock);
             #1;
             validating = 1'b1;
@@ -1597,6 +1597,7 @@ module test_AXI_ctrl( );
 
         @ (posedge clock);
         #1;
+        validating = 1'b1;
         if (btpu_state_tb == fetching) begin
             $display("Test #%0dd: OK", testN);
         end else begin
@@ -1607,9 +1608,19 @@ module test_AXI_ctrl( );
         end else begin
             $display("Test #%0de: FAILED -> btpu_busy_tb was %0x", testN, btpu_busy_tb);
         end
-        // @ (posedge clock);
-        // #1;
+        #1;
+        validating = 1'b0;
 
+        op_class = 5'b00100; //Load
+        en_in = 1'b1;
+        we_in = 1'b0;
+        mem_opcode = 3'b010; //LW
+        alu_resoult = 32'h40020030 + 0*4; //BTPU CS Reg
+        #1;
+
+        @ (posedge clock);
+        #1;
+        validating = 1'b1;
         if (btpu_creg_tb[0][1] == 1'b1) begin
             $display("Test #%0df: OK", testN);
         end else begin
@@ -1620,6 +1631,12 @@ module test_AXI_ctrl( );
         end else begin
             $display("Test #%0dg: FAILED -> btpu_creg_tb[6] was %0x", testN, btpu_creg_tb[6]);
         end
+        if(rd_value_out[2] == 1'b1) begin
+            $display("Test #%0dh: OK", testN);
+        end else begin
+            $display("Test #%0dh: FAILED -> rd_value_out was %0x", testN, rd_value_out[2]);
+        end
+
         #1;
         validating = 1'b0;
 
