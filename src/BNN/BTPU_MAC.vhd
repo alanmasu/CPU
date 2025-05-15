@@ -35,7 +35,7 @@ library work;
 use work.BNN_pkg.all;
 use work.utilities_pkg.all;
 
-entity BTPU_MAC is
+entity btpu_mac is
     generic (
         X : integer := 32;
         ACC_SIZE : integer := 16;
@@ -51,9 +51,9 @@ entity BTPU_MAC is
         res : out STD_LOGIC_VECTOR (clog2(X) - 1 downto 0);
         acc : out STD_LOGIC_VECTOR (ACC_SIZE - 1 downto 0)
     );
-end BTPU_MAC;
+end btpu_mac;
 
-architecture Behavioral of BTPU_MAC is
+architecture Behavioral of btpu_mac is
     signal accumulator : STD_LOGIC_VECTOR (ACC_SIZE - 1 downto 0) := (others => '0');
     signal popcount : STD_LOGIC_VECTOR (clog2(X) - 1 downto 0) := (others => '0');
     signal size_u   : unsigned(ACC_SIZE - 1 downto 0) := (others => '0');

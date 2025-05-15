@@ -30,11 +30,11 @@ use work.types_pkg.all;
 use work.constant_package.all;
 use work.memory_pkg.all;
 
-entity test_BTPU_memory is
+entity test_btpu_memory is
 --  Port ( );
-end test_BTPU_memory;
+end test_btpu_memory;
 
-architecture Behavioral of test_BTPU_memory is
+architecture Behavioral of test_btpu_memory is
     constant DEBUG : boolean := false;
     constant W_DIM : integer := 1024;
     constant GRID_SIZE : integer := 32;
@@ -163,7 +163,7 @@ begin
             doutb => doutb
         );
 
-    dut2 : entity work.BTPU_MAC
+    dut2 : entity work.btpu_mac
         generic map (
             X => GRID_SIZE,
             ACC_SIZE => ACC_SIZE

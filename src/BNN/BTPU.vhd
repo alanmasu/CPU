@@ -39,7 +39,7 @@ use work.constant_package.all;
 use work.memory_pkg.all;
 
 
-entity BTPU is
+entity btpu is
     generic (
         ACC_SIZE : integer := 32;
         GRID_SIZE : integer := 32;
@@ -68,9 +68,9 @@ entity BTPU is
         dinb    : in STD_LOGIC_VECTOR(31 downto 0);
         doutb   : out STD_LOGIC_VECTOR(31 downto 0)
     );
-end BTPU;
+end btpu;
 
-architecture Behavioral of BTPU is
+architecture Behavioral of btpu is
     constant W_DIM : integer := (GRID_SIZE * GRID_SIZE);
     constant TILES_N : integer := (GRID_SIZE * GRID_SIZE) / MAC_INST_N;
     constant tiles_n_u : unsigned(clog2(TILES_N) - 1 downto 0) := to_unsigned(TILES_N, clog2(TILES_N));
@@ -185,23 +185,23 @@ architecture Behavioral of BTPU is
             );
         END COMPONENT;
         
-        component BTPU_MAC is
-            generic (
-                X : integer := 32;
-                ACC_SIZE : integer := 16;
-                SIMULATION : boolean := false
-            );
-            port ( 
-                acc_clk : in STD_LOGIC;
-                acc_resn : in STD_LOGIC;
-                a : in STD_LOGIC_VECTOR (X - 1 downto 0);
-                b : in STD_LOGIC_VECTOR (X - 1 downto 0);
-                size : in STD_LOGIC_VECTOR (ACC_SIZE - 1 downto 0);
-                res_sign : out STD_LOGIC;
-                res : out STD_LOGIC_VECTOR (clog2(X) - 1 downto 0);
-                acc : out STD_LOGIC_VECTOR (ACC_SIZE - 1 downto 0)
-            );
-        end component;
+--        component BTPU_MAC is
+--            generic (
+--                X : integer := 32;
+--                ACC_SIZE : integer := 16;
+--                SIMULATION : boolean := false
+--            );
+--            port ( 
+--                acc_clk : in STD_LOGIC;
+--                acc_resn : in STD_LOGIC;
+--                a : in STD_LOGIC_VECTOR (X - 1 downto 0);
+--                b : in STD_LOGIC_VECTOR (X - 1 downto 0);
+--                size : in STD_LOGIC_VECTOR (ACC_SIZE - 1 downto 0);
+--                res_sign : out STD_LOGIC;
+--                res : out STD_LOGIC_VECTOR (clog2(X) - 1 downto 0);
+--                acc : out STD_LOGIC_VECTOR (ACC_SIZE - 1 downto 0)
+--            );
+--        end component;
 begin
 
     -- Instantiation of the   W   BRAM
@@ -277,8 +277,8 @@ begin
 
     --------------- MAC Instantiation ---------------
         mac_inst_gen : for inst in 0 to MAC_INST_N - 1 generate
---            behav_gen : if SIMULATION = false generate
-                mac_inst : BTPU_MAC
+            behav_gen : if SIMULATION = false generate
+                mac_inst : entity work.btpu_mac
                     generic map (
                         X => GRID_SIZE,
                         ACC_SIZE => ACC_SIZE
@@ -293,25 +293,25 @@ begin
                         res      => mac_res_out(inst),
                         acc      => mac_acc_out(inst)
                     );
---            end generate; -- behav_gen
-
-            -- sim_gen : if SIMULATION = true generate
-            --     mac_inst : entity work.BTPU_MAC(SimulationArch)
-            --         generic map (
-            --             X => GRID_SIZE,
-            --             ACC_SIZE => ACC_SIZE
-            --         )
-            --         port map (
-            --             acc_clk  => clk,
-            --             acc_resn => acc_clear,
-            --             a        => mac_a_in(inst),
-            --             b        => mac_b_in(inst),
-            --             size     => mac_size_in,
-            --             res_sign => mac_sign_out(inst), 
-            --             res      => mac_res_out(inst),
-            --             acc      => mac_acc_out(inst)
-            --         );
-            -- end generate; -- sim_gen
+             end generate; -- behav_gen
+--            else generate
+             sim_gen : if SIMULATION = true generate
+                mac_inst_sim : entity work.btpu_mac_sim
+                    generic map (
+                        X => GRID_SIZE,
+                        ACC_SIZE => ACC_SIZE
+                    )
+                    port map (
+                        acc_clk  => clk,
+                        acc_resn => acc_clear,
+                        a        => mac_a_in(inst),
+                        b        => mac_b_in(inst),
+                        size     => mac_size_in,
+                        res_sign => mac_sign_out(inst), 
+                        res      => mac_res_out(inst),
+                        acc      => mac_acc_out(inst)
+                    );
+            end generate; -- sim_gen
 
         end generate ; -- mac_inst_gen
     --------------- Tile Selection ------------------
