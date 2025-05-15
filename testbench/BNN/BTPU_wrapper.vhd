@@ -9,7 +9,7 @@ use work.types_pkg.all;
 use work.constant_package.all;
 use work.memory_pkg.all;
 
-entity BTPU_wrapper is
+entity btpu_wrapper is
     port ( 
         clk : in STD_LOGIC;
         res : in STD_LOGIC;
@@ -30,14 +30,15 @@ entity BTPU_wrapper is
         dinb    : in STD_LOGIC_VECTOR(31 downto 0);
         doutb   : out STD_LOGIC_VECTOR(31 downto 0)
     );
-end BTPU_wrapper;
+end btpu_wrapper;
 
-architecture Behavioral of BTPU_wrapper is begin
+architecture Behavioral of btpu_wrapper is begin
 
     -- BTPU instantiation
-    BTPU_inst : entity work.BTPU
+    btpu_inst : entity work.btpu
     generic map (
-        SIMULATION => true
+        SIMULATION => true,
+        DEBUG => false
     )
     port map (
         clk => clk,

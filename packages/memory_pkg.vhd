@@ -23,11 +23,11 @@ package memory_pkg is
         (lower_bound => x"40010000", upper_bound => x"4001FFFF", space_type => RAM),        --AXI DATA MEMORY (Mem upper bount = 0x40011FFF)
         (lower_bound => x"40020000", upper_bound => x"4002000F", space_type => GPIO),       --RISC-V GPIO
         (lower_bound => x"40020010", upper_bound => x"4002002F", space_type => I2C),        --RISC-V I2C
-        (lower_bound => x"40020030", upper_bound => x"40020050", space_type => BTPU_CREG_FILE),        --RISC-V I2C
-        (lower_bound => x"40030000", upper_bound => x"4003FFFF", space_type => BTPU_W_MEM),        --RISC-V I2C
-        (lower_bound => x"40040000", upper_bound => x"4004FFFF", space_type => BTPU_IO0_MEM),        --RISC-V I2C
-        (lower_bound => x"40050000", upper_bound => x"4005FFFF", space_type => BTPU_IO1_MEM),        --RISC-V I2C
-        (lower_bound => x"40060000", upper_bound => x"7FFFFFFF", space_type => IO),         --RISC-V IO
+        (lower_bound => x"40020030", upper_bound => x"40020050", space_type => BTPU_CREG_FILE), --BTPU Register File
+        (lower_bound => x"40080000", upper_bound => x"4009FFFF", space_type => BTPU_W_MEM),     --BTPU Weights Memory
+        (lower_bound => x"400A0000", upper_bound => x"400BFFFF", space_type => BTPU_IO0_MEM),   --BTPU I/O Memory 0
+        (lower_bound => x"400C0000", upper_bound => x"400DFFFF", space_type => BTPU_IO1_MEM),   --BTPU I/O Memory 1
+        (lower_bound => x"400E0000", upper_bound => x"7FFFFFFF", space_type => IO),         --RISC-V IO
         (lower_bound => x"80000000", upper_bound => x"DFFFFFFF", space_type => RESERVED),   
         (lower_bound => x"E0000000", upper_bound => x"E02FFFFF", space_type => AXI),        --PS IO
         (lower_bound => x"E0300000", upper_bound => x"E0FFFFFF", space_type => RESERVED),
