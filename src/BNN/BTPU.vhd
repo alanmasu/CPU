@@ -315,47 +315,6 @@ begin
 
         end generate ; -- mac_inst_gen
     --------------- Tile Selection ------------------
-        -- tile_selection : process( activations_matrix, weights_matrix, tile_number) is
-        --     variable inst_number : integer;
-        --     variable tile_row : integer;
-        --     variable tile_col : integer;
-        -- begin
-        --     tile_selector : for inst in 0 to MAC_INST_N - 1 loop
-        --         inst_number := inst + to_integer(tile_number) * MAC_INST_N;
-        --         tile_row := inst_number / GRID_SIZE;
-        --         tile_col := inst_number mod GRID_SIZE;
-        --         mac_a_in(inst) <= activations_matrix(tile_row);
-        --         mac_b_in(inst) <= weights_matrix(tile_col);
-        --     end loop ; -- tile_select
-        -- end process ; -- tile_selection
-
-        -- inst_for : for inst in 0 to MAC_INST_N - 1 generate
-        --     tile_for : for tile in 0 to TILES_N - 1 generate
-        --         constant inst_number : integer := inst + tile * MAC_INST_N;
-        --         constant tile_row    : integer := inst_number / GRID_SIZE;
-        --         constant tile_col    : integer := inst_number mod GRID_SIZE;
-        --     begin
-        --         tile_check : if tile = to_integer(tile_number) generate
-        --             mac_a_in(inst) <= activations_matrix(tile_row);
-        --             mac_b_in(inst) <= weights_matrix(tile_col);
-        --         end generate;
-        --     end generate; -- tile_for
-        -- end generate; -- inst_for
-
-        -- inst_for : for inst in 0 to MAC_INST_N - 1 generate
-        --     multiplexer_inst : process( activations_matrix, weights_matrix, tile_number) is
-        --         variable inst_number : integer;
-        --         variable tile_row : integer;
-        --         variable tile_col : integer;
-        --     begin
-        --         inst_number := inst + to_integer(tile_number) * MAC_INST_N;
-        --         tile_row := inst_number / GRID_SIZE;
-        --         tile_col := inst_number mod GRID_SIZE;
-        --         mac_a_in(inst) <= activations_matrix(tile_row);
-        --         mac_b_in(inst) <= weights_matrix(tile_col);
-        --     end process ; -- multiplexer_inst
-        -- end generate; -- inst_for
-
         populate_inst_choises : for inst in 0 to MAC_INST_N - 1 generate
             tile_for : for tile in 0 to TILES_N - 1 generate
                 constant inst_number : integer := inst + tile * MAC_INST_N;
@@ -389,10 +348,6 @@ begin
                 constant tile_col    : integer := inst_number mod GRID_SIZE;
                 constant bit_n       : integer := tile_row * GRID_SIZE + tile_col;
             begin
-                -- result_word(bit_n) <= mac_sign_out(inst) when unsigned(tile_number) = to_unsigned(tile, tile_number'length)
-                --                     else 
-                --                       result_word(bit_n);
-
                 result_bit_reg : process( clk, res )
                 begin
                     if rising_edge(clk) then
