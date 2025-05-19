@@ -124,6 +124,7 @@ architecture Behavioral of btpu is
         signal o_mem_select : std_logic := '0';
         signal bram_port_sel: std_logic := '0';  
         signal acc_clear    : std_logic := '0';
+        signal acc_en       : std_logic := '1';
         signal multiple_acc : std_logic := '0';
         signal acc_number   : unsigned(31 downto 0) := (others => '0');
         signal compute_size : unsigned(31 downto 0) := (others => '0');
@@ -277,42 +278,26 @@ begin
 
     --------------- MAC Instantiation ---------------
         mac_inst_gen : for inst in 0 to MAC_INST_N - 1 generate
-            behav_gen : if SIMULATION = false generate
-                mac_inst : entity work.btpu_mac
-                    generic map (
-                        X => GRID_SIZE,
-                        ACC_SIZE => ACC_SIZE
-                    )
-                    port map (
-                        acc_clk  => clk,
-                        acc_resn => acc_clear,
-                        a        => mac_a_in(inst),
-                        b        => mac_b_in(inst),
-                        size     => mac_size_in,
-                        res_sign => mac_sign_out(inst), 
-                        res      => mac_res_out(inst),
-                        acc      => mac_acc_out(inst)
-                    );
-             end generate; -- behav_gen
---            else generate
-             sim_gen : if SIMULATION = true generate
-                mac_inst_sim : entity work.btpu_mac_sim
-                    generic map (
-                        X => GRID_SIZE,
-                        ACC_SIZE => ACC_SIZE
-                    )
-                    port map (
-                        acc_clk  => clk,
-                        acc_resn => acc_clear,
-                        a        => mac_a_in(inst),
-                        b        => mac_b_in(inst),
-                        size     => mac_size_in,
-                        res_sign => mac_sign_out(inst), 
-                        res      => mac_res_out(inst),
-                        acc      => mac_acc_out(inst)
-                    );
-            end generate; -- sim_gen
+            mac_inst : entity work.btpu_mac
+                generic map (
+                    X => GRID_SIZE,
+                    ACC_SIZE => ACC_SIZE,
+                    TILES_N => TILES_N,
 
+                    SIMULATION => SIMULATION
+                )
+                port map (
+                    acc_clk  => clk,
+                    acc_resn => acc_clear,
+                    en       => acc_en,
+                    a        => mac_a_in(inst),
+                    b        => mac_b_in(inst),
+                    tile_n   => tile_number,
+                    size     => mac_size_in,
+                    res_sign => mac_sign_out(inst), 
+                    res      => mac_res_out(inst),
+                    acc      => mac_acc_out(inst)
+                );
         end generate ; -- mac_inst_gen
     --------------- Tile Selection ------------------
         populate_inst_choises : for inst in 0 to MAC_INST_N - 1 generate

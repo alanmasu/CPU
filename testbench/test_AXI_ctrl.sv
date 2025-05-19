@@ -25,6 +25,9 @@ import types_pkg::*;
 import memory_pkg::*;
 
 module test_AXI_ctrl( );
+
+    `include "testMatrix.svh"
+
     //Type definitions
     typedef struct packed {
         logic en_mem;
@@ -95,7 +98,7 @@ module test_AXI_ctrl( );
     
 
 
-    //Master vip agent
+    //Slave vip agent
     axi_transaction                         wr_transaction;   
     axi_transaction                         rd_transaction;   
     axi_monitor_transaction                 slv_monitor_transaction;  
@@ -144,6 +147,12 @@ module test_AXI_ctrl( );
         .dinb(32'b0)
     );
 
+    wire [3:0] btpu_ena;
+    assign btpu_ena[0] = en_out.en_BTPU_CREG;
+    assign btpu_ena[1] = en_out.en_BTPU_W_MEM;
+    assign btpu_ena[2] = en_out.en_BTPU_IO0_MEM;
+    assign btpu_ena[3] = en_out.en_BTPU_IO1_MEM;
+
     mem_ctrl_test_wrapper DUT(
         .reset_rtl(reset),
         .clock_100mhz(clock),
@@ -158,7 +167,20 @@ module test_AXI_ctrl( );
         .address_1(address_1),
         .write_data_1(write_data_1),
         .read_data_1(read_data_1),
-        .stall_1(stall_1)
+        .stall_1(stall_1),
+
+        //BTPU Wrapper
+        .ena_0(btpu_ena),
+        .wea_0(we_out),
+        .addra_0(address_out),
+        .dina_0(d_out),
+        .douta_0(btpu_douta),
+
+        .enb_0(btpu_enb),
+        .web_0(btpu_web),
+        .addrb_0(btpu_addrb),
+        .dinb_0(btpu_dinb),
+        .doutb_0(btpu_doutb)
     );
 
     GPIO DUT2(
@@ -201,23 +223,23 @@ module test_AXI_ctrl( );
     );
 
     //BTPU
-    BTPU_wrapper DUT4(
-        .clk(clock),
-        .res(reset),
-        .hs_clk(clock),
+//    btpu_wrapper DUT4(
+//        .clk(clock),
+//        .res(reset),
+//        .hs_clk(clock),
 
-        .ena(en_out),
-        .wea(we_out),
-        .addra(address_out),
-        .dina(d_out),
-        .douta(btpu_douta),
+//        .ena(en_out),
+//        .wea(we_out),
+//        .addra(address_out),
+//        .dina(d_out),
+//        .douta(btpu_douta),
 
-        .enb(btpu_enb),
-        .web(btpu_web),
-        .addrb(btpu_addrb),
-        .dinb(btpu_dinb),
-        .doutb(btpu_doutb)
-    );
+//        .enb(btpu_enb),
+//        .web(btpu_web),
+//        .addrb(btpu_addrb),
+//        .dinb(btpu_dinb),
+//        .doutb(btpu_doutb)
+//    );
 
 
     genvar j;
@@ -252,8 +274,8 @@ module test_AXI_ctrl( );
     
     initial begin
         reset = 1'b0;
-        // #200;
-        #160;
+        #200;
+        // #160;
         reset = 1'b1;
     end
 
@@ -1223,19 +1245,20 @@ module test_AXI_ctrl( );
 
     ////////////////////// ATTENTION //////////////////////////
     //////// Hierarchical access not fully supported //////////
+    
     wire [1023:0] BTPU_IO0_out_tb;
-    // assign BTPU_IO0_out_tb = DUT4.BTPU_inst.bram_IO0_doutb;
+    assign BTPU_IO0_out_tb = DUT.mem_ctrl_test_i.btpu_wrapper_0.U0.btpu_inst.bram_IO0_doutb;
 
     btpu_regfile_t btpu_creg_tb;
-    assign btpu_creg_tb = DUT4.BTPU_inst.control_reg;
+    assign btpu_creg_tb = DUT.mem_ctrl_test_i.btpu_wrapper_0.U0.btpu_inst.control_reg;
 
     btpu_state_t btpu_state_tb;
-    assign btpu_state_tb = DUT4.BTPU_inst.state;
+    assign btpu_state_tb = DUT.mem_ctrl_test_i.btpu_wrapper_0.U0.btpu_inst.state;
 
     wire [31:0] btpu_busy_tb;
-    assign btpu_busy_tb = DUT4.BTPU_inst.busy;
+    assign btpu_busy_tb = DUT.mem_ctrl_test_i.btpu_wrapper_0.U0.btpu_inst.busy;
 
-    task automatic testBTU;
+    task automatic testBTPU;
         bit memory_test;
     begin
         $display("\n\nTesting BTPU...\n");
@@ -1308,8 +1331,8 @@ module test_AXI_ctrl( );
             @ (posedge clock);
             #1;
             validating = 1'b1;
-            if(BTPU_IO0_out_tb != i + 1) begin
-                $display("Test #%0d-%0d: FAILED -> BTPU_IO0_out_tb was %0x", testN, i, BTPU_IO0_out_tb);
+            if(btpu_doutb != i + 1) begin
+                $display("Test #%0d-%0d: FAILED -> btpu_doutb was %0x", testN, i, btpu_doutb);
                 memory_test = 0;
             end
             #1;
@@ -1327,8 +1350,8 @@ module test_AXI_ctrl( );
             @ (posedge clock);
             #1;
             validating = 1'b1;
-            if(BTPU_IO0_out_tb != i + 2) begin
-                $display("Test #%0d-%0d: FAILED -> BTPU_IO0_out_tb was %0x", testN, i, BTPU_IO0_out_tb);
+            if(btpu_doutb != i + 2) begin
+                $display("Test #%0d-%0d: FAILED -> btpu_doutb was %0x", testN, i, btpu_doutb);
                 memory_test = 0;
             end
             #1;
@@ -1426,7 +1449,7 @@ module test_AXI_ctrl( );
     end
     endtask
 
-    task automatic testBTU_FSM;
+    task automatic testBTPU_FSM;
     begin
         $display("Testing BTPU FSM...");
         //////////////// TESTING BTPU State Machine ////////////////
@@ -1647,6 +1670,47 @@ module test_AXI_ctrl( );
     end
     endtask
 
+    task automatic testBTPU_Computation;
+    begin
+        $display("Testing BTPU Computation...");
+        testN = 0;
+        op_class = 5'b01000; //Store
+        en_in = 1'b1;
+        we_in = 1'b1;
+        mem_opcode = 3'b010; //SW
+        alu_resoult = 32'h40020030 + 0*4; //BTPU CS Reg
+        rs2_value = 32'b0;
+        rs2_value[3] = 1'b0; //Seledt BRAM PORT A
+        @ (posedge clock);
+        #1;
+        for (int i=0; i < $size(W_Memory); ++i) begin
+            rs2_value = W_Memory[i];
+            alu_resoult = 32'h40080000 + i*4;
+            @ (posedge clock);
+            #1;
+        end
+
+        for (int i = 0; i < $size(IO0_Memory); ++i) begin
+            rs2_value = IO0_Memory[i];
+            alu_resoult = 32'h400A0000 + i*4;
+            @ (posedge clock);
+            #1;
+        end
+
+        for (int i = 0; i < $size(IO1_Memory); ++i) begin
+            rs2_value = IO1_Memory[i];
+            alu_resoult = 32'h400C0000 + i*4;
+            @ (posedge clock);
+            #1;
+        end
+
+        testN = 1;
+        validating = 1'b1;
+        #10;
+
+    end
+    endtask
+
     initial begin
         @(posedge reset);
         #1;
@@ -1655,8 +1719,9 @@ module test_AXI_ctrl( );
         // testGPIO();
         // testI2C();
         // testAXI_BRESP();
-        testBTU();
-        testBTU_FSM();
+        testBTPU();
+        testBTPU_FSM();
+        testBTPU_Computation();
         // #100;
         en_in = 1'b0;
         $finish;
