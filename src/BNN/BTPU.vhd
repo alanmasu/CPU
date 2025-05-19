@@ -108,27 +108,35 @@ architecture Behavioral of btpu is
     
     -- FSM Signals
     signal state : BTPU_state_t := IDLE;
+    signal start : std_logic := '0';
+    signal busy  : std_logic := '0';
+    signal err   : std_logic := '0';
     signal weigth_word      : STD_LOGIC_VECTOR(W_DIM - 1 downto 0) := (others => '0');
     signal activaction_word : STD_LOGIC_VECTOR(W_DIM - 1 downto 0) := (others => '0');
     signal result_word      : STD_LOGIC_VECTOR(W_DIM - 1 downto 0) := (others => '0');
     signal tile_number      : unsigned(clog2(TILES_N) - 1 downto 0) := (others => '0');
+    signal addr_w_base      : unsigned(clog2(MEM_B_SIZE) - 1 downto 0) := (others => '0');
+    signal addr_i_base      : unsigned(clog2(MEM_B_SIZE) - 1 downto 0) := (others => '0');
+    signal addr_o_base      : unsigned(clog2(MEM_B_SIZE) - 1 downto 0) := (others => '0');
+    signal m                : unsigned(clog2(MEM_B_SIZE) - 1 downto 0) := (others => '0');
+    signal n                : unsigned(clog2(MEM_B_SIZE) - 1 downto 0) := (others => '0');
+    signal k                : unsigned(clog2(MEM_B_SIZE) - 1 downto 0) := (others => '0');
+    signal is_batched       : std_logic := '0';
+    -- DBG
+    signal i_s              : unsigned(clog2(MEM_B_SIZE) - 1 downto 0) := (others => '0');
+    signal c_s              : unsigned(clog2(MEM_B_SIZE) - 1 downto 0) := (others => '0');
+    signal r_s              : unsigned(clog2(MEM_B_SIZE) - 1 downto 0) := (others => '0');
      -- Memories signals
         signal bram_i_addr  : unsigned(clog2(MEM_B_SIZE) - 1 downto 0) := (others => '0');
         signal bram_o_addr  : unsigned(clog2(MEM_B_SIZE) - 1 downto 0) := (others => '0');
         signal bram_i_en    : std_logic := '0';
         signal bram_o_en    : std_logic := '0';
         signal bram_o_we    : std_logic := '0';
-     -- Status signals
-        signal start        : std_logic := '0';
-        signal busy         : std_logic := '0';
+     -- Others signals
         signal o_mem_select : std_logic := '0';
         signal bram_port_sel: std_logic := '0';  
         signal acc_clear    : std_logic := '0';
         signal acc_en       : std_logic := '1';
-        signal multiple_acc : std_logic := '0';
-        signal acc_number   : unsigned(31 downto 0) := (others => '0');
-        signal compute_size : unsigned(31 downto 0) := (others => '0');
-        signal compute_iteration : unsigned(31 downto 0) := (others => '0');
         signal force_acc_clear : std_logic := '0';
 
     -- BRAMs      LS Interface signals 
@@ -185,24 +193,6 @@ architecture Behavioral of btpu is
                 doutb : OUT STD_LOGIC_VECTOR(1023 DOWNTO 0)
             );
         END COMPONENT;
-        
---        component BTPU_MAC is
---            generic (
---                X : integer := 32;
---                ACC_SIZE : integer := 16;
---                SIMULATION : boolean := false
---            );
---            port ( 
---                acc_clk : in STD_LOGIC;
---                acc_resn : in STD_LOGIC;
---                a : in STD_LOGIC_VECTOR (X - 1 downto 0);
---                b : in STD_LOGIC_VECTOR (X - 1 downto 0);
---                size : in STD_LOGIC_VECTOR (ACC_SIZE - 1 downto 0);
---                res_sign : out STD_LOGIC;
---                res : out STD_LOGIC_VECTOR (clog2(X) - 1 downto 0);
---                acc : out STD_LOGIC_VECTOR (ACC_SIZE - 1 downto 0)
---            );
---        end component;
 begin
 
     -- Instantiation of the   W   BRAM
@@ -357,7 +347,6 @@ begin
         o_mem_select    <= control_reg(BTPU_REG_CONTROL)(BTPU_CREG_OMEM_SEL_BIT);
         bram_port_sel   <= control_reg(BTPU_REG_CONTROL)(BTPU_CREG_BRAM_PORT_SEL_BIT);
         acc_clear       <= (not control_reg(BTPU_REG_CONTROL)(BTPU_CREG_ACC_CLEAR_BIT)) and (not force_acc_clear);
-        multiple_acc    <= control_reg(BTPU_REG_CONTROL)(BTPU_CREG_MULTIPLE_ACCUM_BIT);
         mac_size_in     <= control_reg(BTPU_SIGN_CMP);
 
         -- control_reg(BTPU_REG_CONTROL)(BTPU_CREG_BUSY_BIT) <= busy;
@@ -449,7 +438,12 @@ begin
         activaction_word <= bram_IO0_doutb when o_mem_select = '1' else bram_IO1_doutb;
 
     --------------- State Machine -------------------
-        state_machine : process( hs_clk, res) begin
+        state_machine : process( hs_clk, res) is
+            variable i : unsigned(clog2(MEM_B_SIZE) - 1 downto 0) := (others => '0');
+            variable c : unsigned(clog2(MEM_B_SIZE) - 1 downto 0) := (others => '0');
+            variable r : unsigned(clog2(MEM_B_SIZE) - 1 downto 0) := (others => '0');
+            variable address_tmp : unsigned((clog2(MEM_B_SIZE) * 2) - 1 downto 0) := (others => '0');
+        begin
             if res = '0' then
                 state <= IDLE;
                 bram_w_enb   <= '0';
@@ -469,18 +463,20 @@ begin
                             busy <= '1';
                             bram_w_enb <= '1';
                             bram_i_en  <= '1';
-                            compute_size <= unsigned(control_reg(BTPU_SIZE)) - 1;
-                            compute_iteration <= (others => '0');
-                            acc_number   <= unsigned(control_reg(BTPU_ACCUM)) - 1;
-                            bram_w_addrb <= unsigned(control_reg(BTPU_W_ADDR)(clog2(MEM_B_SIZE) - 1 downto 0));
-                            bram_i_addr  <= unsigned(control_reg(BTPU_I_ADDR)(clog2(MEM_B_SIZE) - 1 downto 0));
-                            bram_o_addr  <= unsigned(control_reg(BTPU_O_ADDR)(clog2(MEM_B_SIZE) - 1 downto 0));
+                            r := (others => '0');
+                            c := (others => '0');
+                            i := (others => '0');
+                            is_batched <= control_reg(BTPU_REG_CONTROL)(BTPU_CREG_BATCHED_MUL_BIT);
+                            addr_w_base <= unsigned(control_reg(BTPU_W_ADDR)(clog2(MEM_B_SIZE) - 1 downto 0));
+                            addr_i_base  <= unsigned(control_reg(BTPU_I_ADDR)(clog2(MEM_B_SIZE) - 1 downto 0));
+                            addr_o_base  <= unsigned(control_reg(BTPU_O_ADDR)(clog2(MEM_B_SIZE) - 1 downto 0));
+                            m <= unsigned(control_reg(BTPU_M_SIZE)(clog2(MEM_B_SIZE) - 1 downto 0));-- - 1;    
+                            n <= unsigned(control_reg(BTPU_N_SIZE)(clog2(MEM_B_SIZE) - 1 downto 0));-- - 1;
+                            k <= unsigned(control_reg(BTPU_K_SIZE)(clog2(MEM_B_SIZE) - 1 downto 0));-- - 1;
                             state <= FETCHING;
                         end if;
                     when FETCHING =>
                         busy <= '1';
-                        -- bram_w_enb <= '1';
-                        -- bram_i_en  <= '1';
                         bram_o_en  <= '0';
                         tile_number <= (others => '0');
                         state <= EXECUTE;
@@ -488,39 +484,68 @@ begin
                         busy <= '1';
                         tile_number <= tile_number + 1;
                         if tile_number = tiles_n_u - 1 then
-                            bram_w_enb <= '1';
-                            bram_i_en  <= '1';
-                            tile_number <= (others => '0');
-                            bram_w_addrb <= bram_w_addrb + 1;
-                            bram_i_addr  <= bram_i_addr  + 1;
-                            compute_iteration <= compute_iteration + 1;
-                            state <= FETCHING;
-                            if compute_iteration = compute_size then
-                                bram_o_en  <= '1'; 
+                            if is_batched = '0' then
+                                bram_o_en  <= '1';
                                 bram_o_we  <= '1';
-                                state <= WRITE_BACK; 
+                                state <= WRITE_BACK;
+                            elsif is_batched = '1' then
+                                if i < n - 1 then
+                                    i := i + 1;
+                                    bram_w_enb <= '1';
+                                    bram_i_en  <= '1';
+                                    state <= FETCHING;
+                                else 
+                                    bram_o_en  <= '1';
+                                    bram_o_we  <= '1';
+                                    state <= WRITE_BACK;
+                                end if;
+                            else 
+                                err <= '1';
+                                state <= IDLE;
                             end if;
                         end if;
-                    when COUNTING =>
-                        state <= IDLE;
                     when WRITE_BACK =>
                         busy <= '1';
-                        bram_o_addr <= bram_o_addr + 1;
-                        if multiple_acc = '1' then
-                            acc_number <= acc_number - 1;
-                            compute_iteration <= (others => '0');
-                            force_acc_clear <= '1';
+                        if is_batched = '0' then
+                            state <= IDLE;
+                        elsif is_batched = '1' then
                             state <= CLEAR_ACC;
-                        end if ;
-                        if acc_number = 0 or multiple_acc = '0' then
-                            busy <= '0';
+                            i := (others => '0');
+                            if c < k - 1 then
+                                c := c + 1;
+                                bram_w_enb <= '1';
+                                bram_i_en  <= '1';
+                            elsif r < m - 1 then
+                                r := r + 1;
+                                c := (others => '0');
+                                bram_w_enb <= '1';
+                                bram_i_en  <= '1';
+                            else 
+                                state <= IDLE;
+                            end if;
+                        else
+                            err <= '1';
                             state <= IDLE;
                         end if;
                     when CLEAR_ACC =>
                         busy <= '1';
+                        tile_number <= (others => '0');
                         force_acc_clear <= '0';
-                        state <= EXECUTE;                        
+                        state <= EXECUTE;               
+                    when others =>
+                        state <= IDLE;
                 end case;
+                i_s <= i;
+                c_s <= c;
+                r_s <= r;
+                address_tmp := addr_w_base + i * k + c;
+                bram_w_addrb <= address_tmp(clog2(MEM_B_SIZE) - 1 downto 0);
+
+                address_tmp := addr_i_base + c * n + i;
+                bram_i_addr  <= address_tmp(clog2(MEM_B_SIZE) - 1 downto 0);
+
+                address_tmp := addr_o_base + r * k + c;
+                bram_o_addr  <= address_tmp(clog2(MEM_B_SIZE) - 1 downto 0);
             end if ;
         end process ; -- state_machine
 

@@ -1477,16 +1477,16 @@ module test_AXI_ctrl( );
         en_in = 1'b1;
         we_in = 1'b1;
         mem_opcode = 3'b010; //SW
-        alu_resoult = 32'h40020030 + 7*4; //BTPU SIGN_CMP Reg
+        alu_resoult = 32'h40020030 + 8*4; //BTPU SIGN_CMP Reg
         rs2_value = 32'd64; 
         @ (posedge clock);
         #1;
         en_in = 1'b0;
         validating = 1'b1;
-        if (btpu_creg_tb[7] == 32'd64) begin
+        if (btpu_creg_tb[8] == 32'd64) begin
             $display("Test #%0db: OK", testN);
         end else begin
-            $display("Test #%0db: FAILED -> btpu_creg_tb[7] was %0x", testN, btpu_creg_tb[7]);
+            $display("Test #%0db: FAILED -> btpu_creg_tb[8] was %0x", testN, btpu_creg_tb[8]);
         end
         #1;
         validating = 1'b0;
@@ -1496,7 +1496,7 @@ module test_AXI_ctrl( );
         en_in = 1'b1;
         we_in = 1'b1;
         mem_opcode = 3'b010; //SW
-        alu_resoult = 32'h40020030 + 4*4; //BTPU SIZE Reg
+        alu_resoult = 32'h40020030 + 4*4; //BTPU M SIZE Reg
         rs2_value = 32'd2;
         @ (posedge clock);
         #1;
@@ -1515,7 +1515,7 @@ module test_AXI_ctrl( );
         en_in = 1'b1;
         we_in = 1'b1;
         mem_opcode = 3'b010; //SW
-        alu_resoult = 32'h40020030 + 5*4; //BTPU ACCUM Number Reg
+        alu_resoult = 32'h40020030 + 5*4; //BTPU N SIZE Reg
         rs2_value = 32'd2;
         @ (posedge clock);
         #1;
@@ -1534,6 +1534,25 @@ module test_AXI_ctrl( );
         en_in = 1'b1;
         we_in = 1'b1;
         mem_opcode = 3'b010; //SW
+        alu_resoult = 32'h40020030 + 6*4; //BTPU K SIZE Reg
+        rs2_value = 32'd2;
+        @ (posedge clock);
+        #1;
+        en_in = 1'b0;
+        validating = 1'b1;
+        if (btpu_creg_tb[6] == 32'd2) begin
+            $display("Test #%0d: OK", testN);
+        end else begin
+            $display("Test #%0d: FAILED -> btpu_creg_tb[6] was %0x", testN, btpu_creg_tb[6]);
+        end
+        #1;
+        validating = 1'b0;
+
+        testN = 10;
+        op_class = 5'b01000; //Store
+        en_in = 1'b1;
+        we_in = 1'b1;
+        mem_opcode = 3'b010; //SW
         alu_resoult = 32'h40020030 + 1*4; //BTPU W ADDR Reg
         rs2_value = 32'b0;
         @ (posedge clock);
@@ -1548,7 +1567,7 @@ module test_AXI_ctrl( );
         #1;
         validating = 1'b0;
 
-        testN = 10;
+        testN = 11;
         op_class = 5'b01000; //Store
         en_in = 1'b1;
         we_in = 1'b1;
@@ -1567,7 +1586,7 @@ module test_AXI_ctrl( );
         #1;
         validating = 1'b0;
 
-        testN = 11;
+        testN = 12;
         op_class = 5'b01000; //Store
         en_in = 1'b1;
         we_in = 1'b1;
@@ -1586,7 +1605,7 @@ module test_AXI_ctrl( );
         #1;
         validating = 1'b0;
 
-        testN = 12;
+        testN = 13;
         op_class = 5'b01000; //Store
         en_in = 1'b1;
         we_in = 1'b1;
@@ -1644,17 +1663,17 @@ module test_AXI_ctrl( );
         @ (posedge clock);
         #1;
         validating = 1'b1;
-        if (btpu_creg_tb[0][1] == 1'b1) begin
+        if (btpu_creg_tb[0][1] == 1'b1) begin   // Busy Bit 
             $display("Test #%0df: OK", testN);
         end else begin
             $display("Test #%0df: FAILED -> btpu_creg_tb[1] was %0x", testN, btpu_creg_tb[1]);
         end
-        if(btpu_creg_tb[6] == 32'd1) begin
+        if(btpu_creg_tb[7] == 32'd1) begin      // Status Reg
             $display("Test #%0dg: OK", testN);
         end else begin
-            $display("Test #%0dg: FAILED -> btpu_creg_tb[6] was %0x", testN, btpu_creg_tb[6]);
+            $display("Test #%0dg: FAILED -> btpu_creg_tb[7] was %0x", testN, btpu_creg_tb[7]);
         end
-        if(rd_value_out[2] == 1'b1) begin
+        if(rd_value_out[2] == 1'b1) begin       // Readed Busy Bit
             $display("Test #%0dh: OK", testN);
         end else begin
             $display("Test #%0dh: FAILED -> rd_value_out was %0x", testN, rd_value_out[2]);
