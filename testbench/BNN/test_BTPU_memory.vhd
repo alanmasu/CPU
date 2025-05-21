@@ -69,6 +69,76 @@ architecture Behavioral of test_btpu_memory is
     
     signal comp : std_logic := '0';
 
+    constant frag : matrix_t := (
+        0 => x"00000000",
+        1 => x"00000001",
+        2 => x"00000002",
+        3 => x"00000003",
+        4 => x"00000004",
+        5 => x"00000005",
+        6 => x"00000006",
+        7 => x"00000007",
+        8 => x"00000008",
+        9 => x"00000009",
+        10 => x"0000000a",
+        11 => x"0000000b",
+        12 => x"0000000c",
+        13 => x"0000000d",
+        14 => x"0000000e",
+        15 => x"0000000f",
+        16 => x"00000010",
+        17 => x"00000011",
+        18 => x"00000012",
+        19 => x"00000013",
+        20 => x"00000014",
+        21 => x"00000015",
+        22 => x"00000016",
+        23 => x"00000017",
+        24 => x"00000018",
+        25 => x"00000019",
+        26 => x"0000001a",
+        27 => x"0000001b",
+        28 => x"0000001c",
+        29 => x"0000001d",
+        30 => x"0000001e",
+        31 => x"0000001f"
+    );
+
+    constant frag_transposed : matrix_t := (
+        0 => x"00000000",
+        1 => x"00000000",
+        2 => x"00000000",
+        3 => x"00000000",
+        4 => x"00000000",
+        5 => x"00000000",
+        6 => x"00000000",
+        7 => x"00000000",
+        8 => x"00000000",
+        9 => x"00000000",
+        10 => x"00000000",
+        11 => x"00000000",
+        12 => x"00000000",
+        13 => x"00000000",
+        14 => x"00000000",
+        15 => x"00000000",
+        16 => x"00000000",
+        17 => x"00000000",
+        18 => x"00000000",
+        19 => x"00000000",
+        20 => x"00000000",
+        21 => x"00000000",
+        22 => x"00000000",
+        23 => x"00000000",
+        24 => x"00000000",
+        25 => x"00000000",
+        26 => x"00000000",
+        27 => x"0000ffff",
+        28 => x"00ff00ff",
+        29 => x"0f0f0f0f",
+        30 => x"33333333",
+        31 => x"55555555"
+    );
+
     --------------------------------------------------------------------------
     signal clk : std_logic := '0';
     signal res : std_logic := '0';
@@ -209,14 +279,14 @@ begin
         end generate ; -- mac_activation_pop
 
     --------------- Weights Pop ---------------------
-        -- weigth_word <= doutb;
-        -- mac_weigths_pop : for col in 0 to GRID_SIZE - 1 generate
-        --     bit_pop : for bit in 0 to GRID_SIZE - 1 generate
-        --         constant bit_from_word : integer := bit * 32 + col;
-        --     begin 
-        --         weights_matrix(col)(bit) <= weigth_word(bit_from_word);
-        --     end generate ; -- bit_pop
-        -- end generate ; -- mac_weigths_pop
+        weigth_word <= doutb;
+        mac_weigths_pop : for col in 0 to GRID_SIZE - 1 generate
+            bit_pop : for bit in 0 to GRID_SIZE - 1 generate
+                constant bit_from_word : integer := bit * 32 + col;
+            begin 
+                weights_matrix(31 - col)(31 - bit) <= weigth_word(bit_from_word);
+            end generate ; -- bit_pop
+        end generate ; -- mac_weigths_pop
 
     --------------- Tile Selection ------------------
         populate_inst_choises : for inst in 0 to MAC_INST_N - 1 generate
@@ -567,7 +637,44 @@ begin
         else 
             report "Test #" & integer'image(test_n) & "b OK";
         end if;
+        wait for 1 ns;
+        mac_en <= '0';
+        validating <= '0';
 
+        ------ Checking Weights Pop ------
+        test_n <= 13;
+        result <= '1';
+        ena <= '1';
+        wea <= "1";
+        for i in 0 to 31 loop
+            addra <= std_logic_vector(to_unsigned(i, 32));
+            dina <= frag(i);
+            wait until rising_edge(clk);
+            wait for 1 ns;
+        end loop ; --
+        ena <= '0';
+        wea <= "0";
+
+        -- Enable Port B
+        enb <= '1';
+        web <= "0";
+        addrb <= std_logic_vector(to_unsigned(0, 32));      
+        wait until rising_edge(clk);
+        wait for 1 ns;
+        validating <= '1';
+        for i in 0 to 31 loop
+            if ( weights_matrix(i) /= frag_transposed(i)) then
+                result <= '0';
+                report "Test #" & integer'image(test_n) & " FAILED => weights_matrix(" & integer'image(i) & ") was: " & integer'image(to_integer(unsigned(weights_matrix(i)))) & " expected: " & integer'image(to_integer(unsigned(frag_transposed(i))));
+            end if;
+        end loop ; --
+        wait for 1 ns;
+        validating <= '0';
+        if result = '1' then
+            report "Test #" & integer'image(test_n) & " OK";
+        end if;
+
+        
 
 
 

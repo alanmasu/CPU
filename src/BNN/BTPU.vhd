@@ -270,7 +270,7 @@ begin
             bit_pop : for bit in 0 to GRID_SIZE - 1 generate
                 constant bit_from_word : integer := bit * 32 + col;
             begin 
-                weights_matrix(col)(bit) <= weigth_word(bit_from_word);
+                weights_matrix((GRID_SIZE - 1) - col)((GRID_SIZE - 1) - bit) <= weigth_word(bit_from_word);
             end generate ; -- bit_pop
         end generate ; -- mac_weigths_pop
 
