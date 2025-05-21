@@ -74,7 +74,9 @@ architecture Behavioral of btpu is
     constant W_DIM : integer := (GRID_SIZE * GRID_SIZE);
     constant TILES_N : integer := (GRID_SIZE * GRID_SIZE) / MAC_INST_N;
     constant tiles_n_u : unsigned(clog2(TILES_N) - 1 downto 0) := to_unsigned(TILES_N, clog2(TILES_N));
-
+    signal mem_b_size_u : unsigned(clog2(MEM_B_SIZE) - 1 downto 0) := to_unsigned(MEM_B_SIZE - 1, clog2(MEM_B_SIZE));
+    constant clog2_mem : natural := clog2(MEM_B_SIZE);
+    
     signal res0 : std_logic_vector(255 downto 0) := (others => '0');
     signal res1 : std_logic_vector(255 downto 0) := (others => '0');
     signal res2 : std_logic_vector(255 downto 0) := (others => '0');
@@ -132,7 +134,13 @@ architecture Behavioral of btpu is
         signal bram_i_en    : std_logic := '0';
         signal bram_o_en    : std_logic := '0';
         signal bram_o_we    : std_logic := '0';
-     -- Others signals
+     -- CREG + Others signals
+        signal addr_w_base_reg : unsigned(clog2(MEM_B_SIZE) - 1 downto 0);
+        signal addr_i_base_reg : unsigned(clog2(MEM_B_SIZE) - 1 downto 0);
+        signal addr_o_base_reg : unsigned(clog2(MEM_B_SIZE) - 1 downto 0);
+        signal m_reg : unsigned(clog2(MEM_B_SIZE) - 1 downto 0);
+        signal n_reg : unsigned(clog2(MEM_B_SIZE) - 1 downto 0);
+        signal k_reg : unsigned(clog2(MEM_B_SIZE) - 1 downto 0);
         signal o_mem_select : std_logic := '0';
         signal bram_port_sel: std_logic := '0';  
         signal acc_clear    : std_logic := '0';
@@ -348,6 +356,12 @@ begin
         bram_port_sel   <= control_reg(BTPU_REG_CONTROL)(BTPU_CREG_BRAM_PORT_SEL_BIT);
         acc_clear       <= (not control_reg(BTPU_REG_CONTROL)(BTPU_CREG_ACC_CLEAR_BIT)) and (not force_acc_clear);
         mac_size_in     <= control_reg(BTPU_SIGN_CMP);
+        addr_w_base_reg  <= unsigned(control_reg(BTPU_W_ADDR)(clog2(MEM_B_SIZE) - 1 downto 0));
+        addr_i_base_reg  <= unsigned(control_reg(BTPU_I_ADDR)(clog2(MEM_B_SIZE) - 1 downto 0));
+        addr_o_base_reg  <= unsigned(control_reg(BTPU_O_ADDR)(clog2(MEM_B_SIZE) - 1 downto 0));
+        m_reg <= unsigned(control_reg(BTPU_M_SIZE)(clog2(MEM_B_SIZE) - 1 downto 0));    
+        n_reg <= unsigned(control_reg(BTPU_N_SIZE)(clog2(MEM_B_SIZE) - 1 downto 0));
+        k_reg <= unsigned(control_reg(BTPU_K_SIZE)(clog2(MEM_B_SIZE) - 1 downto 0));
 
         -- control_reg(BTPU_REG_CONTROL)(BTPU_CREG_BUSY_BIT) <= busy;
         -- control_reg(BTPU_STATUS) <= std_logic_vector(to_unsigned(BTPU_state_t'POS(state), 32));
@@ -380,6 +394,7 @@ begin
                         when BTPU_REG_CONTROL =>
                             creg_out <= control_reg(reg_addr);
                             creg_out(BTPU_CREG_BUSY_BIT) <= busy;
+                            creg_out(BTPU_CREG_ERROR_BIT) <= err;
                         when BTPU_STATUS =>
                             creg_out <= std_logic_vector(to_unsigned(BTPU_state_t'POS(state), 32));
                         when others =>
@@ -389,7 +404,13 @@ begin
                 if start = '1' then
                     control_reg(BTPU_REG_CONTROL)(BTPU_CREG_START_BIT) <= '0';
                 end if ;
-                control_reg(BTPU_REG_CONTROL)(BTPU_CREG_BUSY_BIT) <= busy;
+                
+                if control_reg(BTPU_REG_CONTROL)(BTPU_CREG_ACC_CLEAR_BIT) = '1' then
+                    control_reg(BTPU_REG_CONTROL)(BTPU_CREG_ACC_CLEAR_BIT) <= '0';
+                end if ;
+
+                control_reg(BTPU_REG_CONTROL)(BTPU_CREG_BUSY_BIT)  <= busy;
+                control_reg(BTPU_REG_CONTROL)(BTPU_CREG_ERROR_BIT) <= err;
                 control_reg(BTPU_STATUS) <= std_logic_vector(to_unsigned(BTPU_state_t'POS(state), 32));
             end if;
         end process;
@@ -460,20 +481,31 @@ begin
                     when IDLE =>
                         busy <= '0';
                         if start = '1' then
+                            err <= '0';
                             busy <= '1';
                             bram_w_enb <= '1';
                             bram_i_en  <= '1';
                             r := (others => '0');
                             c := (others => '0');
                             i := (others => '0');
-                            is_batched <= control_reg(BTPU_REG_CONTROL)(BTPU_CREG_BATCHED_MUL_BIT);
-                            addr_w_base <= unsigned(control_reg(BTPU_W_ADDR)(clog2(MEM_B_SIZE) - 1 downto 0));
-                            addr_i_base  <= unsigned(control_reg(BTPU_I_ADDR)(clog2(MEM_B_SIZE) - 1 downto 0));
-                            addr_o_base  <= unsigned(control_reg(BTPU_O_ADDR)(clog2(MEM_B_SIZE) - 1 downto 0));
-                            m <= unsigned(control_reg(BTPU_M_SIZE)(clog2(MEM_B_SIZE) - 1 downto 0));-- - 1;    
-                            n <= unsigned(control_reg(BTPU_N_SIZE)(clog2(MEM_B_SIZE) - 1 downto 0));-- - 1;
-                            k <= unsigned(control_reg(BTPU_K_SIZE)(clog2(MEM_B_SIZE) - 1 downto 0));-- - 1;
+                            is_batched   <= control_reg(BTPU_REG_CONTROL)(BTPU_CREG_BATCHED_MUL_BIT);
+                            addr_w_base  <= addr_w_base_reg;
+                            addr_i_base  <= addr_i_base_reg;
+                            addr_o_base  <= addr_o_base_reg;
+                            m <= m_reg;
+                            n <= n_reg;
+                            k <= k_reg;
                             state <= FETCHING;
+                            if addr_w_base_reg > mem_b_size_u -1 or addr_i_base_reg > mem_b_size_u -1 or addr_o_base_reg > mem_b_size_u -1 then
+                                err <= '1';
+                                busy <= '0';
+                                state <= IDLE;
+                            end if;
+                            if m * n > mem_b_size_u or n * k > mem_b_size_u or m * k > mem_b_size_u then
+                                err <= '1';
+                                busy <= '0';
+                                state <= IDLE;
+                            end if;
                         end if;
                     when FETCHING =>
                         busy <= '1';

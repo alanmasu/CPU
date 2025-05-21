@@ -34,10 +34,14 @@ package types_pkg is
     -- I2C Register File type
     type I2C_regFile_t is array(0 to 31) of std_logic_vector(31 downto 0);
 
+
+    ------------ BTPU --------------
     -- BTPU Register File type
     type BTPU_regFile_t is array(0 to 31) of std_logic_vector(31 downto 0);
     -- BTPU State type
     type BTPU_state_t is (IDLE, FETCHING, EXECUTE, COUNTING, WRITE_BACK, CLEAR_ACC);
+    -- BTPU Arrays
+    type acc_t_dbg is array (0 to 256 - 1) of std_logic_vector(32 - 1 downto 0);
     
     
 end package ;
