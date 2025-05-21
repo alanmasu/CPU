@@ -103,7 +103,7 @@ begin
         if rising_edge(acc_clk) then
             acc_addr := to_integer(tile_n);
             if acc_resn = '0' then
-                accumulator(acc_addr) <= (others => '0');
+                accumulator <= (others => (others => '0'));
             else
                 if en = '1' then
                     accumulator(acc_addr) <= std_logic_vector(unsigned(accumulator(acc_addr)) + unsigned(popcount));

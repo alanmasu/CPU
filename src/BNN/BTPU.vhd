@@ -144,7 +144,7 @@ architecture Behavioral of btpu is
         signal o_mem_select : std_logic := '0';
         signal bram_port_sel: std_logic := '0';  
         signal acc_clear    : std_logic := '0';
-        signal acc_en       : std_logic := '1';
+        signal acc_en       : std_logic := '0';
         signal force_acc_clear : std_logic := '0';
 
     -- BRAMs      LS Interface signals 
@@ -477,6 +477,7 @@ begin
                 bram_i_en  <= '0';
                 bram_o_en  <= '0';
                 bram_w_enb <= '0';
+                acc_en     <= '0';
                 case state is
                     when IDLE =>
                         busy <= '0';
@@ -511,28 +512,34 @@ begin
                         busy <= '1';
                         bram_o_en  <= '0';
                         tile_number <= (others => '0');
+                        acc_en <= '1';
                         state <= EXECUTE;
                     when EXECUTE =>
                         busy <= '1';
+                        acc_en <= '1';
                         tile_number <= tile_number + 1;
                         if tile_number = tiles_n_u - 1 then
                             if is_batched = '0' then
                                 bram_o_en  <= '1';
                                 bram_o_we  <= '1';
+                                acc_en <= '0';
                                 state <= WRITE_BACK;
                             elsif is_batched = '1' then
                                 if i < n - 1 then
                                     i := i + 1;
                                     bram_w_enb <= '1';
                                     bram_i_en  <= '1';
+                                    acc_en <= '0';
                                     state <= FETCHING;
                                 else 
                                     bram_o_en  <= '1';
                                     bram_o_we  <= '1';
+                                    acc_en <= '0';
                                     state <= WRITE_BACK;
                                 end if;
                             else 
                                 err <= '1';
+                                acc_en <= '0';
                                 state <= IDLE;
                             end if;
                         end if;
@@ -563,6 +570,7 @@ begin
                         busy <= '1';
                         tile_number <= (others => '0');
                         force_acc_clear <= '0';
+                        acc_en <= '1';
                         state <= EXECUTE;               
                     when others =>
                         state <= IDLE;

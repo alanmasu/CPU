@@ -1689,16 +1689,16 @@ module test_AXI_ctrl( );
     end
     endtask
 
-    wire [9:0] r_tb;
+    bit [9:0] r_tb;
     assign r_tb = DUT.mem_ctrl_test_i.btpu_wrapper_0.U0.btpu_inst.r_s;
 
-    wire [9:0] c_tb;
+    bit [9:0] c_tb;
     assign c_tb = DUT.mem_ctrl_test_i.btpu_wrapper_0.U0.btpu_inst.c_s;
 
-    wire [9:0] i_tb;
+    bit [9:0] i_tb;
     assign i_tb = DUT.mem_ctrl_test_i.btpu_wrapper_0.U0.btpu_inst.i_s;
 
-    wire [3:0] tile_number_tb;
+    bit [3:0] tile_number_tb;
     assign tile_number_tb = DUT.mem_ctrl_test_i.btpu_wrapper_0.U0.btpu_inst.tile_number;
 
     acc_t_dbg acc_tb;
@@ -1708,16 +1708,88 @@ module test_AXI_ctrl( );
     int N = 3; //Numero di blocchi per colonna di A (e righe di B)
     int K = 4; //Numero di blocchi per colonna di B (e colonne di result)
 
-    task automatic testBTPU_Computation;
+    //Task per leggere un array da un file csv:
+    task automatic readArrayFromCSV(input string filename, output logic [31:0] array_out[$]);
+        int file;
+        string line;
+    begin
+        // Pulisce l'array di output
+        array_out = {};
+
+        // Apertura file
+        file = $fopen(filename, "r");
+        if (file == 0) begin
+            $display("Errore: impossibile aprire il file %s", filename);
+            return;
+        end
+
+        // Legge ogni riga finché c'è qualcosa
+        while (!$feof(file)) begin
+            void'($fgets(line, file));
+            array_out.push_back(line.atoi());
+        end
+
+        $fclose(file);
+    end
+    endtask
+
+    parameter string resultFileName = "/home/alan.masutti/Documents/CPU Repo/simulation/matrixMul_result.csv";
+
+    //Task per controllare un blocco
+    task automatic testBlock(input int blockRow, input int blockCol, input logic [31:0] result_Matrix[$], input int testN, output logic res);
         int blockRow_offset;
         int blockCol_offset;
         int elementInsideBlock;
         int row;
         int col;
         int element;
+    begin
+        res = 1'b1;
+        blockRow_offset = blockRow * 32 * K;  // br * Dim del blocco * dim della riga
+        blockCol_offset = blockCol * 32;      // bc * Dim del blocco
+        for(int mac_n = 0; mac_n < 256; ++mac_n) begin
+            elementInsideBlock = tile_number_tb * 8 + mac_n;
+            row = elementInsideBlock / 32; // elemento / Dim del blocco
+            col = elementInsideBlock % 32; // elemento % Dim del blocco
+            element = blockRow_offset + blockCol_offset + row * (32 * K) + col; // (blocco) + riga del blocco * dimensione della riga + colonna del blocco
+            if (acc_tb[mac_n] != result_Matrix[element]) begin
+                $display("Test #%0d FAILED -> mac:[%0d] tile:[%0d] | element:[%0d]: acc_tb was %0x expected %0x", testN, mac_n, tile_number_tb, element, acc_tb[mac_n], result_Matrix[element]);
+                res = 1'b0;
+                break;
+            end
+            if (res == 1'b0) begin
+                break;
+            end
+        end
+    end
+    endtask
+
+    task automatic testBTPU_Computation;
+        int blockRow_offset;
+        int blockCol_offset;
+        int elementInsideBlock;
+        int tile;
+        int row;
+        int col;
+        int element;
         bit testResult = 1'b1;
+        logic [31:0] result_Matrix[$];
     begin
         $display("Testing BTPU Computation...");
+
+        $display("Reading result matrix from file...");
+        readArrayFromCSV(resultFileName, result_Matrix);
+        $display("Result matrix readed from file:");
+        if ($size(result_Matrix) >= 5) begin
+            for(int i = 0; i < 5; ++i) begin
+                $display("    result_Matrix[%0d] = %0d", i, result_Matrix[i]);
+            end
+        end else begin
+            for(int i = 0; i < $size(result_Matrix); ++i) begin
+                $display("    result_Matrix[%0d] = %0d", i, result_Matrix[i]);
+            end
+        end
+
         testN = 0;
         op_class = 5'b01000; //Store
         en_in = 1'b1;
@@ -1875,35 +1947,60 @@ module test_AXI_ctrl( );
         validating = 1'b1;
         #1;
         validating = 1'b0;
-        
-        testResult = 1'b1;
+
+        testN = 8;
         for(int r_test = 0; r_test < M; ++r_test) begin
-            @(r_tb == r_test);
+            wait (r_tb == r_test);
             for(int c_test = 0; c_test < K; ++c_test) begin
-                @ (c_tb == c_test && i_tb == N - 1);
+                wait (c_tb == c_test && i_tb == N - 1);
+                tile = tile_number_tb;
                 @ (tile_number_tb);
                 #1;
-                validating = 1'b1;
                 blockRow_offset = r_test * 32 * K;  // br * Dim del blocco * dim della riga
                 blockCol_offset = c_test * 32;      // bc * Dim del blocco
                 for(int mac_n = 0; mac_n < 256; ++mac_n) begin
-                    elementInsideBlock = tile_number_tb * 256 + mac_n;
+                    elementInsideBlock = tile * 256 + mac_n;
                     row = elementInsideBlock / 32; // elemento / Dim del blocco
                     col = elementInsideBlock % 32; // elemento % Dim del blocco
                     element = blockRow_offset + blockCol_offset + row * (32 * K) + col; // (blocco) + riga del blocco * dimensione della riga + colonna del blocco
+                    validating = 1'b1;
                     if (acc_tb[mac_n] != result_Matrix[element]) begin
-                        $display("Test #%0d block:[%0d][%0d] | element:[%0d][%0d]: FAILED -> acc_tb was %0x expected %0x", testN, r_test, c_test, row, col, acc_tb[mac_n], result_Matrix[element]);
+                        $display("Test #%0d FAILED -> mac:[%0d] tile:[%0d] | element:[%0d]: acc_tb was %0d expected %0d", testN, mac_n, tile, element, acc_tb[mac_n], result_Matrix[element]);
+                        // $display("Test #%0d block:[%0d][%0d] | element:[%0d][%0d]: FAILED -> acc_tb was %0x expected %0x", testN, r_test, c_test, row, col, acc_tb[mac_n], result_Matrix[element]);
                         testResult = 1'b0;
                         break;
                     end
+                    #1;
+                    validating = 1'b0;
+                    #1;
                 end
-                #1;
-                validating = 1'b0;
+                if (testResult == 1'b0) begin
+                    break;
+                end
+            end
+            if (testResult == 1'b0) begin
+                break;
             end
         end
         if(testResult == 1'b1) begin
             $display("Test #%0d: OK", testN);
         end
+
+        // testN = 8;
+        // row = 0;
+        // col = 0;
+        // testResult = 1'b1;
+        // wait(r_tb == row && c_tb == col && i_tb == N - 1);
+        // @(tile_number_tb == 0);
+        // #1;
+        // validating = 1'b1;
+        // testBlock(row, col, result_Matrix, testN, testResult);
+        // if (testResult) begin
+        //     $display("Test #%0d: OK", testN);
+        // end
+        // #1;
+        // validating = 1'b0;
+
 
 
         #10;
