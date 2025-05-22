@@ -1710,9 +1710,9 @@ module test_AXI_ctrl( );
     acc_t_dbg acc_tb;
     assign acc_tb = DUT.mem_ctrl_test_i.btpu_wrapper_0.U0.btpu_inst.mac_acc_out;
 
-    int M = 2; //Numero di blocchi per riga di A
-    int N = 3; //Numero di blocchi per colonna di A (e righe di B)
-    int K = 4; //Numero di blocchi per colonna di B (e colonne di result)
+    // int M = 2; //Numero di blocchi per riga di A
+    // int N = 3; //Numero di blocchi per colonna di A (e righe di B)
+    // int K = 4; //Numero di blocchi per colonna di B (e colonne di result)
 
     //Task per leggere un array da un file csv:
     task automatic readArrayFromCSV(input string filename, output logic [31:0] array_out[$]);
@@ -1770,6 +1770,8 @@ module test_AXI_ctrl( );
     end
     endtask
 
+
+    bit testResult = 1'b1;
     task automatic testBTPU_Computation;
         int blockRow_offset;
         int blockCol_offset;
@@ -1779,13 +1781,12 @@ module test_AXI_ctrl( );
         int row;
         int col;
         int element;
-        bit testResult = 1'b1;
-        logic [31:0] result_Matrix[$];
+        // logic [31:0] result_Matrix[$];
     begin
         $display("Testing BTPU Computation...");
 
-        $display("Reading result matrix from file...");
-        readArrayFromCSV(resultFileName, result_Matrix);
+        // $display("Reading result matrix from file...");
+        // readArrayFromCSV(resultFileName, result_Matrix);
         // $display("Result matrix readed from file:");
         // if ($size(result_Matrix) >= 5) begin
         //     for(int i = 0; i < 5; ++i) begin
@@ -2024,7 +2025,8 @@ module test_AXI_ctrl( );
                 wait (c_tb == c_test && i_tb == N - 1);
                 for(int tile = 0; tile < 4; ++tile) begin
                     $display("    Waiting for tile_number_tb == %0d", tile);
-                    wait (tile_number_tb == tile);
+                    // wait (tile_number_tb == tile);
+                    @(tile_number_tb);
                     #1;
                     blockRow_offset = r_test * 32 * K;  // br * Dim del blocco * dim della riga
                     blockCol_offset = c_test * 32;      // bc * Dim del blocco
@@ -2035,7 +2037,7 @@ module test_AXI_ctrl( );
                         col = elementInsideBlock % 32; // elemento % Dim del blocco
                         element = blockRow_offset + blockCol_offset + row * (32 * K) + col; // (blocco) + riga del blocco * dimensione della riga + colonna del blocco
                         if (acc_tb[mac_n] != result_Matrix[element]) begin
-                            $display("Test #%0d FAILED -> mac:[%0d] tile:[%0d] | element:[%0d]: acc_tb was %0d expected %0d", testN, mac_n, tile, element, acc_tb[mac_n], result_Matrix[element]);
+                            $display("Test #%0d FAILED -> mac:[%0d] tile:[%0d] | block: [%0d][%0d] | element:[%0d]: acc_tb was %0d expected %0d", testN, mac_n, tile, r_test, c_test, element, acc_tb[mac_n], result_Matrix[element]);
                             // $display("Test #%0d block:[%0d][%0d] | element:[%0d][%0d]: FAILED -> acc_tb was %0x expected %0x", testN, r_test, c_test, row, col, acc_tb[mac_n], result_Matrix[element]);
                             testResult = 1'b0;
                             break;
@@ -2044,6 +2046,7 @@ module test_AXI_ctrl( );
                     #1;
                     validating = 1'b0;
                     if (testResult == 1'b0) begin
+                        testResult = 1'b1;
                         // break;
                     end
                 end
