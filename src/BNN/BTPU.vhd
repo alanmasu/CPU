@@ -416,7 +416,7 @@ begin
         end process;
     
     --------------- BRAM Port Selector --------------
-        bram_addra <= addra(14 downto 0)    when bram_port_sel = '0' else addrb(14 downto 0);
+        bram_addra <= addra(16 downto 2)    when bram_port_sel = '0' else addrb(16 downto 2);
         bram_dina  <= dina                  when bram_port_sel = '0' else dinb;
         bram_wea   <= wea(0 downto 0)       when bram_port_sel = '0' else web(0 downto 0);
 

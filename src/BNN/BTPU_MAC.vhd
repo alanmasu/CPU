@@ -99,6 +99,7 @@ begin
     
     process(acc_clk) is
         variable acc_addr : integer;    
+        variable sum : unsigned (ACC_SIZE - 1 downto 0);
     begin
         if rising_edge(acc_clk) then
             acc_addr := to_integer(tile_n);
@@ -106,7 +107,15 @@ begin
                 accumulator <= (others => (others => '0'));
             else
                 if en = '1' then
-                    accumulator(acc_addr) <= std_logic_vector(unsigned(accumulator(acc_addr)) + unsigned(popcount));
+                    sum := unsigned(accumulator(acc_addr)) + unsigned(popcount);
+                    res <= popcount;
+                    acc <= std_logic_vector(sum);
+                    if sum > size_u then
+                        res_sign <= '1';
+                    else
+                        res_sign <= '0';
+                    end if;
+                    accumulator(acc_addr) <= std_logic_vector(sum);
                 end if;
             end if;
         end if ;
@@ -116,8 +125,8 @@ begin
     size_u <= unsigned(size(ACC_SIZE - 1 downto 0));
 
     -- Output assignment
-    res <= popcount;
-    acc <= accumulator(to_integer(tile_n));
-    res_sign <= '0' when (unsigned(accumulator(to_integer(tile_n))) < size_u) else '1';
+    -- res <= popcount;
+    -- acc <= accumulator(to_integer(tile_n));
+    -- res_sign <= '0' when (unsigned(accumulator(to_integer(tile_n))) < size_u) else '1';
 
 end Behavioral;

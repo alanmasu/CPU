@@ -1249,6 +1249,12 @@ module test_AXI_ctrl( );
     wire [1023:0] BTPU_IO0_out_tb;
     assign BTPU_IO0_out_tb = DUT.mem_ctrl_test_i.btpu_wrapper_0.U0.btpu_inst.bram_IO0_doutb;
 
+    wire [9:0] BTPU_IO0_addr_tb;
+    assign BTPU_IO0_addr_tb = DUT.mem_ctrl_test_i.btpu_wrapper_0.U0.btpu_inst.bram_IO0_addrb;
+
+    wire [1023:0] BTPU_IO1_out_tb;
+    assign BTPU_IO1_out_tb = DUT.mem_ctrl_test_i.btpu_wrapper_0.U0.btpu_inst.bram_IO1_doutb;
+
     btpu_regfile_t btpu_creg_tb;
     assign btpu_creg_tb = DUT.mem_ctrl_test_i.btpu_wrapper_0.U0.btpu_inst.control_reg;
 
@@ -1797,7 +1803,7 @@ module test_AXI_ctrl( );
         mem_opcode = 3'b010; //SW
         alu_resoult = 32'h40020030 + 0*4; //BTPU CS Reg
         rs2_value = 32'b0;
-        rs2_value[3] = 1'b0; //Seledt BRAM PORT A
+        rs2_value[3] = 1'b0; //Select BRAM PORT A
         @ (posedge clock);
         #1;
         for (int i=0; i < $size(W_Memory); ++i) begin
@@ -1820,6 +1826,66 @@ module test_AXI_ctrl( );
             @ (posedge clock);
             #1;
         end
+
+        //Testing memory
+        op_class = 5'b00100; //Load
+        en_in = 1'b1;
+        we_in = 1'b0;
+        mem_opcode = 3'b010; //LW
+        for(int i = 0; i < $size(W_Memory); ++i) begin
+            alu_resoult = 32'h40080000 + i*4;
+            @ (posedge clock);
+            #1;
+            validating = 1'b1;
+            if(btpu_doutb != W_Memory[i]) begin
+                $display("Test W-Memory %0d: FAILED -> btpu_doutb was %0x", testN, i, btpu_doutb);
+                testResult = 1'b0;
+                break;
+            end
+            #1;
+            validating = 1'b0;
+        end
+        if(testResult) begin
+            $display("Test W-Memory: OK");
+        end
+
+        testResult = 1'b1;
+        for(int i = 0; i < $size(IO0_Memory); ++i) begin
+            alu_resoult = 32'h400A0000 + i*4;
+            @ (posedge clock);
+            #1;
+            validating = 1'b1;
+            if(btpu_doutb != IO0_Memory[i]) begin
+                $display("Test IO0-Memory %0d: FAILED -> btpu_doutb was %0x", testN, i, btpu_doutb);
+                testResult = 1'b0;
+                break;
+            end
+            #1;
+            validating = 1'b0;
+        end
+        if(testResult) begin
+            $display("Test IO0-Memory: OK");
+        end
+
+        testResult = 1'b1;
+        for(int i = 0; i < $size(IO1_Memory); ++i) begin
+            alu_resoult = 32'h400C0000 + i*4;
+            @ (posedge clock);
+            #1;
+            validating = 1'b1;
+            if(btpu_doutb != IO1_Memory[i]) begin
+                $display("Test IO1-Memory %0d: FAILED -> btpu_doutb was %0x", testN, i, btpu_doutb);
+                testResult = 1'b0;
+                break;
+            end
+            #1;
+            validating = 1'b0;
+        end
+        if(testResult) begin
+            $display("Test IO1-Memory: OK");
+        end
+
+
 
         testN = 1;
         op_class = 5'b01000; //Store
@@ -2024,5 +2090,36 @@ module test_AXI_ctrl( );
         $finish;
     end
 
+
+    task automatic testMemoryWord (input logic [1023:0] word, input logic [31:0] map[], input [31:0] address, output bit res);
+        int bitOffset;
+        int wordOffset;
+    begin
+        res = 1'b1;
+        wordOffset = address * 32;
+        for(int i = 0; i < 32; ++i) begin
+            bitOffset = (32 * i) + 31;
+            if (word[bitOffset +: 32] != map[wordOffset + i]) begin
+                $display("Test Memory Word: FAILED -> word[%0d] was %0x expected %0x", i, word[bitOffset +: 32], map[wordOffset + i]);
+                res = 1'b0;
+                break;
+            end
+        end
+    end
+    endtask
+
+
+    // bit bramRes;
+    // bit checkBram = 1'b0;
+    // always @(BTPU_IO0_out_tb) begin
+    //     bramRes = 1'b1;
+    //     if (checkBram == 1'b1) begin
+    //         testMemoryWord(BTPU_IO0_out_tb, IO0_Memory, BTPU_IO0_addr_tb, bramRes);
+    //         if (bramRes == 1'b0) begin
+    //             $display("Test BTPU I/O 0: FAILED -> BTPU_IO0_out_tb was %0x", BTPU_IO0_out_tb);
+    //             $finish;
+    //         end 
+    //     end
+    // end
 
 endmodule
