@@ -1949,11 +1949,11 @@ module test_AXI_ctrl( );
         we_in = 1'b1;
         mem_opcode = 3'b010; //SW
         alu_resoult = 32'h40020030 + 4*4; //BTPU M SIZE Reg
-        rs2_value = 32'd2; //BTPU M SIZE
+        rs2_value = M; //BTPU M SIZE
         @ (posedge clock);
         #1;
         validating = 1'b1;
-        if (btpu_creg_tb[4] == 32'd2) begin
+        if (btpu_creg_tb[4] == M) begin
             $display("Test #%0d: OK", testN);
         end else begin
             $display("Test #%0d: FAILED -> btpu_creg_tb[4] was %0x", testN, btpu_creg_tb[4]);
@@ -1967,11 +1967,11 @@ module test_AXI_ctrl( );
         we_in = 1'b1;
         mem_opcode = 3'b010; //SW
         alu_resoult = 32'h40020030 + 5*4; //BTPU N SIZE Reg
-        rs2_value = 32'd3; //BTPU N SIZE
+        rs2_value = N; //BTPU N SIZE
         @ (posedge clock);
         #1;
         validating = 1'b1;
-        if (btpu_creg_tb[5] == 32'd3) begin
+        if (btpu_creg_tb[5] == N) begin
             $display("Test #%0d: OK", testN);
         end else begin
             $display("Test #%0d: FAILED -> btpu_creg_tb[5] was %0x", testN, btpu_creg_tb[5]);
@@ -1985,11 +1985,11 @@ module test_AXI_ctrl( );
         we_in = 1'b1;
         mem_opcode = 3'b010; //SW
         alu_resoult = 32'h40020030 + 6*4; //BTPU K SIZE Reg
-        rs2_value = 32'd4; //BTPU K SIZE
+        rs2_value = K; //BTPU K SIZE
         @ (posedge clock);
         #1;
         validating = 1'b1;
-        if (btpu_creg_tb[6] == 32'd4) begin
+        if (btpu_creg_tb[6] == K) begin
             $display("Test #%0d: OK", testN);
         end else begin
             $display("Test #%0d: FAILED -> btpu_creg_tb[6] was %0x", testN, btpu_creg_tb[6]);
@@ -2018,13 +2018,13 @@ module test_AXI_ctrl( );
 
         testN = 8;
         for(int r_test = 0; r_test < M; ++r_test) begin
-            $display("    Waiting for r_tb == %0d", r_test);
+            // $display("    Waiting for r_tb == %0d", r_test);
             wait (r_tb == r_test);
             for(int c_test = 0; c_test < K; ++c_test) begin
-                $display("    Waiting for c_tb == %0d", c_test);
+                // $display("    Waiting for c_tb == %0d", c_test);
                 wait (c_tb == c_test && i_tb == N - 1);
                 for(int tile = 0; tile < 4; ++tile) begin
-                    $display("    Waiting for tile_number_tb == %0d", tile);
+                    // $display("    Waiting for tile_number_tb == %0d", tile);
                     // wait (tile_number_tb == tile);
                     @(tile_number_tb);
                     #1;
@@ -2037,7 +2037,7 @@ module test_AXI_ctrl( );
                         col = elementInsideBlock % 32; // elemento % Dim del blocco
                         element = blockRow_offset + blockCol_offset + row * (32 * K) + col; // (blocco) + riga del blocco * dimensione della riga + colonna del blocco
                         if (acc_tb[mac_n] != result_Matrix[element]) begin
-                            $display("Test #%0d FAILED -> mac:[%0d] tile:[%0d] | block: [%0d][%0d] | element:[%0d]: acc_tb was %0d expected %0d", testN, mac_n, tile, r_test, c_test, element, acc_tb[mac_n], result_Matrix[element]);
+                            $display("Test #%0d FAILED -> mac:[%0d] tile:[%0d] | block: [%0d][%0d] | element:[%0d]: acc_tb was 0x%08x expected 0x%08x", testN, mac_n, tile, r_test, c_test, element, acc_tb[mac_n], result_Matrix[element]);
                             // $display("Test #%0d block:[%0d][%0d] | element:[%0d][%0d]: FAILED -> acc_tb was %0x expected %0x", testN, r_test, c_test, row, col, acc_tb[mac_n], result_Matrix[element]);
                             testResult = 1'b0;
                             break;
