@@ -1785,16 +1785,16 @@ module test_AXI_ctrl( );
 
         $display("Reading result matrix from file...");
         readArrayFromCSV(resultFileName, result_Matrix);
-        $display("Result matrix readed from file:");
-        if ($size(result_Matrix) >= 5) begin
-            for(int i = 0; i < 5; ++i) begin
-                $display("    result_Matrix[%0d] = %0d", i, result_Matrix[i]);
-            end
-        end else begin
-            for(int i = 0; i < $size(result_Matrix); ++i) begin
-                $display("    result_Matrix[%0d] = %0d", i, result_Matrix[i]);
-            end
-        end
+        // $display("Result matrix readed from file:");
+        // if ($size(result_Matrix) >= 5) begin
+        //     for(int i = 0; i < 5; ++i) begin
+        //         $display("    result_Matrix[%0d] = %0d", i, result_Matrix[i]);
+        //     end
+        // end else begin
+        //     for(int i = 0; i < $size(result_Matrix); ++i) begin
+        //         $display("    result_Matrix[%0d] = %0d", i, result_Matrix[i]);
+        //     end
+        // end
 
         testN = 0;
         op_class = 5'b01000; //Store
@@ -1838,7 +1838,7 @@ module test_AXI_ctrl( );
             #1;
             validating = 1'b1;
             if(btpu_doutb != W_Memory[i]) begin
-                $display("Test W-Memory %0d: FAILED -> btpu_doutb was %0x", testN, i, btpu_doutb);
+                $display("Test   W-Memory %0d: FAILED -> btpu_doutb was %0x", testN, i, btpu_doutb);
                 testResult = 1'b0;
                 break;
             end
@@ -1846,7 +1846,7 @@ module test_AXI_ctrl( );
             validating = 1'b0;
         end
         if(testResult) begin
-            $display("Test W-Memory: OK");
+            $display("Test   W-Memory: OK");
         end
 
         testResult = 1'b1;
@@ -2016,36 +2016,39 @@ module test_AXI_ctrl( );
 
         testN = 8;
         for(int r_test = 0; r_test < M; ++r_test) begin
+            $display("    Waiting for r_tb == %0d", r_test);
             wait (r_tb == r_test);
             for(int c_test = 0; c_test < K; ++c_test) begin
+                $display("    Waiting for c_tb == %0d", c_test);
                 wait (c_tb == c_test && i_tb == N - 1);
-                tile = tile_number_tb;
+                $display("    Waiting for tile_number_tb to change");
                 @ (tile_number_tb);
+                tile = (tile_number_tb - 1) % 4;
                 #1;
                 blockRow_offset = r_test * 32 * K;  // br * Dim del blocco * dim della riga
                 blockCol_offset = c_test * 32;      // bc * Dim del blocco
+                validating = 1'b1;
                 for(int mac_n = 0; mac_n < 256; ++mac_n) begin
                     elementInsideBlock = tile * 256 + mac_n;
                     row = elementInsideBlock / 32; // elemento / Dim del blocco
                     col = elementInsideBlock % 32; // elemento % Dim del blocco
                     element = blockRow_offset + blockCol_offset + row * (32 * K) + col; // (blocco) + riga del blocco * dimensione della riga + colonna del blocco
-                    validating = 1'b1;
                     if (acc_tb[mac_n] != result_Matrix[element]) begin
                         $display("Test #%0d FAILED -> mac:[%0d] tile:[%0d] | element:[%0d]: acc_tb was %0d expected %0d", testN, mac_n, tile, element, acc_tb[mac_n], result_Matrix[element]);
                         // $display("Test #%0d block:[%0d][%0d] | element:[%0d][%0d]: FAILED -> acc_tb was %0x expected %0x", testN, r_test, c_test, row, col, acc_tb[mac_n], result_Matrix[element]);
                         testResult = 1'b0;
-                        break;
+                        // break;
                     end
-                    #1;
-                    validating = 1'b0;
-                    #1;
                 end
+                #1;
+                validating = 1'b0;
+
                 if (testResult == 1'b0) begin
-                    break;
+                    // break;
                 end
             end
             if (testResult == 1'b0) begin
-                break;
+                // break;
             end
         end
         if(testResult == 1'b1) begin
@@ -2068,8 +2071,7 @@ module test_AXI_ctrl( );
         // validating = 1'b0;
 
 
-
-        #10;
+        #50;
 
     end
     endtask
