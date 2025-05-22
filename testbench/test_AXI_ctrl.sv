@@ -1773,8 +1773,9 @@ module test_AXI_ctrl( );
     task automatic testBTPU_Computation;
         int blockRow_offset;
         int blockCol_offset;
+        int tileRow_offset;
         int elementInsideBlock;
-        int tile;
+        // int tile;
         int row;
         int col;
         int element;
@@ -2021,30 +2022,30 @@ module test_AXI_ctrl( );
             for(int c_test = 0; c_test < K; ++c_test) begin
                 $display("    Waiting for c_tb == %0d", c_test);
                 wait (c_tb == c_test && i_tb == N - 1);
-                $display("    Waiting for tile_number_tb to change");
-                @ (tile_number_tb);
-                tile = (tile_number_tb - 1) % 4;
-                #1;
-                blockRow_offset = r_test * 32 * K;  // br * Dim del blocco * dim della riga
-                blockCol_offset = c_test * 32;      // bc * Dim del blocco
-                validating = 1'b1;
-                for(int mac_n = 0; mac_n < 256; ++mac_n) begin
-                    elementInsideBlock = tile * 256 + mac_n;
-                    row = elementInsideBlock / 32; // elemento / Dim del blocco
-                    col = elementInsideBlock % 32; // elemento % Dim del blocco
-                    element = blockRow_offset + blockCol_offset + row * (32 * K) + col; // (blocco) + riga del blocco * dimensione della riga + colonna del blocco
-                    if (acc_tb[mac_n] != result_Matrix[element]) begin
-                        $display("Test #%0d FAILED -> mac:[%0d] tile:[%0d] | element:[%0d]: acc_tb was %0d expected %0d", testN, mac_n, tile, element, acc_tb[mac_n], result_Matrix[element]);
-                        // $display("Test #%0d block:[%0d][%0d] | element:[%0d][%0d]: FAILED -> acc_tb was %0x expected %0x", testN, r_test, c_test, row, col, acc_tb[mac_n], result_Matrix[element]);
-                        testResult = 1'b0;
+                for(int tile = 0; tile < 4; ++tile) begin
+                    $display("    Waiting for tile_number_tb == %0d", tile);
+                    wait (tile_number_tb == tile);
+                    #1;
+                    blockRow_offset = r_test * 32 * K;  // br * Dim del blocco * dim della riga
+                    blockCol_offset = c_test * 32;      // bc * Dim del blocco
+                    validating = 1'b1;
+                    for(int mac_n = 0; mac_n < 256; ++mac_n) begin
+                        elementInsideBlock = tile * 256 + mac_n;
+                        row = elementInsideBlock / 32; // elemento / Dim del blocco
+                        col = elementInsideBlock % 32; // elemento % Dim del blocco
+                        element = blockRow_offset + blockCol_offset + row * (32 * K) + col; // (blocco) + riga del blocco * dimensione della riga + colonna del blocco
+                        if (acc_tb[mac_n] != result_Matrix[element]) begin
+                            $display("Test #%0d FAILED -> mac:[%0d] tile:[%0d] | element:[%0d]: acc_tb was %0d expected %0d", testN, mac_n, tile, element, acc_tb[mac_n], result_Matrix[element]);
+                            // $display("Test #%0d block:[%0d][%0d] | element:[%0d][%0d]: FAILED -> acc_tb was %0x expected %0x", testN, r_test, c_test, row, col, acc_tb[mac_n], result_Matrix[element]);
+                            testResult = 1'b0;
+                            break;
+                        end
+                    end
+                    #1;
+                    validating = 1'b0;
+                    if (testResult == 1'b0) begin
                         // break;
                     end
-                end
-                #1;
-                validating = 1'b0;
-
-                if (testResult == 1'b0) begin
-                    // break;
                 end
             end
             if (testResult == 1'b0) begin

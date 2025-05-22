@@ -548,6 +548,7 @@ begin
                         if is_batched = '0' then
                             state <= IDLE;
                         elsif is_batched = '1' then
+                            force_acc_clear <= '1';
                             state <= CLEAR_ACC;
                             i := (others => '0');
                             if c < k - 1 then
@@ -560,6 +561,7 @@ begin
                                 bram_w_enb <= '1';
                                 bram_i_en  <= '1';
                             else 
+                                force_acc_clear <= '0';
                                 state <= IDLE;
                             end if;
                         else
