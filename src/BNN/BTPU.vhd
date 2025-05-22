@@ -317,10 +317,8 @@ begin
         end generate; -- populate_inst_choises
 
         inst_for : for inst in 0 to MAC_INST_N - 1 generate
-            multiplexer_inst : process( mac_inst_activations_choises(inst), mac_inst_weights_choises(inst), tile_number) begin
-                mac_a_in(inst) <= mac_inst_activations_choises(inst)(to_integer(tile_number));
-                mac_b_in(inst) <= mac_inst_weights_choises(inst)(to_integer(tile_number));
-            end process ; -- multiplexer_inst
+            mac_a_in(inst) <= mac_inst_activations_choises(inst)(to_integer(tile_number));
+            mac_b_in(inst) <= mac_inst_weights_choises(inst)(to_integer(tile_number));
         end generate; -- inst_for
         
     --------------- Result Pop ----------------------
@@ -583,7 +581,7 @@ begin
                 address_tmp := addr_w_base + i * k + c;
                 bram_w_addrb <= address_tmp(clog2(MEM_B_SIZE) - 1 downto 0);
 
-                address_tmp := addr_i_base + c * n + i;
+                address_tmp := addr_i_base + r * n + i;
                 bram_i_addr  <= address_tmp(clog2(MEM_B_SIZE) - 1 downto 0);
 
                 address_tmp := addr_o_base + r * k + c;
