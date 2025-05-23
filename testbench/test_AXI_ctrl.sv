@@ -2009,6 +2009,15 @@ module test_AXI_ctrl( );
         rs2_value[4] = 1'b1; //Clear ACC
         rs2_value[5] = 1'b1; //Enable batched Mat Mul
         @ (posedge clock);
+        #1;
+        validating = 1'b1;
+        if (btpu_creg_tb[0][5:0] == 6'b110101) begin
+            $display("Test #%0d: OK", testN);
+        end else begin
+            $display("Test #%0d: FAILED -> btpu_creg_tb[0] was %0x", testN, btpu_creg_tb[0][5:0]);
+        end
+        #1;
+        validating = 1'b0;
         en_in = 1'b0;
         @ (posedge clock);   //Wait until BTPU start the computation
         #1;
