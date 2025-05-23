@@ -2028,8 +2028,8 @@ module test_AXI_ctrl( );
                     // wait (tile_number_tb == tile);
                     @(tile_number_tb);
                     #1;
-                    blockRow_offset = r_test * 32 * K;  // br * Dim del blocco * dim della riga
-                    blockCol_offset = c_test * 32;      // bc * Dim del blocco
+                    blockRow_offset = r_test * 32 * (K * 32);   // br * Dim del blocco * dim della riga
+                    blockCol_offset = c_test * 32;              // bc * Dim del blocco
                     validating = 1'b1;
                     for(int mac_n = 0; mac_n < 256; ++mac_n) begin
                         elementInsideBlock = tile * 256 + mac_n;
