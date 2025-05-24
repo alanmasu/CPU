@@ -44,6 +44,7 @@ entity btpu_mac is
     );
     port ( 
         acc_clk     : in STD_LOGIC;
+        acc_res     : in STD_LOGIC;
         acc_resn    : in STD_LOGIC;
         en          : in STD_LOGIC;
         a           : in STD_LOGIC_VECTOR (X - 1 downto 0);
@@ -97,11 +98,18 @@ begin
         end process ; -- popcounter_pro
     end generate simulation_inst;
     
-    process(acc_clk) is
+    process(acc_clk, acc_res) is
         variable acc_addr : integer;    
         variable sum : unsigned (ACC_SIZE - 1 downto 0);
     begin
-        if rising_edge(acc_clk) then
+        if acc_res = '0' then
+            -- Reset the accumulator
+            accumulator <= (others => (others => '0'));
+            res <= (others => '0');
+            acc <= (others => '0');
+            -- res_sign <= '0';
+            sum := (others => '0');
+        elsif rising_edge(acc_clk) then
             acc_addr := to_integer(tile_n);
             if acc_resn = '0' then
                 accumulator <= (others => (others => '0'));
@@ -110,11 +118,11 @@ begin
                     sum := unsigned(accumulator(acc_addr)) + unsigned(popcount);
                     res <= popcount;
                     acc <= std_logic_vector(sum);
-                    if sum > size_u then
-                        res_sign <= '1';
-                    else
-                        res_sign <= '0';
-                    end if;
+                    -- if sum > size_u then
+                    --     res_sign <= '1';
+                    -- else
+                    --     res_sign <= '0';
+                    -- end if;
                     accumulator(acc_addr) <= std_logic_vector(sum);
                 end if;
             end if;
@@ -127,6 +135,6 @@ begin
     -- Output assignment
     -- res <= popcount;
     -- acc <= accumulator(to_integer(tile_n));
-    -- res_sign <= '0' when (unsigned(accumulator(to_integer(tile_n))) < size_u) else '1';
+    res_sign <= '1' when ((unsigned(accumulator(to_integer(tile_n))) + unsigned(popcount))> size_u) else '0';
 
 end Behavioral;

@@ -88,11 +88,17 @@ architecture Behavioral of btpu is
     type acc_t      is array (0 to MAC_INST_N - 1) of std_logic_vector(ACC_SIZE - 1 downto 0);
     type mac_input  is array (0 to MAC_INST_N - 1) of std_logic_vector(GRID_SIZE - 1 downto 0);
 
+    type sign_row_t   is array (0 to (MAC_INST_N / GRID_SIZE) - 1) of std_logic_vector(GRID_SIZE - 1 downto 0);
+    
+
     type inst_choises_t is array (0 to TILES_N - 1) of std_logic_vector(GRID_SIZE - 1 downto 0);
     type inst_input_t is array (0 to MAC_INST_N - 1) of inst_choises_t;
 
     signal activations_matrix : matrix_t;
     signal weights_matrix     : matrix_t; 
+    signal result_matrix      : matrix_t;
+
+    signal sign_row : sign_row_t;
     
     signal mac_a_in     : mac_input;
     signal mac_b_in     : mac_input;
@@ -274,6 +280,22 @@ begin
             end generate ; -- bit_pop
         end generate ; -- mac_weigths_pop
 
+    --------------- Result Matrix Pop ----------------
+        mac_result_m_pop : for i in 0 to GRID_SIZE - 1 generate
+            constant word_to_bit    : integer := i * 32;
+            constant word_from_bit  : integer := word_to_bit + 31;
+        begin 
+            result_matrix(i) <= result_word(word_from_bit downto word_to_bit);
+        end generate ; -- mac_result_m_pop
+
+    --------------- Sign Rows Pop ----------------
+        mac_sign_m_pop : for i in 0 to (MAC_INST_N / GRID_SIZE) - 1 generate
+            constant word_to_bit    : integer := i * 32;
+            constant word_from_bit  : integer := word_to_bit + 31;
+        begin 
+            sign_row(i) <= mac_sign_out(word_from_bit downto word_to_bit);
+        end generate ; -- mac_result_m_pop
+
     --------------- MAC Instantiation ---------------
         mac_inst_gen : for inst in 0 to MAC_INST_N - 1 generate
             mac_inst : entity work.btpu_mac
@@ -286,6 +308,7 @@ begin
                 )
                 port map (
                     acc_clk  => clk,
+                    acc_res  => res,
                     acc_resn => acc_clear,
                     en       => acc_en,
                     a        => mac_a_in(inst),
@@ -327,7 +350,7 @@ begin
                 constant inst_number : integer := inst + tile * MAC_INST_N;
                 constant tile_row    : integer := inst_number / GRID_SIZE;
                 constant tile_col    : integer := inst_number mod GRID_SIZE;
-                constant bit_n       : integer := tile_row * GRID_SIZE + tile_col;
+                constant bit_n       : integer := tile_row * GRID_SIZE + (31 - tile_col);
             begin
                 result_bit_reg : process( clk, res )
                 begin
@@ -474,6 +497,7 @@ begin
                 bram_w_enb <= '0';
                 bram_i_en  <= '0';
                 bram_o_en  <= '0';
+                bram_o_we  <= '0';
                 bram_w_enb <= '0';
                 acc_en     <= '0';
                 case state is
