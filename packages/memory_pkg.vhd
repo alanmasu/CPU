@@ -7,7 +7,7 @@ use work.types_pkg.all;
 
 package memory_pkg is
     --MEMORY model
-    type memory_space_type_t is (ROM, CREG_FILE, RAM, IO, GPIO, I2C, AXI, RESERVED);
+    type memory_space_type_t is (ROM, CREG_FILE, RAM, IO, GPIO, I2C, AXI, BTPU_CREG_FILE, BTPU_W_MEM, BTPU_IO0_MEM, BTPU_IO1_MEM, RESERVED);
     type memory_addr_space_t is record
         lower_bound : unsigned(31 downto 0);
         upper_bound : unsigned(31 downto 0);
@@ -16,14 +16,18 @@ package memory_pkg is
 
     -- Memory map
     type memory_model is array (natural range <>) of memory_addr_space_t;
-    constant memory_map : memory_model(0 to 20) := (
+    constant memory_map : memory_model(0 to 24) := (
         (lower_bound => x"00000000", upper_bound => x"3FFFFFFF", space_type => AXI),        --OCM & DDR
         (lower_bound => x"40000000", upper_bound => x"40003FFF", space_type => ROM),        --AXI INSTRUCTION MEMORY
         (lower_bound => x"40004000", upper_bound => x"4000FFFF", space_type => CREG_FILE),  --AXI FSM Control Register
         (lower_bound => x"40010000", upper_bound => x"4001FFFF", space_type => RAM),        --AXI DATA MEMORY (Mem upper bount = 0x40011FFF)
         (lower_bound => x"40020000", upper_bound => x"4002000F", space_type => GPIO),       --RISC-V GPIO
         (lower_bound => x"40020010", upper_bound => x"4002002F", space_type => I2C),        --RISC-V I2C
-        (lower_bound => x"40020030", upper_bound => x"7FFFFFFF", space_type => IO),         --RISC-V IO
+        (lower_bound => x"40020030", upper_bound => x"40020050", space_type => BTPU_CREG_FILE), --BTPU Register File
+        (lower_bound => x"40080000", upper_bound => x"4009FFFF", space_type => BTPU_W_MEM),     --BTPU Weights Memory
+        (lower_bound => x"400A0000", upper_bound => x"400BFFFF", space_type => BTPU_IO0_MEM),   --BTPU I/O Memory 0
+        (lower_bound => x"400C0000", upper_bound => x"400DFFFF", space_type => BTPU_IO1_MEM),   --BTPU I/O Memory 1
+        (lower_bound => x"400E0000", upper_bound => x"7FFFFFFF", space_type => IO),         --RISC-V IO
         (lower_bound => x"80000000", upper_bound => x"DFFFFFFF", space_type => RESERVED),   
         (lower_bound => x"E0000000", upper_bound => x"E02FFFFF", space_type => AXI),        --PS IO
         (lower_bound => x"E0300000", upper_bound => x"E0FFFFFF", space_type => RESERVED),
@@ -42,6 +46,7 @@ package memory_pkg is
     -- Offset for peripherals
     constant GPIO_OFFSET    : unsigned(31 downto 0) := x"0000_0000";
     constant I2C_OFFSET     : unsigned(31 downto 0) := x"0000_0010";
+    constant BTPU_CREG_OFFSET : unsigned(31 downto 0) := x"0000_0030";
 
     --FUNCTIONS
     function is_in_space(addr : std_logic_vector(31 downto 0); space_type: memory_space_type_t) return std_logic;
@@ -87,12 +92,16 @@ package body memory_pkg is
     end function;
 
     function en_bus_t_to_slv(en_bus : en_bus_t) return std_logic_vector is
-        variable result : std_logic_vector(3 downto 0);
+        variable result : std_logic_vector(7 downto 0);
     begin
         result(0) := en_bus.en_mem;
         result(1) := en_bus.en_AXI;
         result(2) := en_bus.en_GPIO;
         result(3) := en_bus.en_I2C;
+        result(4) := en_bus.en_BTPU_CREG;
+        result(5) := en_bus.en_BTPU_W_MEM;
+        result(6) := en_bus.en_BTPU_IO0_MEM;
+        result(7) := en_bus.en_BTPU_IO1_MEM;
         return result;
     end function;
 

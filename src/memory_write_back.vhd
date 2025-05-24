@@ -92,13 +92,15 @@ architecture Behavioral of memory_write_back is
         en_mem => '0', 
         en_AXI => '0',
         en_GPIO => '0',
-        en_I2C => '0'
+        en_I2C => '0',
+        others => '0'
     );
     signal en_bus_reg : en_bus_t := (
         en_mem => '0', 
         en_AXI => '0',
         en_GPIO => '0',
-        en_I2C => '0'
+        en_I2C => '0',
+        others => '0'
     );
     signal we, mem_wea : std_logic_vector(3 downto 0) := (others => '0');
 begin
@@ -185,7 +187,8 @@ begin
                 en_mem => '0',
                 en_AXI => '0',
                 en_GPIO => '0',
-                en_I2C => '0'
+                en_I2C => '0',
+                others => '0'
             );
         elsif rising_edge(clk) then
             en_bus_reg <= en_bus;
@@ -219,6 +222,8 @@ begin
             dato := unsigned(d_in.GPIO_data);
         elsif en_bus_reg.en_I2C then
             dato := unsigned(d_in.I2C_data);
+        elsif en_bus.en_BTPU_CREG or en_bus.en_BTPU_W_MEM or en_bus.en_BTPU_IO0_MEM or en_bus.en_BTPU_IO1_MEM then
+            dato := unsigned(d_in.BTPU_data);
         end if ;
 
         --Sign extension

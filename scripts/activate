@@ -3,6 +3,10 @@ CPU_PYTHON_ENV="${CPU_DIR}/CPU Repo/pyEnv"
 CPU_PYTHON_DIR="${CPU_DIR}/CPU Repo/scripts"
 CPU_PYTHON_V_ENV="${CPU_PYTHON_ENV}/bin/activate"
 
+CPU_ENV=1
+
+export CPU_ENV
+
 export CPU_PYTHON_DIR
 export CPU_PYTHON_ENV
 export CPU_PYTHON_V_ENV

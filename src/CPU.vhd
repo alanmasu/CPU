@@ -252,7 +252,8 @@ architecture Behavioral of CPU is
         en_mem => '0',
         en_AXI => '0',
         en_GPIO => '0',
-        en_I2C => '0'
+        en_I2C => '0',
+        others => '0'
     );
     signal mem_wb_we_out : std_logic_vector(3 downto 0) := (others => '0');
     signal mem_wb_addr_out : std_logic_vector(31 downto 0) := (others => '0');

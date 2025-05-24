@@ -18,6 +18,15 @@ case "$1" in
         echo "Eseguo lo script Python per 'c'..."
         python3 "${CPU_PYTHON_DIR}/elfToC.py" "${@:2}";
         ;;
+    -s)
+        # Controlla se il secondo parametro è un file esistente, in caso positivo esegui quello script
+        if [ -f "$2" ]; then
+            echo "Eseguo lo script Python per 'script'..."
+            python3 "$2" "${@:3}";
+        else
+            echo "Errore: il file '$2' non esiste."
+        fi
+        ;;
     *)
         # Gestione dei valori non validi
         echo "Errore: primo parametro non valido. Usa uno tra: -coe, -sv, -c"
