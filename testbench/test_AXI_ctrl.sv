@@ -2094,18 +2094,6 @@ module test_AXI_ctrl( );
         en_in = 1'b1;
         we_in = 1'b0;
         mem_opcode = 3'b010; //LW
-        // alu_resoult = 32'h400C0000;
-        // @ (posedge clock);
-        // #1;
-        // while (btpu_douta != 32'h07ffffff && btpu_douta != 32'hffffffe0 && alu_resoult < 32'h400DFFFF) begin
-        //     alu_resoult += 4;
-        //     @ (posedge clock);
-        //     #1;
-        // end
-        // $display("Test #%0d: OK -> Founded data @ 0x%08x", testN, alu_resoult);
-        // alu_resoult += -4;
-
-        testN = 11;
         for (int i = 0; i < $size(resultB_Matrix); ++i) begin
             // alu_resoult += 4;
             alu_resoult = 32'h400C0000 + (5 * 32 * 4) + i * 4;
