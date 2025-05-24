@@ -41,7 +41,8 @@ entity CPU is
 		C_M_AXI_ADDR_WIDTH	   : integer	:= 32;
 		C_M_AXI_DATA_WIDTH	   : integer	:= 32;
         RUN_BLINK_COUNTER_SIZE : integer    := 26;
-        IS_STANDALONE          : boolean    := false
+        IS_STANDALONE          : boolean    := false;
+        BTPU_SIMULATION        : boolean    := false
 	);
     Port ( 
         clk         : IN std_logic;
@@ -89,6 +90,39 @@ entity CPU is
         s_axi_d_rresp : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
         s_axi_d_rvalid : OUT STD_LOGIC;
         s_axi_d_rready : IN STD_LOGIC;
+        
+        -- BTPU AXI Interface
+        s_axi_btpu_awaddr : IN STD_LOGIC_VECTOR(19 DOWNTO 0);
+        s_axi_btpu_awlen : IN STD_LOGIC_VECTOR(7 DOWNTO 0);
+        s_axi_btpu_awsize : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
+        s_axi_btpu_awburst : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
+        s_axi_btpu_awlock : IN STD_LOGIC;
+        s_axi_btpu_awcache : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
+        s_axi_btpu_awprot : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
+        s_axi_btpu_awvalid : IN STD_LOGIC;
+        s_axi_btpu_awready : OUT STD_LOGIC;
+        s_axi_btpu_wdata : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+        s_axi_btpu_wstrb : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
+        s_axi_btpu_wlast : IN STD_LOGIC;
+        s_axi_btpu_wvalid : IN STD_LOGIC;
+        s_axi_btpu_wready : OUT STD_LOGIC;
+        s_axi_btpu_bresp : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
+        s_axi_btpu_bvalid : OUT STD_LOGIC;
+        s_axi_btpu_bready : IN STD_LOGIC;
+        s_axi_btpu_araddr : IN STD_LOGIC_VECTOR(19 DOWNTO 0);
+        s_axi_btpu_arlen : IN STD_LOGIC_VECTOR(7 DOWNTO 0);
+        s_axi_btpu_arsize : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
+        s_axi_btpu_arburst : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
+        s_axi_btpu_arlock : IN STD_LOGIC;
+        s_axi_btpu_arcache : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
+        s_axi_btpu_arprot : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
+        s_axi_btpu_arvalid : IN STD_LOGIC;
+        s_axi_btpu_arready : OUT STD_LOGIC;
+        s_axi_btpu_rdata : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+        s_axi_btpu_rresp : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
+        s_axi_btpu_rlast : OUT STD_LOGIC;
+        s_axi_btpu_rvalid : OUT STD_LOGIC;
+        s_axi_btpu_rready : IN STD_LOGIC;
 
         --M_AXI interface
         M_AXI_AWADDR	: out std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
@@ -140,7 +174,10 @@ entity CPU is
         oled_dc     : out std_logic;
         oled_res    : out std_logic;
         oled_vbat   : out std_logic;
-        oled_vdd    : out std_logic
+        oled_vdd    : out std_logic;
+
+        -- CDMA
+        cdma_interrupt : in STD_LOGIC
         
     );
 end CPU;
@@ -184,6 +221,51 @@ architecture Behavioral of CPU is
         s_axi_arready : OUT STD_LOGIC;
         s_axi_rdata : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
         s_axi_rresp : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
+        s_axi_rvalid : OUT STD_LOGIC;
+        s_axi_rready : IN STD_LOGIC;
+        bram_rst_a : OUT STD_LOGIC;
+        bram_clk_a : OUT STD_LOGIC;
+        bram_en_a : OUT STD_LOGIC;
+        bram_we_a : OUT STD_LOGIC_VECTOR(3 DOWNTO 0);
+        bram_addr_a : OUT STD_LOGIC_VECTOR(19 DOWNTO 0);
+        bram_wrdata_a : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+        bram_rddata_a : IN STD_LOGIC_VECTOR(31 DOWNTO 0)
+    );
+    END COMPONENT;
+
+    COMPONENT axi_btpu_ctrl
+    PORT (
+        s_axi_aclk : IN STD_LOGIC;
+        s_axi_aresetn : IN STD_LOGIC;
+        s_axi_awaddr : IN STD_LOGIC_VECTOR(19 DOWNTO 0);
+        s_axi_awlen : IN STD_LOGIC_VECTOR(7 DOWNTO 0);
+        s_axi_awsize : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
+        s_axi_awburst : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
+        s_axi_awlock : IN STD_LOGIC;
+        s_axi_awcache : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
+        s_axi_awprot : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
+        s_axi_awvalid : IN STD_LOGIC;
+        s_axi_awready : OUT STD_LOGIC;
+        s_axi_wdata : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+        s_axi_wstrb : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
+        s_axi_wlast : IN STD_LOGIC;
+        s_axi_wvalid : IN STD_LOGIC;
+        s_axi_wready : OUT STD_LOGIC;
+        s_axi_bresp : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
+        s_axi_bvalid : OUT STD_LOGIC;
+        s_axi_bready : IN STD_LOGIC;
+        s_axi_araddr : IN STD_LOGIC_VECTOR(19 DOWNTO 0);
+        s_axi_arlen : IN STD_LOGIC_VECTOR(7 DOWNTO 0);
+        s_axi_arsize : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
+        s_axi_arburst : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
+        s_axi_arlock : IN STD_LOGIC;
+        s_axi_arcache : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
+        s_axi_arprot : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
+        s_axi_arvalid : IN STD_LOGIC;
+        s_axi_arready : OUT STD_LOGIC;
+        s_axi_rdata : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+        s_axi_rresp : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
+        s_axi_rlast : OUT STD_LOGIC;
         s_axi_rvalid : OUT STD_LOGIC;
         s_axi_rready : IN STD_LOGIC;
         bram_rst_a : OUT STD_LOGIC;
@@ -249,10 +331,6 @@ architecture Behavioral of CPU is
 
     --Memory Writeback - OUT | Peripheral - IN
     signal mem_wb_en_out : en_bus_t := (
-        en_mem => '0',
-        en_AXI => '0',
-        en_GPIO => '0',
-        en_I2C => '0',
         others => '0'
     );
     signal mem_wb_we_out : std_logic_vector(3 downto 0) := (others => '0');
@@ -282,6 +360,16 @@ architecture Behavioral of CPU is
     --OLED
     signal display_in : std_logic_vector(31 downto 0) := (others => '0');
     signal oled_select : std_logic_vector(2 downto 0) := (others => '0');
+    
+    --DEBUG
+--    signal state_dbg_sig : std_logic_vector(2 downto 0);
+
+    -- BTPU BRAM Interface
+    signal btpu_bram_en    : STD_LOGIC;
+    signal btpu_bram_we    : STD_LOGIC_VECTOR(3 DOWNTO 0);
+    signal btpu_bram_addr  : STD_LOGIC_VECTOR(31 DOWNTO 0);
+    signal btpu_bram_din   : STD_LOGIC_VECTOR(31 DOWNTO 0);
+    signal btpu_bram_dout  : STD_LOGIC_VECTOR(31 DOWNTO 0);
 
 begin
     --Fetch
@@ -512,8 +600,8 @@ begin
         wea => mem_wb_we_out,
         d_in => mem_wb_data_out,
         d_out => d_bus_in.GPIO_data,
-        GPIO => GPIO,
-        gpio_state_dbg => gpio_state_dbg
+        GPIO => GPIO--,
+        --gpio_state_dbg => gpio_state_dbg
     );
 
     -- I2C
@@ -548,6 +636,73 @@ begin
         oled_vdd => oled_vdd
     );
     
+
+    -- BTPU AXI Controller
+    btpu_axi_controller : axi_btpu_ctrl
+    PORT MAP (
+        s_axi_aclk => clk,
+        s_axi_aresetn => res_in,
+        s_axi_awaddr => s_axi_btpu_awaddr,
+        s_axi_awlen => s_axi_btpu_awlen,
+        s_axi_awsize => s_axi_btpu_awsize,
+        s_axi_awburst => s_axi_btpu_awburst,
+        s_axi_awlock => s_axi_btpu_awlock,
+        s_axi_awcache => s_axi_btpu_awcache,
+        s_axi_awprot => s_axi_btpu_awprot,
+        s_axi_awvalid => s_axi_btpu_awvalid,
+        s_axi_awready => s_axi_btpu_awready,
+        s_axi_wdata => s_axi_btpu_wdata,
+        s_axi_wstrb => s_axi_btpu_wstrb,
+        s_axi_wlast => s_axi_btpu_wlast,
+        s_axi_wvalid => s_axi_btpu_wvalid,
+        s_axi_wready => s_axi_btpu_wready,
+        s_axi_bresp => s_axi_btpu_bresp,
+        s_axi_bvalid => s_axi_btpu_bvalid,
+        s_axi_bready => s_axi_btpu_bready,
+        s_axi_araddr => s_axi_btpu_araddr,
+        s_axi_arlen => s_axi_btpu_arlen,
+        s_axi_arsize => s_axi_btpu_arsize,
+        s_axi_arburst => s_axi_btpu_arburst,
+        s_axi_arlock => s_axi_btpu_arlock,
+        s_axi_arcache => s_axi_btpu_arcache,
+        s_axi_arprot => s_axi_btpu_arprot,
+        s_axi_arvalid => s_axi_btpu_arvalid,
+        s_axi_arready => s_axi_btpu_arready,
+        s_axi_rdata => s_axi_btpu_rdata,
+        s_axi_rresp => s_axi_btpu_rresp,
+        s_axi_rlast => s_axi_btpu_rlast,
+        s_axi_rvalid => s_axi_btpu_rvalid,
+        s_axi_rready => s_axi_btpu_rready,
+        bram_en_a => btpu_bram_en,
+        bram_we_a => btpu_bram_we,
+        bram_addr_a => btpu_bram_addr,
+        bram_wrdata_a => btpu_bram_din,
+        bram_rddata_a => btpu_bram_dout
+    );
+
+    btpu_inst : entity work.btpu
+        generic map(
+            SIMULATION => BTPU_SIMULATION
+        )
+        port map(
+            clk => clk,
+            res => res,
+            hs_clk => clk,
+
+            ena => mem_wb_en_out,
+            wea => mem_wb_we_out,
+            addra => mem_wb_addr_out,
+            dina => mem_wb_data_out,
+            douta => d_bus_in.BTPU_data,
+
+            enb => btpu_bram_en,
+            web => btpu_bram_we,
+            addrb => btpu_bram_addr,
+            dinb => btpu_bram_din,
+            doutb => btpu_bram_dout
+        );
+
+
     --Control Register File
         --Enable signals for Instruction Memory PortB and Control Register File
     ena_comb : process( bram_addr_a_i, bram_en_a_i) begin
@@ -639,8 +794,8 @@ begin
         oled_select,
         pc_fetched, 
         instruction_fetched,
-        control_reg(CREG_OLED_DATA),
-        state_dbg_sig
+        control_reg(CREG_OLED_DATA)--,
+        -- state_dbg_sig
     ) is 
         variable index : integer;
     begin
@@ -651,7 +806,7 @@ begin
             when 1 =>
                 display_in <= instruction_fetched;
             when 2 =>
-                display_in(2 downto 0) <= state_dbg_sig;
+                -- display_in(2 downto 0) <= state_dbg_sig;
                 display_in(31 downto 3) <= (others => '0');
             when 3 =>
                 display_in <= control_reg(CREG_OLED_DATA);
