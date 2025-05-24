@@ -2222,11 +2222,11 @@ module test_AXI_ctrl( );
     initial begin
         @(posedge reset);
         #1;
-        // testMemory();
-        // testAXI();
-        // testGPIO();
-        // testI2C();
-        // testAXI_BRESP();
+        testMemory();
+        testAXI();
+        testGPIO();
+        testI2C();
+        testAXI_BRESP();
         testBTPU();
         testBTPU_FSM();
         testBTPU_Computation();
