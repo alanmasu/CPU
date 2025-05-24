@@ -74,7 +74,9 @@ architecture Behavioral of btpu is
     constant W_DIM : integer := (GRID_SIZE * GRID_SIZE);
     constant TILES_N : integer := (GRID_SIZE * GRID_SIZE) / MAC_INST_N;
     constant tiles_n_u : unsigned(clog2(TILES_N) - 1 downto 0) := to_unsigned(TILES_N, clog2(TILES_N));
-
+    signal mem_b_size_u : unsigned(clog2(MEM_B_SIZE) - 1 downto 0) := to_unsigned(MEM_B_SIZE - 1, clog2(MEM_B_SIZE));
+    constant clog2_mem : natural := clog2(MEM_B_SIZE);
+    
     signal res0 : std_logic_vector(255 downto 0) := (others => '0');
     signal res1 : std_logic_vector(255 downto 0) := (others => '0');
     signal res2 : std_logic_vector(255 downto 0) := (others => '0');
@@ -86,11 +88,17 @@ architecture Behavioral of btpu is
     type acc_t      is array (0 to MAC_INST_N - 1) of std_logic_vector(ACC_SIZE - 1 downto 0);
     type mac_input  is array (0 to MAC_INST_N - 1) of std_logic_vector(GRID_SIZE - 1 downto 0);
 
+    type sign_row_t   is array (0 to (MAC_INST_N / GRID_SIZE) - 1) of std_logic_vector(GRID_SIZE - 1 downto 0);
+    
+
     type inst_choises_t is array (0 to TILES_N - 1) of std_logic_vector(GRID_SIZE - 1 downto 0);
     type inst_input_t is array (0 to MAC_INST_N - 1) of inst_choises_t;
 
     signal activations_matrix : matrix_t;
     signal weights_matrix     : matrix_t; 
+    signal result_matrix      : matrix_t;
+
+    signal sign_row : sign_row_t;
     
     signal mac_a_in     : mac_input;
     signal mac_b_in     : mac_input;
@@ -108,26 +116,41 @@ architecture Behavioral of btpu is
     
     -- FSM Signals
     signal state : BTPU_state_t := IDLE;
+    signal start : std_logic := '0';
+    signal busy  : std_logic := '0';
+    signal err   : std_logic := '0';
     signal weigth_word      : STD_LOGIC_VECTOR(W_DIM - 1 downto 0) := (others => '0');
     signal activaction_word : STD_LOGIC_VECTOR(W_DIM - 1 downto 0) := (others => '0');
     signal result_word      : STD_LOGIC_VECTOR(W_DIM - 1 downto 0) := (others => '0');
     signal tile_number      : unsigned(clog2(TILES_N) - 1 downto 0) := (others => '0');
+    signal addr_w_base      : unsigned(clog2(MEM_B_SIZE) - 1 downto 0) := (others => '0');
+    signal addr_i_base      : unsigned(clog2(MEM_B_SIZE) - 1 downto 0) := (others => '0');
+    signal addr_o_base      : unsigned(clog2(MEM_B_SIZE) - 1 downto 0) := (others => '0');
+    signal m                : unsigned(clog2(MEM_B_SIZE) - 1 downto 0) := (others => '0');
+    signal n                : unsigned(clog2(MEM_B_SIZE) - 1 downto 0) := (others => '0');
+    signal k                : unsigned(clog2(MEM_B_SIZE) - 1 downto 0) := (others => '0');
+    signal is_batched       : std_logic := '0';
+    -- DBG
+    signal i_s              : unsigned(clog2(MEM_B_SIZE) - 1 downto 0) := (others => '0');
+    signal c_s              : unsigned(clog2(MEM_B_SIZE) - 1 downto 0) := (others => '0');
+    signal r_s              : unsigned(clog2(MEM_B_SIZE) - 1 downto 0) := (others => '0');
      -- Memories signals
         signal bram_i_addr  : unsigned(clog2(MEM_B_SIZE) - 1 downto 0) := (others => '0');
         signal bram_o_addr  : unsigned(clog2(MEM_B_SIZE) - 1 downto 0) := (others => '0');
         signal bram_i_en    : std_logic := '0';
         signal bram_o_en    : std_logic := '0';
         signal bram_o_we    : std_logic := '0';
-     -- Status signals
-        signal start        : std_logic := '0';
-        signal busy         : std_logic := '0';
+     -- CREG + Others signals
+        signal addr_w_base_reg : unsigned(clog2(MEM_B_SIZE) - 1 downto 0);
+        signal addr_i_base_reg : unsigned(clog2(MEM_B_SIZE) - 1 downto 0);
+        signal addr_o_base_reg : unsigned(clog2(MEM_B_SIZE) - 1 downto 0);
+        signal m_reg : unsigned(clog2(MEM_B_SIZE) - 1 downto 0);
+        signal n_reg : unsigned(clog2(MEM_B_SIZE) - 1 downto 0);
+        signal k_reg : unsigned(clog2(MEM_B_SIZE) - 1 downto 0);
         signal o_mem_select : std_logic := '0';
         signal bram_port_sel: std_logic := '0';  
         signal acc_clear    : std_logic := '0';
-        signal multiple_acc : std_logic := '0';
-        signal acc_number   : unsigned(31 downto 0) := (others => '0');
-        signal compute_size : unsigned(31 downto 0) := (others => '0');
-        signal compute_iteration : unsigned(31 downto 0) := (others => '0');
+        signal acc_en       : std_logic := '0';
         signal force_acc_clear : std_logic := '0';
 
     -- BRAMs      LS Interface signals 
@@ -184,24 +207,6 @@ architecture Behavioral of btpu is
                 doutb : OUT STD_LOGIC_VECTOR(1023 DOWNTO 0)
             );
         END COMPONENT;
-        
---        component BTPU_MAC is
---            generic (
---                X : integer := 32;
---                ACC_SIZE : integer := 16;
---                SIMULATION : boolean := false
---            );
---            port ( 
---                acc_clk : in STD_LOGIC;
---                acc_resn : in STD_LOGIC;
---                a : in STD_LOGIC_VECTOR (X - 1 downto 0);
---                b : in STD_LOGIC_VECTOR (X - 1 downto 0);
---                size : in STD_LOGIC_VECTOR (ACC_SIZE - 1 downto 0);
---                res_sign : out STD_LOGIC;
---                res : out STD_LOGIC_VECTOR (clog2(X) - 1 downto 0);
---                acc : out STD_LOGIC_VECTOR (ACC_SIZE - 1 downto 0)
---            );
---        end component;
 begin
 
     -- Instantiation of the   W   BRAM
@@ -271,91 +276,51 @@ begin
             bit_pop : for bit in 0 to GRID_SIZE - 1 generate
                 constant bit_from_word : integer := bit * 32 + col;
             begin 
-                weights_matrix(col)(bit) <= weigth_word(bit_from_word);
+                weights_matrix((GRID_SIZE - 1) - col)((GRID_SIZE - 1) - bit) <= weigth_word(bit_from_word);
             end generate ; -- bit_pop
         end generate ; -- mac_weigths_pop
 
+    --------------- Result Matrix Pop ----------------
+        mac_result_m_pop : for i in 0 to GRID_SIZE - 1 generate
+            constant word_to_bit    : integer := i * 32;
+            constant word_from_bit  : integer := word_to_bit + 31;
+        begin 
+            result_matrix(i) <= result_word(word_from_bit downto word_to_bit);
+        end generate ; -- mac_result_m_pop
+
+    --------------- Sign Rows Pop ----------------
+        mac_sign_m_pop : for i in 0 to (MAC_INST_N / GRID_SIZE) - 1 generate
+            constant word_to_bit    : integer := i * 32;
+            constant word_from_bit  : integer := word_to_bit + 31;
+        begin 
+            sign_row(i) <= mac_sign_out(word_from_bit downto word_to_bit);
+        end generate ; -- mac_result_m_pop
+
     --------------- MAC Instantiation ---------------
         mac_inst_gen : for inst in 0 to MAC_INST_N - 1 generate
-            behav_gen : if SIMULATION = false generate
-                mac_inst : entity work.btpu_mac
-                    generic map (
-                        X => GRID_SIZE,
-                        ACC_SIZE => ACC_SIZE
-                    )
-                    port map (
-                        acc_clk  => clk,
-                        acc_resn => acc_clear,
-                        a        => mac_a_in(inst),
-                        b        => mac_b_in(inst),
-                        size     => mac_size_in,
-                        res_sign => mac_sign_out(inst), 
-                        res      => mac_res_out(inst),
-                        acc      => mac_acc_out(inst)
-                    );
-             end generate; -- behav_gen
---            else generate
-             sim_gen : if SIMULATION = true generate
-                mac_inst_sim : entity work.btpu_mac_sim
-                    generic map (
-                        X => GRID_SIZE,
-                        ACC_SIZE => ACC_SIZE
-                    )
-                    port map (
-                        acc_clk  => clk,
-                        acc_resn => acc_clear,
-                        a        => mac_a_in(inst),
-                        b        => mac_b_in(inst),
-                        size     => mac_size_in,
-                        res_sign => mac_sign_out(inst), 
-                        res      => mac_res_out(inst),
-                        acc      => mac_acc_out(inst)
-                    );
-            end generate; -- sim_gen
+            mac_inst : entity work.btpu_mac
+                generic map (
+                    X => GRID_SIZE,
+                    ACC_SIZE => ACC_SIZE,
+                    TILES_N => TILES_N,
 
+                    SIMULATION => SIMULATION
+                )
+                port map (
+                    acc_clk  => clk,
+                    acc_res  => res,
+                    acc_resn => acc_clear,
+                    en       => acc_en,
+                    a        => mac_a_in(inst),
+                    b        => mac_b_in(inst),
+                    tile_n   => tile_number,
+                    size     => mac_size_in,
+                    res_sign => mac_sign_out(inst), 
+                    res      => mac_res_out(inst),
+                    acc      => mac_acc_out(inst)
+                );
         end generate ; -- mac_inst_gen
     --------------- Tile Selection ------------------
-        -- tile_selection : process( activations_matrix, weights_matrix, tile_number) is
-        --     variable inst_number : integer;
-        --     variable tile_row : integer;
-        --     variable tile_col : integer;
-        -- begin
-        --     tile_selector : for inst in 0 to MAC_INST_N - 1 loop
-        --         inst_number := inst + to_integer(tile_number) * MAC_INST_N;
-        --         tile_row := inst_number / GRID_SIZE;
-        --         tile_col := inst_number mod GRID_SIZE;
-        --         mac_a_in(inst) <= activations_matrix(tile_row);
-        --         mac_b_in(inst) <= weights_matrix(tile_col);
-        --     end loop ; -- tile_select
-        -- end process ; -- tile_selection
-
-        -- inst_for : for inst in 0 to MAC_INST_N - 1 generate
-        --     tile_for : for tile in 0 to TILES_N - 1 generate
-        --         constant inst_number : integer := inst + tile * MAC_INST_N;
-        --         constant tile_row    : integer := inst_number / GRID_SIZE;
-        --         constant tile_col    : integer := inst_number mod GRID_SIZE;
-        --     begin
-        --         tile_check : if tile = to_integer(tile_number) generate
-        --             mac_a_in(inst) <= activations_matrix(tile_row);
-        --             mac_b_in(inst) <= weights_matrix(tile_col);
-        --         end generate;
-        --     end generate; -- tile_for
-        -- end generate; -- inst_for
-
-        -- inst_for : for inst in 0 to MAC_INST_N - 1 generate
-        --     multiplexer_inst : process( activations_matrix, weights_matrix, tile_number) is
-        --         variable inst_number : integer;
-        --         variable tile_row : integer;
-        --         variable tile_col : integer;
-        --     begin
-        --         inst_number := inst + to_integer(tile_number) * MAC_INST_N;
-        --         tile_row := inst_number / GRID_SIZE;
-        --         tile_col := inst_number mod GRID_SIZE;
-        --         mac_a_in(inst) <= activations_matrix(tile_row);
-        --         mac_b_in(inst) <= weights_matrix(tile_col);
-        --     end process ; -- multiplexer_inst
-        -- end generate; -- inst_for
-
         populate_inst_choises : for inst in 0 to MAC_INST_N - 1 generate
             tile_for : for tile in 0 to TILES_N - 1 generate
                 constant inst_number : integer := inst + tile * MAC_INST_N;
@@ -375,10 +340,8 @@ begin
         end generate; -- populate_inst_choises
 
         inst_for : for inst in 0 to MAC_INST_N - 1 generate
-            multiplexer_inst : process( mac_inst_activations_choises(inst), mac_inst_weights_choises(inst), tile_number) begin
-                mac_a_in(inst) <= mac_inst_activations_choises(inst)(to_integer(tile_number));
-                mac_b_in(inst) <= mac_inst_weights_choises(inst)(to_integer(tile_number));
-            end process ; -- multiplexer_inst
+            mac_a_in(inst) <= mac_inst_activations_choises(inst)(to_integer(tile_number));
+            mac_b_in(inst) <= mac_inst_weights_choises(inst)(to_integer(tile_number));
         end generate; -- inst_for
         
     --------------- Result Pop ----------------------
@@ -387,12 +350,8 @@ begin
                 constant inst_number : integer := inst + tile * MAC_INST_N;
                 constant tile_row    : integer := inst_number / GRID_SIZE;
                 constant tile_col    : integer := inst_number mod GRID_SIZE;
-                constant bit_n       : integer := tile_row * GRID_SIZE + tile_col;
+                constant bit_n       : integer := tile_row * GRID_SIZE + (31 - tile_col);
             begin
-                -- result_word(bit_n) <= mac_sign_out(inst) when unsigned(tile_number) = to_unsigned(tile, tile_number'length)
-                --                     else 
-                --                       result_word(bit_n);
-
                 result_bit_reg : process( clk, res )
                 begin
                     if rising_edge(clk) then
@@ -417,8 +376,13 @@ begin
         o_mem_select    <= control_reg(BTPU_REG_CONTROL)(BTPU_CREG_OMEM_SEL_BIT);
         bram_port_sel   <= control_reg(BTPU_REG_CONTROL)(BTPU_CREG_BRAM_PORT_SEL_BIT);
         acc_clear       <= (not control_reg(BTPU_REG_CONTROL)(BTPU_CREG_ACC_CLEAR_BIT)) and (not force_acc_clear);
-        multiple_acc    <= control_reg(BTPU_REG_CONTROL)(BTPU_CREG_MULTIPLE_ACCUM_BIT);
         mac_size_in     <= control_reg(BTPU_SIGN_CMP);
+        addr_w_base_reg  <= unsigned(control_reg(BTPU_W_ADDR)(clog2(MEM_B_SIZE) - 1 downto 0));
+        addr_i_base_reg  <= unsigned(control_reg(BTPU_I_ADDR)(clog2(MEM_B_SIZE) - 1 downto 0));
+        addr_o_base_reg  <= unsigned(control_reg(BTPU_O_ADDR)(clog2(MEM_B_SIZE) - 1 downto 0));
+        m_reg <= unsigned(control_reg(BTPU_M_SIZE)(clog2(MEM_B_SIZE) - 1 downto 0));    
+        n_reg <= unsigned(control_reg(BTPU_N_SIZE)(clog2(MEM_B_SIZE) - 1 downto 0));
+        k_reg <= unsigned(control_reg(BTPU_K_SIZE)(clog2(MEM_B_SIZE) - 1 downto 0));
 
         -- control_reg(BTPU_REG_CONTROL)(BTPU_CREG_BUSY_BIT) <= busy;
         -- control_reg(BTPU_STATUS) <= std_logic_vector(to_unsigned(BTPU_state_t'POS(state), 32));
@@ -451,6 +415,7 @@ begin
                         when BTPU_REG_CONTROL =>
                             creg_out <= control_reg(reg_addr);
                             creg_out(BTPU_CREG_BUSY_BIT) <= busy;
+                            creg_out(BTPU_CREG_ERROR_BIT) <= err;
                         when BTPU_STATUS =>
                             creg_out <= std_logic_vector(to_unsigned(BTPU_state_t'POS(state), 32));
                         when others =>
@@ -460,13 +425,19 @@ begin
                 if start = '1' then
                     control_reg(BTPU_REG_CONTROL)(BTPU_CREG_START_BIT) <= '0';
                 end if ;
-                control_reg(BTPU_REG_CONTROL)(BTPU_CREG_BUSY_BIT) <= busy;
+                
+                if control_reg(BTPU_REG_CONTROL)(BTPU_CREG_ACC_CLEAR_BIT) = '1' then
+                    control_reg(BTPU_REG_CONTROL)(BTPU_CREG_ACC_CLEAR_BIT) <= '0';
+                end if ;
+
+                control_reg(BTPU_REG_CONTROL)(BTPU_CREG_BUSY_BIT)  <= busy;
+                control_reg(BTPU_REG_CONTROL)(BTPU_CREG_ERROR_BIT) <= err;
                 control_reg(BTPU_STATUS) <= std_logic_vector(to_unsigned(BTPU_state_t'POS(state), 32));
             end if;
         end process;
     
     --------------- BRAM Port Selector --------------
-        bram_addra <= addra(14 downto 0)    when bram_port_sel = '0' else addrb(14 downto 0);
+        bram_addra <= addra(16 downto 2)    when bram_port_sel = '0' else addrb(16 downto 2);
         bram_dina  <= dina                  when bram_port_sel = '0' else dinb;
         bram_wea   <= wea(0 downto 0)       when bram_port_sel = '0' else web(0 downto 0);
 
@@ -509,7 +480,12 @@ begin
         activaction_word <= bram_IO0_doutb when o_mem_select = '1' else bram_IO1_doutb;
 
     --------------- State Machine -------------------
-        state_machine : process( hs_clk, res) begin
+        state_machine : process( hs_clk, res) is
+            variable i : unsigned(clog2(MEM_B_SIZE) - 1 downto 0) := (others => '0');
+            variable c : unsigned(clog2(MEM_B_SIZE) - 1 downto 0) := (others => '0');
+            variable r : unsigned(clog2(MEM_B_SIZE) - 1 downto 0) := (others => '0');
+            variable address_tmp : unsigned((clog2(MEM_B_SIZE) * 2) - 1 downto 0) := (others => '0');
+        begin
             if res = '0' then
                 state <= IDLE;
                 bram_w_enb   <= '0';
@@ -521,66 +497,119 @@ begin
                 bram_w_enb <= '0';
                 bram_i_en  <= '0';
                 bram_o_en  <= '0';
+                bram_o_we  <= '0';
                 bram_w_enb <= '0';
+                acc_en     <= '0';
                 case state is
                     when IDLE =>
                         busy <= '0';
                         if start = '1' then
+                            err <= '0';
                             busy <= '1';
                             bram_w_enb <= '1';
                             bram_i_en  <= '1';
-                            compute_size <= unsigned(control_reg(BTPU_SIZE)) - 1;
-                            compute_iteration <= (others => '0');
-                            acc_number   <= unsigned(control_reg(BTPU_ACCUM)) - 1;
-                            bram_w_addrb <= unsigned(control_reg(BTPU_W_ADDR)(clog2(MEM_B_SIZE) - 1 downto 0));
-                            bram_i_addr  <= unsigned(control_reg(BTPU_I_ADDR)(clog2(MEM_B_SIZE) - 1 downto 0));
-                            bram_o_addr  <= unsigned(control_reg(BTPU_O_ADDR)(clog2(MEM_B_SIZE) - 1 downto 0));
+                            r := (others => '0');
+                            c := (others => '0');
+                            i := (others => '0');
+                            is_batched   <= control_reg(BTPU_REG_CONTROL)(BTPU_CREG_BATCHED_MUL_BIT);
+                            addr_w_base  <= addr_w_base_reg;
+                            addr_i_base  <= addr_i_base_reg;
+                            addr_o_base  <= addr_o_base_reg;
+                            m <= m_reg;
+                            n <= n_reg;
+                            k <= k_reg;
                             state <= FETCHING;
+                            if addr_w_base_reg > mem_b_size_u -1 or addr_i_base_reg > mem_b_size_u -1 or addr_o_base_reg > mem_b_size_u -1 then
+                                err <= '1';
+                                busy <= '0';
+                                state <= IDLE;
+                            end if;
+                            if m * n > mem_b_size_u or n * k > mem_b_size_u or m * k > mem_b_size_u then
+                                err <= '1';
+                                busy <= '0';
+                                state <= IDLE;
+                            end if;
                         end if;
                     when FETCHING =>
                         busy <= '1';
-                        -- bram_w_enb <= '1';
-                        -- bram_i_en  <= '1';
                         bram_o_en  <= '0';
                         tile_number <= (others => '0');
+                        acc_en <= '1';
                         state <= EXECUTE;
                     when EXECUTE =>
                         busy <= '1';
+                        acc_en <= '1';
                         tile_number <= tile_number + 1;
                         if tile_number = tiles_n_u - 1 then
-                            bram_w_enb <= '1';
-                            bram_i_en  <= '1';
-                            tile_number <= (others => '0');
-                            bram_w_addrb <= bram_w_addrb + 1;
-                            bram_i_addr  <= bram_i_addr  + 1;
-                            compute_iteration <= compute_iteration + 1;
-                            state <= FETCHING;
-                            if compute_iteration = compute_size then
-                                bram_o_en  <= '1'; 
+                            if is_batched = '0' then
+                                bram_o_en  <= '1';
                                 bram_o_we  <= '1';
-                                state <= WRITE_BACK; 
+                                acc_en <= '0';
+                                state <= WRITE_BACK;
+                            elsif is_batched = '1' then
+                                if i < n - 1 then
+                                    i := i + 1;
+                                    bram_w_enb <= '1';
+                                    bram_i_en  <= '1';
+                                    acc_en <= '0';
+                                    state <= FETCHING;
+                                else 
+                                    bram_o_en  <= '1';
+                                    bram_o_we  <= '1';
+                                    acc_en <= '0';
+                                    state <= WRITE_BACK;
+                                end if;
+                            else 
+                                err <= '1';
+                                acc_en <= '0';
+                                state <= IDLE;
                             end if;
                         end if;
-                    when COUNTING =>
-                        state <= IDLE;
                     when WRITE_BACK =>
                         busy <= '1';
-                        bram_o_addr <= bram_o_addr + 1;
-                        if multiple_acc = '1' then
-                            acc_number <= acc_number - 1;
-                            compute_iteration <= (others => '0');
+                        if is_batched = '0' then
+                            state <= IDLE;
+                        elsif is_batched = '1' then
                             force_acc_clear <= '1';
                             state <= CLEAR_ACC;
-                        end if ;
-                        if acc_number = 0 or multiple_acc = '0' then
-                            busy <= '0';
+                            i := (others => '0');
+                            if c < k - 1 then
+                                c := c + 1;
+                                bram_w_enb <= '1';
+                                bram_i_en  <= '1';
+                            elsif r < m - 1 then
+                                r := r + 1;
+                                c := (others => '0');
+                                bram_w_enb <= '1';
+                                bram_i_en  <= '1';
+                            else 
+                                force_acc_clear <= '0';
+                                state <= IDLE;
+                            end if;
+                        else
+                            err <= '1';
                             state <= IDLE;
                         end if;
                     when CLEAR_ACC =>
                         busy <= '1';
+                        tile_number <= (others => '0');
                         force_acc_clear <= '0';
-                        state <= EXECUTE;                        
+                        acc_en <= '1';
+                        state <= EXECUTE;               
+                    when others =>
+                        state <= IDLE;
                 end case;
+                i_s <= i;
+                c_s <= c;
+                r_s <= r;
+                address_tmp := addr_w_base + i * k + c;
+                bram_w_addrb <= address_tmp(clog2(MEM_B_SIZE) - 1 downto 0);
+
+                address_tmp := addr_i_base + r * n + i;
+                bram_i_addr  <= address_tmp(clog2(MEM_B_SIZE) - 1 downto 0);
+
+                address_tmp := addr_o_base + r * k + c;
+                bram_o_addr  <= address_tmp(clog2(MEM_B_SIZE) - 1 downto 0);
             end if ;
         end process ; -- state_machine
 

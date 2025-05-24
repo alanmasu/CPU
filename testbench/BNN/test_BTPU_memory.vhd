@@ -50,6 +50,7 @@ architecture Behavioral of test_btpu_memory is
     type mac_input  is array (0 to MAC_INST_N - 1) of std_logic_vector(GRID_SIZE - 1 downto 0);
 
     signal activaction_word : std_logic_vector(W_DIM - 1 downto 0) := (others => '0');
+    signal weigth_word      : std_logic_vector(W_DIM - 1 downto 0) := (others => '0');
     signal result_word      : std_logic_vector(W_DIM - 1 downto 0) := (others => '0');
 
     signal mac_sign_out     : std_logic_vector(MAC_INST_N - 1 downto 0) := (others => '0');
@@ -67,6 +68,76 @@ architecture Behavioral of test_btpu_memory is
     signal mac_inst_weights_choises     : inst_input_t;
     
     signal comp : std_logic := '0';
+
+    constant frag : matrix_t := (
+        0 => x"00000000",
+        1 => x"00000001",
+        2 => x"00000002",
+        3 => x"00000003",
+        4 => x"00000004",
+        5 => x"00000005",
+        6 => x"00000006",
+        7 => x"00000007",
+        8 => x"00000008",
+        9 => x"00000009",
+        10 => x"0000000a",
+        11 => x"0000000b",
+        12 => x"0000000c",
+        13 => x"0000000d",
+        14 => x"0000000e",
+        15 => x"0000000f",
+        16 => x"00000010",
+        17 => x"00000011",
+        18 => x"00000012",
+        19 => x"00000013",
+        20 => x"00000014",
+        21 => x"00000015",
+        22 => x"00000016",
+        23 => x"00000017",
+        24 => x"00000018",
+        25 => x"00000019",
+        26 => x"0000001a",
+        27 => x"0000001b",
+        28 => x"0000001c",
+        29 => x"0000001d",
+        30 => x"0000001e",
+        31 => x"0000001f"
+    );
+
+    constant frag_transposed : matrix_t := (
+        0 => x"00000000",
+        1 => x"00000000",
+        2 => x"00000000",
+        3 => x"00000000",
+        4 => x"00000000",
+        5 => x"00000000",
+        6 => x"00000000",
+        7 => x"00000000",
+        8 => x"00000000",
+        9 => x"00000000",
+        10 => x"00000000",
+        11 => x"00000000",
+        12 => x"00000000",
+        13 => x"00000000",
+        14 => x"00000000",
+        15 => x"00000000",
+        16 => x"00000000",
+        17 => x"00000000",
+        18 => x"00000000",
+        19 => x"00000000",
+        20 => x"00000000",
+        21 => x"00000000",
+        22 => x"00000000",
+        23 => x"00000000",
+        24 => x"00000000",
+        25 => x"00000000",
+        26 => x"00000000",
+        27 => x"0000ffff",
+        28 => x"00ff00ff",
+        29 => x"0f0f0f0f",
+        30 => x"33333333",
+        31 => x"55555555"
+    );
 
     --------------------------------------------------------------------------
     signal clk : std_logic := '0';
@@ -122,6 +193,7 @@ architecture Behavioral of test_btpu_memory is
     signal mac_out      : std_logic_vector(clog2(GRID_SIZE) - 1 downto 0) := (others => '0');
     signal mac_acc      : std_logic_vector(ACC_SIZE - 1 downto 0) := (others => '0');
     signal mac_clear    : std_logic := '0';
+    signal mac_en       : std_logic := '1';
 
     function popcount_compute (input : std_logic_vector(GRID_SIZE - 1 downto 0)) return std_logic_vector is
         variable result : unsigned(clog2(GRID_SIZE) - 1 downto 0) := (others => '0');
@@ -166,13 +238,16 @@ begin
     dut2 : entity work.btpu_mac
         generic map (
             X => GRID_SIZE,
+            TILES_N => TILES_N,
             ACC_SIZE => ACC_SIZE
         )
         PORT MAP (
             acc_clk => clk,
             acc_resn => mac_clear,
+            en => mac_en,
             a => mac_a,
             b => mac_b,
+            tile_n => tile_number,
             size => mac_sign_cmp,
             res_sign => mac_sign,
             res => mac_out,
@@ -204,13 +279,14 @@ begin
         end generate ; -- mac_activation_pop
 
     --------------- Weights Pop ---------------------
-        --    mac_weigths_pop : for col in 0 to GRID_SIZE - 1 generate
-        --        bit_pop : for bit in 0 to GRID_SIZE - 1 generate
-        --            constant bit_from_word : integer := bit * 32 + col;
-        --        begin 
-        --            weights_matrix(col)(bit) <= weigth_word(bit_from_word);
-        --        end generate ; -- bit_pop
-        --    end generate ; -- mac_weigths_pop
+        weigth_word <= doutb;
+        mac_weigths_pop : for col in 0 to GRID_SIZE - 1 generate
+            bit_pop : for bit in 0 to GRID_SIZE - 1 generate
+                constant bit_from_word : integer := bit * 32 + col;
+            begin 
+                weights_matrix(31 - col)(31 - bit) <= weigth_word(bit_from_word);
+            end generate ; -- bit_pop
+        end generate ; -- mac_weigths_pop
 
     --------------- Tile Selection ------------------
         populate_inst_choises : for inst in 0 to MAC_INST_N - 1 generate
@@ -426,6 +502,7 @@ begin
         test_n <= 6;
         result <= '1';
         mac_clear <= '0';
+        tile_number <= to_unsigned(0, clog2(TILES_N));
         wait until rising_edge(clk);
         wait for 1 ns;
         mac_clear <= '1';
@@ -500,6 +577,104 @@ begin
         wait for 1 ns;
         validating <= '0';
 
+        test_n <= 10;
+        result <= '1';
+        mac_a <= (5 => '1', 4 => '1', 3 => '0', 2 => '0', 1 => '0', 0 => '0', others => '0'); -- 2 uni
+        mac_b <= (others => '1'); -- 32 uni in xnor con 2 uni => popcount = 2;
+        tile_number <= to_unsigned(1, clog2(TILES_N));
+        wait until rising_edge(clk);
+        wait for 1 ns;
+        validating <= '1';
+        if mac_out /= popcount_compute(mac_a xnor mac_b) then
+            report "Test #" & integer'image(test_n) & "a FAILED => mac_out was: " & integer'image(to_integer(unsigned(mac_out))) & " expected: " & integer'image(to_integer(unsigned(popcount_compute(mac_a xnor mac_b))));
+        else 
+            report "Test #" & integer'image(test_n) & "a OK";
+        end if;
+        if mac_acc /= popcount_compute_acc(mac_a xnor mac_b) then
+            result <= '0';
+            report "Test #" & integer'image(test_n) & "b FAILED => mac_acc was: " & integer'image(to_integer(unsigned(mac_acc))) & " expected: " & integer'image(to_integer(unsigned(popcount_compute(mac_a xnor mac_b))));
+        else 
+            report "Test #" & integer'image(test_n) & "b OK";
+        end if;
+        wait for 1 ns;
+        validating <= '0';
+
+        test_n <= 11;
+        mac_en <= '0';
+        result <= '1';
+        tile_number <= to_unsigned(0, clog2(TILES_N));
+        wait until rising_edge(clk);
+        wait for 1 ns;
+        validating <= '1';
+        if mac_out /= popcount_compute(mac_a xnor mac_b) then
+            report "Test #" & integer'image(test_n) & "a FAILED => mac_out was: " & integer'image(to_integer(unsigned(mac_out))) & " expected: 2";
+        else 
+            report "Test #" & integer'image(test_n) & "a OK";
+        end if;
+        if mac_acc /= std_logic_vector(to_unsigned(7, ACC_SIZE)) then
+            result <= '0';
+            report "Test #" & integer'image(test_n) & "b FAILED => mac_acc was: " & integer'image(to_integer(unsigned(mac_acc))) & " expected: 7";
+        else 
+            report "Test #" & integer'image(test_n) & "b OK";
+        end if;
+        wait for 1 ns;
+        validating <= '0';
+
+        test_n <= 12;
+        result <= '1';
+        mac_en <= '1';
+        wait until rising_edge(clk);
+        wait for 1 ns;
+        validating <= '1';
+        if mac_out /= popcount_compute(mac_a xnor mac_b) then
+            report "Test #" & integer'image(test_n) & "a FAILED => mac_out was: " & integer'image(to_integer(unsigned(mac_out))) & " expected: 2";
+        else 
+            report "Test #" & integer'image(test_n) & "a OK";
+        end if;
+        if mac_acc /= std_logic_vector(to_unsigned(9, ACC_SIZE)) then
+            result <= '0';
+            report "Test #" & integer'image(test_n) & "b FAILED => mac_acc was: " & integer'image(to_integer(unsigned(mac_acc))) & " expected: 9";
+        else 
+            report "Test #" & integer'image(test_n) & "b OK";
+        end if;
+        wait for 1 ns;
+        mac_en <= '0';
+        validating <= '0';
+
+        ------ Checking Weights Pop ------
+        test_n <= 13;
+        result <= '1';
+        ena <= '1';
+        wea <= "1";
+        for i in 0 to 31 loop
+            addra <= std_logic_vector(to_unsigned(i, 32));
+            dina <= frag(i);
+            wait until rising_edge(clk);
+            wait for 1 ns;
+        end loop ; --
+        ena <= '0';
+        wea <= "0";
+
+        -- Enable Port B
+        enb <= '1';
+        web <= "0";
+        addrb <= std_logic_vector(to_unsigned(0, 32));      
+        wait until rising_edge(clk);
+        wait for 1 ns;
+        validating <= '1';
+        for i in 0 to 31 loop
+            if ( weights_matrix(i) /= frag_transposed(i)) then
+                result <= '0';
+                report "Test #" & integer'image(test_n) & " FAILED => weights_matrix(" & integer'image(i) & ") was: " & integer'image(to_integer(unsigned(weights_matrix(i)))) & " expected: " & integer'image(to_integer(unsigned(frag_transposed(i))));
+            end if;
+        end loop ; --
+        wait for 1 ns;
+        validating <= '0';
+        if result = '1' then
+            report "Test #" & integer'image(test_n) & " OK";
+        end if;
+
+        
 
 
 

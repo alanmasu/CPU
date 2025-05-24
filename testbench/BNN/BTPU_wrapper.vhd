@@ -17,7 +17,7 @@ entity btpu_wrapper is
         hs_clk : in STD_LOGIC;
 
         -- BRAM Port A
-        ena     : in en_bus_t;
+        ena     : in STD_LOGIC_VECTOR(3 downto 0);
         wea     : in STD_LOGIC_VECTOR(3 downto 0);
         addra   : in STD_LOGIC_VECTOR(31 downto 0);
         dina    : in STD_LOGIC_VECTOR(31 downto 0);
@@ -32,12 +32,14 @@ entity btpu_wrapper is
     );
 end btpu_wrapper;
 
-architecture Behavioral of btpu_wrapper is begin
+architecture Behavioral of btpu_wrapper is 
+    signal ena_int : en_bus_t := (others => '0');
+begin
 
     -- BTPU instantiation
     btpu_inst : entity work.btpu
     generic map (
-        SIMULATION => true,
+        SIMULATION => false,
         DEBUG => false
     )
     port map (
@@ -46,7 +48,7 @@ architecture Behavioral of btpu_wrapper is begin
 
         hs_clk => hs_clk,
 
-        ena => ena,
+        ena => ena_int,
         wea => wea,
         addra => addra,
         dina => dina,
@@ -58,4 +60,10 @@ architecture Behavioral of btpu_wrapper is begin
         dinb => dinb,
         doutb => doutb
     );
+    
+    ena_int.en_BTPU_CREG <= ena(0);
+    ena_int.en_BTPU_W_MEM <= ena(1);
+    ena_int.en_BTPU_IO0_MEM <= ena(2);
+    ena_int.en_BTPU_IO1_MEM <= ena(3);
+    
 end Behavioral;
