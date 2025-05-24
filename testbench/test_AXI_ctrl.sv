@@ -1931,11 +1931,11 @@ module test_AXI_ctrl( );
         we_in = 1'b1;
         mem_opcode = 3'b010; //SW
         alu_resoult = 32'h40020030 + 3*4; //BTPU I/O 1 ADDR Reg
-        rs2_value = 32'd5; //BTPU I/O 1 BRAM base
+        rs2_value = (N * K); //BTPU I/O 1 BRAM base
         @ (posedge clock);
         #1;
         validating = 1'b1;
-        if (btpu_creg_tb[3] == 32'd5) begin
+        if (btpu_creg_tb[3] == (N * K)) begin
             $display("Test #%0d: OK", testN);
         end else begin
             $display("Test #%0d: FAILED -> btpu_creg_tb[3] was %0x", testN, btpu_creg_tb[3]);
@@ -2096,7 +2096,7 @@ module test_AXI_ctrl( );
         mem_opcode = 3'b010; //LW
         for (int i = 0; i < $size(resultB_Matrix); ++i) begin
             // alu_resoult += 4;
-            alu_resoult = 32'h400C0000 + (5 * 32 * 4) + i * 4;
+            alu_resoult = 32'h400C0000 + ((N * K) * 32 * 4) + i * 4;
             @ (posedge clock);
             #1;
             validating = 1'b1;
@@ -2113,7 +2113,104 @@ module test_AXI_ctrl( );
         if(testResult) begin
             $display("Test #%0d: OK", testN);
         end
-        
+
+        testN = 11;
+        op_class = 5'b01000; //Store
+        en_in = 1'b1;
+        we_in = 1'b1;
+        mem_opcode = 3'b010; //SW
+        alu_resoult = 32'h40020030 + 0*4; //BTPU CS Reg
+        rs2_value = 32'b0;
+        rs2_value[0] = 1'b1; //Start
+        rs2_value[2] = 1'b0; //Select the BTPU I/O 0 as the output
+        rs2_value[4] = 1'b1; //Clear ACC
+        rs2_value[5] = 1'b1; //Enable batched Mat Mul
+        @ (posedge clock);
+        #1;
+        validating = 1'b1;
+        if (btpu_creg_tb[0][5:0] == 6'b110001) begin
+            $display("Test #%0d: OK", testN);
+        end else begin
+            $display("Test #%0d: FAILED -> btpu_creg_tb[0] was %0x", testN, btpu_creg_tb[0][5:0]);
+        end
+        #1;
+        validating = 1'b0;
+        en_in = 1'b0;
+        @ (posedge clock);   //Wait until BTPU start the computation
+        #1;
+        validating = 1'b1;
+        #1;
+        validating = 1'b0;
+
+        testN = 12;
+        for(int r_test = 0; r_test < M; ++r_test) begin
+            // $display("    Waiting for r_tb == %0d", r_test);
+            wait (r_tb == r_test);
+            for(int c_test = 0; c_test < K; ++c_test) begin
+                // $display("    Waiting for c_tb == %0d", c_test);
+                wait (c_tb == c_test && i_tb == N - 1);
+                for(int tile = 0; tile < 4; ++tile) begin
+                    // $display("    Waiting for tile_number_tb == %0d", tile);
+                    // wait (tile_number_tb == tile);
+                    @(tile_number_tb);
+                    #1;
+                    blockRow_offset = r_test * 32 * (K * 32);   // br * Dim del blocco * dim della riga
+                    blockCol_offset = c_test * 32;              // bc * Dim del blocco
+                    validating = 1'b1;
+                    for(int mac_n = 0; mac_n < 256; ++mac_n) begin
+                        elementInsideBlock = tile * 256 + mac_n;
+                        row = elementInsideBlock / 32; // elemento / Dim del blocco
+                        col = elementInsideBlock % 32; // elemento % Dim del blocco
+                        element = blockRow_offset + blockCol_offset + row * (32 * K) + col; // (blocco) + riga del blocco * dimensione della riga + colonna del blocco
+                        if (acc_tb[mac_n] != result_1_Matrix[element]) begin
+                            $display("Test #%0d FAILED -> mac:[%0d] tile:[%0d] | block: [%0d][%0d] | element:[%0d]: acc_tb was 0x%08x expected 0x%08x", testN, mac_n, tile, r_test, c_test, element, acc_tb[mac_n], result_1_Matrix[element]);
+                            // $display("Test #%0d block:[%0d][%0d] | element:[%0d][%0d]: FAILED -> acc_tb was %0x expected %0x", testN, r_test, c_test, row, col, acc_tb[mac_n], result_Matrix[element]);
+                            testResult = 1'b0;
+                            break;
+                        end
+                    end
+                    #1;
+                    validating = 1'b0;
+                    if (testResult == 1'b0) begin
+                        testResult = 1'b1;
+                        // break;
+                    end
+                end
+            end
+            if (testResult == 1'b0) begin
+                // break;
+            end
+        end
+        if(testResult == 1'b1) begin
+            $display("Test #%0d: OK", testN);
+        end
+
+        wait (btpu_busy_tb == 1'b0);
+
+        testN = 13;
+        op_class = 5'b00100; //Load
+        en_in = 1'b1;
+        we_in = 1'b0;
+        mem_opcode = 3'b010; //LW
+        for (int i = 0; i < $size(resultB_Matrix); ++i) begin
+            // alu_resoult += 4;
+            alu_resoult = 32'h400A0000 + ((N * K) * 32 * 4) + i * 4;
+            @ (posedge clock);
+            #1;
+            validating = 1'b1;
+            if(btpu_douta != resultB_1_Matrix[i]) begin
+                $display("Test #%0d: FAILED -> btpu_douta @ i = %0d (addra = 0x%08x) was %08x, expected %08x", testN, i, alu_resoult, btpu_douta, resultB_1_Matrix[i]);
+                testResult = 1'b0;
+                validating = 1'b0;
+                // break;
+            end
+            #1;
+            validating = 1'b0;
+            #1;
+        end
+        if(testResult) begin
+            $display("Test #%0d: OK", testN);
+        end
         
 
 
