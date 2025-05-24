@@ -11,7 +11,7 @@
 
 main:
     nop
-    li a0, 0x40000020
+    li a0, 0x400000f0
     sw a0, 0(a0)
     lw a1, 0(a0)
     sw a1, 0(sp)
