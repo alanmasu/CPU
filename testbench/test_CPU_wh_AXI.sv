@@ -521,7 +521,7 @@ logic [31:0] testAxiProgram [] = '{
   assign instruction_tb = DUT.test_design_i.CPU_0.U0.instr_fetch.instruction;
   
   // CPU State
-  logic [2:0] state_tb;
+  state_type state_tb;
   assign state_tb = DUT.test_design_i.CPU_0.U0.state_dbg_sig;
 
   wire run_tb;
