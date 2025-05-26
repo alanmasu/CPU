@@ -21,6 +21,9 @@ module test_CPU_wh_AXI();
   xil_axi_uint                            slave_moniter_transaction_queue_size =0;  
   xil_axi_uint                            slv_agent_verbosity = 0;  
   test_design_axi_vip_1_0_slv_mem_t       slv_agent_0;
+  bit [31:0]                              data_readed;
+  bit [31:0]                              data_to_write;
+  bit [3:0]                               strobe_to_write = 4'hF; //All strobes are set to 1
 
   bit                                     clock = 1;
   bit                                     clock100MHz = 1;
@@ -83,7 +86,7 @@ module test_CPU_wh_AXI();
     .btn_center_0 (BTNs[4]),
     .switches_0   (switches),
     .leds_0(LEDs),
-    .state_dbg_0(state_dbg),
+    // .state_dbg_0(state_dbg),
     .oled_select0_0(oled_select0),
     .SDA_0(SDA),
     .SCL_0(SCL)
@@ -224,7 +227,7 @@ logic [31:0] testI2C [] = '{
 logic [31:0] testAxiProgram [] = '{
     32'h00000013,
     32'h40000537,
-    32'h02050513,
+    32'h0f050513,
     32'h00a52023,
     32'h00052583,
     32'h00b12023,
@@ -437,6 +440,23 @@ logic [31:0] testAxiProgram [] = '{
     $finish;
   end
 
+  task backdoor_mem_write(
+      input xil_axi_ulong     addr, 
+      input bit [32-1:0]      wr_data,
+      input bit [(32/8)-1:0]  wr_strb ={(32/8){4'b1111}}
+    );
+    slv_agent_0.mem_model.backdoor_memory_write(addr, wr_data, wr_strb);
+
+  endtask
+
+  task backdoor_mem_read(
+      input xil_axi_ulong mem_rd_addr,
+      output bit [32-1:0] mem_rd_data
+    );
+    mem_rd_data= slv_agent_0.mem_model.backdoor_memory_read(mem_rd_addr);
+
+  endtask
+
   //Load program
   task automatic LOAD_PROGRAM (input logic [31:0] programma[], input [31:0] BASE_ADDR);
         integer i;
@@ -501,8 +521,9 @@ logic [31:0] testAxiProgram [] = '{
   assign instruction_tb = DUT.test_design_i.CPU_0.U0.instr_fetch.instruction;
   
   // CPU State
-  state_type state_tb;
-  assign state_tb = DUT.test_design_i.CPU_0.U0.state;
+  logic [2:0] state_tb;
+  assign state_tb = DUT.test_design_i.CPU_0.U0.state_dbg_sig;
+
   wire run_tb;
   assign run_tb = DUT.test_design_i.CPU_0.U0.run;
   wire res_tb;
@@ -525,6 +546,9 @@ logic [31:0] testAxiProgram [] = '{
   //OLED
   wire [31:0] display_in_tb;
   assign display_in_tb = DUT.test_design_i.CPU_0.U0.display_in;
+
+  wire stall_tb;
+  assign stall_tb = DUT.test_design_i.CPU_0.U0.axi_stall;
 
 
   task automatic writeCREG(input logic [31:0] data);
@@ -571,12 +595,15 @@ logic [31:0] testAxiProgram [] = '{
       mtestQOS = 0; 
 
       //Imposto la CPU in RUN and NON in RESET
+      run <= 1'b0; 
       writeCREG(32'b11);
+      run <= 1'b1; //Set RUN to 1 to start the CPU
 
       //Istruzione no. 1 
       test_n = 1;
 
       wait (state_tb == fetch);
+      @(state_tb);
       wait (state_tb == fetch); //wait until the CPU has executed the first instruction
       #1;                       //wait to be after the rising edge of the clock
       
@@ -763,17 +790,41 @@ logic [31:0] testAxiProgram [] = '{
 
 
       test_n = 10;
-      wait (state_tb == fetch); //wait until the CPU has executed the next instruction
+      // wait (state_tb == fetch); //wait until the CPU has executed the next instruction
+      wait (stall_tb == 1);
+      wait (stall_tb == 0);
       #1;                       //wait to be after the rising edge of the clock
       validating = 1'b1;
       // Check instruction       SW x0, 0(x6) //Stop the CPU by setting RUN to 0
-      addToLog(test_n, 1, $sformatf("SKIPPED -> You need to check it: if a WRITE AXI transaction is done at %0t on CPU_0.M_AXI interface at Address: 0x%x and value: 2 -> TEST OK", $time, regFile[5]), 0);
+      @(posedge clock);
+      #1; //wait to be after the rising edge of the clock
+      validating = 1'b1;
+      if(run_tb == 0) begin
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = "FAILED -> CPU is still running";
+      end
+      addToLog(test_n, testPassed, message, regFile[6], "#10a");
+      #1;
+      validating = 1'b0;
+      #1;
+
+      run <= 1'b0; //Set RUN to 0 to stop the CPU
+      writeCREG(32'b11); //Set RUN to 1 to continue the CPU
+      run <= 1'b1; //Set RUN to 1 to start the CPU again
+
+
+      // addToLog(test_n, 1, $sformatf("SKIPPED -> You need to check it: if a WRITE AXI transaction is done at %0t on CPU_0.M_AXI interface at Address: 0x%x and value: 2 -> TEST OK", $time, regFile[5]), 0);
       #1;
       validating = 1'b0;
       @(posedge clock);
       #1;
 
       test_n = 11;
+      wait (state_tb == fetch); //wait until the CPU fetched the next instruction
+      @(state_tb);
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
       #1;                       //wait to be after the rising edge of the clock
       validating = 1'b1;
@@ -1073,16 +1124,16 @@ logic [31:0] testAxiProgram [] = '{
       addToLog(test_n, testPassed, message, control_reg_tb[2], $sformatf("#%0da", test_n));
 
       //Check state_dbg == fetch (aka stato ATTUALE)
-      if(state_dbg == fetch) begin // State 
+      if(state_tb == fetch) begin // State 
         testPassed = 1;
         message = "OK";
       end else begin
         testPassed = 0;
-        message = "FAILED -> state_dbg was";
+        message = "FAILED -> state_tb was";
       end
-      addToLog(test_n, testPassed, message, state_dbg, $sformatf("#%0db", test_n));
+      addToLog(test_n, testPassed, message, state_tb, $sformatf("#%0db", test_n));
 
-      if(control_reg_tb[3] == 32'hff000093) begin 
+      if(control_reg_tb[3] == 32'h40000000) begin 
         testPassed = 1;
         message = "OK";
       end else begin
@@ -1113,6 +1164,7 @@ logic [31:0] testAxiProgram [] = '{
 
       //Writing to PS-PL GPIO registers
       test_n = 29;
+      run = 0; //Set RUN to 0 to stop the CPU
       mtestADDR = 32'h40004010;
       mst_agent_0.AXI4LITE_READ_BURST( 
         mtestADDR, 
@@ -1128,7 +1180,7 @@ logic [31:0] testAxiProgram [] = '{
         testPassed = 0;
         message = "FAILED -> mtestRDataL was";
       end
-      addToLog(test_n, testPassed, message, mtestRDataL[31:6], $sformatf("#%0da", test_n));
+      addToLog(test_n, testPassed, message, mtestRDataL, $sformatf("#%0da", test_n));
       
       if(control_reg_tb[4] == 32'h00000011) begin 
         testPassed = 1;
@@ -1178,7 +1230,7 @@ logic [31:0] testAxiProgram [] = '{
       oled_select0 = 1;
       #1;
       validating = 1'b1;
-      if(display_in_tb == 32'h00120a63) begin 
+      if(display_in_tb == 32'h40000000) begin 
         testPassed = 1;
         message = "OK";
       end else begin
@@ -1198,9 +1250,12 @@ logic [31:0] testAxiProgram [] = '{
     
     begin
       $display("Testing ANDI instruction");
+      run = 1'b0; //Set RUN to 0 to stop the CPU
       writeCREG(32'b11); //Set CPU in RUN 
+      run = 1'b1; //Set RUN to 1 to start the CPU
 
       wait (state_tb == fetch);
+      @(state_tb);
       wait (state_tb == fetch);
       #1;
       test_n = 1;
@@ -1576,13 +1631,15 @@ logic [31:0] testAxiProgram [] = '{
     begin
       test_n = 0;
       $display("Testing AXI Store after Load");
+      run = 1'b0; //Set RUN to 0 to stop the CPU
       writeCREG(32'b11); //Set CPU in RUN 
+      run = 1'b1; //Set RUN to 1 to start the CPU
       
       test_n = 1;
-      wait (state_tb == fetch); //wait until the CPU has executed the next instruction
-      wait (state_tb == fetch); //wait until the CPU has executed the next instruction
-      @(instruction_tb);
       @(instruction_tb);        //wait nop instruction
+      @(instruction_tb);        //wait nop instruction
+      @(instruction_tb);        //wait until the CPU has executed the next instruction
+      wait (state_tb == fetch); 
       #1;
       validating = 1'b1;
       //Check instruction   lui     a0, 0x40000
@@ -1596,14 +1653,14 @@ logic [31:0] testAxiProgram [] = '{
       addToLog(test_n, testPassed, message, regFile[9]);
       #1;
       validating = 1'b0;      
-      @(instruction_tb);
 
       test_n = 2;
+      @(instruction_tb);
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
       #1;
       validating = 1'b1;
-      //Check instruction   addi   a0, a0, 0x20
-      if (regFile[9] == 32'h40000020) begin
+      //Check instruction   addi   a0, a0, 0xf0
+      if (regFile[9] == 32'h400000f0) begin
         testPassed = 1;
         message = "OK";
       end else begin
@@ -1613,19 +1670,20 @@ logic [31:0] testAxiProgram [] = '{
       addToLog(test_n, testPassed, message, regFile[9]);
       #1;
       validating = 1'b0;
-      @(instruction_tb);
 
-      //SKIP instruction   lw    a0, 0(a0)
-      wait (state_tb == fetch); //wait until the CPU has executed the next instruction
+      test_n = 0;
       @(instruction_tb);
+      //SKIP instruction   sw    a0, 0(a0)
+      wait (state_tb == fetch); //wait until the CPU has executed the next instruction
       #1;
 
       test_n = 3;
+      @(instruction_tb);
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
       #1;
       validating = 1'b1;
       //Check instruction   lw    a1, 0(a0)
-      if (regFile[10] == 32'h40000020) begin
+      if (regFile[10] == 32'h400000f0) begin
         testPassed = 1;
         message = "OK";
       end else begin
@@ -1638,13 +1696,14 @@ logic [31:0] testAxiProgram [] = '{
       @(instruction_tb);
 
       //SKIP instruction   sw   a1, 0(sp)
+      test_n = 0;
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
       #1;
 
-      @(instruction_tb);
 
       ///////// UART test /////////
       test_n = 4;
+      @(instruction_tb);
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
       #1;
       validating = 1'b1;
@@ -1659,9 +1718,9 @@ logic [31:0] testAxiProgram [] = '{
       addToLog(test_n, testPassed, message, regFile[5]);
       #1;
       validating = 1'b0;
-      @(instruction_tb);
 
       test_n = 5;
+      @(instruction_tb);
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
       #1;
       validating = 1'b1;
@@ -1683,12 +1742,20 @@ logic [31:0] testAxiProgram [] = '{
       #1;
       validating = 1'b1;
       //Check instruction   sw    t1, 0(t1)
-      addToLog(test_n, 1, $sformatf("SKIPPED -> You need to check it: if a WRITE AXI transaction is done at %0t on CPU_0.M_AXI interface at Address: 0x%x and value: 2 -> TEST OK", $time, regFile[5]), 0);
+      backdoor_mem_read(32'hE000102C, data_readed);
+      if (data_readed == 32'hE000102C) begin
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = "FAILED -> Memory[0xE000102C] was";
+      end
+      addToLog(test_n, testPassed, message, data_readed);
       #1;
       validating = 1'b0;
-      @(instruction_tb);
 
       test_n = 7;
+      @(instruction_tb);
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
       #1;
       validating = 1'b1;
@@ -1703,10 +1770,10 @@ logic [31:0] testAxiProgram [] = '{
       addToLog(test_n, testPassed, message, regFile[8]);
       #1;
       validating = 1'b0;
-      @(instruction_tb);
 
 
       test_n = 8;
+      @(instruction_tb);
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
       #1;
       validating = 1'b1;
@@ -1721,9 +1788,9 @@ logic [31:0] testAxiProgram [] = '{
       addToLog(test_n, testPassed, message, regFile[28]);
       #1;
       validating = 1'b0;
-      @(instruction_tb);
 
       test_n = 9;
+      @(instruction_tb);
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
       #1;
       validating = 1'b1;
@@ -1740,13 +1807,52 @@ logic [31:0] testAxiProgram [] = '{
       validating = 1'b0;
       // @(instruction_tb);
 
+      test_n = 6;
+      data_readed = 0;
+      backdoor_mem_read(32'hE000102C, data_readed);
+      validating = 1'b1;
+      if (data_readed == 32'hE000102C) begin
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = "FAILED -> Memory[0xE000102C] was";
+      end
+      addToLog(test_n, testPassed, message, data_readed, $sformatf("#%0db", test_n));
+      #1;
+      validating = 1'b0;
+
+      mtestADDR = 32'hE000102C;
+      mtestWDataL = 32'hE000102C;
+      mst_agent_0.AXI4LITE_WRITE_BURST( 
+        mtestADDR, 
+        mtestProtectionType, 
+        mtestWDataL, 
+        mtestBresp 
+      );
+      backdoor_mem_read(32'hE000102C, data_readed);
+      validating = 1'b1;
+      if (data_readed == 32'hE000102C) begin
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = "FAILED -> Memory[0xE000102C] was";
+      end
+      addToLog(test_n, testPassed, message, data_readed, $sformatf("#%0dc", test_n));
+      #1;
+      validating = 1'b0;
+
+
+
+
     end
   endtask 
 
-  always @(state_tb, reset) begin
-    if (reset == 0) begin
+  always @(instruction_tb or negedge reset) begin
+    if (!reset) begin
       istruction_count = 0;
-    end else if (state_tb == fetch) begin
+    end else begin
       istruction_count ++;
     end
   end

@@ -362,7 +362,7 @@ architecture Behavioral of CPU is
     signal oled_select : std_logic_vector(2 downto 0) := (others => '0');
     
     --DEBUG
---    signal state_dbg_sig : std_logic_vector(2 downto 0);
+   signal state_dbg_sig : std_logic_vector(2 downto 0);
 
     -- BTPU BRAM Interface
     signal btpu_bram_en    : STD_LOGIC;
@@ -675,10 +675,12 @@ begin
         s_axi_rready => s_axi_btpu_rready,
         bram_en_a => btpu_bram_en,
         bram_we_a => btpu_bram_we,
-        bram_addr_a => btpu_bram_addr,
+        bram_addr_a => btpu_bram_addr(19 downto 0),
         bram_wrdata_a => btpu_bram_din,
         bram_rddata_a => btpu_bram_dout
     );
+    
+    btpu_bram_addr(31 downto 20) <= x"400";
 
     btpu_inst : entity work.btpu
         generic map(
@@ -702,6 +704,14 @@ begin
             doutb => btpu_bram_dout
         );
 
+    ----------------------------------- DEBUG -----------------------------------
+        state_dbg_comb : process( state ) is 
+            variable state_integer : integer := 0;
+        begin
+            state_integer := state_type'POS(state);
+            state_dbg_sig <= std_logic_vector(to_unsigned(state_integer,3));
+        end process ; -- control_reg_file
+    ----------------------------------- END DEBUG -----------------------------------
 
     --Control Register File
         --Enable signals for Instruction Memory PortB and Control Register File
@@ -715,14 +725,34 @@ begin
         variable reg_addr : integer;
     begin
         bram_rddata_a_i <= bram_rddata_a_i;     -- Latch inference
-        if(check_bram_address(bram_addr_a_i, ROM) = '1') then
-            bram_rddata_a_i <= instr_doutb;
-        elsif(check_bram_address(bram_addr_a_i, CREG_FILE) = '1') then
-            reg_addr := to_integer(unsigned(bram_addr_a_i(6 downto 2)));
-            bram_rddata_a_i <= control_reg(reg_addr);
+        if bram_en_a_i = '1' then
+            if(check_bram_address(bram_addr_a_i, ROM) = '1') then
+                bram_rddata_a_i <= instr_doutb;
+            elsif(check_bram_address(bram_addr_a_i, CREG_FILE) = '1') then
+                reg_addr := to_integer(unsigned(bram_addr_a_i(6 downto 2)));
+                bram_rddata_a_i <= control_reg(reg_addr);
+            end if;
         end if;
-        
     end process ; -- bram_i_dina_comb
+
+    -- bram_i_dina : process( clock, res ) is
+    --     variable reg_addr : integer;
+    -- begin
+    --     if(res = '0') then
+    --         bram_rddata_a_i <= (others => '0');
+    --     elsif(rising_edge(clock)) then
+    --         if bram_en_a_i = '1' then
+    --             if(check_bram_address(bram_addr_a_i, ROM) = '1') then
+    --                 bram_rddata_a_i <= instr_doutb;
+    --             elsif(check_bram_address(bram_addr_a_i, CREG_FILE) = '1') then
+    --                 reg_addr := to_integer(unsigned(bram_addr_a_i(6 downto 2)));
+    --                 bram_rddata_a_i <= control_reg(reg_addr);
+    --             end if;
+    --         else
+    --             bram_rddata_a_i <= bram_rddata_a_i;
+    --         end if;
+    --     end if;        
+    -- end process ; -- 
 
         --Control Register File Implementation
     control_reg_file : process( clk, res) is 
