@@ -1885,8 +1885,12 @@ logic [31:0] testAxiProgram [] = '{
 
   logic [31:0] data_readed;
   int btpu_test_size = 32;
-  logic [31:0] res1_addr_base = 32'h400A0000 + 32 * 4;
-  logic [31:0] res2_addr_base = 32'h400C0000 + 32 * 4;
+  logic [31:0] w_addr_base = 32'h40080000 + 0 * 4;
+  logic [31:0] a0_addr_base = 32'h400A0000 + 0 * 4;
+  logic [31:0] a1_addr_base = 32'h400C0000 + 0 * 4;
+
+  logic [31:0] res1_addr_base = 32'h400C0000 + 32 * 4;
+  logic [31:0] res2_addr_base = 32'h400A0000 + 32 * 4;
 
   task automatic doBTPUTest;
     integer i;
@@ -1910,6 +1914,48 @@ logic [31:0] testAxiProgram [] = '{
       wait (instruction_tb == 32'h0000006f); // Wait for CPU traps
 
       test_n = 0;
+      for(i = 0; i < btpu_test_size; ++i) begin
+        read_memory(w_addr_base + i * 4, data_readed);
+        validating = 1'b1;
+        if (data_readed == i) begin
+          testPassed = 1;
+          message = "OK";
+        end else begin
+          testPassed = 0;
+          message = $sformatf("FAILED -> w[%0d] was", i);
+        end
+        addToLog(test_n + i + 1, testPassed, message, data_readed, $sformatf("#%0d-%0da", test_n, i));
+        #1;
+        validating = 1'b0;
+
+        read_memory(a0_addr_base + i * 4, data_readed);
+        validating = 1'b1;
+        if (data_readed == i + 1) begin
+          testPassed = 1;
+          message = "OK";
+        end else begin
+          testPassed = 0;
+          message = $sformatf("FAILED -> a0[%0d] was", i);
+        end 
+        addToLog(test_n + i + 1, testPassed, message, data_readed, $sformatf("#%0d-%0db", test_n, i));
+        #1;
+        validating = 1'b0;
+
+        read_memory(a1_addr_base + i * 4, data_readed);
+        validating = 1'b1;
+        if (data_readed == i + 2) begin
+          testPassed = 1;
+          message = "OK";
+        end else begin
+          testPassed = 0;
+          message = $sformatf("FAILED -> a1[%0d] was", i);
+        end
+        addToLog(test_n + i + 1, testPassed, message, data_readed, $sformatf("#%0d-%0dc", test_n, i));
+        #1;
+        validating = 1'b0;
+      end
+
+      test_n = 1;
       for (i = 0; i < btpu_test_size; ++i) begin
         read_memory(res1_addr_base + i * 4, data_readed);
         validating = 1'b1;
@@ -1920,7 +1966,7 @@ logic [31:0] testAxiProgram [] = '{
           testPassed = 0;
           message = $sformatf("FAILED -> res1[%0d] was", i);
         end
-        addToLog(test_n + i + 1, testPassed, message, data_readed, $sformatf("#%0da", i + 1));
+        addToLog(test_n + i + 1 + 32, testPassed, message, data_readed, $sformatf("#%0d-%0da", test_n, i));
         #1;
         validating = 1'b0;
 
@@ -1933,7 +1979,7 @@ logic [31:0] testAxiProgram [] = '{
           testPassed = 0;
           message = $sformatf("FAILED -> res2[%0d] was", i);
         end
-        addToLog(test_n + i + 1, testPassed, message, data_readed, $sformatf("#%0db", i + 1));
+        addToLog(test_n + i + 1 + 32, testPassed, message, data_readed, $sformatf("#%0d-%0db", test_n, i));
         #1;
         validating = 1'b0;
       end
