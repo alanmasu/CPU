@@ -241,6 +241,7 @@ logic [31:0] testAxiProgram [] = '{
 };
 
   `include "testBTPUProgram.svh"
+  `include "testBlockMatrixMul.svh"
 
   // Setup VIP agents
   initial begin
@@ -415,29 +416,35 @@ logic [31:0] testAxiProgram [] = '{
   initial begin
     wait(reset == 1);
 
-    LOAD_PROGRAM(data_array, BASE_ADDR);
-    S_AXI_TEST();
-    doQueuedTests();
-    printLog();
+    // LOAD_PROGRAM(data_array, BASE_ADDR);
+    // S_AXI_TEST();
+    // doQueuedTests();
+    // printLog();
+
+    // writeCREG(32'b00); //Reset CPU
+    // LOAD_PROGRAM(and_array, BASE_ADDR);
+    // istruction_count = 0;
+    // doAndiTest();
+    // printLog();
+
+    // writeCREG(32'b00); //Reset CPU
+    // LOAD_PROGRAM(testI2C, BASE_ADDR);
+    // istruction_count = 0;
+    // doI2CTest();
+    // printLog();
+
+    // writeCREG(32'b00); //Reset CPU
+    // LOAD_PROGRAM(testAxiProgram, BASE_ADDR);
+    // istruction_count = 0;
+    // doAXITest();
+    // printLog();
 
     writeCREG(32'b00); //Reset CPU
-    LOAD_PROGRAM(and_array, BASE_ADDR);
     istruction_count = 0;
-    doAndiTest();
+    doBTPUTest();
     printLog();
 
-    writeCREG(32'b00); //Reset CPU
-    LOAD_PROGRAM(testI2C, BASE_ADDR);
-    istruction_count = 0;
-    doI2CTest();
-    printLog();
-
-    writeCREG(32'b00); //Reset CPU
-    LOAD_PROGRAM(testAxiProgram, BASE_ADDR);
-    istruction_count = 0;
-    doAXITest();
-    printLog();
-
+    
     #200ns;
     $finish;
   end
@@ -457,6 +464,30 @@ logic [31:0] testAxiProgram [] = '{
     );
     mem_rd_data= slv_agent_0.mem_model.backdoor_memory_read(mem_rd_addr);
 
+  endtask
+
+  task read_memory(input xil_axi_ulong mem_rd_addr, output bit [32-1:0] mem_rd_data);
+  begin
+    mst_agent_0.AXI4LITE_READ_BURST(
+      mem_rd_addr, 
+      mtestProtectionType, 
+      mem_rd_data, 
+      mtestRresp
+    );
+  end
+  endtask
+
+  task write_memory(
+      input xil_axi_ulong mem_wr_addr, 
+      input bit [32-1:0] mem_wr_data, 
+      input bit [(32/8)-1:0] mem_wr_strb = {(32/8){4'b1111}}
+    );
+    mst_agent_0.AXI4LITE_WRITE_BURST(
+      mem_wr_addr, 
+      mtestProtectionType, 
+      mem_wr_data, 
+      mtestBresp
+    );
   endtask
 
   //Load program
@@ -1851,6 +1882,12 @@ logic [31:0] testAxiProgram [] = '{
     end
   endtask 
 
+
+  logic [31:0] data_readed;
+  int btpu_test_size = 32;
+  logic [31:0] res1_addr_base = 32'h400A0000 + 32 * 4;
+  logic [31:0] res2_addr_base = 32'h400C0000 + 32 * 4;
+
   task automatic doBTPUTest;
     integer i;
     logic testPassed = 0;
@@ -1871,10 +1908,35 @@ logic [31:0] testAxiProgram [] = '{
       run = 1'b1; //Set RUN to 1 to start the CPU
 
       wait (instruction_tb == 32'h0000006f); // Wait for CPU traps
-      
 
-        
+      test_n = 0;
+      for (i = 0; i < btpu_test_size; ++i) begin
+        read_memory(res1_addr_base + i * 4, data_readed);
+        validating = 1'b1;
+        if (data_readed == btpu_res1[i]) begin
+          testPassed = 1;
+          message = "OK";
+        end else begin
+          testPassed = 0;
+          message = $sformatf("FAILED -> res1[%0d] was", i);
+        end
+        addToLog(test_n + i + 1, testPassed, message, data_readed, $sformatf("#%0da", i + 1));
+        #1;
+        validating = 1'b0;
 
+        read_memory(res2_addr_base + i * 4, data_readed);
+        validating = 1'b1;
+        if (data_readed == btpu_res2[i]) begin
+          testPassed = 1;
+          message = "OK";
+        end else begin
+          testPassed = 0;
+          message = $sformatf("FAILED -> res2[%0d] was", i);
+        end
+        addToLog(test_n + i + 1, testPassed, message, data_readed, $sformatf("#%0db", i + 1));
+        #1;
+        validating = 1'b0;
+      end
     end
   endtask
 
