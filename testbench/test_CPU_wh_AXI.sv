@@ -240,6 +240,8 @@ logic [31:0] testAxiProgram [] = '{
     32'h0000006f
 };
 
+  `include "testBTPUProgram.svh"
+
   // Setup VIP agents
   initial begin
     //Slave vip agent initialization
@@ -1848,6 +1850,34 @@ logic [31:0] testAxiProgram [] = '{
 
     end
   endtask 
+
+  task automatic doBTPUTest;
+    integer i;
+    logic testPassed = 0;
+    string message;
+    begin
+      $display("\nTesting BTPU module");
+      `ifdef testBTPU_TEXT_ADDR
+        LOAD_PROGRAM(testBTPU_text, `testBTPU_TEXT_ADDR);
+      `endif
+      `ifdef testBTPU_DATA_ADDR
+        LOAD_PROGRAM(testBTPU_data, `testBTPU_DATA_ADDR);
+      `endif
+      `ifdef testBTPU_CONST_ADDR
+        LOAD_PROGRAM(testBTPU_const, `testBTPU_CONST_ADDR);
+      `endif
+      run = 1'b0; //Set RUN to 0 to stop the CPU
+      writeCREG(32'b11); //Set CPU in RUN
+      run = 1'b1; //Set RUN to 1 to start the CPU
+
+      wait (instruction_tb == 32'h0000006f); // Wait for CPU traps
+      
+
+        
+
+    end
+  endtask
+
 
   always @(instruction_tb or negedge reset) begin
     if (!reset) begin
