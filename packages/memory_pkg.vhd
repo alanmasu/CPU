@@ -23,6 +23,7 @@ package memory_pkg is
         (lower_bound => x"40010000", upper_bound => x"4001FFFF", space_type => RAM),        --AXI DATA MEMORY (Mem upper bount = 0x40011FFF)
         (lower_bound => x"40020000", upper_bound => x"4002000F", space_type => GPIO),       --RISC-V GPIO
         (lower_bound => x"40020010", upper_bound => x"4002002F", space_type => I2C),        --RISC-V I2C
+        (lower_bound => x"40030000", upper_bound => x"4003FFFF", space_type => AXI),        --CDMA
         (lower_bound => x"40020030", upper_bound => x"40020050", space_type => BTPU_CREG_FILE), --BTPU Register File
         (lower_bound => x"40080000", upper_bound => x"4009FFFF", space_type => BTPU_W_MEM),     --BTPU Weights Memory
         (lower_bound => x"400A0000", upper_bound => x"400BFFFF", space_type => BTPU_IO0_MEM),   --BTPU I/O Memory 0
