@@ -90,7 +90,7 @@ module test_AXI_ctrl( );
     //For BTPU
     wire [31:0] btpu_douta;
     
-    logic [3:0] btpu_web = 1'b0;
+    logic [3:0] btpu_web = 4'b0;
     logic btpu_enb = 1'b0;
     logic [31:0] btpu_addrb = 32'd0;
     logic [31:0] btpu_dinb = 32'd0;
@@ -2094,6 +2094,7 @@ module test_AXI_ctrl( );
         en_in = 1'b1;
         we_in = 1'b0;
         mem_opcode = 3'b010; //LW
+        testResult = 1'b1;
         for (int i = 0; i < $size(resultB_Matrix); ++i) begin
             // alu_resoult += 4;
             alu_resoult = 32'h400C0000 + ((N * K) * 32 * 4) + i * 4;
@@ -2164,7 +2165,6 @@ module test_AXI_ctrl( );
                         element = blockRow_offset + blockCol_offset + row * (32 * K) + col; // (blocco) + riga del blocco * dimensione della riga + colonna del blocco
                         if (acc_tb[mac_n] != result_1_Matrix[element]) begin
                             $display("Test #%0d FAILED -> mac:[%0d] tile:[%0d] | block: [%0d][%0d] | element:[%0d]: acc_tb was 0x%08x expected 0x%08x", testN, mac_n, tile, r_test, c_test, element, acc_tb[mac_n], result_1_Matrix[element]);
-                            // $display("Test #%0d block:[%0d][%0d] | element:[%0d][%0d]: FAILED -> acc_tb was %0x expected %0x", testN, r_test, c_test, row, col, acc_tb[mac_n], result_Matrix[element]);
                             testResult = 1'b0;
                             break;
                         end
@@ -2192,6 +2192,7 @@ module test_AXI_ctrl( );
         en_in = 1'b1;
         we_in = 1'b0;
         mem_opcode = 3'b010; //LW
+        testResult = 1'b1;
         for (int i = 0; i < $size(resultB_Matrix); ++i) begin
             // alu_resoult += 4;
             alu_resoult = 32'h400A0000 + ((N * K) * 32 * 4) + i * 4;
@@ -2212,6 +2213,74 @@ module test_AXI_ctrl( );
             $display("Test #%0d: OK", testN);
         end
         
+        testN = 14;
+        op_class = 5'b01000; //Store
+        en_in = 1'b1;
+        we_in = 1'b1;
+        mem_opcode = 3'b010; //SW
+        alu_resoult = 32'h40020030 + 0*4; //BTPU CS Reg
+        rs2_value = 32'b0;
+        rs2_value[3] = 1'b1; //Select BRAM PORT B
+        @ (posedge clock);
+        #1;
+        validating = 1'b1;
+        if (btpu_creg_tb[0][3] == 1'b1) begin
+            $display("Test #%0d: OK", testN);
+        end else begin
+            $display("Test #%0d: FAILED -> btpu_creg_tb[0] was %0x", testN, btpu_creg_tb[0][3]);
+        end
+        #1;
+        validating = 1'b0;
+
+        testN = 15;
+        btpu_enb = 1'b1;
+        btpu_web = 4'b0;
+        testResult = 1'b1;
+        for (int i = 0; i < $size(resultB_Matrix); ++i) begin
+            // alu_resoult += 4;
+            btpu_addrb = 32'h400C0000 + ((N * K) * 32 * 4) + i * 4;
+            @ (posedge clock);
+            #1;
+            validating = 1'b1;
+            if(btpu_doutb != resultB_Matrix[i]) begin
+                $display("Test #%0d: FAILED -> btpu_doutb @ i = %0d (addra = 0x%08x) was %08x, expected %08x", testN, i, btpu_addrb, btpu_doutb, resultB_Matrix[i]);
+                testResult = 1'b0;
+                validating = 1'b0;
+                // break;
+            end
+            #1;
+            validating = 1'b0;
+            #1;
+        end
+        if(testResult) begin
+            $display("Test #%0d: OK", testN);
+        end
+        btpu_enb = 1'b0;
+
+        testN = 16;
+        btpu_enb = 1'b1;
+        btpu_web = 4'b0;
+        testResult = 1'b1;
+        for (int i = 0; i < $size(resultB_1_Matrix); ++i) begin
+            // alu_resoult += 4;
+            btpu_addrb = 32'h400A0000 + ((N * K) * 32 * 4) + i * 4;
+            @ (posedge clock);
+            #1;
+            validating = 1'b1;
+            if(btpu_doutb != resultB_1_Matrix[i]) begin
+                $display("Test #%0d: FAILED -> btpu_doutb @ i = %0d (addra = 0x%08x) was %08x, expected %08x", testN, i, btpu_addrb, btpu_doutb, resultB_1_Matrix[i]);
+                testResult = 1'b0;
+                validating = 1'b0;
+                // break;
+            end
+            #1;
+            validating = 1'b0;
+            #1;
+        end
+        if(testResult) begin
+            $display("Test #%0d: OK", testN);
+        end
+
 
 
         #50;

@@ -16,13 +16,14 @@ package memory_pkg is
 
     -- Memory map
     type memory_model is array (natural range <>) of memory_addr_space_t;
-    constant memory_map : memory_model(0 to 24) := (
+    constant memory_map : memory_model(0 to 25) := (
         (lower_bound => x"00000000", upper_bound => x"3FFFFFFF", space_type => AXI),        --OCM & DDR
         (lower_bound => x"40000000", upper_bound => x"40003FFF", space_type => ROM),        --AXI INSTRUCTION MEMORY
         (lower_bound => x"40004000", upper_bound => x"4000FFFF", space_type => CREG_FILE),  --AXI FSM Control Register
         (lower_bound => x"40010000", upper_bound => x"4001FFFF", space_type => RAM),        --AXI DATA MEMORY (Mem upper bount = 0x40011FFF)
         (lower_bound => x"40020000", upper_bound => x"4002000F", space_type => GPIO),       --RISC-V GPIO
         (lower_bound => x"40020010", upper_bound => x"4002002F", space_type => I2C),        --RISC-V I2C
+        (lower_bound => x"40030000", upper_bound => x"4003FFFF", space_type => AXI),        --CDMA
         (lower_bound => x"40020030", upper_bound => x"40020050", space_type => BTPU_CREG_FILE), --BTPU Register File
         (lower_bound => x"40080000", upper_bound => x"4009FFFF", space_type => BTPU_W_MEM),     --BTPU Weights Memory
         (lower_bound => x"400A0000", upper_bound => x"400BFFFF", space_type => BTPU_IO0_MEM),   --BTPU I/O Memory 0
