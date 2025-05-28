@@ -416,28 +416,28 @@ logic [31:0] testAxiProgram [] = '{
   initial begin
     wait(reset == 1);
 
-    // LOAD_PROGRAM(data_array, BASE_ADDR);
-    // S_AXI_TEST();
-    // doQueuedTests();
-    // printLog();
+    LOAD_PROGRAM(data_array, BASE_ADDR);
+    S_AXI_TEST();
+    doQueuedTests();
+    printLog();
 
-    // writeCREG(32'b00); //Reset CPU
-    // LOAD_PROGRAM(and_array, BASE_ADDR);
-    // istruction_count = 0;
-    // doAndiTest();
-    // printLog();
+    writeCREG(32'b00); //Reset CPU
+    LOAD_PROGRAM(and_array, BASE_ADDR);
+    istruction_count = 0;
+    doAndiTest();
+    printLog();
 
-    // writeCREG(32'b00); //Reset CPU
-    // LOAD_PROGRAM(testI2C, BASE_ADDR);
-    // istruction_count = 0;
-    // doI2CTest();
-    // printLog();
+    writeCREG(32'b00); //Reset CPU
+    LOAD_PROGRAM(testI2C, BASE_ADDR);
+    istruction_count = 0;
+    doI2CTest();
+    printLog();
 
-    // writeCREG(32'b00); //Reset CPU
-    // LOAD_PROGRAM(testAxiProgram, BASE_ADDR);
-    // istruction_count = 0;
-    // doAXITest();
-    // printLog();
+    writeCREG(32'b00); //Reset CPU
+    LOAD_PROGRAM(testAxiProgram, BASE_ADDR);
+    istruction_count = 0;
+    doAXITest();
+    printLog();
 
     writeCREG(32'b00); //Reset CPU
     istruction_count = 0;
@@ -1910,6 +1910,10 @@ logic [31:0] testAxiProgram [] = '{
       run = 1'b0; //Set RUN to 0 to stop the CPU
       writeCREG(32'b11); //Set CPU in RUN
       run = 1'b1; //Set RUN to 1 to start the CPU
+
+      wait (state_tb == fetch);
+      @(instruction_tb); // Wait for the first instruction
+      #1;
 
       wait (instruction_tb == 32'h0000006f); // Wait for CPU traps
 
