@@ -17,32 +17,34 @@ package memory_pkg is
     -- Memory map
     type memory_model is array (natural range <>) of memory_addr_space_t;
     constant memory_map : memory_model(0 to 25) := (
-        (lower_bound => x"00000000", upper_bound => x"3FFFFFFF", space_type => AXI),        --OCM & DDR
-        (lower_bound => x"40000000", upper_bound => x"40003FFF", space_type => ROM),        --AXI INSTRUCTION MEMORY
-        (lower_bound => x"40004000", upper_bound => x"4000FFFF", space_type => CREG_FILE),  --AXI FSM Control Register
-        (lower_bound => x"40010000", upper_bound => x"4001FFFF", space_type => RAM),        --AXI DATA MEMORY (Mem upper bount = 0x40011FFF)
-        (lower_bound => x"40020000", upper_bound => x"4002000F", space_type => GPIO),       --RISC-V GPIO
-        (lower_bound => x"40020010", upper_bound => x"4002002F", space_type => I2C),        --RISC-V I2C
-        (lower_bound => x"40030000", upper_bound => x"4003FFFF", space_type => AXI),        --CDMA
-        (lower_bound => x"40020030", upper_bound => x"40020050", space_type => BTPU_CREG_FILE), --BTPU Register File
+        (lower_bound => x"00000000", upper_bound => x"3FFFFFFF", space_type => AXI),            --OCM & DDR
+        (lower_bound => x"40000000", upper_bound => x"40003FFF", space_type => ROM),            --AXI INSTRUCTION MEMORY
+        (lower_bound => x"40004000", upper_bound => x"4000FFFF", space_type => CREG_FILE),      --AXI FSM Control Register
+        (lower_bound => x"40010000", upper_bound => x"4001FFFF", space_type => RAM),            --AXI DATA MEMORY (Mem upper bount = 0x40011FFF)
+        (lower_bound => x"40020000", upper_bound => x"4002000F", space_type => GPIO),           --RISC-V GPIO
+        (lower_bound => x"40020010", upper_bound => x"4002002F", space_type => I2C),            --RISC-V I2C
+        (lower_bound => x"40020030", upper_bound => x"4002005F", space_type => BTPU_CREG_FILE), --BTPU Register File
+        (lower_bound => x"40020060", upper_bound => x"4002FFFF", space_type => IO),             --RISC-V IO (free space)
+        (lower_bound => x"40030000", upper_bound => x"4003FFFF", space_type => AXI),            --CDMA
+        (lower_bound => x"40040000", upper_bound => x"4007FFFF", space_type => IO),             --RISC-V IO (free space)
         (lower_bound => x"40080000", upper_bound => x"4009FFFF", space_type => BTPU_W_MEM),     --BTPU Weights Memory
         (lower_bound => x"400A0000", upper_bound => x"400BFFFF", space_type => BTPU_IO0_MEM),   --BTPU I/O Memory 0
         (lower_bound => x"400C0000", upper_bound => x"400DFFFF", space_type => BTPU_IO1_MEM),   --BTPU I/O Memory 1
-        (lower_bound => x"400E0000", upper_bound => x"7FFFFFFF", space_type => IO),         --RISC-V IO
+        (lower_bound => x"400E0000", upper_bound => x"7FFFFFFF", space_type => IO),             --RISC-V IO (free space)
         (lower_bound => x"80000000", upper_bound => x"DFFFFFFF", space_type => RESERVED),   
-        (lower_bound => x"E0000000", upper_bound => x"E02FFFFF", space_type => AXI),        --PS IO
+        (lower_bound => x"E0000000", upper_bound => x"E02FFFFF", space_type => AXI),            --PS IO
         (lower_bound => x"E0300000", upper_bound => x"E0FFFFFF", space_type => RESERVED),
-        (lower_bound => x"E1000000", upper_bound => x"E5FFFFFF", space_type => AXI),        --PS SMC
+        (lower_bound => x"E1000000", upper_bound => x"E5FFFFFF", space_type => AXI),            --PS SMC
         (lower_bound => x"E6000000", upper_bound => x"E7FFFFFF", space_type => RESERVED),
-        (lower_bound => x"E8000000", upper_bound => x"F8000BFF", space_type => AXI),        --PS SLCR
+        (lower_bound => x"E8000000", upper_bound => x"F8000BFF", space_type => AXI),            --PS SLCR
         (lower_bound => x"F8000C00", upper_bound => x"F8000FFF", space_type => RESERVED),   
-        (lower_bound => x"F8001000", upper_bound => x"F880FFFF", space_type => AXI),        --PS REGISTERS
+        (lower_bound => x"F8001000", upper_bound => x"F880FFFF", space_type => AXI),            --PS REGISTERS
         (lower_bound => x"F8810000", upper_bound => x"F8890FFF", space_type => RESERVED),
-        (lower_bound => x"F8900000", upper_bound => x"F8F02FFF", space_type => RESERVED),   --CPU
+        (lower_bound => x"F8900000", upper_bound => x"F8F02FFF", space_type => RESERVED),       --CPU
         (lower_bound => x"F8F03000", upper_bound => x"FBFFFFFF", space_type => RESERVED),
-        (lower_bound => x"FC000000", upper_bound => x"FDFFFFFF", space_type => AXI),        --PS QSPI
+        (lower_bound => x"FC000000", upper_bound => x"FDFFFFFF", space_type => AXI),            --PS QSPI
         (lower_bound => x"FE000000", upper_bound => x"FFFBFFFF", space_type => RESERVED),   
-        (lower_bound => x"FFFC0000", upper_bound => x"FFFFFFFF", space_type => AXI)         --PS OCM
+        (lower_bound => x"FFFC0000", upper_bound => x"FFFFFFFF", space_type => AXI)             --PS OCM
     );
     -- Offset for peripherals
     constant GPIO_OFFSET    : unsigned(31 downto 0) := x"0000_0000";
