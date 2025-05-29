@@ -1206,7 +1206,7 @@ logic [31:0] testAxiProgram [] = '{
         mtestRresp 
       );
       validating = 1'b1;   
-      if(mtestRDataL[31:6] == 32'h0 && mtestRDataL[3:0] == 1) begin 
+      if(mtestRDataL[31:0] == 32'h00000011) begin 
         testPassed = 1;
         message = "OK";
       end else begin
