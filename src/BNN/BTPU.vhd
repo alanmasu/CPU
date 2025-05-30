@@ -455,7 +455,7 @@ begin
         douta <= bram_w_douta   when ena.en_BTPU_W_MEM  = '1' else
                  bram_IO0_douta when ena.en_BTPU_IO0_MEM = '1' else
                  bram_IO1_douta when ena.en_BTPU_IO1_MEM = '1' else
-                 creg_out       when ena.en_BTPU_CREG    = '1' else
+                 creg_out       when is_in_space(addra, BTPU_CREG_FILE) = '1' else
                  (others => '0'); 
 
         doutb <= bram_w_douta     when bram_w_ena    = '1' else

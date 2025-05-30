@@ -319,6 +319,7 @@ architecture Behavioral of CPU is
     signal bram_addr_a_i : STD_LOGIC_VECTOR(19 DOWNTO 0);
     signal bram_wrdata_a_i : STD_LOGIC_VECTOR(31 DOWNTO 0);
     signal bram_rddata_a_i : STD_LOGIC_VECTOR(31 DOWNTO 0) := (others => '0');
+    signal bram_creg       : STD_LOGIC_VECTOR(31 downto 0) := (others => '0');
 
     --Fetch - MSF
     signal pc_load      : STD_LOGIC := '0';
@@ -787,19 +788,27 @@ begin
     end process ; -- ena_comb
 
         -- Bram Controller In value selector
-    bram_i_dina_comb : process( bram_addr_a_i, instr_doutb, control_reg) is
+    bram_i_dina_comb : process( bram_addr_a_i, instr_doutb, bram_creg) is
         variable reg_addr : integer;
     begin
-        bram_rddata_a_i <= bram_rddata_a_i;     -- Latch inference
-        if bram_en_a_i = '1' then
-            if(check_bram_address(bram_addr_a_i, ROM) = '1') then
-                bram_rddata_a_i <= instr_doutb;
-            elsif(check_bram_address(bram_addr_a_i, CREG_FILE) = '1') then
-                reg_addr := to_integer(unsigned(bram_addr_a_i(6 downto 2)));
-                bram_rddata_a_i <= control_reg(reg_addr);
-            end if;
+        bram_rddata_a_i <= instr_doutb;
+        if (check_bram_address(bram_addr_a_i, CREG_FILE) = '1') then
+            bram_rddata_a_i <= bram_creg;
         end if;
     end process ; -- bram_i_dina_comb
+
+    bram_creg_pro : process(clk, res) is
+        variable reg_addr : integer;
+    begin
+        if res = '0' then
+            bram_creg <= (others => '0');
+        elsif rising_edge(clk) then
+            if control_reg_ena = '1' then
+                reg_addr := to_integer(unsigned(bram_addr_a_i(6 downto 2)));
+                bram_creg <= control_reg(reg_addr);
+            end if;
+        end if;
+    end process ; -- bram_creg_pro
 
     -- bram_i_dina : process( clock, res ) is
     --     variable reg_addr : integer;
@@ -966,7 +975,7 @@ begin
     mem_wb_op_class     <= op_class_executed    when is_axi_load = '0' else op_class_reg;
     mem_wb_mem_opcode   <= mem_opcode_executed  when is_axi_load = '0' else mem_opcode_reg;
 
-    ena_mealy : process( state, AXI_stall, run, op_class_decoded ) begin
+    ena_mealy : process( state, AXI_stall, run, op_class_decoded, is_axi_load ) begin
         if run = '1' then
             case state is
                 when idle =>

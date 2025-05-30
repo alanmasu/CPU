@@ -214,15 +214,14 @@ begin
         --     when others =>
         --         dato := dato;
         -- end case ;
-        if en_bus_reg.en_mem = '1' then
-            dato := unsigned(mem_out);
-        elsif en_bus_reg.en_AXI then
+        dato := unsigned(mem_out);
+        if en_bus_reg.en_AXI then
             dato := unsigned(d_in.axi_data);
         elsif en_bus_reg.en_GPIO then
             dato := unsigned(d_in.GPIO_data);
         elsif en_bus_reg.en_I2C then
             dato := unsigned(d_in.I2C_data);
-        elsif en_bus.en_BTPU_CREG or en_bus.en_BTPU_W_MEM or en_bus.en_BTPU_IO0_MEM or en_bus.en_BTPU_IO1_MEM then
+        elsif en_bus_reg.en_BTPU_CREG or en_bus_reg.en_BTPU_W_MEM or en_bus_reg.en_BTPU_IO0_MEM or en_bus_reg.en_BTPU_IO1_MEM then
             dato := unsigned(d_in.BTPU_data);
         end if ;
 
@@ -255,11 +254,8 @@ begin
                 when others =>
                     dato := dato;
             end case ;
-            mem_out_extended <= std_logic_vector(dato);
-        else 
-            mem_out_extended <= mem_out_extended;
         end if ;
-        
+        mem_out_extended <= std_logic_vector(dato);
     end process ; -- sign_extension
 
     pc_out_comb : process( jmp, op_class, alu_resoult_reg, npc_in )
@@ -272,19 +268,13 @@ begin
     
     rd_value_comb: process(op_class, alu_resoult_reg, mem_out_extended, npc_in, res) 
     begin
-        rd_value <= rd_value;
-        if res = '1' then                   
-            if op_class = "10000" then          --ALU_OP
-                rd_value <= alu_resoult_reg;
-            elsif op_class = "00100" then       --LOAD
-                rd_value <= mem_out_extended;
-            elsif op_class = "00001" then       --JAL
-                -- rd_value(11 downto 0 ) <= std_logic_vector(npc_in(11 downto 0));
-                -- rd_value(31 downto 12) <= (others => '0'); 
-                rd_value <= std_logic_vector(npc_in);               
-            end if ;
-        else
-            rd_value <= (others => '0');
+        rd_value <= alu_resoult_reg;
+        if op_class = "00100" then       --LOAD
+            rd_value <= mem_out_extended;
+        elsif op_class = "00001" then       --JAL
+            -- rd_value(11 downto 0 ) <= std_logic_vector(npc_in(11 downto 0));
+            -- rd_value(31 downto 12) <= (others => '0'); 
+            rd_value <= std_logic_vector(npc_in);               
         end if ;
     end process ; -- rd_value
     
