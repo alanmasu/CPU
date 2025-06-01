@@ -86,13 +86,13 @@ package constant_package is
      -- #NOTA: sp Punta nel posto sbagliato ma dovesse dare problemi si può cambiare via LD Script + bootloader
     constant REG_FILE_RESET_VALUE : ram_array := (
         0  => x"00000000", -- x1/ra
-        1  => x"40011FFC", -- x2/sp
+        1  => x"4001FFFC", -- x2/sp
         2  => x"00000000", -- x3/gp
         3  => x"00000000", -- x4/tp
         4  => x"00000000", -- x5/t0
         5  => x"00000000", -- x6/t1
         6  => x"00000000", -- x7/t2
-        7  => x"40011FFC", -- x8/s0/fp
+        7  => x"4001FFFC", -- x8/s0/fp
         8  => x"00000000", -- x9/s1
         9  => x"00000000", -- x10/a0
         10 => x"00000000", -- x11/a1

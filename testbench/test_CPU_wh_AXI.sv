@@ -936,7 +936,7 @@ logic [31:0] testAxiProgram [] = '{
       #1;                       //wait to be after the rising edge of the clock
       validating = 1'b1;
       //Check instruction       ADDI x8, x8, -4
-      if(regFile[7] == 32'h40011ff4) begin 
+      if(regFile[7] == 32'h4001fff4) begin 
         testPassed = 1;
         message = "OK";
       end else begin
