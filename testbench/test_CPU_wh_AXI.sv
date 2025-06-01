@@ -13,8 +13,10 @@ import types_pkg::*;
 // import constant_package::*;
 
 module test_CPU_wh_AXI();
-//slave vip agent
-
+  typedef enum { MEMORY, ANDI, I2C, AXI, BTPU, SERIAL_CODE} test_type_t;
+  test_type_t test_type = MEMORY;
+    
+  //slave vip agent
   axi_transaction                         rd_transaction;   
   axi_monitor_transaction                 slv_monitor_transaction;  
   axi_monitor_transaction                 slave_moniter_transaction_queue[$];  
@@ -242,6 +244,10 @@ logic [31:0] testAxiProgram [] = '{
 
   `include "testBTPUProgram.svh"
   `include "testBlockMatrixMul.svh"
+  `include "test_SerialCodeProgram.svh"
+
+  //Creating a define for simulating serial code
+  `define SIM_SERIAL_CODE_PROGRAM 1
 
   // Setup VIP agents
   initial begin
@@ -280,14 +286,24 @@ logic [31:0] testAxiProgram [] = '{
   end
 
   //Clock generation
-  // always #5 clock <= ~clock;ù
-  localparam int CLOCK_PERIOD = 10;
-  always begin
-    clock <= 1'b1;
-    #5ns;
-    clock <= 1'b0;
-    #5ns;
-  end
+  // If SIM_SERIAL_CODE_PROGRAM is defined, use a faster clock
+  // `ifndef SIM_SERIAL_CODE_PROGRAM
+    localparam int CLOCK_PERIOD = 10;
+    always begin
+      clock <= 1'b1;
+      #5ns;
+      clock <= 1'b0;
+      #5ns;
+    end
+  // `else
+  //   localparam int CLOCK_PERIOD = 2;
+  //   always begin
+  //     clock <= 1'b1;
+  //     #1ns;
+  //     clock <= 1'b0;
+  //     #1ns;
+  //   end
+  // `endif
 
   //AXI Check process
   typedef struct{
@@ -415,35 +431,46 @@ logic [31:0] testAxiProgram [] = '{
   //Testbench
   initial begin
     wait(reset == 1);
+    // `ifndef SIM_SERIAL_CODE_PROGRAM
+      test_type = MEMORY;
+      LOAD_PROGRAM(data_array, BASE_ADDR);
+      S_AXI_TEST();
+      doQueuedTests();
+      printLog();
 
-    LOAD_PROGRAM(data_array, BASE_ADDR);
-    S_AXI_TEST();
-    doQueuedTests();
-    printLog();
+      test_type = ANDI;
+      writeCREG(32'b00); //Reset CPU
+      LOAD_PROGRAM(and_array, BASE_ADDR);
+      istruction_count = 0;
+      doAndiTest();
+      printLog();
 
-    writeCREG(32'b00); //Reset CPU
-    LOAD_PROGRAM(and_array, BASE_ADDR);
-    istruction_count = 0;
-    doAndiTest();
-    printLog();
+      test_type = I2C;
+      writeCREG(32'b00); //Reset CPU
+      LOAD_PROGRAM(testI2C, BASE_ADDR);
+      istruction_count = 0;
+      doI2CTest();
+      printLog();
 
-    writeCREG(32'b00); //Reset CPU
-    LOAD_PROGRAM(testI2C, BASE_ADDR);
-    istruction_count = 0;
-    doI2CTest();
-    printLog();
+      test_type = AXI;
+      writeCREG(32'b00); //Reset CPU
+      LOAD_PROGRAM(testAxiProgram, BASE_ADDR);
+      istruction_count = 0;
+      doAXITest();
+      printLog();
 
-    writeCREG(32'b00); //Reset CPU
-    LOAD_PROGRAM(testAxiProgram, BASE_ADDR);
-    istruction_count = 0;
-    doAXITest();
-    printLog();
-
-    writeCREG(32'b00); //Reset CPU
-    istruction_count = 0;
-    doBTPUTest();
-    printLog();
-
+      test_type = BTPU;
+      writeCREG(32'b00); //Reset CPU
+      istruction_count = 0;
+      doBTPUTest();
+      printLog();
+    // `else
+      test_type = SERIAL_CODE;
+      writeCREG(32'b00); //Reset CPU
+      istruction_count = 0;
+      doBlockMatrixMulTest();
+      printLog();
+    // `endif
     
     #200ns;
     $finish;
@@ -1883,7 +1910,6 @@ logic [31:0] testAxiProgram [] = '{
   endtask 
 
 
-  logic [31:0] data_readed;
   int btpu_test_size = 32;
   logic [31:0] w_addr_base = 32'h40080000 + 0 * 4;
   logic [31:0] a0_addr_base = 32'h400A0000 + 0 * 4;
@@ -1987,6 +2013,87 @@ logic [31:0] testAxiProgram [] = '{
         #1;
         validating = 1'b0;
       end
+    end
+  endtask
+
+  task automatic doBlockMatrixMulTest;
+    integer i;
+    logic testPassed = 0;
+    string message;
+    begin
+      $display("\nTesting SerialCode module");
+      `ifdef test_SerialCode_TEXT_ADDR
+        LOAD_PROGRAM(test_SerialCode_text, `test_SerialCode_TEXT_ADDR);
+      `endif
+      `ifdef test_SerialCode_BSS_ADDR
+        for (i = 0; i < 32; i++) begin
+          write_memory(`test_SerialCode_BSS_ADDR + i * 4, 0);
+        end
+      `endif
+      `ifdef test_SerialCode_DATA_ADDR
+        LOAD_PROGRAM(test_SerialCode_data, `test_SerialCode_DATA_ADDR);
+      `endif
+      `ifdef test_SerialCode_CONST_ADDR
+        LOAD_PROGRAM(test_SerialCode_const, `test_SerialCode_CONST_ADDR);
+      `endif
+
+      run = 1'b0; //Set RUN to 0 to stop the CPU
+      writeCREG(32'b11); //Set CPU in RUN
+      run = 1'b1; //Set RUN to 1 to start the CPU
+      @(instruction_tb); // Wait for the first instruction
+
+
+      wait (instruction_tb == 32'h0000006f); // Wait for CPU traps
+      $display("CPU has trapped, starting test...");
+
+      test_n = 1;
+      mtestADDR = `results_ADDR;
+      read_memory(mtestADDR, data_readed);
+      validating = 1'b1;
+      //Test xnor32(0,0)
+      if (data_readed == 32'hFFFFFFFF) begin
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = $sformatf("FAILED -> Memory[0x%08X] was", mtestADDR);
+      end
+      addToLog(test_n, testPassed, message, data_readed, $sformatf("#%0d", test_n));
+      #1;
+      validating = 1'b0;
+
+      test_n = 2;
+      mtestADDR += 4;
+      read_memory(mtestADDR, data_readed);
+      validating = 1'b1;
+      //Test popcount32(xnor32(0,0))
+      if (data_readed == 32'h20) begin
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = $sformatf("FAILED -> Memory[0x%08X] was", mtestADDR);
+      end
+      addToLog(test_n, testPassed, message, data_readed, $sformatf("#%0d", test_n));
+      #1;
+      validating = 1'b0;
+
+      test_n = 3;
+      mtestADDR += 4;
+      read_memory(mtestADDR, data_readed);
+      validating = 1'b1;
+      //Test binaryMul(0, 0)
+      if (data_readed == 32'h20) begin
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = $sformatf("FAILED -> Memory[0x%08X] was", mtestADDR);
+      end
+      addToLog(test_n, testPassed, message, data_readed, $sformatf("#%0d", test_n));
+      #1;
+      validating = 1'b0;
+
     end
   endtask
 
