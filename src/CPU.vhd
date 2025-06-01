@@ -582,7 +582,7 @@ begin
         clkb => bram_clk_a_d,
         enb => bram_en_a_d,
         web => bram_we_a_d,
-        addrb => bram_addr_a_d(12 downto 2),
+        addrb => bram_addr_a_d(15 downto 2),
         dinb => bram_wrdata_a_d,
         doutb => bram_rddata_a_d
     );

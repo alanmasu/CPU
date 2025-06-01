@@ -83,6 +83,7 @@ package constant_package is
     );
 
     -- Registers Reset Values
+     -- #NOTA: sp Punta nel posto sbagliato ma dovesse dare problemi si può cambiare via LD Script + bootloader
     constant REG_FILE_RESET_VALUE : ram_array := (
         0  => x"00000000", -- x1/ra
         1  => x"40011FFC", -- x2/sp

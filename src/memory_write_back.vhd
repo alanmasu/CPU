@@ -60,7 +60,7 @@ entity memory_write_back is
         clkb : IN STD_LOGIC;
         enb : IN STD_LOGIC;
         web : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
-        addrb : IN STD_LOGIC_VECTOR(10 DOWNTO 0);
+        addrb : IN STD_LOGIC_VECTOR(13 DOWNTO 0);
         dinb : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
         doutb : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
     );
@@ -72,13 +72,13 @@ architecture Behavioral of memory_write_back is
             clka : IN STD_LOGIC;
             wea : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
             ena : IN STD_LOGIC;
-            addra : IN STD_LOGIC_VECTOR(10 DOWNTO 0);
+            addra : IN STD_LOGIC_VECTOR(13 DOWNTO 0);
             dina : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
             douta : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
             clkb : IN STD_LOGIC;
             enb : IN STD_LOGIC;
             web : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
-            addrb : IN STD_LOGIC_VECTOR(10 DOWNTO 0);
+            addrb : IN STD_LOGIC_VECTOR(13 DOWNTO 0);
             dinb : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
             doutb : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
         );
@@ -109,7 +109,7 @@ begin
         clka => clk,
         wea => mem_wea,
         ena => en_bus.en_mem,
-        addra => alu_resoult(12 downto 2),
+        addra => alu_resoult(15 downto 2),
         dina => mem_in,
         douta => mem_out,
         clkb => clkb,
