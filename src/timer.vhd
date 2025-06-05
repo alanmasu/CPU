@@ -88,8 +88,9 @@ begin
     
 
     cc_sel <= to_integer(unsigned(regFile(TIMER_REG_CONTROL)(TIMER_CAPTURE_SEL_MSB_BIT downto TIMER_CAPTURE_SEL_LSB_BIT)));
-    -- capture <= cc(cc_sel);
-    
+    capture <= cc(cc_sel);
+    timer_mode <= regFile(TIMER_REG_CONTROL)(TIMER_MODE_MSB_BIT downto TIMER_MODE_LSB_BIT);
+    capture_mode <= regFile(TIMER_REG_CONTROL)(TIMER_CAPTURE_MODE_BIT);
     start <= regFile(TIMER_REG_CONTROL)(TIMER_CREG_RUN_BIT);
     stop <= regFile(TIMER_REG_CONTROL)(TIMER_CREG_STOP_BIT);
 
@@ -104,6 +105,11 @@ begin
             regFile <= (others => (others => '0'));
             dataToWrite := (others => '0');
             dout <= (others => '0');
+            timer_mode_reg <= (others => '0');
+            compare_reg <= (others => '0');
+            capture_mode_reg <= '0';
+            capture_reg <= '0';
+            pwm_int <= '0';
         elsif rising_edge(clk) then
 
             regAddr_u := unsigned(addr) - TIMER_OFFSET;
@@ -148,10 +154,9 @@ begin
             end if;
 
             ------------------ MACCHINA A STATI ------------------
-            counter <= counter + 1; -- Incrementa il contatore ad ogni ciclo di clock
             case timer_state is
                 when timer_idle =>
-                    counter <= counter;
+                    -- counter <= counter;
                     busy <= '0';
                     pwm_int <= '0';
                     if start = '1' then
@@ -172,11 +177,13 @@ begin
                         end case ;
                     end if;
                 when timer_counting =>
+                    counter <= counter + 1;
                     if stop = '1' then
                         timer_state <= timer_idle;
                         busy <= '0';
                     end if;
                 when timer_capture => 
+                    counter <= counter + 1;
                     capture_reg <= capture;
                     if stop = '1' then
                         timer_state <= timer_idle;
@@ -202,7 +209,7 @@ begin
                         end if;
                     end if;
                 when timer_pwm =>
-                    pwm_int <= '1';
+                    counter <= counter + 1;
                     if stop = '1' then
                         timer_state <= timer_idle;
                         busy <= '0';

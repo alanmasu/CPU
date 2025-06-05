@@ -2406,9 +2406,12 @@ module test_AXI_ctrl( );
         rs2_value = 32'b0;
         rs2_value[8:4] = 5'b00000; //Capture select cc as first bit
         rs2_value[3:2] = 2'b01; //Capture mode
+        @ (posedge clock);
+        #1;
         rs2_value[0] = 1'b1; //Start
         @ (posedge clock);
         #1;
+        en_in = 1'b0;
         for (int i = 0; i < n_clocks; ++i) begin
             @(posedge clock);
             #1;
@@ -2418,8 +2421,12 @@ module test_AXI_ctrl( );
             we_in = 1'b0;
             mem_opcode = 3'b010; //LW
         end
-        timer_cc[0] = rd_value_out;
+        timer_cc[0] = 1'b1;
         @ (posedge clock);
+        for(int i = 0; i < n_clocks; ++i) begin
+            @(posedge clock);
+            #1;
+        end
         #1;
         validating = 1'b1;
         if(timer_counter_tb == n_clocks) begin
@@ -2429,6 +2436,8 @@ module test_AXI_ctrl( );
         end
         #1;
         validating = 1'b0;
+        
+        //Testig PWM Mode
 
 
 
