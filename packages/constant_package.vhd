@@ -153,5 +153,24 @@ package constant_package is
     constant BTPU_SIGN_CMP  : integer := 8;  -- Sign comparison value    
     
 
+    -- Timer Register File Names
+    constant TIMER_REG_CONTROL              : integer := 0;
+        constant TIMER_CREG_RUN_BIT         : integer := 0; -- Run bit
+        constant TIMER_CREG_STOP_BIT        : integer := 1; -- Stop bit
+        constant TIMER_MODE_LSB_BIT         : integer := 2; -- Mode bit (0 = CONTINUOUS, 1 = CAPTURE, 2 = PWM)
+        constant TIMER_MODE_MSB_BIT         : integer := 3;
+        constant TIMER_CAPTURE_SEL_LSB_BIT  : integer := 4; -- Capture select
+        constant TIMER_CAPTURE_SEL_MSB_BIT  : integer := 8;
+        constant TIMER_CAPTURE_MODE_BIT     : integer := 9; -- Capture mode (0 = RISING, 1 = FALLING)
+        constant TIMER_CREG_BUSY_BIT        : integer := 10; -- Busy bit
+
+    constant TIMER_REG_COUNTER_LSB          : integer := 1; -- Counter value
+    constant TIMER_REG_COUNTER_MSB          : integer := 2;
+    constant TIMER_REG_CAPTURE_LSB          : integer := 3; -- Capture value
+    constant TIMER_REG_CAPTURE_MSB          : integer := 4;
+    constant TIMER_REG_COMPARE_LSB          : integer := 5; -- Compare value
+    constant TIMER_REG_COMPARE_MSB          : integer := 6;
+    
+
 
 end package ;

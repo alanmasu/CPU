@@ -223,6 +223,8 @@ begin
             dato := unsigned(d_in.I2C_data);
         elsif en_bus_reg.en_BTPU_CREG or en_bus_reg.en_BTPU_W_MEM or en_bus_reg.en_BTPU_IO0_MEM or en_bus_reg.en_BTPU_IO1_MEM then
             dato := unsigned(d_in.BTPU_data);
+        elsif en_bus_reg.en_timer then
+            dato := unsigned(d_in.timer_data);
         end if ;
 
         --Sign extension

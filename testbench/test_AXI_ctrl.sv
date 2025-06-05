@@ -38,6 +38,7 @@ module test_AXI_ctrl( );
         logic en_BTPU_W_MEM;
         logic en_BTPU_IO0_MEM;
         logic en_BTPU_IO1_MEM;
+        logic en_timer;
     } en_bus_t;
 
     // typedef struct packed {
@@ -60,12 +61,12 @@ module test_AXI_ctrl( );
     bit[4:0] rd_addr_out;
     bit[31:0] rd_value_out;
     bit[31:0] pc_out;
-    en_bus_t en_out = '{en_mem: 1'b0, en_axi: 1'b0, en_gpio: 1'b0, en_i2c: 1'b0, en_BTPU_CREG: 1'b0, en_BTPU_W_MEM: 1'b0, en_BTPU_IO0_MEM: 1'b0, en_BTPU_IO1_MEM: 1'b0};
+    en_bus_t en_out = '{en_mem: 1'b0, en_axi: 1'b0, en_gpio: 1'b0, en_i2c: 1'b0, en_BTPU_CREG: 1'b0, en_BTPU_W_MEM: 1'b0, en_BTPU_IO0_MEM: 1'b0, en_BTPU_IO1_MEM: 1'b0, en_timer: 1'b0};
     bit[3:0] we_out;
     bit[31:0] address_out;
     bit[31:0] d_out;
 
-    bit[31:0] axi_data_out = 32'h00000000;
+    wire[31:0] axi_data_out = 32'h00000000;
     bit stall;
     peripheral_data_t d_in; // = '{axi_data: 32'h00000000};
     wire [31:0] gpio_data_out;
@@ -78,7 +79,7 @@ module test_AXI_ctrl( );
     //I2C
     wire SCL;
     wire SDA;
-    bit [31:0] i2c_data_out;
+    wire [31:0] i2c_data_out;
     logic sda_tb = 1'bz;
     logic scl_tb = 1'bz;
       //for slave interface
@@ -95,7 +96,12 @@ module test_AXI_ctrl( );
     logic [31:0] btpu_addrb = 32'd0;
     logic [31:0] btpu_dinb = 32'd0;
     wire [31:0] btpu_doutb;
-    
+
+    //For timer
+    logic timer_ena;    
+    logic [31:0] timer_cc = 32'd0;
+    logic timer_pwm;
+    wire [31:0] timer_douta;
 
 
     //Slave vip agent
@@ -143,7 +149,7 @@ module test_AXI_ctrl( );
         .clkb(clock),
         .enb(1'b0),
         .web(4'b0),
-        .addrb(11'b0),
+        .addrb(14'b0),
         .dinb(32'b0)
     );
 
@@ -180,7 +186,13 @@ module test_AXI_ctrl( );
         .web_0(btpu_web),
         .addrb_0(btpu_addrb),
         .dinb_0(btpu_dinb),
-        .doutb_0(btpu_doutb)
+        .doutb_0(btpu_doutb),
+
+        //Timer
+        .timer_en_0(en_out.en_timer),
+        .cc_0(timer_cc),
+        .pwm_0(timer_pwm),
+        .timer_dout_0(timer_douta)
     );
 
     GPIO DUT2(
@@ -257,14 +269,23 @@ module test_AXI_ctrl( );
         d_in.gpio_data = gpio_data_out;
     end
 
+    always @(i2c_data_out) begin
+        d_in.i2c_data = i2c_data_out;
+    end
+
     always @(btpu_douta) begin
         d_in.btpu_data = btpu_douta;
+    end
+
+    always @(timer_douta) begin
+        d_in.timer_data = timer_douta;
     end
 
     always @(posedge clock) begin
         alu_resoult_reg <= alu_resoult;
     end
 
+    integer CLK_PERIOD = 10; // Clock period in ns
     always begin
         clock = 1'b1;
         #5;
@@ -2288,17 +2309,148 @@ module test_AXI_ctrl( );
     end
     endtask
 
+    wire [39:0] timer_counter_tb;
+    assign timer_counter_tb = DUT.mem_ctrl_test_i.timer_0.U0.counter;
+
+    int n_clocks = 20;
+
+    task automatic testTimer;
+    begin
+        $display("\nTesting Timer...");
+
+        // Test continuos mode
+        testN = 1;
+        op_class = 5'b01000; //Store
+        en_in = 1'b1;
+        we_in = 1'b1;
+        mem_opcode = 3'b010; //SW
+        alu_resoult = 32'h40020060 + 0*4; //Timer CS Reg
+        rs2_value = 32'b0;
+        rs2_value[0] = 1'b1; //Start
+
+        for (int i = 0; i < n_clocks; ++i) begin
+            @(posedge clock);
+            #1;
+            alu_resoult = 32'h40020060 + 1 * 4;  // Timer Counter LSB Reg
+            op_class = 5'b00100; //Load
+            en_in = 1'b1;
+            we_in = 1'b0;
+            mem_opcode = 3'b010; //LW
+        end
+        validating = 1'b1;
+        if(timer_counter_tb == n_clocks - 2) begin
+            $display("Test #%0d-a: OK", testN);
+        end else begin
+            $display("Test #%0d-a: FAILED -> timer_counter_tb was %0d expected %0d", testN, timer_counter_tb, 10 * CLK_PERIOD);
+        end
+
+        if(rd_value_out == n_clocks - 3) begin
+            $display("Test #%0d-b: OK", testN);
+        end else begin
+            $display("Test #%0d-b: FAILED -> rd_value_out was %0d expected %0d", testN, rd_value_out, n_clocks - 3);
+        end
+        #1;
+        validating = 1'b0;
+
+        testN = 2;
+        op_class = 5'b01000; //Store
+        en_in = 1'b1;
+        we_in = 1'b1;
+        mem_opcode = 3'b010; //SW
+        alu_resoult = 32'h40020060 + 0 * 4; //Timer Control Reg
+        rs2_value = 32'b10;
+        @ (posedge clock);
+        #1;
+        en_in = 1'b0;
+        we_in = 1'b0;
+        for(int i = 0; i < n_clocks; ++i) begin
+            @(posedge clock);
+            #1;
+        end
+        validating = 1'b1;
+        if (timer_counter_tb == n_clocks) begin
+            $display("Test #%0d: OK", testN);
+        end else begin
+            $display("Test #%0d: FAILED -> timer_counter_tb was %0d expected %0d", testN, timer_counter_tb, n_clocks - 2);
+        end
+        #1;
+        validating = 1'b0;
+
+        testN = 3;
+        op_class = 5'b01000; //Store
+        en_in = 1'b1;
+        we_in = 1'b1;
+        mem_opcode = 3'b010; //SW
+        alu_resoult = 32'h40020060 + 1 * 4; //Timer Counter LSB Reg
+        rs2_value = 32'b0; //Reset counter
+        @ (posedge clock);
+        #1;
+        en_in = 1'b0;
+        we_in = 1'b0;
+        validating = 1'b1;
+        if (timer_counter_tb == 0) begin
+            $display("Test #%0d: OK", testN);
+        end else begin
+            $display("Test #%0d: FAILED -> timer_counter_tb was %0d expected %0d", testN, timer_counter_tb, 0);
+        end
+        #1;
+        validating = 1'b0;
+        
+        // Test capture mode
+        testN = 4;
+        op_class = 5'b01000; //Store
+        en_in = 1'b1;
+        we_in = 1'b1;
+        mem_opcode = 3'b010; //SW
+        alu_resoult = 32'h40020060 + 0 * 4; //Timer CS Reg
+        rs2_value = 32'b0;
+        rs2_value[8:4] = 5'b00000; //Capture select cc as first bit
+        rs2_value[3:2] = 2'b01; //Capture mode
+        rs2_value[0] = 1'b1; //Start
+        @ (posedge clock);
+        #1;
+        for (int i = 0; i < n_clocks; ++i) begin
+            @(posedge clock);
+            #1;
+            alu_resoult = 32'h40020060 + 1 * 4;  // Timer Counter LSB Reg
+            op_class = 5'b00100; //Load
+            en_in = 1'b1;
+            we_in = 1'b0;
+            mem_opcode = 3'b010; //LW
+        end
+        timer_cc[0] = rd_value_out;
+        @ (posedge clock);
+        #1;
+        validating = 1'b1;
+        if(timer_counter_tb == n_clocks) begin
+            $display("Test #%0d-a: OK", testN);
+        end else begin
+            $display("Test #%0d-a: FAILED -> timer_counter_tb was %0d expected %0d", testN, timer_counter_tb, n_clocks - 2);
+        end
+        #1;
+        validating = 1'b0;
+
+
+
+        
+
+
+
+    end
+    endtask
+
     initial begin
         @(posedge reset);
         #1;
-        testMemory();
-        testAXI();
-        testGPIO();
-        testI2C();
-        testAXI_BRESP();
-        testBTPU();
-        testBTPU_FSM();
-        testBTPU_Computation();
+        // testMemory();
+        // testAXI();
+        // testGPIO();
+        // testI2C();
+        // testAXI_BRESP();
+        // testBTPU();
+        // testBTPU_FSM();
+        // testBTPU_Computation();
+        testTimer();
         // #100;
         en_in = 1'b0;
         $finish;
