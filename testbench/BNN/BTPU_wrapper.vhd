@@ -39,7 +39,7 @@ begin
     -- BTPU instantiation
     btpu_inst : entity work.btpu
     generic map (
-        SIMULATION => false,
+        SIMULATION => true,
         DEBUG => false
     )
     port map (
