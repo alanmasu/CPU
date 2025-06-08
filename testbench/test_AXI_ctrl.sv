@@ -2313,6 +2313,7 @@ module test_AXI_ctrl( );
     assign timer_counter_tb = DUT.mem_ctrl_test_i.timer_0.U0.counter;
 
     int n_clocks = 20;
+    logic [63:0] timer_value_composed;
 
     task automatic testTimer;
     begin
@@ -2358,7 +2359,7 @@ module test_AXI_ctrl( );
         we_in = 1'b1;
         mem_opcode = 3'b010; //SW
         alu_resoult = 32'h40020060 + 0 * 4; //Timer Control Reg
-        rs2_value = 32'b10;
+        rs2_value = 32'b10;                 //Stop
         @ (posedge clock);
         #1;
         en_in = 1'b0;
@@ -2412,14 +2413,10 @@ module test_AXI_ctrl( );
         @ (posedge clock);
         #1;
         en_in = 1'b0;
+        we_in = 1'b0;
         for (int i = 0; i < n_clocks; ++i) begin
             @(posedge clock);
             #1;
-            alu_resoult = 32'h40020060 + 1 * 4;  // Timer Counter LSB Reg
-            op_class = 5'b00100; //Load
-            en_in = 1'b1;
-            we_in = 1'b0;
-            mem_opcode = 3'b010; //LW
         end
         timer_cc[0] = 1'b1;
         @ (posedge clock);
@@ -2430,20 +2427,151 @@ module test_AXI_ctrl( );
         #1;
         validating = 1'b1;
         if(timer_counter_tb == n_clocks) begin
-            $display("Test #%0d-a: OK", testN);
+            $display("Test #%0d: OK", testN);
         end else begin
-            $display("Test #%0d-a: FAILED -> timer_counter_tb was %0d expected %0d", testN, timer_counter_tb, n_clocks - 2);
+            $display("Test #%0d: FAILED -> timer_counter_tb was %0d expected %0d", testN, timer_counter_tb, n_clocks);
         end
         #1;
         validating = 1'b0;
+
+        testN = 5;
+        op_class = 5'b00100; //Load
+        en_in = 1'b1;
+        we_in = 1'b0;
+        mem_opcode = 3'b010; //LW
+        alu_resoult = 32'h40020060 + 1 * 4; //Timer Counter LSB Reg
+        @ (posedge clock);
+        #1;
+        timer_value_composed[31:0] = rd_value_out;
+        alu_resoult = 32'h40020060 + 2 * 4; //Timer Counter MSB Reg
+        @ (posedge clock);
+        #1;
+        timer_value_composed[63:32] = rd_value_out;
+        validating = 1'b1;
+        if(timer_value_composed == n_clocks) begin
+            $display("Test #%0d: OK", testN);
+        end else begin
+            $display("Test #%0d: FAILED -> timer_counter composed was %0d expected %0d", testN, timer_value_composed, n_clocks);
+        end
+        #1;
+        validating = 1'b0;
+
+        testN = 6;
+        op_class = 5'b00100; //Load
+        en_in = 1'b1;
+        we_in = 1'b0;
+        mem_opcode = 3'b010; //LW
+        alu_resoult = 32'h40020060 + 3 * 4; //Timer Capture LSB Reg
+        @ (posedge clock);
+        #1;
+        timer_value_composed[31:0] = rd_value_out;
+        alu_resoult = 32'h40020060 + 4 * 4; //Timer Capture MSB Reg
+        @ (posedge clock);
+        #1;
+        timer_value_composed[63:32] = rd_value_out;
+        validating = 1'b1;
+        if(timer_value_composed == n_clocks - 1) begin
+            $display("Test #%0d: OK", testN);
+        end else begin
+            $display("Test #%0d: FAILED -> timer_capture composed was %0d expected %0d", testN, timer_value_composed, n_clocks - 1);
+        end
+        #1;
+        validating = 1'b0;
+
+        //Testung falling mode
+        testN = 7;
+        op_class = 5'b01000; //Store
+        en_in = 1'b1;
+        we_in = 1'b1;
+        mem_opcode = 3'b010; //SW
+        alu_resoult = 32'h40020060 + 0 * 4; //Timer CS Reg
+        rs2_value = 32'b0;
+        rs2_value[8:4] = 5'b00000; //Capture select cc as first bit
+        rs2_value[3:2] = 2'b01;    //Capture mode
+        rs2_value[9] = 1'b1;       //Falling edge
+        @ (posedge clock);
+        #1;
+        rs2_value[0] = 1'b1; //Start
+        @ (posedge clock);
+        #1;
+        en_in = 1'b0;
+        we_in = 1'b0;
+        for (int i = 0; i < n_clocks; ++i) begin
+            @(posedge clock);
+            #1;
+        end
+        timer_cc[0] = 1'b0;
+        @ (posedge clock);
+        for(int i = 0; i < n_clocks; ++i) begin
+            @(posedge clock);
+            #1;
+        end
+        #1;
+        validating = 1'b1;
+        if(timer_counter_tb == n_clocks) begin
+            $display("Test #%0d: OK", testN);
+        end else begin
+            $display("Test #%0d: FAILED -> timer_counter_tb was %0d expected %0d", testN, timer_counter_tb, n_clocks);
+        end
+        #1;
+        validating = 1'b0;
+
+        testN = 8;
+        op_class = 5'b00100; //Load
+        en_in = 1'b1;
+        we_in = 1'b0;
+        mem_opcode = 3'b010; //LW
+        alu_resoult = 32'h40020060 + 1 * 4; //Timer Counter LSB Reg
+        @ (posedge clock);
+        #1;
+        timer_value_composed[31:0] = rd_value_out;
+        alu_resoult = 32'h40020060 + 2 * 4; //Timer Counter MSB Reg
+        @ (posedge clock);
+        #1;
+        timer_value_composed[63:32] = rd_value_out;
+        validating = 1'b1;
+        if(timer_value_composed == n_clocks) begin
+            $display("Test #%0d: OK", testN);
+        end else begin
+            $display("Test #%0d: FAILED -> timer_couter composed was %0d expected %0d", testN, timer_value_composed, n_clocks);
+        end
+        #1;
+        validating = 1'b0;
+
+        testN = 9;
+        op_class = 5'b00100; //Load
+        en_in = 1'b1;
+        we_in = 1'b0;
+        mem_opcode = 3'b010; //LW
+        alu_resoult = 32'h40020060 + 3 * 4; //Timer Capture LSB Reg
+        @ (posedge clock);
+        #1;
+        timer_value_composed[31:0] = rd_value_out;
+        alu_resoult = 32'h40020060 + 4 * 4; //Timer Capture MSB Reg
+        @ (posedge clock);
+        #1;
+        timer_value_composed[63:32] = rd_value_out;
+        validating = 1'b1;
+        if(timer_value_composed == n_clocks - 1) begin
+            $display("Test #%0d: OK", testN);
+        end else begin
+            $display("Test #%0d: FAILED -> timer_capture composed was %0d expected %0d", testN, timer_value_composed, n_clocks - 1);
+        end
+        #1;
+        validating = 1'b0;
+
+        //Testing PWM Mode
+        testN = 10;
+        op_class = 5'b01000; //Store
+        en_in = 1'b1;
+        we_in = 1'b1;
+        mem_opcode = 3'b010; //SW
+        alu_resoult = 32'h40020060 + 0 * 4; //Timer CS Reg
+        rs2_value = 32'b0;
+        rs2_value[3:2] = 2'b10; //PWM mode
+        @ (posedge clock);
+        #1;
         
-        //Testig PWM Mode
-
-
-
-        
-
-
 
     end
     endtask

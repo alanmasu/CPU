@@ -84,9 +84,6 @@ begin
         report "TIMER_SIZE must be greater than 32 and less than or equal to 64" 
         severity failure;
 
-    assert false report "COUNTER_MSB_BIT_POS is: " & integer'image(COUNTER_MSB_BIT_POS);
-    
-
     cc_sel <= to_integer(unsigned(regFile(TIMER_REG_CONTROL)(TIMER_CAPTURE_SEL_MSB_BIT downto TIMER_CAPTURE_SEL_LSB_BIT)));
     capture <= cc(cc_sel);
     timer_mode <= regFile(TIMER_REG_CONTROL)(TIMER_MODE_MSB_BIT downto TIMER_MODE_LSB_BIT);
@@ -152,6 +149,7 @@ begin
             if regFile(TIMER_REG_CONTROL)(TIMER_CREG_STOP_BIT) = '1' then
                 regFile(TIMER_REG_CONTROL)(TIMER_CREG_STOP_BIT) <= '0';
             end if;
+            regFile(TIMER_REG_CONTROL)(TIMER_CREG_BUSY_BIT) <= busy; -- Aggiorna il bit busy nel registro di controllo
 
             ------------------ MACCHINA A STATI ------------------
             case timer_state is
@@ -169,9 +167,11 @@ begin
                                 capture_mode_reg <= capture_mode; 
                                 compare_reg <= compare;
                                 timer_state <= timer_capture;
+                                counter <= (others => '0'); -- Reset the counter when entering capture mode
                             when "10" => -- PWM
                                 compare_reg <= compare;
                                 timer_state <= timer_pwm;
+                                counter <= (others => '0'); -- Reset the counter when entering PWM mode
                             when others =>
                                 timer_state <= timer_idle; -- Default case                        
                         end case ;
@@ -192,16 +192,16 @@ begin
                             if capture_mode_reg = '0' then -- RISING EDGE
                                 if capture = '1' then
                                     regFile(TIMER_REG_CAPTURE_LSB) <= std_logic_vector(counter(31 downto 0));
-                                    regFile(TIMER_REG_CAPTURE_MSB)(COUNTER_MSB_BIT_POS downto 32) <= std_logic_vector(counter(COUNTER_MSB_BIT_POS downto 32));
-                                    regFile(TIMER_REG_CAPTURE_MSB)(31 downto COUNTER_MSB_BIT_POS + 1) <= (others => '0');
+                                    regFile(TIMER_REG_CAPTURE_MSB)(COUNTER_MSB_BIT_POS - 1 downto 0) <= std_logic_vector(counter(COUNTER_MSB_BIT_POS + 31 downto 32));
+                                    regFile(TIMER_REG_CAPTURE_MSB)(31 downto COUNTER_MSB_BIT_POS) <= (others => '0');
                                     timer_state <= timer_idle; -- Torna allo stato idle dopo la cattura
                                     busy <= '0';
                                 end if;
                             else -- FALLING EDGE
                                 if capture = '0' then
                                     regFile(TIMER_REG_CAPTURE_LSB) <= std_logic_vector(counter(31 downto 0));
-                                    regFile(TIMER_REG_CAPTURE_MSB)(COUNTER_MSB_BIT_POS downto 32) <= std_logic_vector(counter(COUNTER_MSB_BIT_POS downto 32));
-                                    regFile(TIMER_REG_CAPTURE_MSB)(31 downto COUNTER_MSB_BIT_POS + 1) <= (others => '0');
+                                    regFile(TIMER_REG_CAPTURE_MSB)(COUNTER_MSB_BIT_POS - 1 downto 0) <= std_logic_vector(counter(COUNTER_MSB_BIT_POS + 31 downto 32));
+                                    regFile(TIMER_REG_CAPTURE_MSB)(31 downto COUNTER_MSB_BIT_POS) <= (others => '0');
                                     timer_state <= timer_idle; -- Torna allo stato idle dopo la cattura
                                     busy <= '0';
                                 end if;
