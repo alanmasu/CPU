@@ -86,6 +86,8 @@ begin
 
     cc_sel <= to_integer(unsigned(regFile(TIMER_REG_CONTROL)(TIMER_CAPTURE_SEL_MSB_BIT downto TIMER_CAPTURE_SEL_LSB_BIT)));
     capture <= cc(cc_sel);
+    compare(31 downto 0) <= unsigned(regFile(TIMER_REG_COMPARE_LSB));
+    compare(COUNTER_MSB_BIT_POS + 31 downto 32) <= unsigned(regFile(TIMER_REG_COMPARE_MSB)(COUNTER_MSB_BIT_POS - 1 downto 0));
     timer_mode <= regFile(TIMER_REG_CONTROL)(TIMER_MODE_MSB_BIT downto TIMER_MODE_LSB_BIT);
     capture_mode <= regFile(TIMER_REG_CONTROL)(TIMER_CAPTURE_MODE_BIT);
     start <= regFile(TIMER_REG_CONTROL)(TIMER_CREG_RUN_BIT);
@@ -221,8 +223,9 @@ begin
                     timer_state <= timer_idle; -- Default case
             end case;
         end if;
-        pwm <= pwm_int; -- Assegna il segnale PWM all'output
     end process;
+    
+    pwm <= pwm_int; -- Assegna il segnale PWM all'output
 
 
 end Behavioral;

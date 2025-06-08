@@ -2566,12 +2566,45 @@ module test_AXI_ctrl( );
         en_in = 1'b1;
         we_in = 1'b1;
         mem_opcode = 3'b010; //SW
+        alu_resoult = 32'h40020060 + 5 * 4; //Timer PWM LSB Reg
+        rs2_value = n_clocks;
+        @ (posedge clock);
+        #1;
         alu_resoult = 32'h40020060 + 0 * 4; //Timer CS Reg
         rs2_value = 32'b0;
         rs2_value[3:2] = 2'b10; //PWM mode
         @ (posedge clock);
         #1;
-        
+        rs2_value[0] = 1'b1; //Start
+        @ (posedge clock);
+        #1;
+        en_in = 1'b0;
+        we_in = 1'b0;
+        for (int i = 0; i < n_clocks + 2; ++i) begin
+            @(posedge clock);
+            #1;
+        end
+        validating = 1'b1;
+        if(timer_pwm == 1'b1) begin
+            $display("Test #%0d-a: OK", testN);
+        end else begin
+            $display("Test #%0d-a: FAILED -> timer_pwm was %0b expected %0b", testN, timer_pwm, 1'b1);
+        end
+        #1;
+        validating = 1'b0;
+        for (int i = 0; i < n_clocks + 2; ++i) begin
+            @(posedge clock);
+            #1;
+        end
+        validating = 1'b1;
+        if(timer_pwm == 1'b0) begin
+            $display("Test #%0d-b: OK", testN);
+        end else begin
+            $display("Test #%0d-b: FAILED -> timer_pwm was %0b expected %0b", testN, timer_pwm, 1'b0);
+        end
+        #1;
+        validating = 1'b0;
+        #1000;
 
     end
     endtask
