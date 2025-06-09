@@ -63,11 +63,13 @@ architecture Behavioral of timer is
     signal compare          : unsigned(TIMER_SIZE - 1 downto 0) := (others => '0'); -- Usato come valore di confronto per il contatore
     signal timer_mode       : std_logic_vector(1 downto 0) := (others => '0');
     signal capture_mode     : std_logic := '0';
+    signal trigger_mode     : std_logic := '0';
 
     signal timer_mode_reg   : std_logic_vector(1 downto 0) := (others => '0'); -- Registro di stato del timer
     signal compare_reg      : unsigned(TIMER_SIZE - 1 downto 0) := (others => '0'); -- Registro di confronto
     signal capture_mode_reg : std_logic;
     signal capture_reg      : std_logic;
+    signal trigger_mode_reg : std_logic := '0'; -- Registro di stato per il trigger mode
 
     signal cc_sel : integer := 0;
     signal start : std_logic := '0';
@@ -92,6 +94,7 @@ begin
     capture_mode <= regFile(TIMER_REG_CONTROL)(TIMER_CAPTURE_MODE_BIT);
     start <= regFile(TIMER_REG_CONTROL)(TIMER_CREG_RUN_BIT);
     stop <= regFile(TIMER_REG_CONTROL)(TIMER_CREG_STOP_BIT);
+    trigger_mode <= regFile(TIMER_REG_CONTROL)(TIMER_TRIGGER_MODE_BIT);
 
     process(clk, res) is 
         variable regAddr_u : unsigned(31 downto 0);
@@ -109,6 +112,7 @@ begin
             capture_mode_reg <= '0';
             capture_reg <= '0';
             pwm_int <= '0';
+            trigger_mode_reg <= '0';
         elsif rising_edge(clk) then
 
             regAddr_u := unsigned(addr) - TIMER_OFFSET;
@@ -169,6 +173,10 @@ begin
                                 capture_mode_reg <= capture_mode; 
                                 compare_reg <= compare;
                                 timer_state <= timer_capture;
+                                trigger_mode_reg <= trigger_mode; -- Imposta il trigger mode
+                                if( trigger_mode = '0') then
+                                    timer_state <= timer_trigger; 
+                                end if;
                                 counter <= (others => '0'); -- Reset the counter when entering capture mode
                             when "10" => -- PWM
                                 compare_reg <= compare;
@@ -183,6 +191,10 @@ begin
                     if stop = '1' then
                         timer_state <= timer_idle;
                         busy <= '0';
+                    end if;
+                when timer_trigger =>
+                    if capture = capture_mode_reg then
+                        timer_state <= timer_capture; 
                     end if;
                 when timer_capture => 
                     counter <= counter + 1;

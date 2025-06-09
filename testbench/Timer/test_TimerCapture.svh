@@ -23,7 +23,7 @@
 `endif
 
 `define test_TimerCapture_TEXT_ADDR 32'h40000000
-`define test_TimerCapture_TEXT_SIZE 652
+`define test_TimerCapture_TEXT_SIZE 700
 `define test_TimerCapture_DATA_ADDR 32'h40010008
 `define test_TimerCapture_DATA_SIZE 20
 `define test_TimerCapture_BSS_ADDR 32'h40010020
@@ -45,17 +45,20 @@ logic [31:0] test_TimerCapture_text [] = '{
     32'h00812423,
     32'h00912223,
     32'h01212023,
-    32'h0e8000ef,
+    32'h0f4000ef,
     32'hffc1a503,
     32'h00100593,
-    32'h1f4000ef,
-    32'hffc1a503,
-    32'h00100593,
-    32'h204000ef,
+    32'h200000ef,
     32'hffc1a503,
     32'h00000593,
-    32'h00418913,
     32'h210000ef,
+    32'hffc1a503,
+    32'h00100593,
+    32'h00418913,
+    32'h224000ef,
+    32'hffc1a503,
+    32'h00000593,
+    32'h234000ef,
     32'hff81a503,
     32'h00100693,
     32'h00000613,
@@ -177,6 +180,15 @@ logic [31:0] test_TimerCapture_text [] = '{
     32'h0035f593,
     32'h00259593,
     32'hff37f793,
+    32'h00b7e7b3,
+    32'h00f52023,
+    32'h00008067,
+    32'h00052783,
+    32'hfffff737,
+    32'h0015f593,
+    32'h7ff70713,
+    32'h00b59593,
+    32'h00e7f7b3,
     32'h00b7e7b3,
     32'h00f52023,
     32'h00008067,

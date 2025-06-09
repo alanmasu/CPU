@@ -2196,7 +2196,7 @@ logic [31:0] testAxiProgram [] = '{
       test_n = 1;
       validating = 1'b1;
       // Check if a0 == 30
-      if (regFile[9] == 151) begin
+      if (regFile[9] == 6) begin
         testPassed = 1;
         message = "OK";
       end else begin
@@ -2213,7 +2213,7 @@ logic [31:0] testAxiProgram [] = '{
       #1;
       validating = 1'b1;
       // Check if a0 == 30
-      if (regFile[9] == 147) begin
+      if (regFile[9] == 6) begin
         testPassed = 1;
         message = "OK";
       end else begin
@@ -2229,7 +2229,7 @@ logic [31:0] testAxiProgram [] = '{
       // wait (instruction_tb == 32'h0000006f); // Wait for CPU traps
       // @(posedge clock);
       // #1;
-      // test_n = 1;
+      // test_n = 3;
       // // Check if result[0] contains the instruction count
       // read_memory(`results_ADDR, timerValue[31:0]);
       // read_memory(`results_ADDR + 4, timerValue[63:32]);
@@ -2245,7 +2245,7 @@ logic [31:0] testAxiProgram [] = '{
       // #1;
       // validating = 1'b0;
 
-      // test_n = 2;
+      // test_n = 4;
       // // Check if result[1] contains the timer value
       // read_memory(`results_ADDR + 8, timerValue[31:0]);
       // read_memory(`results_ADDR + 12, timerValue[63:32]);

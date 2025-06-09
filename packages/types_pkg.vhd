@@ -48,6 +48,6 @@ package types_pkg is
 
     ------------ TIMER --------------
     type timer_regFile_t is array(0 to 31) of std_logic_vector(31 downto 0);
-    type timer_state_t is (timer_idle, timer_counting, timer_capture, timer_pwm);
+    type timer_state_t is (timer_idle, timer_counting, timer_capture, timer_pwm, timer_trigger);
     
 end package ;

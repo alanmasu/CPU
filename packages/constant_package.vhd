@@ -162,6 +162,7 @@ package constant_package is
         constant TIMER_CAPTURE_SEL_MSB_BIT  : integer := 8;
         constant TIMER_CAPTURE_MODE_BIT     : integer := 9; -- Capture mode (0 = RISING, 1 = FALLING)
         constant TIMER_CREG_BUSY_BIT        : integer := 10; -- Busy bit
+        constant TIMER_TRIGGER_MODE_BIT     : integer := 11; -- Trigger mode (0 = AUTOMATIC, 1 = ON_START)
 
     constant TIMER_REG_COUNTER_LSB          : integer := 1; -- Counter value
     constant TIMER_REG_COUNTER_MSB          : integer := 2;
