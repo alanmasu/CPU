@@ -13,7 +13,7 @@ import types_pkg::*;
 // import constant_package::*;
 
 module test_CPU_wh_AXI();
-  typedef enum { MEMORY, ANDI, I2C, AXI, BTPU, SERIAL_CODE, TIMER} test_type_t;
+  typedef enum { MEMORY, ANDI, I2C, AXI, BTPU, SERIAL_CODE, TIMER, TIMER_CAPTURE} test_type_t;
   test_type_t test_type = MEMORY;
     
   //slave vip agent
@@ -246,6 +246,7 @@ logic [31:0] testAxiProgram [] = '{
   `include "testBlockMatrixMul.svh"
   `include "test_SerialCodeProgram.svh"
   `include "test_TimerContinuous.svh"
+  `include "test_TimerCapture.svh"
 
   //Creating a define for simulating serial code
   `define SIM_SERIAL_CODE_PROGRAM 1
@@ -464,7 +465,7 @@ logic [31:0] testAxiProgram [] = '{
     istruction_count = 0;
     doBTPUTest();
     printLog();
-    
+
     test_type = SERIAL_CODE;
     writeCREG(32'b00); //Reset CPU
     istruction_count = 0;
@@ -476,8 +477,12 @@ logic [31:0] testAxiProgram [] = '{
     istruction_count = 0;
     doTimerContinuousTest();
     printLog();
-
-
+    
+    test_type = TIMER_CAPTURE;
+    writeCREG(32'b00); //Reset CPU
+    istruction_count = 0;
+    doTimerCaptureTest();
+    printLog();
     
     #200ns;
     $finish;
@@ -2153,6 +2158,110 @@ logic [31:0] testAxiProgram [] = '{
     #1;
     validating = 1'b0;
   end
+  endtask
+
+  logic [63:0] timerValue = 0;
+
+  task automatic doTimerCaptureTest;
+    integer i;
+    logic testPassed = 0;
+    string message;
+    begin
+      test_n = 0;
+      $display("\nTesting Timer Capture mode");
+      `ifdef test_TimerCapture_TEXT_ADDR
+        LOAD_PROGRAM(test_TimerCapture_text, `test_TimerCapture_TEXT_ADDR);
+      `endif
+      `ifdef test_TimerCapture_BSS_ADDR
+        for (int i = 0; i < `test_TimerCapture_BSS_SIZE / 4; i++) begin
+          write_memory(`test_TimerCapture_BSS_ADDR + i * 4, 0);
+        end
+      `endif
+      `ifdef test_TimerCapture_DATA_ADDR
+        LOAD_PROGRAM(test_TimerCapture_data, `test_TimerCapture_DATA_ADDR);
+      `endif
+      `ifdef test_TimerCapture_CONST_ADDR
+        LOAD_PROGRAM(test_TimerCapture_const, `test_TimerCapture_CONST_ADDR);
+      `endif
+
+      run = 1'b0; //Set RUN to 0 to stop the CPU
+      writeCREG(32'b11); //Set CPU in RUN 
+      run = 1'b1; //Set RUN to 1 to start the CPU
+
+      @(instruction_tb); // Wait for the first instruction
+
+      wait (instruction_tb == 32'h00a92023); // sw a0, 0(s2) [lo(result[0])]
+      @(instruction_tb); // Wait for the instruction to be executed
+      #1;
+      test_n = 1;
+      validating = 1'b1;
+      // Check if a0 == 30
+      if (regFile[9] == 151) begin
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = $sformatf("FAILED -> regFile[10] was %0d", regFile[9]);
+      end
+      addToLog(test_n, 1, message, regFile[9]);
+      #1;
+      validating = 1'b0;
+
+      test_n = 2;
+      wait (instruction_tb == 32'h00a92423); // sw a1, 8(s2) [lo(result[1])]
+      @(instruction_tb); // Wait for the instruction to be executed
+      #1;
+      validating = 1'b1;
+      // Check if a0 == 30
+      if (regFile[9] == 147) begin
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = $sformatf("FAILED -> regFile[10] was %0d", regFile[9]);
+      end
+      addToLog(test_n, 1, message, regFile[9]);
+      #1;
+      validating = 1'b0;
+
+
+
+      // wait (instruction_tb == 32'h0000006f); // Wait for CPU traps
+      // @(posedge clock);
+      // #1;
+      // test_n = 1;
+      // // Check if result[0] contains the instruction count
+      // read_memory(`results_ADDR, timerValue[31:0]);
+      // read_memory(`results_ADDR + 4, timerValue[63:32]);
+      // validating = 1'b1;
+      // if (timerValue == 10 * 4 + 6) begin
+      //   testPassed = 1;
+      //   message = "OK";
+      // end else begin
+      //   testPassed = 0;
+      //   message = $sformatf("FAILED -> timer capture was %0d", timerValue);
+      // end
+      // addToLog(test_n, 1, message, timerValue);
+      // #1;
+      // validating = 1'b0;
+
+      // test_n = 2;
+      // // Check if result[1] contains the timer value
+      // read_memory(`results_ADDR + 8, timerValue[31:0]);
+      // read_memory(`results_ADDR + 12, timerValue[63:32]);
+      // validating = 1'b1;
+      // if (timerValue == 10 * 4 + 6) begin
+      //   testPassed = 1;
+      //   message = "OK";
+      // end else begin
+      //   testPassed = 0;
+      //   message = $sformatf("FAILED -> timer value was %0d", timerValue);
+      // end
+      // addToLog(test_n, 1, message, timerValue);
+      // #1;
+      // validating = 1'b0;
+
+    end
   endtask
 
 
