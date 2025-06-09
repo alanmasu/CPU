@@ -208,7 +208,6 @@ entity CPU is
 
         -- CDMA
         cdma_interrupt : in STD_LOGIC
-        
     );
 end CPU;
 
@@ -398,6 +397,9 @@ architecture Behavioral of CPU is
     signal btpu_bram_addr  : STD_LOGIC_VECTOR(31 DOWNTO 0);
     signal btpu_bram_din   : STD_LOGIC_VECTOR(31 DOWNTO 0);
     signal btpu_bram_dout  : STD_LOGIC_VECTOR(31 DOWNTO 0);
+
+    -- Timer
+    signal timer_cc        : std_logic_vector(31 downto 0) := (others => '0');
 
     --DEBUG
     signal state_dbg_sig : std_logic_vector(2 downto 0);
@@ -736,9 +738,27 @@ begin
             web => btpu_bram_we,
             addrb => btpu_bram_addr,
             dinb => btpu_bram_din,
-            doutb => btpu_bram_dout
+            doutb => btpu_bram_dout,
+
+            busy => timer_cc(0)
         );
 
+    timer_inst : entity work.timer
+        generic map(
+            TIMER_SIZE => 40
+        )
+        port map(
+            clk => clk,
+            res => res,
+            en  => mem_wb_en_out.en_timer,
+            wea => mem_wb_we_out,
+            addr => mem_wb_addr_out,
+            din  => mem_wb_data_out,
+            dout => d_bus_in.timer_data,
+
+            cc   => timer_cc,
+            pwm  => leds(0)
+        );
 
 
     ----------------------------------- DEBUG -----------------------------------
@@ -887,9 +907,8 @@ begin
     end process ; -- reset_pro
 
     -- PS-PL GPIO
-    leds(0) <= control_reg(CREG_IO)(CREG_LED0_BIT);
-    leds(1) <= control_reg(CREG_IO)(CREG_LED1_BIT);
-    leds(2) <= control_reg(CREG_IO)(CREG_LED2_BIT);
+    leds(1) <= control_reg(CREG_IO)(CREG_LED0_BIT);
+    leds(2) <= control_reg(CREG_IO)(CREG_LED1_BIT);
 
     -- OLED Display
     oled_select(2 downto 1) <= control_reg(CREG_OLED_CTR)(1 downto 0);

@@ -38,7 +38,6 @@ package constant_package is
         
         constant CREG_LED0_BIT      : integer := 24;
         constant CREG_LED1_BIT      : integer := 25;
-        constant CREG_LED2_BIT      : integer := 26;
 
     constant CREG_OLED_CTR          : integer := 5;
         constant CREG_OLED_SELECT_BIT1 : integer := 0;
