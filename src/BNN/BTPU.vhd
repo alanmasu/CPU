@@ -66,7 +66,9 @@ entity btpu is
         web     : in STD_LOGIC_VECTOR(3 downto 0);
         addrb   : in STD_LOGIC_VECTOR(31 downto 0);
         dinb    : in STD_LOGIC_VECTOR(31 downto 0);
-        doutb   : out STD_LOGIC_VECTOR(31 downto 0)
+        doutb   : out STD_LOGIC_VECTOR(31 downto 0);
+
+        busy    : out STD_LOGIC
     );
 end btpu;
 
@@ -117,7 +119,7 @@ architecture Behavioral of btpu is
     -- FSM Signals
     signal state : BTPU_state_t := IDLE;
     signal start : std_logic := '0';
-    signal busy  : std_logic := '0';
+    signal busy_s  : std_logic := '0';
     signal err   : std_logic := '0';
     signal weigth_word      : STD_LOGIC_VECTOR(W_DIM - 1 downto 0) := (others => '0');
     signal activaction_word : STD_LOGIC_VECTOR(W_DIM - 1 downto 0) := (others => '0');
@@ -384,7 +386,7 @@ begin
         n_reg <= unsigned(control_reg(BTPU_N_SIZE)(clog2(MEM_B_SIZE) - 1 downto 0));
         k_reg <= unsigned(control_reg(BTPU_K_SIZE)(clog2(MEM_B_SIZE) - 1 downto 0));
 
-        -- control_reg(BTPU_REG_CONTROL)(BTPU_CREG_BUSY_BIT) <= busy;
+        -- control_reg(BTPU_REG_CONTROL)(BTPU_CREG_BUSY_BIT) <= busy_s;
         -- control_reg(BTPU_STATUS) <= std_logic_vector(to_unsigned(BTPU_state_t'POS(state), 32));
 
         control_reg_file : process( clk, res) is 
@@ -414,7 +416,7 @@ begin
                     case reg_addr is
                         when BTPU_REG_CONTROL =>
                             creg_out <= control_reg(reg_addr);
-                            creg_out(BTPU_CREG_BUSY_BIT) <= busy;
+                            creg_out(BTPU_CREG_BUSY_BIT) <= busy_s;
                             creg_out(BTPU_CREG_ERROR_BIT) <= err;
                         when BTPU_STATUS =>
                             creg_out <= std_logic_vector(to_unsigned(BTPU_state_t'POS(state), 32));
@@ -430,7 +432,7 @@ begin
                     control_reg(BTPU_REG_CONTROL)(BTPU_CREG_ACC_CLEAR_BIT) <= '0';
                 end if ;
 
-                control_reg(BTPU_REG_CONTROL)(BTPU_CREG_BUSY_BIT)  <= busy;
+                control_reg(BTPU_REG_CONTROL)(BTPU_CREG_BUSY_BIT)  <= busy_s;
                 control_reg(BTPU_REG_CONTROL)(BTPU_CREG_ERROR_BIT) <= err;
                 control_reg(BTPU_STATUS) <= std_logic_vector(to_unsigned(BTPU_state_t'POS(state), 32));
             end if;
@@ -502,10 +504,10 @@ begin
                 acc_en     <= '0';
                 case state is
                     when IDLE =>
-                        busy <= '0';
+                        busy_s <= '0';
                         if start = '1' then
                             err <= '0';
-                            busy <= '1';
+                            busy_s <= '1';
                             bram_w_enb <= '1';
                             bram_i_en  <= '1';
                             r := (others => '0');
@@ -521,23 +523,23 @@ begin
                             state <= FETCHING;
                             if addr_w_base_reg > mem_b_size_u -1 or addr_i_base_reg > mem_b_size_u -1 or addr_o_base_reg > mem_b_size_u -1 then
                                 err <= '1';
-                                busy <= '0';
+                                busy_s <= '0';
                                 state <= IDLE;
                             end if;
                             if m * n > mem_b_size_u or n * k > mem_b_size_u or m * k > mem_b_size_u then
                                 err <= '1';
-                                busy <= '0';
+                                busy_s <= '0';
                                 state <= IDLE;
                             end if;
                         end if;
                     when FETCHING =>
-                        busy <= '1';
+                        busy_s <= '1';
                         bram_o_en  <= '0';
                         tile_number <= (others => '0');
                         acc_en <= '1';
                         state <= EXECUTE;
                     when EXECUTE =>
-                        busy <= '1';
+                        busy_s <= '1';
                         acc_en <= '1';
                         tile_number <= tile_number + 1;
                         if tile_number = tiles_n_u - 1 then
@@ -566,7 +568,7 @@ begin
                             end if;
                         end if;
                     when WRITE_BACK =>
-                        busy <= '1';
+                        busy_s <= '1';
                         if is_batched = '0' then
                             state <= IDLE;
                         elsif is_batched = '1' then
@@ -591,7 +593,7 @@ begin
                             state <= IDLE;
                         end if;
                     when CLEAR_ACC =>
-                        busy <= '1';
+                        busy_s <= '1';
                         tile_number <= (others => '0');
                         force_acc_clear <= '0';
                         acc_en <= '1';
@@ -612,6 +614,7 @@ begin
                 bram_o_addr  <= address_tmp(clog2(MEM_B_SIZE) - 1 downto 0);
             end if ;
         end process ; -- state_machine
+        busy <= busy_s;
 
     --------------- Debug Signals -----------------
         res0 <= result_word(255 downto 0);

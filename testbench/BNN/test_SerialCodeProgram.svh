@@ -1,3 +1,7 @@
+`ifndef results_ADDR
+	`define results_ADDR 32'h40010008
+`endif
+
 `define test_SerialCode_TEXT_ADDR 32'h40000000
 `define test_SerialCode_TEXT_SIZE 396
 `define test_SerialCode_BSS_ADDR 32'h40010008
@@ -7,7 +11,7 @@
 logic [31:0] test_SerialCode_text [] = '{
     32'h00010197,
     32'h04418193,
-    32'h00012117,
+    32'h00020117,
     32'hff810113,
     32'h400102b7,
     32'h0002a503,
@@ -109,7 +113,3 @@ logic [31:0] test_SerialCode_text [] = '{
 
 // Nessun dato nella sezione const
 // Nessun dato nella sezione data
-`ifndef results_ADDR
-	`define results_ADDR 32'h40010008
-`endif
-
