@@ -6,16 +6,16 @@
 	`define BTPU0_W_MEMORY_ADDR 32'h40010010
 `endif
 
-`ifndef results_ADDR
-	`define results_ADDR 32'h40010020
-`endif
-
 `ifndef BTPU0_IO1_MEMORY_ADDR
 	`define BTPU0_IO1_MEMORY_ADDR 32'h40010008
 `endif
 
 `ifndef BTPU0RegFile_ADDR
 	`define BTPU0RegFile_ADDR 32'h40010014
+`endif
+
+`ifndef resultsTestCapture_ADDR
+	`define resultsTestCapture_ADDR 32'h40010020
 `endif
 
 `ifndef Timer0RegFile_ADDR
