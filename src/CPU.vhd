@@ -178,13 +178,12 @@ entity CPU is
         CREG_CTR_dbg    : OUT STD_LOGIC_VECTOR(7 downto 0);
         rd_addr_dbg     : OUT STD_LOGIC_VECTOR(4 downto 0);
 
-        gpio_state_dbg  : OUT STD_LOGIC_VECTOR(31 downto 0);
-        gpio_dbg        : OUT STD_LOGIC_VECTOR(31 downto 0);
-
-        read_state_dbg : out std_logic_vector(2 downto 0);
-		awrite_state_dbg : out std_logic_vector(2 downto 0);
-		dwrite_state_dbg : out std_logic_vector(2 downto 0);
-		bready_dbg : out std_logic;
+        -- read_state_dbg : out std_logic_vector(2 downto 0);
+		-- awrite_state_dbg : out std_logic_vector(2 downto 0);
+		-- dwrite_state_dbg : out std_logic_vector(2 downto 0);
+		-- bready_dbg : out std_logic;
+        -- btpu_readed     : OUT STD_LOGIC_VECTOR(31 downto 0);
+        -- AXI_readed      : OUT STD_LOGIC_VECTOR(31 downto 0);
 
         -- Buttons
         btn_up          : IN STD_LOGIC;
@@ -619,13 +618,13 @@ begin
 		M_AXI_RDATA => M_AXI_RDATA,
 		M_AXI_RRESP => M_AXI_RRESP,
 		M_AXI_RVALID => M_AXI_RVALID,
-		M_AXI_RREADY => M_AXI_RREADY,
+		M_AXI_RREADY => M_AXI_RREADY--,
 
         ----- DEBUG ----
-        read_state_dbg => read_state_dbg,
-        awrite_state_dbg => awrite_state_dbg,
-        dwrite_state_dbg => dwrite_state_dbg,
-        bready_dbg => bready_dbg
+--        read_state_dbg => read_state_dbg,
+--        awrite_state_dbg => awrite_state_dbg,
+--        dwrite_state_dbg => dwrite_state_dbg,
+--        bready_dbg => bready_dbg
     );
 
     -- GPIO
@@ -782,13 +781,9 @@ begin
     instruction_dbg <= instruction_fetched;
     CREG_CTR_dbg    <= control_reg(CREG_CTR)(7 downto 0);
     rd_addr_dbg     <= rd_addr_in_decode;
-    
-    gpio_for_loop: for i in 0 to 31 generate
-        -- gpio_state_dbg(i) <= '1' when to_X01(GPIO(i)) = '1' else '0';
-        gpio_dbg(i) <= '1' when to_X01(GPIO(i)) = '1' else '0';
-    end generate;
-    -- gpio_dbg        <= GPIO;
-    
+
+    -- btpu_readed <= d_bus_in.BTPU_data;
+    -- AXI_readed <= AXI_read_data;   
 
     state_dbg_comb : process( state ) is 
         variable state_integer : integer := 0;
@@ -931,7 +926,8 @@ begin
                 display_in <= instruction_fetched;
             when 2 =>
                 -- display_in(2 downto 0) <= state_dbg_sig;
-                display_in(31 downto 3) <= (others => '0');
+                -- display_in(31 downto 3) <= (others => '0');
+                display_in <= (others => '0');
             when 3 =>
                 display_in <= control_reg(CREG_OLED_DATA);
             when others =>
@@ -995,6 +991,10 @@ begin
     mem_wb_mem_opcode   <= mem_opcode_executed  when is_axi_load = '0' else mem_opcode_reg;
 
     ena_mealy : process( state, AXI_stall, run, op_class_decoded, is_axi_load ) begin
+        mem_we <= '0';
+        mem_ena <= '0';
+        regFile_we <= '0';
+        pc_load <= '0';
         if run = '1' then
             case state is
                 when idle =>

@@ -247,6 +247,7 @@ logic [31:0] testAxiProgram [] = '{
   `include "test_SerialCodeProgram.svh"
   `include "test_TimerContinuous.svh"
   `include "test_TimerCapture.svh"
+  `include "test_LoadStoreBTPUProgram.svh"
 
   //Creating a define for simulating serial code
   `define SIM_SERIAL_CODE_PROGRAM 1
@@ -482,6 +483,12 @@ logic [31:0] testAxiProgram [] = '{
     writeCREG(32'b00); //Reset CPU
     istruction_count = 0;
     doTimerCaptureTest();
+    printLog();
+
+    test_type = MEMORY;
+    writeCREG(32'b00); //Reset CPU
+    istruction_count = 0;
+    doLoadStoreBTPUTest();
     printLog();
     
     #200ns;
@@ -2262,6 +2269,54 @@ logic [31:0] testAxiProgram [] = '{
       addToLog(test_n, 1, message, timerValue);
       #1;
       validating = 1'b0;
+
+    end
+  endtask
+
+  task automatic doLoadStoreBTPUTest;
+    integer i;
+    logic testPassed = 0;
+    string message;
+    begin
+      $display("\nTesting Load/Store BTPU module");
+      `ifdef test_LoadStoreBTPU_TEXT_ADDR
+        LOAD_PROGRAM(test_LoadStoreBTPU_text, `test_LoadStoreBTPU_TEXT_ADDR);
+      `else
+        $display("`test_LoadStoreBTPU_TEXT_ADDR is not defined, skipping Load/Store BTPU test");
+      `endif
+      `ifdef test_LoadStoreBTPU_DATA_ADDR
+        LOAD_PROGRAM(test_LoadStoreBTPU_data, `test_LoadStoreBTPU_DATA_ADDR);
+      `endif
+      `ifdef test_LoadStoreBTPU_CONST_ADDR
+        LOAD_PROGRAM(test_LoadStoreBTPU_const, `test_LoadStoreBTPU_CONST_ADDR);
+      `endif
+
+      run = 1'b0; //Set RUN to 0 to stop the CPU
+      writeCREG(32'b11); //Set CPU in RUN 
+      run = 1'b1; //Set RUN to 1 to start the CPU
+
+      wait (state_tb == fetch);
+      @(instruction_tb); // Wait for the first instruction
+      #1;
+
+      wait (instruction_tb == 32'h0000006f); // Wait for CPU traps
+      `ifdef value_ADDR
+        read_memory(`value_ADDR, data_readed);  
+        validating = 1'b1;
+        if (data_readed == 32'h12345678) begin
+          testPassed = 1;
+          message = "OK";
+        end else begin
+          testPassed = 0;
+          message = $sformatf("FAILED -> Memory[0x%08X] was", `value_ADDR);
+        end
+        addToLog(1, testPassed, message, data_readed);
+        #1;
+        validating = 1'b0;
+      `else
+        $display("`value_ADDR is not defined, skipping Load/Store BTPU test");
+      `endif
+
 
     end
   endtask

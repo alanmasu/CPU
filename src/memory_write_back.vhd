@@ -154,9 +154,8 @@ begin
                 when others =>
                     dato := dato;
             end case ;
-            mem_in <= dato(63 downto 32);
         end if ;
-        
+        mem_in <= dato(63 downto 32);
     end process ; -- data_in_combinatory
 
 
