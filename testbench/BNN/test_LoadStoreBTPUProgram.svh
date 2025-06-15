@@ -11,7 +11,7 @@
 `endif
 
 `define test_LoadStoreBTPU_TEXT_ADDR 32'h40000000
-`define test_LoadStoreBTPU_TEXT_SIZE 76
+`define test_LoadStoreBTPU_TEXT_SIZE 108
 `define test_LoadStoreBTPU_DATA_ADDR 32'h40010008
 `define test_LoadStoreBTPU_DATA_SIZE 8
 `define test_LoadStoreBTPU_BSS_ADDR 32'h40010010
@@ -28,15 +28,23 @@ logic [31:0] test_LoadStoreBTPU_text [] = '{
     32'h0042a583,
     32'h00000097,
     32'h008080e7,
-    32'hffa1a703,
-    32'h123457b7,
-    32'h67878793,
-    32'h00f72023,
-    32'h00f1a123,
-    32'hffe1a703,
-    32'h00072783,
-    32'h0087e793,
-    32'h00f72023,
+    32'hfe010113,
+    32'h00112e23,
+    32'h00812c23,
+    32'h02010413,
+    32'hfea42623,
+    32'hfeb42423,
+    32'hffa1a783,
+    32'h12345737,
+    32'h67870713,
+    32'h00e7a023,
+    32'hffa1a783,
+    32'h0007a703,
+    32'h00e1a123,
+    32'hffe1a783,
+    32'h0007a703,
+    32'h00876713,
+    32'h00e7a023,
     32'h0000006f,
     32'h00000000
 };
@@ -47,3 +55,4 @@ logic [31:0] test_LoadStoreBTPU_data [] = '{
     32'h40020030,
     32'h00000000
 };
+

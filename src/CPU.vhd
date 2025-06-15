@@ -182,7 +182,7 @@ entity CPU is
 		-- awrite_state_dbg : out std_logic_vector(2 downto 0);
 		-- dwrite_state_dbg : out std_logic_vector(2 downto 0);
 		-- bready_dbg : out std_logic;
-        -- btpu_readed     : OUT STD_LOGIC_VECTOR(31 downto 0);
+        btpu_readed     : OUT STD_LOGIC_VECTOR(31 downto 0);
         -- AXI_readed      : OUT STD_LOGIC_VECTOR(31 downto 0);
 
         -- Buttons
@@ -782,7 +782,7 @@ begin
     CREG_CTR_dbg    <= control_reg(CREG_CTR)(7 downto 0);
     rd_addr_dbg     <= rd_addr_in_decode;
 
-    -- btpu_readed <= d_bus_in.BTPU_data;
+    btpu_readed <= d_bus_in.BTPU_data;
     -- AXI_readed <= AXI_read_data;   
 
     state_dbg_comb : process( state ) is 
