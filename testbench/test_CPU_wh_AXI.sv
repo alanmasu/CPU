@@ -344,9 +344,12 @@ logic [31:0] testAxiProgram [] = '{
     string message;
     begin
       if (check_queue_size > 0) begin
+        $display("doQueuedTests: check_queue_size = %0d", check_queue_size);        
         for (int i = 0; i < check_queue_size; i++) begin
           check_record_t check_record = check_queue.pop_front();
-          check_queue_size--;
+          $display("doQueuedTests: i = %0d", i);
+          test_n = check_record.test_n;
+          // check_queue_size--;
           mtestADDR = check_record.addr;
           mst_agent_0.AXI4LITE_READ_BURST( 
             mtestADDR, 
@@ -355,6 +358,7 @@ logic [31:0] testAxiProgram [] = '{
             mtestRresp 
           );
           check_record.readed_data = mtestRDataL[31:0];
+          validating = 1'b1;
           if (check_record.readed_data == check_record.assert_data) begin
             check_record.resoult = 1;
             message = check_record.messageOnPass;
@@ -363,6 +367,8 @@ logic [31:0] testAxiProgram [] = '{
             message = check_record.messageOnFail;
           end
           addToLog(check_record.test_n, check_record.resoult, message, check_record.readed_data, check_record.name);
+          #1;
+          validating = 1'b0;
           checked_queue.push_back(check_record);
           checked_queue_size++;
         end
@@ -1079,12 +1085,12 @@ logic [31:0] testAxiProgram [] = '{
 
       test_n = 21;
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
-      #1;                       //wait to be after the rising edge of the clock
-      validating = 1'b1;
+      // #1;                       //wait to be after the rising edge of the clock
+      // validating = 1'b1;
       //Check instruction       sw x12, 0(x12)
-      // addToLog(test_n, 1, "SKIPPED", 1);
-      #1;
-      validating = 1'b0;
+      checkQueuePush(test_n, 32'h40000000, 32'h40000000, "OK", "FAILED -> Mem[0x40000000] was");
+      // #1;
+      // validating = 1'b0;
       @(posedge clock);
       #1;
 
@@ -1100,11 +1106,6 @@ logic [31:0] testAxiProgram [] = '{
       end else begin
         testPassed = 0;
         message = "FAILED -> regFile[13] was";
-      end
-      if(testPassed == 1) begin
-        addToLog(test_n-1, 1, "OK", 1);
-      end else begin
-        addToLog(test_n-1, 1, "UNKNOWN -> reading memory at the address get:", regFile[12]);
       end
       addToLog(test_n, testPassed, message, regFile[12]);
 

@@ -103,6 +103,7 @@ architecture Behavioral of memory_write_back is
         others => '0'
     );
     signal we, mem_wea : std_logic_vector(3 downto 0) := (others => '0');
+    signal address_reg : std_logic_vector(31 downto 0);
 begin
     memory : data_memory
     PORT MAP (
@@ -189,10 +190,14 @@ begin
                 en_I2C => '0',
                 others => '0'
             );
+            address_reg <= (others => '0');
         elsif rising_edge(clk) then
             en_bus_reg <= en_bus;
             if is_axi_load = '1' then
                 en_bus_reg <= en_bus_reg;
+            end if ;
+            if en_in = '1' then
+                address_reg <= alu_resoult;
             end if ;
         end if ;
         
@@ -214,17 +219,27 @@ begin
         --         dato := dato;
         -- end case ;
         dato := unsigned(mem_out);
-        if en_bus_reg.en_AXI then
+        if is_in_space(address_reg, AXI) then
             dato := unsigned(d_in.axi_data);
-        elsif en_bus_reg.en_GPIO then
+        elsif is_in_space(address_reg, ROM) then
+            dato := unsigned(d_in.axi_data);
+        elsif is_in_space(address_reg, CREG_FILE) then
+            dato := unsigned(d_in.axi_data);
+        elsif is_in_space(address_reg, GPIO) then
             dato := unsigned(d_in.GPIO_data);
-        elsif en_bus_reg.en_I2C then
+        elsif is_in_space(address_reg, I2C) then
             dato := unsigned(d_in.I2C_data);
-        elsif en_bus_reg.en_BTPU_CREG or en_bus_reg.en_BTPU_W_MEM or en_bus_reg.en_BTPU_IO0_MEM or en_bus_reg.en_BTPU_IO1_MEM then
+        elsif is_in_space(address_reg, BTPU_CREG_FILE) then
             dato := unsigned(d_in.BTPU_data);
-        elsif en_bus_reg.en_timer then
+        elsif is_in_space(address_reg, BTPU_W_MEM) then
+            dato := unsigned(d_in.BTPU_data);
+        elsif is_in_space(address_reg, BTPU_IO0_MEM) then
+            dato := unsigned(d_in.BTPU_data);
+        elsif is_in_space(address_reg, BTPU_IO1_MEM) then
+            dato := unsigned(d_in.BTPU_data);
+        elsif is_in_space(address_reg, TIMER) then
             dato := unsigned(d_in.timer_data);
-        end if ;
+        end if;
 
         --Sign extension
         if op_class = "00100" then   --LOAD
