@@ -77,6 +77,7 @@ architecture Behavioral of timer is
     signal busy : std_logic := '0';
     signal capture : std_logic := '0'; 
     signal pwm_int : std_logic := '0';
+    signal pwm_tc : std_logic_vector(TIMER_SIZE - 1 downto 0) := (others => '0'); -- Segnale PWM temporaneo
 
     -- DEBUG
     signal regAddr_s : integer := 0; -- Registro di stato per debug
@@ -95,6 +96,9 @@ begin
     start <= regFile(TIMER_REG_CONTROL)(TIMER_CREG_RUN_BIT);
     stop <= regFile(TIMER_REG_CONTROL)(TIMER_CREG_STOP_BIT);
     trigger_mode <= regFile(TIMER_REG_CONTROL)(TIMER_TRIGGER_MODE_BIT);
+
+    pwm_tc(31 downto 0) <= regFile(TIMER_REG_CAPTURE_LSB);
+    pwm_tc(COUNTER_MSB_BIT_POS + 31 downto 32) <= regFile(TIMER_REG_CAPTURE_MSB)(COUNTER_MSB_BIT_POS - 1 downto 0);
 
     process(clk, res) is 
         variable regAddr_u : unsigned(31 downto 0);
@@ -227,9 +231,10 @@ begin
                     if stop = '1' then
                         timer_state <= timer_idle;
                         busy <= '0';
-                    elsif counter = compare_reg then
-                        counter <= (others => '0'); -- Resetta il contatore quando raggiunge il valore di confronto
+                    elsif counter = compare then
                         pwm_int <= not pwm_int; -- Inverte il segnale PWM quando il contatore supera il valore di confronto
+                    elsif counter = pwm_tc then
+                        counter <= (others => '0'); -- Resetta il contatore quando raggiunge il valore di cattura
                     end if;
                 when others =>
                     timer_state <= timer_idle; -- Default case
