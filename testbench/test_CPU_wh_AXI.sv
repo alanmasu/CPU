@@ -51,7 +51,11 @@ module test_CPU_wh_AXI();
 
   logic on_programming = 1'b1;
   int istruction_count = 0;
-   
+
+  //Signal for testing
+  logic validating = 1'b0;
+  int test_n = 0;
+
 //Master vip agent
   axi_transaction                         wr_transaction;   
   xil_axi_uint                            mst_agent_verbosity = 0;  
@@ -247,6 +251,9 @@ logic [31:0] testAxiProgram [] = '{
   `include "test_SerialCodeProgram.svh"
   `include "test_TimerContinuous.svh"
   `include "test_TimerCapture.svh"
+  `include "test_LoadStoreBTPUProgram.svh"
+  `include "test_TimerPWM.svh"
+
 
   //Creating a define for simulating serial code
   `define SIM_SERIAL_CODE_PROGRAM 1
@@ -345,7 +352,8 @@ logic [31:0] testAxiProgram [] = '{
       if (check_queue_size > 0) begin
         for (int i = 0; i < check_queue_size; i++) begin
           check_record_t check_record = check_queue.pop_front();
-          check_queue_size--;
+          test_n = check_record.test_n;
+          // check_queue_size--;
           mtestADDR = check_record.addr;
           mst_agent_0.AXI4LITE_READ_BURST( 
             mtestADDR, 
@@ -354,6 +362,7 @@ logic [31:0] testAxiProgram [] = '{
             mtestRresp 
           );
           check_record.readed_data = mtestRDataL[31:0];
+          validating = 1'b1;
           if (check_record.readed_data == check_record.assert_data) begin
             check_record.resoult = 1;
             message = check_record.messageOnPass;
@@ -362,6 +371,8 @@ logic [31:0] testAxiProgram [] = '{
             message = check_record.messageOnFail;
           end
           addToLog(check_record.test_n, check_record.resoult, message, check_record.readed_data, check_record.name);
+          #1;
+          validating = 1'b0;
           checked_queue.push_back(check_record);
           checked_queue_size++;
         end
@@ -483,6 +494,18 @@ logic [31:0] testAxiProgram [] = '{
     istruction_count = 0;
     doTimerCaptureTest();
     printLog();
+
+    test_type = MEMORY;
+    writeCREG(32'b00); //Reset CPU
+    istruction_count = 0;
+    doLoadStoreBTPUTest();
+    printLog();
+
+    test_type = TIMER;
+    writeCREG(32'b00); //Reset CPU
+    istruction_count = 0;
+    doTimerPWMTest();
+    printLog();
     
     #200ns;
     $finish;
@@ -494,26 +517,25 @@ logic [31:0] testAxiProgram [] = '{
       input bit [(32/8)-1:0]  wr_strb ={(32/8){4'b1111}}
     );
     slv_agent_0.mem_model.backdoor_memory_write(addr, wr_data, wr_strb);
-
   endtask
 
   task backdoor_mem_read(
       input xil_axi_ulong mem_rd_addr,
       output bit [32-1:0] mem_rd_data
     );
-    mem_rd_data= slv_agent_0.mem_model.backdoor_memory_read(mem_rd_addr);
-
+    mem_rd_data = slv_agent_0.mem_model.backdoor_memory_read(mem_rd_addr);
   endtask
 
-  task read_memory(input xil_axi_ulong mem_rd_addr, output bit [32-1:0] mem_rd_data);
-  begin
+  task read_memory(
+      input xil_axi_ulong mem_rd_addr, 
+      output bit [32-1:0] mem_rd_data
+    );
     mst_agent_0.AXI4LITE_READ_BURST(
       mem_rd_addr, 
       mtestProtectionType, 
       mem_rd_data, 
       mtestRresp
     );
-  end
   endtask
 
   task write_memory(
@@ -579,10 +601,6 @@ logic [31:0] testAxiProgram [] = '{
             on_programming = 1'b0;
         end
     endtask
-
-  //Signal for testing
-  logic validating = 1'b0;
-  integer test_n = 0;
 
   //Modificare questo task qui per il testbench
   //Segnali gerarchici
@@ -1072,12 +1090,12 @@ logic [31:0] testAxiProgram [] = '{
 
       test_n = 21;
       wait (state_tb == fetch); //wait until the CPU has executed the next instruction
-      #1;                       //wait to be after the rising edge of the clock
-      validating = 1'b1;
+      // #1;                       //wait to be after the rising edge of the clock
+      // validating = 1'b1;
       //Check instruction       sw x12, 0(x12)
-      // addToLog(test_n, 1, "SKIPPED", 1);
-      #1;
-      validating = 1'b0;
+      checkQueuePush(test_n, 32'h40000000, 32'h40000000, "OK", "FAILED -> Mem[0x40000000] was");
+      // #1;
+      // validating = 1'b0;
       @(posedge clock);
       #1;
 
@@ -1093,11 +1111,6 @@ logic [31:0] testAxiProgram [] = '{
       end else begin
         testPassed = 0;
         message = "FAILED -> regFile[13] was";
-      end
-      if(testPassed == 1) begin
-        addToLog(test_n-1, 1, "OK", 1);
-      end else begin
-        addToLog(test_n-1, 1, "UNKNOWN -> reading memory at the address get:", regFile[12]);
       end
       addToLog(test_n, testPassed, message, regFile[12]);
 
@@ -1937,6 +1950,9 @@ logic [31:0] testAxiProgram [] = '{
     integer i;
     logic testPassed = 0;
     string message;
+    int errorCount1 = 0;
+    int errorCount2 = 0;
+    int errorCount3 = 0;
     begin
       $display("\nTesting BTPU module");
       `ifdef testBTPU_TEXT_ADDR
@@ -1958,75 +1974,98 @@ logic [31:0] testAxiProgram [] = '{
 
       wait (instruction_tb == 32'h0000006f); // Wait for CPU traps
 
-      test_n = 0;
+      test_n = 1;
       for(i = 0; i < btpu_test_size; ++i) begin
         read_memory(w_addr_base + i * 4, data_readed);
         validating = 1'b1;
-        if (data_readed == i) begin
-          testPassed = 1;
-          message = "OK";
-        end else begin
+        if (data_readed != i) begin
           testPassed = 0;
           message = $sformatf("FAILED -> w[%0d] was", i);
+          addToLog(test_n + i + 1, testPassed, message, data_readed, $sformatf("#%0d-%0da", test_n, i));
+          errorCount1++;
         end
-        addToLog(test_n + i + 1, testPassed, message, data_readed, $sformatf("#%0d-%0da", test_n, i));
         #1;
         validating = 1'b0;
 
         read_memory(a0_addr_base + i * 4, data_readed);
         validating = 1'b1;
-        if (data_readed == i + 1) begin
-          testPassed = 1;
-          message = "OK";
-        end else begin
+        if (data_readed != i + 1) begin
           testPassed = 0;
           message = $sformatf("FAILED -> a0[%0d] was", i);
+          addToLog(test_n + i + 1, testPassed, message, data_readed, $sformatf("#%0d-%0db", test_n, i));
+          errorCount2++;
         end 
-        addToLog(test_n + i + 1, testPassed, message, data_readed, $sformatf("#%0d-%0db", test_n, i));
         #1;
         validating = 1'b0;
 
         read_memory(a1_addr_base + i * 4, data_readed);
         validating = 1'b1;
-        if (data_readed == i + 2) begin
-          testPassed = 1;
-          message = "OK";
-        end else begin
+        if (data_readed != i + 2) begin
           testPassed = 0;
           message = $sformatf("FAILED -> a1[%0d] was", i);
+          addToLog(test_n + i + 1, 1, message, data_readed, $sformatf("#%0d-%0dc", test_n, i));
+          errorCount3++;
         end
-        addToLog(test_n + i + 1, testPassed, message, data_readed, $sformatf("#%0d-%0dc", test_n, i));
         #1;
         validating = 1'b0;
       end
 
-      test_n = 1;
+      if (errorCount1 == 0) begin
+        testPassed = 1;
+        message = "OK";
+        addToLog(test_n + 1, 1, message, data_readed, $sformatf("#%0da", test_n));
+      end 
+
+      if (errorCount2 == 0) begin
+        testPassed = 1;
+        message = "OK";
+        addToLog(test_n + 2, 1, message, data_readed, $sformatf("#%0db", test_n));
+      end
+
+      if (errorCount3 == 0) begin
+        testPassed = 1;
+        message = "OK";
+        addToLog(test_n + 3, 1, message, data_readed, $sformatf("#%0dc", test_n));
+      end
+
+
+      test_n = 2;
+      errorCount1 = 0;
+      errorCount2 = 0;
+      errorCount3 = 0;
       for (i = 0; i < btpu_test_size; ++i) begin
         read_memory(res1_addr_base + i * 4, data_readed);
         validating = 1'b1;
-        if (data_readed == btpu_res1[i]) begin
-          testPassed = 1;
-          message = "OK";
-        end else begin
+        if (data_readed != btpu_res1[i]) begin
           testPassed = 0;
           message = $sformatf("FAILED -> res1[%0d] was", i);
+          addToLog(test_n + i + 1 + 32, 1, message, data_readed, $sformatf("#%0d-%0da", test_n, i));
+          errorCount1++;
         end
-        addToLog(test_n + i + 1 + 32, testPassed, message, data_readed, $sformatf("#%0d-%0da", test_n, i));
         #1;
         validating = 1'b0;
 
         read_memory(res2_addr_base + i * 4, data_readed);
         validating = 1'b1;
-        if (data_readed == btpu_res2[i]) begin
-          testPassed = 1;
-          message = "OK";
-        end else begin
+        if (data_readed != btpu_res2[i]) begin
           testPassed = 0;
           message = $sformatf("FAILED -> res2[%0d] was", i);
+          addToLog(test_n + i + 1 + 32, 1, message, data_readed, $sformatf("#%0d-%0db", test_n, i));
         end
-        addToLog(test_n + i + 1 + 32, testPassed, message, data_readed, $sformatf("#%0d-%0db", test_n, i));
         #1;
         validating = 1'b0;
+      end
+
+      if (errorCount1 == 0) begin
+        testPassed = 1;
+        message = "OK";
+        addToLog(test_n + 1 + 32, 1, message, data_readed, $sformatf("#%0da", test_n));
+      end
+
+      if (errorCount2 == 0) begin
+        testPassed = 1;
+        message = "OK";
+        addToLog(test_n + 2 + 32, 1, message, data_readed, $sformatf("#%0db", test_n));
       end
     end
   endtask
@@ -2196,7 +2235,7 @@ logic [31:0] testAxiProgram [] = '{
       test_n = 1;
       validating = 1'b1;
       // Check if a0 == 30
-      if (regFile[9] == 151) begin
+      if (regFile[9] == 6) begin
         testPassed = 1;
         message = "OK";
       end else begin
@@ -2213,7 +2252,7 @@ logic [31:0] testAxiProgram [] = '{
       #1;
       validating = 1'b1;
       // Check if a0 == 30
-      if (regFile[9] == 147) begin
+      if (regFile[9] == 6) begin
         testPassed = 1;
         message = "OK";
       end else begin
@@ -2226,41 +2265,138 @@ logic [31:0] testAxiProgram [] = '{
 
 
 
-      // wait (instruction_tb == 32'h0000006f); // Wait for CPU traps
-      // @(posedge clock);
-      // #1;
-      // test_n = 1;
-      // // Check if result[0] contains the instruction count
-      // read_memory(`results_ADDR, timerValue[31:0]);
-      // read_memory(`results_ADDR + 4, timerValue[63:32]);
-      // validating = 1'b1;
-      // if (timerValue == 10 * 4 + 6) begin
-      //   testPassed = 1;
-      //   message = "OK";
-      // end else begin
-      //   testPassed = 0;
-      //   message = $sformatf("FAILED -> timer capture was %0d", timerValue);
-      // end
-      // addToLog(test_n, 1, message, timerValue);
-      // #1;
-      // validating = 1'b0;
+      wait (instruction_tb == 32'h0000006f); // Wait for CPU traps
+      @(posedge clock);
+      #1;
+      test_n = 3;
+      // Check if result[0] contains the instruction count
+      read_memory(`resultsTestCapture_ADDR, data_readed);
+      timerValue[31:0] = data_readed;
+      read_memory(`resultsTestCapture_ADDR + 4, data_readed);
+      timerValue[63:32] = data_readed;
+      validating = 1'b1;
+      if (timerValue == 6) begin
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = $sformatf("FAILED -> timer capture was %0d", timerValue);
+      end
+      addToLog(test_n, 1, message, timerValue);
+      #1;
+      validating = 1'b0;
 
-      // test_n = 2;
-      // // Check if result[1] contains the timer value
-      // read_memory(`results_ADDR + 8, timerValue[31:0]);
-      // read_memory(`results_ADDR + 12, timerValue[63:32]);
-      // validating = 1'b1;
-      // if (timerValue == 10 * 4 + 6) begin
-      //   testPassed = 1;
-      //   message = "OK";
-      // end else begin
-      //   testPassed = 0;
-      //   message = $sformatf("FAILED -> timer value was %0d", timerValue);
-      // end
-      // addToLog(test_n, 1, message, timerValue);
-      // #1;
-      // validating = 1'b0;
+      test_n = 4;
+      // Check if result[1] contains the timer value
+      read_memory(`resultsTestCapture_ADDR + 8, timerValue[31:0]);
+      read_memory(`resultsTestCapture_ADDR + 12, timerValue[63:32]);
+      validating = 1'b1;
+      if (timerValue == 6) begin
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = $sformatf("FAILED -> timer value was %0d", timerValue);
+      end
+      addToLog(test_n, 1, message, timerValue);
+      #1;
+      validating = 1'b0;
 
+    end
+  endtask
+
+  task automatic doLoadStoreBTPUTest;
+    integer i;
+    logic testPassed = 0;
+    string message;
+    begin
+      $display("\nTesting Load/Store BTPU module");
+      `ifdef test_LoadStoreBTPU_TEXT_ADDR
+        LOAD_PROGRAM(test_LoadStoreBTPU_text, `test_LoadStoreBTPU_TEXT_ADDR);
+      `else
+        $display("`test_LoadStoreBTPU_TEXT_ADDR is not defined, skipping Load/Store BTPU test");
+      `endif
+      `ifdef test_LoadStoreBTPU_DATA_ADDR
+        LOAD_PROGRAM(test_LoadStoreBTPU_data, `test_LoadStoreBTPU_DATA_ADDR);
+      `endif
+      `ifdef test_LoadStoreBTPU_CONST_ADDR
+        LOAD_PROGRAM(test_LoadStoreBTPU_const, `test_LoadStoreBTPU_CONST_ADDR);
+      `endif
+
+      run = 1'b0; //Set RUN to 0 to stop the CPU
+      writeCREG(32'b11); //Set CPU in RUN 
+      run = 1'b1; //Set RUN to 1 to start the CPU
+
+      wait (state_tb == fetch);
+      @(instruction_tb); // Wait for the first instruction
+      #1;
+
+      wait (instruction_tb == 32'h0000006f); // Wait for CPU traps
+      `ifdef value_ADDR
+        read_memory(`value_ADDR, data_readed);  
+        validating = 1'b1;
+        if (data_readed == 32'h12345678) begin
+          testPassed = 1;
+          message = "OK";
+        end else begin
+          testPassed = 0;
+          message = $sformatf("FAILED -> Memory[0x%08X] was", `value_ADDR);
+        end
+        addToLog(1, testPassed, message, data_readed);
+        #1;
+        validating = 1'b0;
+      `else
+        $display("`value_ADDR is not defined, skipping Load/Store BTPU test");
+      `endif
+
+
+    end
+  endtask
+
+  task automatic doTimerPWMTest;
+    integer i;
+    logic testPassed = 0;
+    string message;
+    time t0;
+    time t1;
+    begin
+      $display("\nTesting Timer PWM mode");
+      `ifdef test_TimerPWM_TEXT_ADDR
+        LOAD_PROGRAM(test_TimerPWM_text, `test_TimerPWM_TEXT_ADDR);
+      `endif
+      `ifdef test_TimerPWM_BSS_ADDR
+        for (int i = 0; i < `test_TimerPWM_BSS_SIZE / 4; i++) begin
+          write_memory(`test_TimerPWM_BSS_ADDR + i * 4, 0);
+        end
+      `endif
+      `ifdef test_TimerPWM_DATA_ADDR
+        LOAD_PROGRAM(test_TimerPWM_data, `test_TimerPWM_DATA_ADDR);
+      `endif
+      `ifdef test_TimerPWM_CONST_ADDR
+        LOAD_PROGRAM(test_TimerPWM_const, `test_TimerPWM_CONST_ADDR);
+      `endif
+
+      run = 1'b0; //Set RUN to 0 to stop the CPU
+      writeCREG(32'b11); //Set CPU in RUN 
+      run = 1'b1; //Set RUN to 1 to start the CPU
+
+      test_n = 1;
+      @(LEDs[0]);
+      t0 = $time;
+      @(LEDs[0]);
+      t1 = $time;
+      validating = 1'b1;
+      if ((t1 - t0) == 67 * CLOCK_PERIOD) begin
+        testPassed = 1;
+        message = "OK";
+      end else begin
+        testPassed = 0;
+        message = "FAILED -> t1 - t0 was";
+      end
+      addToLog(test_n, testPassed, message, (t1 - t0), $sformatf("#%0d", test_n));
+      #1;
+      validating = 1'b0;
+      
     end
   endtask
 

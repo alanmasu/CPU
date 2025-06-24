@@ -63,11 +63,13 @@ architecture Behavioral of timer is
     signal compare          : unsigned(TIMER_SIZE - 1 downto 0) := (others => '0'); -- Usato come valore di confronto per il contatore
     signal timer_mode       : std_logic_vector(1 downto 0) := (others => '0');
     signal capture_mode     : std_logic := '0';
+    signal trigger_mode     : std_logic := '0';
 
     signal timer_mode_reg   : std_logic_vector(1 downto 0) := (others => '0'); -- Registro di stato del timer
     signal compare_reg      : unsigned(TIMER_SIZE - 1 downto 0) := (others => '0'); -- Registro di confronto
     signal capture_mode_reg : std_logic;
     signal capture_reg      : std_logic;
+    signal trigger_mode_reg : std_logic := '0'; -- Registro di stato per il trigger mode
 
     signal cc_sel : integer := 0;
     signal start : std_logic := '0';
@@ -75,6 +77,7 @@ architecture Behavioral of timer is
     signal busy : std_logic := '0';
     signal capture : std_logic := '0'; 
     signal pwm_int : std_logic := '0';
+    signal pwm_tc : std_logic_vector(TIMER_SIZE - 1 downto 0) := (others => '0'); -- Segnale PWM temporaneo
 
     -- DEBUG
     signal regAddr_s : integer := 0; -- Registro di stato per debug
@@ -92,6 +95,10 @@ begin
     capture_mode <= regFile(TIMER_REG_CONTROL)(TIMER_CAPTURE_MODE_BIT);
     start <= regFile(TIMER_REG_CONTROL)(TIMER_CREG_RUN_BIT);
     stop <= regFile(TIMER_REG_CONTROL)(TIMER_CREG_STOP_BIT);
+    trigger_mode <= regFile(TIMER_REG_CONTROL)(TIMER_TRIGGER_MODE_BIT);
+
+    pwm_tc(31 downto 0) <= regFile(TIMER_REG_CAPTURE_LSB);
+    pwm_tc(COUNTER_MSB_BIT_POS + 31 downto 32) <= regFile(TIMER_REG_CAPTURE_MSB)(COUNTER_MSB_BIT_POS - 1 downto 0);
 
     process(clk, res) is 
         variable regAddr_u : unsigned(31 downto 0);
@@ -109,6 +116,7 @@ begin
             capture_mode_reg <= '0';
             capture_reg <= '0';
             pwm_int <= '0';
+            trigger_mode_reg <= '0';
         elsif rising_edge(clk) then
 
             regAddr_u := unsigned(addr) - TIMER_OFFSET;
@@ -169,10 +177,15 @@ begin
                                 capture_mode_reg <= capture_mode; 
                                 compare_reg <= compare;
                                 timer_state <= timer_capture;
+                                trigger_mode_reg <= trigger_mode; -- Imposta il trigger mode
+                                if( trigger_mode = '0') then
+                                    timer_state <= timer_trigger; 
+                                end if;
                                 counter <= (others => '0'); -- Reset the counter when entering capture mode
                             when "10" => -- PWM
                                 compare_reg <= compare;
                                 timer_state <= timer_pwm;
+                                pwm_int <= '1';
                                 counter <= (others => '0'); -- Reset the counter when entering PWM mode
                             when others =>
                                 timer_state <= timer_idle; -- Default case                        
@@ -183,6 +196,10 @@ begin
                     if stop = '1' then
                         timer_state <= timer_idle;
                         busy <= '0';
+                    end if;
+                when timer_trigger =>
+                    if capture = capture_mode_reg then
+                        timer_state <= timer_capture; 
                     end if;
                 when timer_capture => 
                     counter <= counter + 1;
@@ -215,9 +232,10 @@ begin
                     if stop = '1' then
                         timer_state <= timer_idle;
                         busy <= '0';
-                    elsif counter = compare_reg then
-                        counter <= (others => '0'); -- Resetta il contatore quando raggiunge il valore di confronto
+                    elsif counter = compare then
                         pwm_int <= not pwm_int; -- Inverte il segnale PWM quando il contatore supera il valore di confronto
+                    elsif counter = unsigned(pwm_tc) then
+                        counter <= (others => '0'); -- Resetta il contatore quando raggiunge il valore di cattura
                     end if;
                 when others =>
                     timer_state <= timer_idle; -- Default case
