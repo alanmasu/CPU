@@ -185,6 +185,7 @@ begin
                             when "10" => -- PWM
                                 compare_reg <= compare;
                                 timer_state <= timer_pwm;
+                                pwm_int <= '1';
                                 counter <= (others => '0'); -- Reset the counter when entering PWM mode
                             when others =>
                                 timer_state <= timer_idle; -- Default case                        
@@ -233,7 +234,7 @@ begin
                         busy <= '0';
                     elsif counter = compare then
                         pwm_int <= not pwm_int; -- Inverte il segnale PWM quando il contatore supera il valore di confronto
-                    elsif counter = pwm_tc then
+                    elsif counter = unsigned(pwm_tc) then
                         counter <= (others => '0'); -- Resetta il contatore quando raggiunge il valore di cattura
                     end if;
                 when others =>
