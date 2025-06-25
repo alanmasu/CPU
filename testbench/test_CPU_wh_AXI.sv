@@ -514,7 +514,7 @@ logic [31:0] testAxiProgram [] = '{
   task backdoor_mem_write(
       input xil_axi_ulong     addr, 
       input bit [32-1:0]      wr_data,
-      input bit [(32/8)-1:0]  wr_strb ={(32/8){4'b1111}}
+      input bit [(32/8)-1:0]  wr_strb ={'1}
     );
     slv_agent_0.mem_model.backdoor_memory_write(addr, wr_data, wr_strb);
   endtask
@@ -541,7 +541,7 @@ logic [31:0] testAxiProgram [] = '{
   task write_memory(
       input xil_axi_ulong mem_wr_addr, 
       input bit [32-1:0] mem_wr_data, 
-      input bit [(32/8)-1:0] mem_wr_strb = {(32/8){4'b1111}}
+      input bit [(32/8)-1:0] mem_wr_strb = {'1}
     );
     mst_agent_0.AXI4LITE_WRITE_BURST(
       mem_wr_addr, 
