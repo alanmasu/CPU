@@ -57,6 +57,7 @@ begin
             en_out.en_BTPU_W_MEM <= is_in_space(address, BTPU_W_MEM);
             en_out.en_BTPU_IO0_MEM <= is_in_space(address, BTPU_IO0_MEM);
             en_out.en_BTPU_IO1_MEM <= is_in_space(address, BTPU_IO1_MEM);
+            en_out.en_timer <= is_in_space(address, TIMER);
         else 
             en_out <= (others => '0');
         end if ;

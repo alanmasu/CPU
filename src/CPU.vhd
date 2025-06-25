@@ -178,7 +178,6 @@ entity CPU is
 
         -- CDMA
         cdma_interrupt : in STD_LOGIC
-        
     );
 end CPU;
 
@@ -289,6 +288,7 @@ architecture Behavioral of CPU is
     signal bram_addr_a_i : STD_LOGIC_VECTOR(19 DOWNTO 0);
     signal bram_wrdata_a_i : STD_LOGIC_VECTOR(31 DOWNTO 0);
     signal bram_rddata_a_i : STD_LOGIC_VECTOR(31 DOWNTO 0) := (others => '0');
+    signal bram_creg       : STD_LOGIC_VECTOR(31 downto 0) := (others => '0');
 
     --Fetch - MSF
     signal pc_load      : STD_LOGIC := '0';
@@ -360,9 +360,6 @@ architecture Behavioral of CPU is
     --OLED
     signal display_in : std_logic_vector(31 downto 0) := (others => '0');
     signal oled_select : std_logic_vector(2 downto 0) := (others => '0');
-    
-    --DEBUG
-   signal state_dbg_sig : std_logic_vector(2 downto 0);
 
     -- BTPU BRAM Interface
     signal btpu_bram_en    : STD_LOGIC;
@@ -371,6 +368,11 @@ architecture Behavioral of CPU is
     signal btpu_bram_din   : STD_LOGIC_VECTOR(31 DOWNTO 0);
     signal btpu_bram_dout  : STD_LOGIC_VECTOR(31 DOWNTO 0);
 
+    -- Timer
+    signal timer_cc        : std_logic_vector(31 downto 0) := (others => '0');
+
+    --DEBUG
+   signal state_dbg_sig : std_logic_vector(2 downto 0);
 begin
     --Fetch
     axi_bram_controller_i: axi_bram_ctrl_0
@@ -552,7 +554,7 @@ begin
         clkb => bram_clk_a_d,
         enb => bram_en_a_d,
         web => bram_we_a_d,
-        addrb => bram_addr_a_d(12 downto 2),
+        addrb => bram_addr_a_d(15 downto 2),
         dinb => bram_wrdata_a_d,
         doutb => bram_rddata_a_d
     );
@@ -600,8 +602,7 @@ begin
         wea => mem_wb_we_out,
         d_in => mem_wb_data_out,
         d_out => d_bus_in.GPIO_data,
-        GPIO => GPIO--,
-        --gpio_state_dbg => gpio_state_dbg
+        GPIO => GPIO
     );
 
     -- I2C
@@ -635,7 +636,6 @@ begin
         oled_vbat => oled_vbat,
         oled_vdd => oled_vdd
     );
-    
 
     -- BTPU AXI Controller
     btpu_axi_controller : axi_btpu_ctrl
@@ -704,6 +704,22 @@ begin
             doutb => btpu_bram_dout
         );
 
+        timer_inst : entity work.timer
+        generic map(
+            TIMER_SIZE => 40
+        )
+        port map(
+            clk => clk,
+            res => res,
+            en  => mem_wb_en_out.en_timer,
+            wea => mem_wb_we_out,
+            addr => mem_wb_addr_out,
+            din  => mem_wb_data_out,
+            dout => d_bus_in.timer_data,
+
+            cc   => timer_cc,
+            pwm  => leds(0)
+        );
     ----------------------------------- DEBUG -----------------------------------
         state_dbg_comb : process( state ) is 
             variable state_integer : integer := 0;
@@ -711,6 +727,7 @@ begin
             state_integer := state_type'POS(state);
             state_dbg_sig <= std_logic_vector(to_unsigned(state_integer,3));
         end process ; -- control_reg_file
+  
     ----------------------------------- END DEBUG -----------------------------------
 
     --Control Register File
@@ -721,19 +738,27 @@ begin
     end process ; -- ena_comb
 
         -- Bram Controller In value selector
-    bram_i_dina_comb : process( bram_addr_a_i, instr_doutb, control_reg) is
+    bram_i_dina_comb : process( bram_addr_a_i, instr_doutb, bram_creg) is
         variable reg_addr : integer;
     begin
-        bram_rddata_a_i <= bram_rddata_a_i;     -- Latch inference
-        if bram_en_a_i = '1' then
-            if(check_bram_address(bram_addr_a_i, ROM) = '1') then
-                bram_rddata_a_i <= instr_doutb;
-            elsif(check_bram_address(bram_addr_a_i, CREG_FILE) = '1') then
-                reg_addr := to_integer(unsigned(bram_addr_a_i(6 downto 2)));
-                bram_rddata_a_i <= control_reg(reg_addr);
-            end if;
+        bram_rddata_a_i <= instr_doutb;
+        if (check_bram_address(bram_addr_a_i, CREG_FILE) = '1') then
+            bram_rddata_a_i <= bram_creg;
         end if;
     end process ; -- bram_i_dina_comb
+
+    bram_creg_pro : process(clk, res) is
+        variable reg_addr : integer;
+    begin
+        if res = '0' then
+            bram_creg <= (others => '0');
+        elsif rising_edge(clk) then
+            if control_reg_ena = '1' then
+                reg_addr := to_integer(unsigned(bram_addr_a_i(6 downto 2)));
+                bram_creg <= control_reg(reg_addr);
+            end if;
+        end if;
+    end process ; -- bram_creg_pro
 
     -- bram_i_dina : process( clock, res ) is
     --     variable reg_addr : integer;
@@ -812,9 +837,8 @@ begin
     end process ; -- reset_pro
 
     -- PS-PL GPIO
-    leds(0) <= control_reg(CREG_IO)(CREG_LED0_BIT);
-    leds(1) <= control_reg(CREG_IO)(CREG_LED1_BIT);
-    leds(2) <= control_reg(CREG_IO)(CREG_LED2_BIT);
+    leds(1) <= control_reg(CREG_IO)(CREG_LED0_BIT);
+    leds(2) <= control_reg(CREG_IO)(CREG_LED1_BIT);
 
     -- OLED Display
     oled_select(2 downto 1) <= control_reg(CREG_OLED_CTR)(1 downto 0);
@@ -824,8 +848,7 @@ begin
         oled_select,
         pc_fetched, 
         instruction_fetched,
-        control_reg(CREG_OLED_DATA)--,
-        -- state_dbg_sig
+        control_reg(CREG_OLED_DATA)
     ) is 
         variable index : integer;
     begin
@@ -836,8 +859,7 @@ begin
             when 1 =>
                 display_in <= instruction_fetched;
             when 2 =>
-                -- display_in(2 downto 0) <= state_dbg_sig;
-                display_in(31 downto 3) <= (others => '0');
+                display_in <= (others => '0');
             when 3 =>
                 display_in <= control_reg(CREG_OLED_DATA);
             when others =>
@@ -900,7 +922,11 @@ begin
     mem_wb_op_class     <= op_class_executed    when is_axi_load = '0' else op_class_reg;
     mem_wb_mem_opcode   <= mem_opcode_executed  when is_axi_load = '0' else mem_opcode_reg;
 
-    ena_mealy : process( state, AXI_stall, run, op_class_decoded ) begin
+    ena_mealy : process( state, AXI_stall, run, op_class_decoded, is_axi_load ) begin
+        mem_we <= '0';
+        mem_ena <= '0';
+        regFile_we <= '0';
+        pc_load <= '0';
         if run = '1' then
             case state is
                 when idle =>

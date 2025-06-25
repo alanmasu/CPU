@@ -60,7 +60,7 @@ entity memory_write_back is
         clkb : IN STD_LOGIC;
         enb : IN STD_LOGIC;
         web : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
-        addrb : IN STD_LOGIC_VECTOR(10 DOWNTO 0);
+        addrb : IN STD_LOGIC_VECTOR(13 DOWNTO 0);
         dinb : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
         doutb : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
     );
@@ -72,13 +72,13 @@ architecture Behavioral of memory_write_back is
             clka : IN STD_LOGIC;
             wea : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
             ena : IN STD_LOGIC;
-            addra : IN STD_LOGIC_VECTOR(10 DOWNTO 0);
+            addra : IN STD_LOGIC_VECTOR(13 DOWNTO 0);
             dina : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
             douta : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
             clkb : IN STD_LOGIC;
             enb : IN STD_LOGIC;
             web : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
-            addrb : IN STD_LOGIC_VECTOR(10 DOWNTO 0);
+            addrb : IN STD_LOGIC_VECTOR(13 DOWNTO 0);
             dinb : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
             doutb : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
         );
@@ -103,13 +103,14 @@ architecture Behavioral of memory_write_back is
         others => '0'
     );
     signal we, mem_wea : std_logic_vector(3 downto 0) := (others => '0');
+    signal address_reg : std_logic_vector(31 downto 0);
 begin
     memory : data_memory
     PORT MAP (
         clka => clk,
         wea => mem_wea,
         ena => en_bus.en_mem,
-        addra => alu_resoult(12 downto 2),
+        addra => alu_resoult(15 downto 2),
         dina => mem_in,
         douta => mem_out,
         clkb => clkb,
@@ -154,9 +155,8 @@ begin
                 when others =>
                     dato := dato;
             end case ;
-            mem_in <= dato(63 downto 32);
         end if ;
-        
+        mem_in <= dato(63 downto 32);
     end process ; -- data_in_combinatory
 
 
@@ -190,10 +190,14 @@ begin
                 en_I2C => '0',
                 others => '0'
             );
+            address_reg <= (others => '0');
         elsif rising_edge(clk) then
             en_bus_reg <= en_bus;
             if is_axi_load = '1' then
                 en_bus_reg <= en_bus_reg;
+            end if ;
+            if en_in = '1' then
+                address_reg <= alu_resoult;
             end if ;
         end if ;
         
@@ -214,17 +218,28 @@ begin
         --     when others =>
         --         dato := dato;
         -- end case ;
-        if en_bus_reg.en_mem = '1' then
-            dato := unsigned(mem_out);
-        elsif en_bus_reg.en_AXI then
+        dato := unsigned(mem_out);
+        if is_in_space(address_reg, AXI) then
             dato := unsigned(d_in.axi_data);
-        elsif en_bus_reg.en_GPIO then
+        elsif is_in_space(address_reg, ROM) then
+            dato := unsigned(d_in.axi_data);
+        elsif is_in_space(address_reg, CREG_FILE) then
+            dato := unsigned(d_in.axi_data);
+        elsif is_in_space(address_reg, GPIO) then
             dato := unsigned(d_in.GPIO_data);
-        elsif en_bus_reg.en_I2C then
+        elsif is_in_space(address_reg, I2C) then
             dato := unsigned(d_in.I2C_data);
-        elsif en_bus.en_BTPU_CREG or en_bus.en_BTPU_W_MEM or en_bus.en_BTPU_IO0_MEM or en_bus.en_BTPU_IO1_MEM then
+        elsif is_in_space(address_reg, BTPU_CREG_FILE) then
             dato := unsigned(d_in.BTPU_data);
-        end if ;
+        elsif is_in_space(address_reg, BTPU_W_MEM) then
+            dato := unsigned(d_in.BTPU_data);
+        elsif is_in_space(address_reg, BTPU_IO0_MEM) then
+            dato := unsigned(d_in.BTPU_data);
+        elsif is_in_space(address_reg, BTPU_IO1_MEM) then
+            dato := unsigned(d_in.BTPU_data);
+        elsif is_in_space(address_reg, TIMER) then
+            dato := unsigned(d_in.timer_data);
+        end if;
 
         --Sign extension
         if op_class = "00100" then   --LOAD
@@ -255,11 +270,8 @@ begin
                 when others =>
                     dato := dato;
             end case ;
-            mem_out_extended <= std_logic_vector(dato);
-        else 
-            mem_out_extended <= mem_out_extended;
         end if ;
-        
+        mem_out_extended <= std_logic_vector(dato);
     end process ; -- sign_extension
 
     pc_out_comb : process( jmp, op_class, alu_resoult_reg, npc_in )
@@ -272,19 +284,13 @@ begin
     
     rd_value_comb: process(op_class, alu_resoult_reg, mem_out_extended, npc_in, res) 
     begin
-        rd_value <= rd_value;
-        if res = '1' then                   
-            if op_class = "10000" then          --ALU_OP
-                rd_value <= alu_resoult_reg;
-            elsif op_class = "00100" then       --LOAD
-                rd_value <= mem_out_extended;
-            elsif op_class = "00001" then       --JAL
-                -- rd_value(11 downto 0 ) <= std_logic_vector(npc_in(11 downto 0));
-                -- rd_value(31 downto 12) <= (others => '0'); 
-                rd_value <= std_logic_vector(npc_in);               
-            end if ;
-        else
-            rd_value <= (others => '0');
+        rd_value <= alu_resoult_reg;
+        if op_class = "00100" then       --LOAD
+            rd_value <= mem_out_extended;
+        elsif op_class = "00001" then       --JAL
+            -- rd_value(11 downto 0 ) <= std_logic_vector(npc_in(11 downto 0));
+            -- rd_value(31 downto 12) <= (others => '0'); 
+            rd_value <= std_logic_vector(npc_in);               
         end if ;
     end process ; -- rd_value
     

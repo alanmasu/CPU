@@ -93,7 +93,7 @@ begin
     counter_process : process(clk, res) begin
         if res = '0' then
             pc  <= unsigned(PC_RESET_VALUE);
-            npc <= pc;
+            npc <= unsigned(PC_RESET_VALUE);
         elsif rising_edge(clk) then
             if pc_load = '1' then
                 pc <= unsigned(pc_in);

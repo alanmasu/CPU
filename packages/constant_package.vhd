@@ -38,7 +38,6 @@ package constant_package is
         
         constant CREG_LED0_BIT      : integer := 24;
         constant CREG_LED1_BIT      : integer := 25;
-        constant CREG_LED2_BIT      : integer := 26;
 
     constant CREG_OLED_CTR          : integer := 5;
         constant CREG_OLED_SELECT_BIT1 : integer := 0;
@@ -83,6 +82,7 @@ package constant_package is
     );
 
     -- Registers Reset Values
+     -- #NOTA: sp Punta nel posto sbagliato ma dovesse dare problemi si può cambiare via LD Script + bootloader
     constant REG_FILE_RESET_VALUE : ram_array := (
         0  => x"00000000", -- x1/ra
         1  => x"40011FFC", -- x2/sp
@@ -150,6 +150,26 @@ package constant_package is
     constant BTPU_K_SIZE    : integer := 6;  -- Number of block depth
     constant BTPU_STATUS    : integer := 7;  -- Status
     constant BTPU_SIGN_CMP  : integer := 8;  -- Sign comparison value    
+    
+
+    -- Timer Register File Names
+    constant TIMER_REG_CONTROL              : integer := 0;
+        constant TIMER_CREG_RUN_BIT         : integer := 0; -- Run bit
+        constant TIMER_CREG_STOP_BIT        : integer := 1; -- Stop bit
+        constant TIMER_MODE_LSB_BIT         : integer := 2; -- Mode bit (0 = CONTINUOUS, 1 = CAPTURE, 2 = PWM)
+        constant TIMER_MODE_MSB_BIT         : integer := 3;
+        constant TIMER_CAPTURE_SEL_LSB_BIT  : integer := 4; -- Capture select
+        constant TIMER_CAPTURE_SEL_MSB_BIT  : integer := 8;
+        constant TIMER_CAPTURE_MODE_BIT     : integer := 9; -- Capture mode (0 = RISING, 1 = FALLING)
+        constant TIMER_CREG_BUSY_BIT        : integer := 10; -- Busy bit
+        constant TIMER_TRIGGER_MODE_BIT     : integer := 11; -- Trigger mode (0 = AUTOMATIC, 1 = ON_START)
+
+    constant TIMER_REG_COUNTER_LSB          : integer := 1; -- Counter value
+    constant TIMER_REG_COUNTER_MSB          : integer := 2;
+    constant TIMER_REG_CAPTURE_LSB          : integer := 3; -- Capture value
+    constant TIMER_REG_CAPTURE_MSB          : integer := 4;
+    constant TIMER_REG_COMPARE_LSB          : integer := 5; -- Compare value
+    constant TIMER_REG_COMPARE_MSB          : integer := 6;
     
 
 

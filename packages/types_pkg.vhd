@@ -19,6 +19,7 @@ package types_pkg is
         GPIO_data : std_logic_vector(31 downto 0);
         I2C_data : std_logic_vector(31 downto 0);
         BTPU_data : std_logic_vector(31 downto 0);
+        timer_data : std_logic_vector(31 downto 0);
     end record peripheral_data_t;
     type en_bus_t is record
         en_mem : std_logic;
@@ -29,6 +30,7 @@ package types_pkg is
         en_BTPU_W_MEM : std_logic;
         en_BTPU_IO0_MEM : std_logic;
         en_BTPU_IO1_MEM : std_logic;
+        en_timer : std_logic;
     end record en_bus_t;
     
     -- I2C Register File type
@@ -43,5 +45,9 @@ package types_pkg is
     -- BTPU Arrays
     type acc_t_dbg is array (0 to 256 - 1) of std_logic_vector(32 - 1 downto 0);
     
+
+    ------------ TIMER --------------
+    type timer_regFile_t is array(0 to 31) of std_logic_vector(31 downto 0);
+    type timer_state_t is (timer_idle, timer_counting, timer_capture, timer_pwm, timer_trigger);
     
 end package ;

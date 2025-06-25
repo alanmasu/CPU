@@ -61,10 +61,10 @@ set_property PACKAGE_PIN AA8  [get_ports {GPIO_0[15]}];  # "JA10"
 # ----------------------------------------------------------------------------
 # JB Pmod - Bank 13
 # ---------------------------------------------------------------------------- 
-set_property PACKAGE_PIN W12 [get_ports {run_dbg_0}];       # "JB1"
-set_property PACKAGE_PIN W11 [get_ports {run_in_dbg_0}];    # "JB2"
-set_property PACKAGE_PIN V10 [get_ports {res_dbg_0}];       # "JB3"
-set_property PACKAGE_PIN W8  [get_ports {res_in_dbg_0}];    # "JB4"
+#set_property PACKAGE_PIN W12 [get_ports {run_dbg_0}];       # "JB1"
+#set_property PACKAGE_PIN W11 [get_ports {run_in_dbg_0}];    # "JB2"
+#set_property PACKAGE_PIN V10 [get_ports {res_dbg_0}];       # "JB3"
+#set_property PACKAGE_PIN W8  [get_ports {res_in_dbg_0}];    # "JB4"
 # set_property PACKAGE_PIN V12 [get_ports {I2C_CSREG_s_dbg_0[0]}];  # "JB7"
 # set_property PACKAGE_PIN W10 [get_ports {I2C_CSREG_s_dbg_0[1]}];  # "JB8"
 # set_property PACKAGE_PIN V9  [get_ports {I2C_CSREG_s_dbg_0[2]}];  # "JB9"
@@ -81,9 +81,9 @@ set_property PACKAGE_PIN W8  [get_ports {res_in_dbg_0}];    # "JB4"
 # ----------------------------------------------------------------------------
 # JC Pmod - Bank 13
 # ---------------------------------------------------------------------------- 
-set_property PACKAGE_PIN AB7 [get_ports {state_dbg_0[1]}];  # "JC1_P"
-set_property PACKAGE_PIN AB6 [get_ports {state_dbg_0[0]}];  # "JC1_N"
-set_property PACKAGE_PIN Y4  [get_ports {state_dbg_0[2]}];  # "JC2_P"
+#set_property PACKAGE_PIN AB7 [get_ports {state_dbg_0[1]}];  # "JC1_P"
+#set_property PACKAGE_PIN AB6 [get_ports {state_dbg_0[0]}];  # "JC1_N"
+#set_property PACKAGE_PIN Y4  [get_ports {state_dbg_0[2]}];  # "JC2_P"
 # set_property PACKAGE_PIN AA4 [get_ports {I2C_state_dbg_0[0]}];  # "JC2_N"
 # set_property PACKAGE_PIN R6  [get_ports {I2C_state_dbg_0[2]}];  # "JC3_P"
 # set_property PACKAGE_PIN T6  [get_ports {I2C_state_dbg_0[1]}];  # "JC3_N"
