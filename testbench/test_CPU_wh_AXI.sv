@@ -462,8 +462,9 @@ logic [31:0] testAxiProgram [] = '{
 
     test_type = AXI;
     writeCREG(32'b00); //Reset CPU
+    LOAD_PROGRAM(testAxiProgram, BASE_ADDR);
     istruction_count = 0;
-    doBTPUTest();
+    doAXITest();
     printLog();
 
     test_type = BTPU;

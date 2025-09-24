@@ -701,7 +701,9 @@ begin
             web => btpu_bram_we,
             addrb => btpu_bram_addr,
             dinb => btpu_bram_din,
-            doutb => btpu_bram_dout
+            doutb => btpu_bram_dout,
+
+            busy => timer_cc(0)
         );
 
         timer_inst : entity work.timer
