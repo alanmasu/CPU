@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="test_BTPU_memory_behav.wdb" id="1">
+         <top_modules>
+            <top_module name="bnn_pkg" />
+            <top_module name="constant_package" />
+            <top_module name="glbl" />
+            <top_module name="memory_pkg" />
+            <top_module name="test_btpu_memory" />
+            <top_module name="types_pkg" />
+            <top_module name="utilities_pkg" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <zoom_setting>
+      <ZoomStartTime time="2,518.500 ns"></ZoomStartTime>
+      <ZoomEndTime time="2,628.501 ns"></ZoomEndTime>
+      <Cursor1Time time="2,614.600 ns"></Cursor1Time>
+   </zoom_setting>
+   <column_width_setting>
+      <NameColumnWidth column_width="303"></NameColumnWidth>
+      <ValueColumnWidth column_width="89"></ValueColumnWidth>
+   </column_width_setting>
+   <WVObjectSize size="9" />
+   <wave_markers>
+      <marker label="" time="3710000" />
+   </wave_markers>
+   <wvobject type="logic" fp_name="/test_btpu_memory/clk">
+      <obj_property name="ElementShortName">clk</obj_property>
+      <obj_property name="ObjectShortName">clk</obj_property>
+   </wvobject>
+   <wvobject type="other" fp_name="/test_btpu_memory/test_n">
+      <obj_property name="ElementShortName">test_n</obj_property>
+      <obj_property name="ObjectShortName">test_n</obj_property>
+      <obj_property name="CustomSignalColor">#FF00FF</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/test_btpu_memory/comp">
+      <obj_property name="ElementShortName">comp</obj_property>
+      <obj_property name="ObjectShortName">comp</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/test_btpu_memory/validating">
+      <obj_property name="ElementShortName">validating</obj_property>
+      <obj_property name="ObjectShortName">validating</obj_property>
+      <obj_property name="CustomSignalColor">#00FFFF</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/test_btpu_memory/result">
+      <obj_property name="ElementShortName">result</obj_property>
+      <obj_property name="ObjectShortName">result</obj_property>
+   </wvobject>
+   <wvobject type="group" fp_name="group1667">
+      <obj_property name="label">Port A</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject type="logic" fp_name="/test_btpu_memory/ena">
+         <obj_property name="ElementShortName">ena</obj_property>
+         <obj_property name="ObjectShortName">ena</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_btpu_memory/wea">
+         <obj_property name="ElementShortName">wea[0:0]</obj_property>
+         <obj_property name="ObjectShortName">wea[0:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_btpu_memory/addra">
+         <obj_property name="ElementShortName">addra[31:0]</obj_property>
+         <obj_property name="ObjectShortName">addra[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_btpu_memory/dina">
+         <obj_property name="ElementShortName">dina[31:0]</obj_property>
+         <obj_property name="ObjectShortName">dina[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_btpu_memory/douta">
+         <obj_property name="ElementShortName">douta[31:0]</obj_property>
+         <obj_property name="ObjectShortName">douta[31:0]</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject type="group" fp_name="group1668">
+      <obj_property name="label">Port B</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject type="logic" fp_name="/test_btpu_memory/enb">
+         <obj_property name="ElementShortName">enb</obj_property>
+         <obj_property name="ObjectShortName">enb</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_btpu_memory/web">
+         <obj_property name="ElementShortName">web[0:0]</obj_property>
+         <obj_property name="ObjectShortName">web[0:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_btpu_memory/addrb">
+         <obj_property name="ElementShortName">addrb[31:0]</obj_property>
+         <obj_property name="ObjectShortName">addrb[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_btpu_memory/dinb">
+         <obj_property name="ElementShortName">dinb[1023:0]</obj_property>
+         <obj_property name="ObjectShortName">dinb[1023:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_btpu_memory/doutb">
+         <obj_property name="ElementShortName">doutb[1023:0]</obj_property>
+         <obj_property name="ObjectShortName">doutb[1023:0]</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject type="group" fp_name="group72">
+      <obj_property name="label">Testing Selectors</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="isExpanded"></obj_property>
+      <wvobject type="array" fp_name="/test_btpu_memory/tile_number">
+         <obj_property name="ElementShortName">tile_number[1:0]</obj_property>
+         <obj_property name="ObjectShortName">tile_number[1:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_btpu_memory/activations_matrix">
+         <obj_property name="ElementShortName">activations_matrix[0:31][31:0]</obj_property>
+         <obj_property name="ObjectShortName">activations_matrix[0:31][31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_btpu_memory/weights_matrix">
+         <obj_property name="ElementShortName">weights_matrix[0:31][31:0]</obj_property>
+         <obj_property name="ObjectShortName">weights_matrix[0:31][31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_btpu_memory/mac_inst_activations_choises">
+         <obj_property name="ElementShortName">mac_inst_activations_choises[0:255][0:3][31:0]</obj_property>
+         <obj_property name="ObjectShortName">mac_inst_activations_choises[0:255][0:3][31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_btpu_memory/mac_a_in">
+         <obj_property name="ElementShortName">mac_a_in[0:255][31:0]</obj_property>
+         <obj_property name="ObjectShortName">mac_a_in[0:255][31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_btpu_memory/mac_sign_out">
+         <obj_property name="ElementShortName">mac_sign_out[255:0]</obj_property>
+         <obj_property name="ObjectShortName">mac_sign_out[255:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_btpu_memory/res0">
+         <obj_property name="ElementShortName">res0[255:0]</obj_property>
+         <obj_property name="ObjectShortName">res0[255:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_btpu_memory/res1">
+         <obj_property name="ElementShortName">res1[255:0]</obj_property>
+         <obj_property name="ObjectShortName">res1[255:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_btpu_memory/res2">
+         <obj_property name="ElementShortName">res2[255:0]</obj_property>
+         <obj_property name="ObjectShortName">res2[255:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_btpu_memory/res3">
+         <obj_property name="ElementShortName">res3[255:0]</obj_property>
+         <obj_property name="ObjectShortName">res3[255:0]</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject type="group" fp_name="group83">
+      <obj_property name="label">Testing MAC</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject type="logic" fp_name="/test_btpu_memory/dut2/acc_clk">
+         <obj_property name="ElementShortName">acc_clk</obj_property>
+         <obj_property name="ObjectShortName">acc_clk</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/test_btpu_memory/dut2/acc_resn">
+         <obj_property name="ElementShortName">acc_resn</obj_property>
+         <obj_property name="ObjectShortName">acc_resn</obj_property>
+         <obj_property name="CustomSignalColor">#FF0000</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/test_btpu_memory/mac_en">
+         <obj_property name="ElementShortName">mac_en</obj_property>
+         <obj_property name="ObjectShortName">mac_en</obj_property>
+         <obj_property name="CustomSignalColor">#00FFFF</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_btpu_memory/dut2/a">
+         <obj_property name="ElementShortName">a[31:0]</obj_property>
+         <obj_property name="ObjectShortName">a[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_btpu_memory/dut2/b">
+         <obj_property name="ElementShortName">b[31:0]</obj_property>
+         <obj_property name="ObjectShortName">b[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_btpu_memory/dut2/size">
+         <obj_property name="ElementShortName">size[31:0]</obj_property>
+         <obj_property name="ObjectShortName">size[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_btpu_memory/tile_number">
+         <obj_property name="ElementShortName">tile_number[1:0]</obj_property>
+         <obj_property name="ObjectShortName">tile_number[1:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_btpu_memory/dut2/accumulator">
+         <obj_property name="ElementShortName">accumulator[0:3][31:0]</obj_property>
+         <obj_property name="ObjectShortName">accumulator[0:3][31:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/test_btpu_memory/dut2/res_sign">
+         <obj_property name="ElementShortName">res_sign</obj_property>
+         <obj_property name="ObjectShortName">res_sign</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_btpu_memory/dut2/res">
+         <obj_property name="ElementShortName">res[4:0]</obj_property>
+         <obj_property name="ObjectShortName">res[4:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_btpu_memory/dut2/acc">
+         <obj_property name="ElementShortName">acc[31:0]</obj_property>
+         <obj_property name="ObjectShortName">acc[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_btpu_memory/dut2/popcount">
+         <obj_property name="ElementShortName">popcount[4:0]</obj_property>
+         <obj_property name="ObjectShortName">popcount[4:0]</obj_property>
+      </wvobject>
+   </wvobject>
+</wave_config>

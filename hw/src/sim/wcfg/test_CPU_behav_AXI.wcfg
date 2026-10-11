@@ -1,0 +1,1483 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="test_CPU_wh_AXI_behav.wdb" id="1">
+         <top_modules>
+            <top_module name="axi_bram_ctrl_funcs" />
+            <top_module name="axi_cdma_pkg" />
+            <top_module name="axi_sg_pkg" />
+            <top_module name="axi_vip_pkg" />
+            <top_module name="bnn_pkg" />
+            <top_module name="constant_package" />
+            <top_module name="glbl" />
+            <top_module name="i2c_utils_pkg" />
+            <top_module name="lib_pkg" />
+            <top_module name="memory_pkg" />
+            <top_module name="std" />
+            <top_module name="test_CPU_wh_AXI" />
+            <top_module name="types_pkg" />
+            <top_module name="types_pkg" />
+            <top_module name="utilities_pkg" />
+            <top_module name="vcomponents" />
+            <top_module name="xil_common_vip_pkg" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <zoom_setting>
+      <ZoomStartTime time="260.759333 us"></ZoomStartTime>
+      <ZoomEndTime time="264.169334 us"></ZoomEndTime>
+      <Cursor1Time time="263.601000 us"></Cursor1Time>
+   </zoom_setting>
+   <column_width_setting>
+      <NameColumnWidth column_width="226"></NameColumnWidth>
+      <ValueColumnWidth column_width="74"></ValueColumnWidth>
+   </column_width_setting>
+   <WVObjectSize size="31" />
+   <wave_markers>
+      <marker label="" time="55000" />
+      <marker label="" time="980000" />
+      <marker label="" time="1460025" />
+      <marker label="" time="1420000" />
+      <marker label="" time="1290000" />
+      <marker label="" time="1330000" />
+      <marker label="" time="1370000" />
+      <marker label="" time="2290000" />
+      <marker label="" time="2330000" />
+      <marker label="" time="950000" />
+      <marker label="" time="3590000" />
+      <marker label="" time="3340000" />
+      <marker label="" time="3330000" />
+      <marker label="" time="3332000" />
+      <marker label="" time="2180000" />
+      <marker label="" time="5820000" />
+      <marker label="" time="466647" />
+      <marker label="" time="6290000" />
+      <marker label="" time="6330000" />
+      <marker label="" time="7480000" />
+      <marker label="" time="7520000" />
+      <marker label="" time="8590000" />
+      <marker label="" time="8590000" />
+      <marker label="" time="8590000" />
+      <marker label="" time="16790000" />
+      <marker label="" time="10500000" />
+      <marker label="" time="91760000" />
+      <marker label="" time="3120000" />
+      <marker label="" time="98830000" />
+      <marker label="" time="11310000" />
+      <marker label="" time="39410000" />
+      <marker label="" time="39860000" />
+      <marker label="" time="41580000" />
+      <marker label="" time="24930001" />
+      <marker label="" time="10540000" />
+      <marker label="" time="10340000" />
+      <marker label="" time="51610000" />
+      <marker label="" time="5780000" />
+      <marker label="" time="3040000" />
+   </wave_markers>
+   <wvobject type="logic" fp_name="/test_CPU_wh_AXI/clock">
+      <obj_property name="ElementShortName">clock</obj_property>
+      <obj_property name="ObjectShortName">clock</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/test_CPU_wh_AXI/reset">
+      <obj_property name="ElementShortName">reset</obj_property>
+      <obj_property name="ObjectShortName">reset</obj_property>
+      <obj_property name="CustomSignalColor">#FF0000</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/res">
+      <obj_property name="ElementShortName">res</obj_property>
+      <obj_property name="ObjectShortName">res</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/test_CPU_wh_AXI/on_programming">
+      <obj_property name="ElementShortName">on_programming</obj_property>
+      <obj_property name="ObjectShortName">on_programming</obj_property>
+      <obj_property name="CustomSignalColor">#00FFFF</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject type="other" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/IS_STANDALONE">
+      <obj_property name="ElementShortName">IS_STANDALONE</obj_property>
+      <obj_property name="ObjectShortName">IS_STANDALONE</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/run">
+      <obj_property name="ElementShortName">run</obj_property>
+      <obj_property name="ObjectShortName">run</obj_property>
+      <obj_property name="CustomSignalColor">#00FFFF</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/run_in">
+      <obj_property name="ElementShortName">run_in</obj_property>
+      <obj_property name="ObjectShortName">run_in</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/run_out">
+      <obj_property name="ElementShortName">run_out</obj_property>
+      <obj_property name="ObjectShortName">run_out</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_CPU_wh_AXI/test_type">
+      <obj_property name="ElementShortName">test_type[31:0]</obj_property>
+      <obj_property name="ObjectShortName">test_type[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_CPU_wh_AXI/test_n">
+      <obj_property name="ElementShortName">test_n[31:0]</obj_property>
+      <obj_property name="ObjectShortName">test_n[31:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      <obj_property name="CustomSignalColor">#00FFFF</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/test_CPU_wh_AXI/validating">
+      <obj_property name="ElementShortName">validating</obj_property>
+      <obj_property name="ObjectShortName">validating</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_CPU_wh_AXI/istruction_count">
+      <obj_property name="ElementShortName">istruction_count[31:0]</obj_property>
+      <obj_property name="ObjectShortName">istruction_count[31:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      <obj_property name="CustomSignalColor">#FF00FF</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject type="other" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/state">
+      <obj_property name="ElementShortName">state</obj_property>
+      <obj_property name="ObjectShortName">state</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_fetch/instruction">
+      <obj_property name="ElementShortName">instruction[31:0]</obj_property>
+      <obj_property name="ObjectShortName">instruction[31:0]</obj_property>
+      <obj_property name="CustomSignalColor">#FF0000</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject type="protoinst" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/axi_vip_0/M_AXI">
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="ElementShortName">M_AXI</obj_property>
+      <obj_property name="ObjectShortName">M_AXI</obj_property>
+      <obj_property name="children_use_element_short_name">true</obj_property>
+      <obj_property name="WaveformStyle">STYLE_ENUM_TRANSACTION</obj_property>
+      <obj_property name="EnumTransactionColorTable">0=blank 1=#D399FF 2=pink</obj_property>
+      <obj_property name="EnumTransactionValueTable">0=blank;1=Read;2=Write;3=Read/Write</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+      <obj_property name="CustomSignalColor">turquoise</obj_property>
+      <obj_property name="Render_Data">/test_CPU_wh_AXI/DUT/test_design_i/axi_vip_0/M_AXI.readWriteSummary</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      <obj_property name="CellHeight">36</obj_property>
+      <obj_property name="label">Master VIP</obj_property>
+   </wvobject>
+   <wvobject type="group" fp_name="group1099">
+      <obj_property name="label">IF</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_fetch/pc_in">
+         <obj_property name="ElementShortName">pc_in[31:0]</obj_property>
+         <obj_property name="ObjectShortName">pc_in[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_fetch/pc_load">
+         <obj_property name="ElementShortName">pc_load</obj_property>
+         <obj_property name="ObjectShortName">pc_load</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_fetch/pc">
+         <obj_property name="ElementShortName">pc[31:0]</obj_property>
+         <obj_property name="ObjectShortName">pc[31:0]</obj_property>
+         <obj_property name="CustomSignalColor">#FFD700</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_fetch/instruction">
+         <obj_property name="ElementShortName">instruction[31:0]</obj_property>
+         <obj_property name="ObjectShortName">instruction[31:0]</obj_property>
+         <obj_property name="CustomSignalColor">#FF0000</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_fetch/npc">
+         <obj_property name="ElementShortName">npc[31:0]</obj_property>
+         <obj_property name="ObjectShortName">npc[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="group" fp_name="group1361">
+         <obj_property name="label">BRAM_AXI</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_fetch/memoria_istruzioni/addrb">
+            <obj_property name="ElementShortName">addrb[11:0]</obj_property>
+            <obj_property name="ObjectShortName">addrb[11:0]</obj_property>
+         </wvobject>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_decode/op_class">
+         <obj_property name="ElementShortName">op_class[4:0]</obj_property>
+         <obj_property name="ObjectShortName">op_class[4:0]</obj_property>
+         <obj_property name="Radix">BINARYRADIX</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject type="group" fp_name="group1100">
+      <obj_property name="label">ID</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_decode/we">
+         <obj_property name="ElementShortName">we</obj_property>
+         <obj_property name="ObjectShortName">we</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_decode/instruction">
+         <obj_property name="ElementShortName">instruction[31:0]</obj_property>
+         <obj_property name="ObjectShortName">instruction[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_decode/pc_in">
+         <obj_property name="ElementShortName">pc_in[31:0]</obj_property>
+         <obj_property name="ObjectShortName">pc_in[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_decode/npc_in">
+         <obj_property name="ElementShortName">npc_in[31:0]</obj_property>
+         <obj_property name="ObjectShortName">npc_in[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_decode/register_file/mem_2">
+         <obj_property name="ElementShortName">mem_2[30:0][31:0]</obj_property>
+         <obj_property name="ObjectShortName">mem_2[30:0][31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_decode/rd_addr_in">
+         <obj_property name="ElementShortName">rd_addr_in[4:0]</obj_property>
+         <obj_property name="ObjectShortName">rd_addr_in[4:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         <obj_property name="CustomSignalColor">#FFFF00</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_decode/rd_value_in">
+         <obj_property name="ElementShortName">rd_value_in[31:0]</obj_property>
+         <obj_property name="ObjectShortName">rd_value_in[31:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+         <obj_property name="CustomSignalColor">#FF00FF</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+      <wvobject type="group" fp_name="group5357">
+         <obj_property name="label">RegFile</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_decode/register_file/we">
+            <obj_property name="ElementShortName">we</obj_property>
+            <obj_property name="ObjectShortName">we</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_decode/register_file/d_in">
+            <obj_property name="ElementShortName">d_in[31:0]</obj_property>
+            <obj_property name="ObjectShortName">d_in[31:0]</obj_property>
+            <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
+         </wvobject>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_decode/rs1_addr">
+         <obj_property name="ElementShortName">rs1_addr[4:0]</obj_property>
+         <obj_property name="ObjectShortName">rs1_addr[4:0]</obj_property>
+         <obj_property name="CustomSignalColor">#FFD700</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_decode/rs1_value">
+         <obj_property name="ElementShortName">rs1_value[31:0]</obj_property>
+         <obj_property name="ObjectShortName">rs1_value[31:0]</obj_property>
+         <obj_property name="CustomSignalColor">#FF00FF</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_decode/rs2_addr">
+         <obj_property name="ElementShortName">rs2_addr[4:0]</obj_property>
+         <obj_property name="ObjectShortName">rs2_addr[4:0]</obj_property>
+         <obj_property name="CustomSignalColor">#FFD700</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_decode/rs2_value">
+         <obj_property name="ElementShortName">rs2_value[31:0]</obj_property>
+         <obj_property name="ObjectShortName">rs2_value[31:0]</obj_property>
+         <obj_property name="CustomSignalColor">#FF00FF</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+         <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_decode/immediate_out">
+         <obj_property name="ElementShortName">immediate_out[31:0]</obj_property>
+         <obj_property name="ObjectShortName">immediate_out[31:0]</obj_property>
+         <obj_property name="CustomSignalColor">#00FFFF</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+         <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_decode/rd_addr_out">
+         <obj_property name="ElementShortName">rd_addr_out[4:0]</obj_property>
+         <obj_property name="ObjectShortName">rd_addr_out[4:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_decode/pc_out">
+         <obj_property name="ElementShortName">pc_out[31:0]</obj_property>
+         <obj_property name="ObjectShortName">pc_out[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_decode/npc_out">
+         <obj_property name="ElementShortName">npc_out[31:0]</obj_property>
+         <obj_property name="ObjectShortName">npc_out[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_decode/alu_opcode">
+         <obj_property name="ElementShortName">alu_opcode[3:0]</obj_property>
+         <obj_property name="ObjectShortName">alu_opcode[3:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_decode/comparator_opcode">
+         <obj_property name="ElementShortName">comparator_opcode[2:0]</obj_property>
+         <obj_property name="ObjectShortName">comparator_opcode[2:0]</obj_property>
+         <obj_property name="Radix">BINARYRADIX</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_decode/mem_opcode">
+         <obj_property name="ElementShortName">mem_opcode[2:0]</obj_property>
+         <obj_property name="ObjectShortName">mem_opcode[2:0]</obj_property>
+         <obj_property name="Radix">BINARYRADIX</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_decode/a_pcn">
+         <obj_property name="ElementShortName">a_pcn</obj_property>
+         <obj_property name="ObjectShortName">a_pcn</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_decode/b_immn">
+         <obj_property name="ElementShortName">b_immn</obj_property>
+         <obj_property name="ObjectShortName">b_immn</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_decode/opcode">
+         <obj_property name="ElementShortName">opcode[6:0]</obj_property>
+         <obj_property name="ObjectShortName">opcode[6:0]</obj_property>
+         <obj_property name="Radix">BINARYRADIX</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_decode/op_class">
+         <obj_property name="ElementShortName">op_class[4:0]</obj_property>
+         <obj_property name="ObjectShortName">op_class[4:0]</obj_property>
+         <obj_property name="Radix">BINARYRADIX</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_decode/rs1">
+         <obj_property name="ElementShortName">rs1[31:0]</obj_property>
+         <obj_property name="ObjectShortName">rs1[31:0]</obj_property>
+         <obj_property name="CustomSignalColor">#FF00FF</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+         <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_decode/rs2">
+         <obj_property name="ElementShortName">rs2[31:0]</obj_property>
+         <obj_property name="ObjectShortName">rs2[31:0]</obj_property>
+         <obj_property name="CustomSignalColor">#FF00FF</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+         <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_decode/rs1_addr">
+         <obj_property name="ElementShortName">rs1_addr[4:0]</obj_property>
+         <obj_property name="ObjectShortName">rs1_addr[4:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_decode/rs2_addr">
+         <obj_property name="ElementShortName">rs2_addr[4:0]</obj_property>
+         <obj_property name="ObjectShortName">rs2_addr[4:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_decode/rd_addr">
+         <obj_property name="ElementShortName">rd_addr[4:0]</obj_property>
+         <obj_property name="ObjectShortName">rd_addr[4:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_decode/func3">
+         <obj_property name="ElementShortName">func3[2:0]</obj_property>
+         <obj_property name="ObjectShortName">func3[2:0]</obj_property>
+         <obj_property name="Radix">BINARYRADIX</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_decode/func7">
+         <obj_property name="ElementShortName">func7[6:0]</obj_property>
+         <obj_property name="ObjectShortName">func7[6:0]</obj_property>
+         <obj_property name="Radix">BINARYRADIX</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_decode/opcode">
+         <obj_property name="ElementShortName">opcode[6:0]</obj_property>
+         <obj_property name="ObjectShortName">opcode[6:0]</obj_property>
+         <obj_property name="Radix">BINARYRADIX</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_decode/op">
+         <obj_property name="ElementShortName">op</obj_property>
+         <obj_property name="ObjectShortName">op</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_decode/store">
+         <obj_property name="ElementShortName">store</obj_property>
+         <obj_property name="ObjectShortName">store</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_decode/load">
+         <obj_property name="ElementShortName">load</obj_property>
+         <obj_property name="ObjectShortName">load</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_decode/branch">
+         <obj_property name="ElementShortName">branch</obj_property>
+         <obj_property name="ObjectShortName">branch</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_decode/jump">
+         <obj_property name="ElementShortName">jump</obj_property>
+         <obj_property name="ObjectShortName">jump</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject type="group" fp_name="group1101">
+      <obj_property name="label">IE</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_execute/rs1_value">
+         <obj_property name="ElementShortName">rs1_value[31:0]</obj_property>
+         <obj_property name="ObjectShortName">rs1_value[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_execute/rs2_value">
+         <obj_property name="ElementShortName">rs2_value[31:0]</obj_property>
+         <obj_property name="ObjectShortName">rs2_value[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_execute/immediate">
+         <obj_property name="ElementShortName">immediate[31:0]</obj_property>
+         <obj_property name="ObjectShortName">immediate[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_execute/npc_in">
+         <obj_property name="ElementShortName">npc_in[31:0]</obj_property>
+         <obj_property name="ObjectShortName">npc_in[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_execute/pc_in">
+         <obj_property name="ElementShortName">pc_in[31:0]</obj_property>
+         <obj_property name="ObjectShortName">pc_in[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_execute/rd_addr_in">
+         <obj_property name="ElementShortName">rd_addr_in[4:0]</obj_property>
+         <obj_property name="ObjectShortName">rd_addr_in[4:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_execute/a_pcn">
+         <obj_property name="ElementShortName">a_pcn</obj_property>
+         <obj_property name="ObjectShortName">a_pcn</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_execute/b_immn">
+         <obj_property name="ElementShortName">b_immn</obj_property>
+         <obj_property name="ObjectShortName">b_immn</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_execute/alu_opcode">
+         <obj_property name="ElementShortName">alu_opcode[3:0]</obj_property>
+         <obj_property name="ObjectShortName">alu_opcode[3:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_execute/comparator_opcode">
+         <obj_property name="ElementShortName">comparator_opcode[2:0]</obj_property>
+         <obj_property name="ObjectShortName">comparator_opcode[2:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_execute/mem_opcode_in">
+         <obj_property name="ElementShortName">mem_opcode_in[2:0]</obj_property>
+         <obj_property name="ObjectShortName">mem_opcode_in[2:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_execute/op_class_in">
+         <obj_property name="ElementShortName">op_class_in[4:0]</obj_property>
+         <obj_property name="ObjectShortName">op_class_in[4:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_execute/resoult_reg">
+         <obj_property name="ElementShortName">resoult_reg[31:0]</obj_property>
+         <obj_property name="ObjectShortName">resoult_reg[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_execute/resoult">
+         <obj_property name="ElementShortName">resoult[31:0]</obj_property>
+         <obj_property name="ObjectShortName">resoult[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_execute/npc_out">
+         <obj_property name="ElementShortName">npc_out[31:0]</obj_property>
+         <obj_property name="ObjectShortName">npc_out[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_execute/rd_addr_out">
+         <obj_property name="ElementShortName">rd_addr_out[4:0]</obj_property>
+         <obj_property name="ObjectShortName">rd_addr_out[4:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_execute/op_class_out">
+         <obj_property name="ElementShortName">op_class_out[4:0]</obj_property>
+         <obj_property name="ObjectShortName">op_class_out[4:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_execute/mem_opcode_out">
+         <obj_property name="ElementShortName">mem_opcode_out[2:0]</obj_property>
+         <obj_property name="ObjectShortName">mem_opcode_out[2:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_execute/rs2_out">
+         <obj_property name="ElementShortName">rs2_out[31:0]</obj_property>
+         <obj_property name="ObjectShortName">rs2_out[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_execute/jmp">
+         <obj_property name="ElementShortName">jmp</obj_property>
+         <obj_property name="ObjectShortName">jmp</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_execute/val1">
+         <obj_property name="ElementShortName">val1[31:0]</obj_property>
+         <obj_property name="ObjectShortName">val1[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_execute/val2">
+         <obj_property name="ElementShortName">val2[31:0]</obj_property>
+         <obj_property name="ObjectShortName">val2[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_execute/alu_resoult">
+         <obj_property name="ElementShortName">alu_resoult[31:0]</obj_property>
+         <obj_property name="ObjectShortName">alu_resoult[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_execute/cond">
+         <obj_property name="ElementShortName">cond</obj_property>
+         <obj_property name="ObjectShortName">cond</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_execute/jal">
+         <obj_property name="ElementShortName">jal</obj_property>
+         <obj_property name="ObjectShortName">jal</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject type="group" fp_name="group178">
+      <obj_property name="label">IE-Short</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_execute/resoult_reg">
+         <obj_property name="ElementShortName">resoult_reg[31:0]</obj_property>
+         <obj_property name="ObjectShortName">resoult_reg[31:0]</obj_property>
+         <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_execute/rd_addr_out">
+         <obj_property name="ElementShortName">rd_addr_out[4:0]</obj_property>
+         <obj_property name="ObjectShortName">rd_addr_out[4:0]</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject type="group" fp_name="group1102">
+      <obj_property name="label">M&amp;WB-Short</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="isExpanded"></obj_property>
+      <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/mem_writeback/we_in">
+         <obj_property name="ElementShortName">we_in</obj_property>
+         <obj_property name="ObjectShortName">we_in</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/mem_writeback/en_in">
+         <obj_property name="ElementShortName">en_in</obj_property>
+         <obj_property name="ObjectShortName">en_in</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/mem_writeback/address_reg">
+         <obj_property name="ElementShortName">address_reg[31:0]</obj_property>
+         <obj_property name="ObjectShortName">address_reg[31:0]</obj_property>
+         <obj_property name="CustomSignalColor">#FFFF00</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/mem_writeback/alu_resoult">
+         <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="ElementShortName">alu_resoult[31:0]</obj_property>
+         <obj_property name="ObjectShortName">alu_resoult[31:0]</obj_property>
+         <obj_property name="label">address</obj_property>
+         <obj_property name="CustomSignalColor">#FFD700</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/mem_writeback/alu_resoult_reg">
+         <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="ElementShortName">alu_resoult_reg[31:0]</obj_property>
+         <obj_property name="ObjectShortName">alu_resoult_reg[31:0]</obj_property>
+         <obj_property name="label">alu_resoult[31:0]</obj_property>
+         <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/mem_writeback/rs2_value">
+         <obj_property name="ElementShortName">rs2_value[31:0]</obj_property>
+         <obj_property name="ObjectShortName">rs2_value[31:0]</obj_property>
+         <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/mem_writeback/d_in">
+         <obj_property name="ElementShortName">d_in</obj_property>
+         <obj_property name="ObjectShortName">d_in</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/mem_writeback/rd_addr_out">
+         <obj_property name="ElementShortName">rd_addr_out[4:0]</obj_property>
+         <obj_property name="ObjectShortName">rd_addr_out[4:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         <obj_property name="CustomSignalColor">#FFD700</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/mem_writeback/rd_value">
+         <obj_property name="ElementShortName">rd_value[31:0]</obj_property>
+         <obj_property name="ObjectShortName">rd_value[31:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+         <obj_property name="CustomSignalColor">#FF00FF</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject type="group" fp_name="group1102">
+      <obj_property name="label">M&amp;WB</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/mem_writeback/mem_out_extended">
+         <obj_property name="ElementShortName">mem_out_extended[31:0]</obj_property>
+         <obj_property name="ObjectShortName">mem_out_extended[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/mem_writeback/we_in">
+         <obj_property name="ElementShortName">we_in</obj_property>
+         <obj_property name="ObjectShortName">we_in</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/mem_writeback/en_in">
+         <obj_property name="ElementShortName">en_in</obj_property>
+         <obj_property name="ObjectShortName">en_in</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/mem_writeback/npc_in">
+         <obj_property name="ElementShortName">npc_in[31:0]</obj_property>
+         <obj_property name="ObjectShortName">npc_in[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/mem_writeback/mem_opcode">
+         <obj_property name="ElementShortName">mem_opcode[2:0]</obj_property>
+         <obj_property name="ObjectShortName">mem_opcode[2:0]</obj_property>
+         <obj_property name="Radix">BINARYRADIX</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/mem_writeback/op_class">
+         <obj_property name="ElementShortName">op_class[4:0]</obj_property>
+         <obj_property name="ObjectShortName">op_class[4:0]</obj_property>
+         <obj_property name="Radix">BINARYRADIX</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/mem_writeback/alu_resoult">
+         <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="ElementShortName">alu_resoult[31:0]</obj_property>
+         <obj_property name="ObjectShortName">alu_resoult[31:0]</obj_property>
+         <obj_property name="label">address</obj_property>
+         <obj_property name="CustomSignalColor">#FFD700</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/mem_writeback/alu_resoult_reg">
+         <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="ElementShortName">alu_resoult_reg[31:0]</obj_property>
+         <obj_property name="ObjectShortName">alu_resoult_reg[31:0]</obj_property>
+         <obj_property name="label">alu_resoult[31:0]</obj_property>
+         <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/mem_writeback/rs2_value">
+         <obj_property name="ElementShortName">rs2_value[31:0]</obj_property>
+         <obj_property name="ObjectShortName">rs2_value[31:0]</obj_property>
+         <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/mem_writeback/rd_addr_in">
+         <obj_property name="ElementShortName">rd_addr_in[4:0]</obj_property>
+         <obj_property name="ObjectShortName">rd_addr_in[4:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/mem_writeback/rd_value">
+         <obj_property name="ElementShortName">rd_value[31:0]</obj_property>
+         <obj_property name="ObjectShortName">rd_value[31:0]</obj_property>
+         <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/mem_writeback/rd_addr_out">
+         <obj_property name="ElementShortName">rd_addr_out[4:0]</obj_property>
+         <obj_property name="ObjectShortName">rd_addr_out[4:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/mem_writeback/pc_out">
+         <obj_property name="ElementShortName">pc_out[31:0]</obj_property>
+         <obj_property name="ObjectShortName">pc_out[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/mem_writeback/en_out">
+         <obj_property name="ElementShortName">en_out</obj_property>
+         <obj_property name="ObjectShortName">en_out</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/mem_writeback/we_out">
+         <obj_property name="ElementShortName">we_out[3:0]</obj_property>
+         <obj_property name="ObjectShortName">we_out[3:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/mem_writeback/address_out">
+         <obj_property name="ElementShortName">address_out[31:0]</obj_property>
+         <obj_property name="ObjectShortName">address_out[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/mem_writeback/d_out">
+         <obj_property name="ElementShortName">d_out[31:0]</obj_property>
+         <obj_property name="ObjectShortName">d_out[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/mem_writeback/d_in">
+         <obj_property name="ElementShortName">d_in</obj_property>
+         <obj_property name="ObjectShortName">d_in</obj_property>
+         <obj_property name="isExpanded"></obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/mem_writeback/byte_address">
+         <obj_property name="ElementShortName">byte_address[1:0]</obj_property>
+         <obj_property name="ObjectShortName">byte_address[1:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/mem_writeback/en_bus">
+         <obj_property name="ElementShortName">en_bus</obj_property>
+         <obj_property name="ObjectShortName">en_bus</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/mem_writeback/we">
+         <obj_property name="ElementShortName">we[3:0]</obj_property>
+         <obj_property name="ObjectShortName">we[3:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/mem_writeback/mem_wea">
+         <obj_property name="ElementShortName">mem_wea[3:0]</obj_property>
+         <obj_property name="ObjectShortName">mem_wea[3:0]</obj_property>
+      </wvobject>
+      <wvobject type="group" fp_name="group1328">
+         <obj_property name="label">BRAM</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <wvobject fp_name="divider1368" type="divider">
+            <obj_property name="label">Port A</obj_property>
+            <obj_property name="DisplayName">label</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/mem_writeback/memory/ena">
+            <obj_property name="ElementShortName">ena</obj_property>
+            <obj_property name="ObjectShortName">ena</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/mem_writeback/memory/wea">
+            <obj_property name="ElementShortName">wea[3:0]</obj_property>
+            <obj_property name="ObjectShortName">wea[3:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/mem_writeback/memory/addra">
+            <obj_property name="ElementShortName">addra[13:0]</obj_property>
+            <obj_property name="ObjectShortName">addra[13:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/mem_writeback/memory/dina">
+            <obj_property name="ElementShortName">dina[31:0]</obj_property>
+            <obj_property name="ObjectShortName">dina[31:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/mem_writeback/memory/douta">
+            <obj_property name="ElementShortName">douta[31:0]</obj_property>
+            <obj_property name="ObjectShortName">douta[31:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="divider1366" type="divider">
+            <obj_property name="label">Port B</obj_property>
+            <obj_property name="DisplayName">label</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/mem_writeback/memory/enb">
+            <obj_property name="ElementShortName">enb</obj_property>
+            <obj_property name="ObjectShortName">enb</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/mem_writeback/memory/web">
+            <obj_property name="ElementShortName">web[3:0]</obj_property>
+            <obj_property name="ObjectShortName">web[3:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/mem_writeback/memory/addrb">
+            <obj_property name="ElementShortName">addrb[13:0]</obj_property>
+            <obj_property name="ObjectShortName">addrb[13:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/mem_writeback/memory/dinb">
+            <obj_property name="ElementShortName">dinb[31:0]</obj_property>
+            <obj_property name="ObjectShortName">dinb[31:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/mem_writeback/memory/doutb">
+            <obj_property name="ElementShortName">doutb[31:0]</obj_property>
+            <obj_property name="ObjectShortName">doutb[31:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="divider1443" type="divider">
+            <obj_property name="label">BRAM Controller</obj_property>
+            <obj_property name="DisplayName">label</obj_property>
+         </wvobject>
+      </wvobject>
+   </wvobject>
+   <wvobject type="group" fp_name="group533">
+      <obj_property name="label">AXI_CTR</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="isExpanded"></obj_property>
+      <wvobject type="protoinst" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/M_AXI">
+         <obj_property name="children_use_element_short_name">true</obj_property>
+         <obj_property name="WaveformStyle">STYLE_ENUM_TRANSACTION</obj_property>
+         <obj_property name="EnumTransactionColorTable">0=blank 1=#D399FF 2=pink</obj_property>
+         <obj_property name="EnumTransactionValueTable">0=blank;1=Read;2=Write;3=Read/Write</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+         <obj_property name="CustomSignalColor">turquoise</obj_property>
+         <obj_property name="Render_Data">/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/M_AXI.readWriteSummary</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         <obj_property name="CellHeight">36</obj_property>
+         <obj_property name="ElementShortName">M_AXI</obj_property>
+         <obj_property name="ObjectShortName">M_AXI</obj_property>
+         <obj_property name="isExpanded"></obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/is_axi_load">
+         <obj_property name="ElementShortName">is_axi_load</obj_property>
+         <obj_property name="ObjectShortName">is_axi_load</obj_property>
+      </wvobject>
+      <wvobject type="other" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/axi_mem_ctrl/read_state">
+         <obj_property name="ElementShortName">read_state</obj_property>
+         <obj_property name="ObjectShortName">read_state</obj_property>
+      </wvobject>
+      <wvobject type="other" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/axi_mem_ctrl/awrite_state">
+         <obj_property name="ElementShortName">awrite_state</obj_property>
+         <obj_property name="ObjectShortName">awrite_state</obj_property>
+      </wvobject>
+      <wvobject type="other" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/axi_mem_ctrl/dwrite_state">
+         <obj_property name="ElementShortName">dwrite_state</obj_property>
+         <obj_property name="ObjectShortName">dwrite_state</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/axi_mem_ctrl/stall">
+         <obj_property name="ElementShortName">stall</obj_property>
+         <obj_property name="ObjectShortName">stall</obj_property>
+      </wvobject>
+      <wvobject type="protoinst" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/axi_vip_1/S_AXI">
+         <obj_property name="ElementShortName">S_AXI</obj_property>
+         <obj_property name="ObjectShortName">S_AXI</obj_property>
+      </wvobject>
+      <wvobject type="protoinst" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/s_axi_i">
+         <obj_property name="ElementShortName">s_axi_i</obj_property>
+         <obj_property name="ObjectShortName">s_axi_i</obj_property>
+      </wvobject>
+      <wvobject type="protoinst" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/s_axi_d">
+         <obj_property name="ElementShortName">s_axi_d</obj_property>
+         <obj_property name="ObjectShortName">s_axi_d</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject type="group" fp_name="group1361">
+      <obj_property name="label">BRAM_AXI</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+   </wvobject>
+   <wvobject type="group" fp_name="group190">
+      <obj_property name="label">GPIO</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/gpio_driver/address">
+         <obj_property name="ElementShortName">address[31:0]</obj_property>
+         <obj_property name="ObjectShortName">address[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/gpio_driver/d_in">
+         <obj_property name="ElementShortName">d_in[31:0]</obj_property>
+         <obj_property name="ObjectShortName">d_in[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/gpio_driver/d_out">
+         <obj_property name="ElementShortName">d_out[31:0]</obj_property>
+         <obj_property name="ObjectShortName">d_out[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/gpio_driver/wea">
+         <obj_property name="ElementShortName">wea[3:0]</obj_property>
+         <obj_property name="ObjectShortName">wea[3:0]</obj_property>
+         <obj_property name="Radix">BINARYRADIX</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/gpio_driver/ena">
+         <obj_property name="ElementShortName">ena</obj_property>
+         <obj_property name="ObjectShortName">ena</obj_property>
+      </wvobject>
+      <wvobject type="group" fp_name="group2914">
+         <obj_property name="label">Signals</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="isExpanded"></obj_property>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/GPIO">
+            <obj_property name="ElementShortName">GPIO[31:0]</obj_property>
+            <obj_property name="ObjectShortName">GPIO[31:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/gpio_driver/GPIO_dir">
+            <obj_property name="ElementShortName">GPIO_dir[31:0]</obj_property>
+            <obj_property name="ObjectShortName">GPIO_dir[31:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/gpio_driver/GPIO_reg">
+            <obj_property name="ElementShortName">GPIO_reg[31:0]</obj_property>
+            <obj_property name="ObjectShortName">GPIO_reg[31:0]</obj_property>
+         </wvobject>
+      </wvobject>
+      <wvobject type="group" fp_name="group2919">
+         <obj_property name="label">Crop Singnals</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="isExpanded"></obj_property>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/gpio_driver/gpio_dir_s">
+            <obj_property name="ElementShortName">gpio_dir_s[7:0]</obj_property>
+            <obj_property name="ObjectShortName">gpio_dir_s[7:0]</obj_property>
+            <obj_property name="Radix">BINARYRADIX</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/gpio_driver/gpio_reg_s">
+            <obj_property name="ElementShortName">gpio_reg_s[7:0]</obj_property>
+            <obj_property name="ObjectShortName">gpio_reg_s[7:0]</obj_property>
+            <obj_property name="Radix">BINARYRADIX</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/gpio_driver/gpio_state_s">
+            <obj_property name="ElementShortName">gpio_state_s[7:0]</obj_property>
+            <obj_property name="ObjectShortName">gpio_state_s[7:0]</obj_property>
+            <obj_property name="Radix">BINARYRADIX</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/gpio_driver/gpio_out_s">
+            <obj_property name="ElementShortName">gpio_out_s[7:0]</obj_property>
+            <obj_property name="ObjectShortName">gpio_out_s[7:0]</obj_property>
+            <obj_property name="Radix">BINARYRADIX</obj_property>
+         </wvobject>
+      </wvobject>
+   </wvobject>
+   <wvobject type="group" fp_name="group192">
+      <obj_property name="label">REG_FILE</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject type="protoinst" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/s_axi_i">
+         <obj_property name="children_use_element_short_name">true</obj_property>
+         <obj_property name="WaveformStyle">STYLE_ENUM_TRANSACTION</obj_property>
+         <obj_property name="EnumTransactionColorTable">0=blank 1=#D399FF 2=pink</obj_property>
+         <obj_property name="EnumTransactionValueTable">0=blank;1=Read;2=Write;3=Read/Write</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+         <obj_property name="CustomSignalColor">turquoise</obj_property>
+         <obj_property name="Render_Data">/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/s_axi_i.readWriteSummary</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         <obj_property name="CellHeight">36</obj_property>
+         <obj_property name="ElementShortName">s_axi_i</obj_property>
+         <obj_property name="ObjectShortName">s_axi_i</obj_property>
+         <obj_property name="isExpanded"></obj_property>
+      </wvobject>
+      <wvobject type="group" fp_name="group1222">
+         <obj_property name="label">BRAM</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/bram_en_a_i">
+            <obj_property name="ElementShortName">bram_en_a_i</obj_property>
+            <obj_property name="ObjectShortName">bram_en_a_i</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/bram_addr_a_i">
+            <obj_property name="ElementShortName">bram_addr_a_i[19:0]</obj_property>
+            <obj_property name="ObjectShortName">bram_addr_a_i[19:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/bram_we_a_i">
+            <obj_property name="ElementShortName">bram_we_a_i[3:0]</obj_property>
+            <obj_property name="ObjectShortName">bram_we_a_i[3:0]</obj_property>
+            <obj_property name="Radix">BINARYRADIX</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/bram_wrdata_a_i">
+            <obj_property name="ElementShortName">bram_wrdata_a_i[31:0]</obj_property>
+            <obj_property name="ObjectShortName">bram_wrdata_a_i[31:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/bram_rddata_a_i">
+            <obj_property name="ElementShortName">bram_rddata_a_i[31:0]</obj_property>
+            <obj_property name="ObjectShortName">bram_rddata_a_i[31:0]</obj_property>
+         </wvobject>
+      </wvobject>
+      <wvobject fp_name="divider359" type="divider">
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/mtestRDataL">
+         <obj_property name="ElementShortName">mtestRDataL[63:0]</obj_property>
+         <obj_property name="ObjectShortName">mtestRDataL[63:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/mtestWDataL">
+         <obj_property name="ElementShortName">mtestWDataL[63:0]</obj_property>
+         <obj_property name="ObjectShortName">mtestWDataL[63:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="divider359" type="divider">
+      </wvobject>
+      <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/control_reg_ena">
+         <obj_property name="ElementShortName">control_reg_ena</obj_property>
+         <obj_property name="ObjectShortName">control_reg_ena</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/BTNs">
+         <obj_property name="ElementShortName">BTNs[4:0]</obj_property>
+         <obj_property name="ObjectShortName">BTNs[4:0]</obj_property>
+         <obj_property name="Radix">BINARYRADIX</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/control_reg">
+         <obj_property name="ElementShortName">control_reg[0:31][31:0]</obj_property>
+         <obj_property name="ObjectShortName">control_reg[0:31][31:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_enb">
+         <obj_property name="ElementShortName">instr_enb</obj_property>
+         <obj_property name="ObjectShortName">instr_enb</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_doutb">
+         <obj_property name="ElementShortName">instr_doutb[31:0]</obj_property>
+         <obj_property name="ObjectShortName">instr_doutb[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/axi_bram_controller_i/bram_en_a">
+         <obj_property name="ElementShortName">bram_en_a</obj_property>
+         <obj_property name="ObjectShortName">bram_en_a</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/axi_bram_controller_i/bram_we_a">
+         <obj_property name="ElementShortName">bram_we_a[3:0]</obj_property>
+         <obj_property name="ObjectShortName">bram_we_a[3:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/axi_bram_controller_i/bram_addr_a">
+         <obj_property name="ElementShortName">bram_addr_a[19:0]</obj_property>
+         <obj_property name="ObjectShortName">bram_addr_a[19:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/axi_bram_controller_i/bram_wrdata_a">
+         <obj_property name="ElementShortName">bram_wrdata_a[31:0]</obj_property>
+         <obj_property name="ObjectShortName">bram_wrdata_a[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/axi_bram_controller_i/bram_rddata_a">
+         <obj_property name="ElementShortName">bram_rddata_a[31:0]</obj_property>
+         <obj_property name="ObjectShortName">bram_rddata_a[31:0]</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject type="group" fp_name="group740">
+      <obj_property name="label">debug</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/oled_select0">
+         <obj_property name="ElementShortName">oled_select0</obj_property>
+         <obj_property name="ObjectShortName">oled_select0</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/display_in">
+         <obj_property name="ElementShortName">display_in[31:0]</obj_property>
+         <obj_property name="ObjectShortName">display_in[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/oled_select">
+         <obj_property name="ElementShortName">oled_select[2:0]</obj_property>
+         <obj_property name="ObjectShortName">oled_select[2:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/state_dbg">
+         <obj_property name="ElementShortName">state_dbg[2:0]</obj_property>
+         <obj_property name="ObjectShortName">state_dbg[2:0]</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/instr_fetch/instruction">
+      <obj_property name="ElementShortName">instruction[31:0]</obj_property>
+      <obj_property name="ObjectShortName">instruction[31:0]</obj_property>
+      <obj_property name="CustomSignalColor">#FF0000</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject type="group" fp_name="group1867">
+      <obj_property name="label">I2C</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject type="logic" fp_name="/test_CPU_wh_AXI/SDA">
+         <obj_property name="ElementShortName">SDA</obj_property>
+         <obj_property name="ObjectShortName">SDA</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/test_CPU_wh_AXI/SCL">
+         <obj_property name="ElementShortName">SCL</obj_property>
+         <obj_property name="ObjectShortName">SCL</obj_property>
+      </wvobject>
+      <wvobject type="group" fp_name="group279">
+         <obj_property name="label">Driver</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/i2c_driver/driver/en">
+            <obj_property name="ElementShortName">en</obj_property>
+            <obj_property name="ObjectShortName">en</obj_property>
+         </wvobject>
+         <wvobject type="other" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/i2c_driver/driver/i2c_state">
+            <obj_property name="ElementShortName">i2c_state</obj_property>
+            <obj_property name="ObjectShortName">i2c_state</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/i2c_driver/driver/addr_in">
+            <obj_property name="ElementShortName">addr_in[6:0]</obj_property>
+            <obj_property name="ObjectShortName">addr_in[6:0]</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/i2c_driver/driver/rw_n">
+            <obj_property name="ElementShortName">rw_n</obj_property>
+            <obj_property name="ObjectShortName">rw_n</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/i2c_driver/driver/d_in">
+            <obj_property name="ElementShortName">d_in[31:0]</obj_property>
+            <obj_property name="ObjectShortName">d_in[31:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/i2c_driver/driver/data_length">
+            <obj_property name="ElementShortName">data_length[2:0]</obj_property>
+            <obj_property name="ObjectShortName">data_length[2:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/i2c_driver/driver/d_out">
+            <obj_property name="ElementShortName">d_out[31:0]</obj_property>
+            <obj_property name="ObjectShortName">d_out[31:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/i2c_driver/driver/data_length_out">
+            <obj_property name="ElementShortName">data_length_out[2:0]</obj_property>
+            <obj_property name="ObjectShortName">data_length_out[2:0]</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/i2c_driver/driver/busy">
+            <obj_property name="ElementShortName">busy</obj_property>
+            <obj_property name="ObjectShortName">busy</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/i2c_driver/driver/error">
+            <obj_property name="ElementShortName">error</obj_property>
+            <obj_property name="ObjectShortName">error</obj_property>
+         </wvobject>
+      </wvobject>
+      <wvobject type="group" fp_name="group1875">
+         <obj_property name="label">Module</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/i2c_driver/ena">
+            <obj_property name="ElementShortName">ena</obj_property>
+            <obj_property name="ObjectShortName">ena</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/i2c_driver/wea">
+            <obj_property name="ElementShortName">wea[3:0]</obj_property>
+            <obj_property name="ObjectShortName">wea[3:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/i2c_driver/addra">
+            <obj_property name="ElementShortName">addra[31:0]</obj_property>
+            <obj_property name="ObjectShortName">addra[31:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/i2c_driver/dina">
+            <obj_property name="ElementShortName">dina[31:0]</obj_property>
+            <obj_property name="ObjectShortName">dina[31:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/i2c_driver/douta">
+            <obj_property name="ElementShortName">douta[31:0]</obj_property>
+            <obj_property name="ObjectShortName">douta[31:0]</obj_property>
+         </wvobject>
+         <wvobject type="vbus" fp_name="vbus439">
+            <obj_property name="label">I2C_CREG[3:0]</obj_property>
+            <obj_property name="DisplayName">label</obj_property>
+            <obj_property name="Radix">BINARYRADIX</obj_property>
+            <obj_property name="CustomSignalColor">#00FFFF</obj_property>
+            <obj_property name="UseCustomSignalColor">true</obj_property>
+            <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/i2c_driver/regFile[0][3]">
+               <obj_property name="DisplayName">label</obj_property>
+               <obj_property name="ElementShortName">[3]</obj_property>
+               <obj_property name="ObjectShortName">[3]</obj_property>
+               <obj_property name="label">[3] (error)</obj_property>
+            </wvobject>
+            <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/i2c_driver/regFile[0][2]">
+               <obj_property name="DisplayName">label</obj_property>
+               <obj_property name="ElementShortName">[2]</obj_property>
+               <obj_property name="ObjectShortName">[2]</obj_property>
+               <obj_property name="label">[2] (busy)</obj_property>
+            </wvobject>
+            <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/i2c_driver/regFile[0][1]">
+               <obj_property name="DisplayName">label</obj_property>
+               <obj_property name="ElementShortName">[1]</obj_property>
+               <obj_property name="ObjectShortName">[1]</obj_property>
+               <obj_property name="label">[1] (RWn)</obj_property>
+            </wvobject>
+            <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/i2c_driver/regFile[0][0]">
+               <obj_property name="DisplayName">label</obj_property>
+               <obj_property name="ElementShortName">[0]</obj_property>
+               <obj_property name="ObjectShortName">[0]</obj_property>
+               <obj_property name="label">[0] (start)</obj_property>
+            </wvobject>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/i2c_driver/regFile">
+            <obj_property name="ElementShortName">regFile[0:31][31:0]</obj_property>
+            <obj_property name="ObjectShortName">regFile[0:31][31:0]</obj_property>
+         </wvobject>
+      </wvobject>
+      <wvobject type="group" fp_name="group2123">
+         <obj_property name="label">Slave</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/slave_tb/i2c_address_tb">
+            <obj_property name="ElementShortName">i2c_address_tb[31:0]</obj_property>
+            <obj_property name="ObjectShortName">i2c_address_tb[31:0]</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/test_CPU_wh_AXI/slave_tb/i2c_rw_n_tb">
+            <obj_property name="ElementShortName">i2c_rw_n_tb</obj_property>
+            <obj_property name="ObjectShortName">i2c_rw_n_tb</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/slave_tb/i2c_data_tb">
+            <obj_property name="ElementShortName">i2c_data_tb[31:0]</obj_property>
+            <obj_property name="ObjectShortName">i2c_data_tb[31:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/slave_tb/i2c_data_to_send">
+            <obj_property name="ElementShortName">i2c_data_to_send[31:0]</obj_property>
+            <obj_property name="ObjectShortName">i2c_data_to_send[31:0]</obj_property>
+         </wvobject>
+         <wvobject type="other" fp_name="/test_CPU_wh_AXI/slave_tb/i2c_slave_state">
+            <obj_property name="ElementShortName">i2c_slave_state</obj_property>
+            <obj_property name="ObjectShortName">i2c_slave_state</obj_property>
+         </wvobject>
+         <wvobject type="other" fp_name="/test_CPU_wh_AXI/slave_tb/byte_count">
+            <obj_property name="ElementShortName">byte_count</obj_property>
+            <obj_property name="ObjectShortName">byte_count</obj_property>
+         </wvobject>
+         <wvobject type="other" fp_name="/test_CPU_wh_AXI/slave_tb/shamt">
+            <obj_property name="ElementShortName">shamt</obj_property>
+            <obj_property name="ObjectShortName">shamt</obj_property>
+         </wvobject>
+      </wvobject>
+   </wvobject>
+   <wvobject type="group" fp_name="group461">
+      <obj_property name="label">AXI Interfaces</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject type="protoinst" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/s_axi_i">
+         <obj_property name="ElementShortName">s_axi_i</obj_property>
+         <obj_property name="ObjectShortName">s_axi_i</obj_property>
+      </wvobject>
+      <wvobject type="protoinst" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/s_axi_d">
+         <obj_property name="ElementShortName">s_axi_d</obj_property>
+         <obj_property name="ObjectShortName">s_axi_d</obj_property>
+      </wvobject>
+      <wvobject type="protoinst" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/s_axi_btpu">
+         <obj_property name="ElementShortName">s_axi_btpu</obj_property>
+         <obj_property name="ObjectShortName">s_axi_btpu</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject type="group" fp_name="group462">
+      <obj_property name="label">BPTU</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/btpu_inst/clk">
+         <obj_property name="ElementShortName">clk</obj_property>
+         <obj_property name="ObjectShortName">clk</obj_property>
+      </wvobject>
+      <wvobject type="group" fp_name="group473">
+         <obj_property name="label">Port A</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <wvobject type="group" fp_name="group2657">
+            <obj_property name="label">BTPU_ENA</obj_property>
+            <obj_property name="DisplayName">label</obj_property>
+            <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/btpu_inst/ena.en_BTPU_CREG">
+               <obj_property name="ElementShortName">.en_BTPU_CREG</obj_property>
+               <obj_property name="ObjectShortName">.en_BTPU_CREG</obj_property>
+            </wvobject>
+            <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/btpu_inst/ena.en_BTPU_W_MEM">
+               <obj_property name="ElementShortName">.en_BTPU_W_MEM</obj_property>
+               <obj_property name="ObjectShortName">.en_BTPU_W_MEM</obj_property>
+            </wvobject>
+            <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/btpu_inst/ena.en_BTPU_IO0_MEM">
+               <obj_property name="ElementShortName">.en_BTPU_IO0_MEM</obj_property>
+               <obj_property name="ObjectShortName">.en_BTPU_IO0_MEM</obj_property>
+            </wvobject>
+            <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/btpu_inst/ena.en_BTPU_IO1_MEM">
+               <obj_property name="ElementShortName">.en_BTPU_IO1_MEM</obj_property>
+               <obj_property name="ObjectShortName">.en_BTPU_IO1_MEM</obj_property>
+            </wvobject>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/btpu_inst/ena">
+            <obj_property name="ElementShortName">ena</obj_property>
+            <obj_property name="ObjectShortName">ena</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/btpu_inst/wea">
+            <obj_property name="ElementShortName">wea[3:0]</obj_property>
+            <obj_property name="ObjectShortName">wea[3:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/btpu_inst/addra">
+            <obj_property name="ElementShortName">addra[31:0]</obj_property>
+            <obj_property name="ObjectShortName">addra[31:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/btpu_inst/dina">
+            <obj_property name="ElementShortName">dina[31:0]</obj_property>
+            <obj_property name="ObjectShortName">dina[31:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/btpu_inst/douta">
+            <obj_property name="ElementShortName">douta[31:0]</obj_property>
+            <obj_property name="ObjectShortName">douta[31:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/btpu_inst/creg_out">
+            <obj_property name="ElementShortName">creg_out[31:0]</obj_property>
+            <obj_property name="ObjectShortName">creg_out[31:0]</obj_property>
+         </wvobject>
+      </wvobject>
+      <wvobject type="group" fp_name="group474">
+         <obj_property name="label">Port B</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/btpu_inst/enb">
+            <obj_property name="ElementShortName">enb</obj_property>
+            <obj_property name="ObjectShortName">enb</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/btpu_inst/web">
+            <obj_property name="ElementShortName">web[3:0]</obj_property>
+            <obj_property name="ObjectShortName">web[3:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/btpu_inst/addrb">
+            <obj_property name="ElementShortName">addrb[31:0]</obj_property>
+            <obj_property name="ObjectShortName">addrb[31:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/btpu_inst/dinb">
+            <obj_property name="ElementShortName">dinb[31:0]</obj_property>
+            <obj_property name="ObjectShortName">dinb[31:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/btpu_inst/doutb">
+            <obj_property name="ElementShortName">doutb[31:0]</obj_property>
+            <obj_property name="ObjectShortName">doutb[31:0]</obj_property>
+         </wvobject>
+      </wvobject>
+      <wvobject type="group" fp_name="group951">
+         <obj_property name="label">MSF</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="isExpanded"></obj_property>
+         <wvobject type="other" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/btpu_inst/state">
+            <obj_property name="ElementShortName">state</obj_property>
+            <obj_property name="ObjectShortName">state</obj_property>
+            <obj_property name="CustomSignalColor">#00FFFF</obj_property>
+            <obj_property name="UseCustomSignalColor">true</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/btpu_inst/tile_number">
+            <obj_property name="ElementShortName">tile_number[1:0]</obj_property>
+            <obj_property name="ObjectShortName">tile_number[1:0]</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+            <obj_property name="CustomSignalColor">#FF00FF</obj_property>
+            <obj_property name="UseCustomSignalColor">true</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/btpu_inst/c_s">
+            <obj_property name="ElementShortName">c_s[9:0]</obj_property>
+            <obj_property name="ObjectShortName">c_s[9:0]</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+            <obj_property name="CustomSignalColor">#FF0000</obj_property>
+            <obj_property name="UseCustomSignalColor">true</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/btpu_inst/r_s">
+            <obj_property name="ElementShortName">r_s[9:0]</obj_property>
+            <obj_property name="ObjectShortName">r_s[9:0]</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+            <obj_property name="CustomSignalColor">#FFD700</obj_property>
+            <obj_property name="UseCustomSignalColor">true</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/btpu_inst/i_s">
+            <obj_property name="ElementShortName">i_s[9:0]</obj_property>
+            <obj_property name="ObjectShortName">i_s[9:0]</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/btpu_inst/bram_i_addr">
+            <obj_property name="ElementShortName">bram_i_addr[9:0]</obj_property>
+            <obj_property name="ObjectShortName">bram_i_addr[9:0]</obj_property>
+            <obj_property name="CustomSignalColor">#00FFFF</obj_property>
+            <obj_property name="UseCustomSignalColor">true</obj_property>
+            <obj_property name="Reversed">false</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/btpu_inst/bram_w_addrb">
+            <obj_property name="ElementShortName">bram_w_addrb[9:0]</obj_property>
+            <obj_property name="ObjectShortName">bram_w_addrb[9:0]</obj_property>
+            <obj_property name="CustomSignalColor">#00FFFF</obj_property>
+            <obj_property name="UseCustomSignalColor">true</obj_property>
+            <obj_property name="Reversed">false</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/btpu_inst/bram_o_addr">
+            <obj_property name="ElementShortName">bram_o_addr[9:0]</obj_property>
+            <obj_property name="ObjectShortName">bram_o_addr[9:0]</obj_property>
+            <obj_property name="CustomSignalColor">#00FFFF</obj_property>
+            <obj_property name="UseCustomSignalColor">true</obj_property>
+            <obj_property name="Reversed">false</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         </wvobject>
+      </wvobject>
+      <wvobject type="group" fp_name="group952">
+         <obj_property name="label">Control Reg</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/btpu_inst/control_reg">
+            <obj_property name="ElementShortName">control_reg[0:31][31:0]</obj_property>
+            <obj_property name="ObjectShortName">control_reg[0:31][31:0]</obj_property>
+         </wvobject>
+         <wvobject type="group" fp_name="group1027">
+            <obj_property name="label">CSREG</obj_property>
+            <obj_property name="DisplayName">label</obj_property>
+            <obj_property name="isExpanded"></obj_property>
+            <wvobject type="vbus" fp_name="VirtualBus">
+               <obj_property name="label">CSREG[6:0]</obj_property>
+               <obj_property name="DisplayName">label</obj_property>
+               <obj_property name="Reversed">true</obj_property>
+               <obj_property name="ElementShortName">VirtualBus[]</obj_property>
+               <obj_property name="ObjectShortName">VirtualBus[]</obj_property>
+               <obj_property name="Radix">BINARYRADIX</obj_property>
+               <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/btpu_inst/start">
+                  <obj_property name="ElementShortName">start</obj_property>
+                  <obj_property name="ObjectShortName">start</obj_property>
+               </wvobject>
+               <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/btpu_inst/busy">
+                  <obj_property name="ElementShortName">busy</obj_property>
+                  <obj_property name="ObjectShortName">busy</obj_property>
+               </wvobject>
+               <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/btpu_inst/o_mem_select">
+                  <obj_property name="ElementShortName">o_mem_select</obj_property>
+                  <obj_property name="ObjectShortName">o_mem_select</obj_property>
+               </wvobject>
+               <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/btpu_inst/bram_port_sel">
+                  <obj_property name="ElementShortName">bram_port_sel</obj_property>
+                  <obj_property name="ObjectShortName">bram_port_sel</obj_property>
+               </wvobject>
+               <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/btpu_inst/control_reg[0][4]">
+                  <obj_property name="DisplayName">label</obj_property>
+                  <obj_property name="ElementShortName">[4]</obj_property>
+                  <obj_property name="ObjectShortName">[4]</obj_property>
+                  <obj_property name="label">acc_clear</obj_property>
+               </wvobject>
+               <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/btpu_inst/is_batched">
+                  <obj_property name="ElementShortName">is_batched</obj_property>
+                  <obj_property name="ObjectShortName">is_batched</obj_property>
+               </wvobject>
+               <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/btpu_inst/err">
+                  <obj_property name="ElementShortName">err</obj_property>
+                  <obj_property name="ObjectShortName">err</obj_property>
+               </wvobject>
+            </wvobject>
+            <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/btpu_inst/start">
+               <obj_property name="ElementShortName">start</obj_property>
+               <obj_property name="ObjectShortName">start</obj_property>
+            </wvobject>
+            <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/btpu_inst/busy">
+               <obj_property name="ElementShortName">busy</obj_property>
+               <obj_property name="ObjectShortName">busy</obj_property>
+            </wvobject>
+            <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/btpu_inst/o_mem_select">
+               <obj_property name="ElementShortName">o_mem_select</obj_property>
+               <obj_property name="ObjectShortName">o_mem_select</obj_property>
+            </wvobject>
+            <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/btpu_inst/bram_port_sel">
+               <obj_property name="ElementShortName">bram_port_sel</obj_property>
+               <obj_property name="ObjectShortName">bram_port_sel</obj_property>
+            </wvobject>
+            <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/btpu_inst/control_reg[0][4]">
+               <obj_property name="DisplayName">label</obj_property>
+               <obj_property name="ElementShortName">[4]</obj_property>
+               <obj_property name="ObjectShortName">[4]</obj_property>
+               <obj_property name="label">acc_clear</obj_property>
+            </wvobject>
+            <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/btpu_inst/is_batched">
+               <obj_property name="ElementShortName">is_batched</obj_property>
+               <obj_property name="ObjectShortName">is_batched</obj_property>
+            </wvobject>
+            <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/btpu_inst/err">
+               <obj_property name="ElementShortName">err</obj_property>
+               <obj_property name="ObjectShortName">err</obj_property>
+            </wvobject>
+         </wvobject>
+         <wvobject type="group" fp_name="group1031">
+            <obj_property name="label">Addresses</obj_property>
+            <obj_property name="DisplayName">label</obj_property>
+            <obj_property name="isExpanded"></obj_property>
+            <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/btpu_inst/addr_w_base_reg">
+               <obj_property name="ElementShortName">addr_w_base_reg[9:0]</obj_property>
+               <obj_property name="ObjectShortName">addr_w_base_reg[9:0]</obj_property>
+               <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+               <obj_property name="CustomSignalColor">#FFFF00</obj_property>
+               <obj_property name="UseCustomSignalColor">true</obj_property>
+            </wvobject>
+            <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/btpu_inst/addr_i_base_reg">
+               <obj_property name="ElementShortName">addr_i_base_reg[9:0]</obj_property>
+               <obj_property name="ObjectShortName">addr_i_base_reg[9:0]</obj_property>
+               <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+               <obj_property name="CustomSignalColor">#FFFF00</obj_property>
+               <obj_property name="UseCustomSignalColor">true</obj_property>
+            </wvobject>
+            <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/btpu_inst/addr_o_base_reg">
+               <obj_property name="ElementShortName">addr_o_base_reg[9:0]</obj_property>
+               <obj_property name="ObjectShortName">addr_o_base_reg[9:0]</obj_property>
+               <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+               <obj_property name="CustomSignalColor">#FFFF00</obj_property>
+               <obj_property name="UseCustomSignalColor">true</obj_property>
+            </wvobject>
+         </wvobject>
+         <wvobject type="group" fp_name="group1032">
+            <obj_property name="label">Sizes</obj_property>
+            <obj_property name="DisplayName">label</obj_property>
+            <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/btpu_inst/m_reg">
+               <obj_property name="ElementShortName">m_reg[9:0]</obj_property>
+               <obj_property name="ObjectShortName">m_reg[9:0]</obj_property>
+               <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+            </wvobject>
+            <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/btpu_inst/n_reg">
+               <obj_property name="ElementShortName">n_reg[9:0]</obj_property>
+               <obj_property name="ObjectShortName">n_reg[9:0]</obj_property>
+               <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+            </wvobject>
+            <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/btpu_inst/k_reg">
+               <obj_property name="ElementShortName">k_reg[9:0]</obj_property>
+               <obj_property name="ObjectShortName">k_reg[9:0]</obj_property>
+               <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+            </wvobject>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/btpu_inst/mac_size_in">
+            <obj_property name="ElementShortName">mac_size_in[31:0]</obj_property>
+            <obj_property name="ObjectShortName">mac_size_in[31:0]</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         </wvobject>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/btpu_inst/activations_matrix">
+         <obj_property name="ElementShortName">activations_matrix[0:31][31:0]</obj_property>
+         <obj_property name="ObjectShortName">activations_matrix[0:31][31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/btpu_inst/weights_matrix">
+         <obj_property name="ElementShortName">weights_matrix[0:31][31:0]</obj_property>
+         <obj_property name="ObjectShortName">weights_matrix[0:31][31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/btpu_inst/result_matrix">
+         <obj_property name="ElementShortName">result_matrix[0:31][31:0]</obj_property>
+         <obj_property name="ObjectShortName">result_matrix[0:31][31:0]</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject type="group" fp_name="group2508">
+      <obj_property name="label">Timer</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="isExpanded"></obj_property>
+      <wvobject type="other" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/timer_inst/timer_state">
+         <obj_property name="ElementShortName">timer_state</obj_property>
+         <obj_property name="ObjectShortName">timer_state</obj_property>
+      </wvobject>
+      <wvobject type="group" fp_name="group2513">
+         <obj_property name="label">Control Regster</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <wvobject type="other" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/timer_inst/cc_sel">
+            <obj_property name="ElementShortName">cc_sel</obj_property>
+            <obj_property name="ObjectShortName">cc_sel</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/timer_inst/start">
+            <obj_property name="ElementShortName">start</obj_property>
+            <obj_property name="ObjectShortName">start</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/timer_inst/stop">
+            <obj_property name="ElementShortName">stop</obj_property>
+            <obj_property name="ObjectShortName">stop</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/timer_inst/busy">
+            <obj_property name="ElementShortName">busy</obj_property>
+            <obj_property name="ObjectShortName">busy</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/timer_inst/capture">
+            <obj_property name="ElementShortName">capture</obj_property>
+            <obj_property name="ObjectShortName">capture</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/timer_inst/regFile">
+            <obj_property name="ElementShortName">regFile[0:31][31:0]</obj_property>
+            <obj_property name="ObjectShortName">regFile[0:31][31:0]</obj_property>
+         </wvobject>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/timer_inst/counter">
+         <obj_property name="ElementShortName">counter[39:0]</obj_property>
+         <obj_property name="ObjectShortName">counter[39:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/timer_inst/compare">
+         <obj_property name="ElementShortName">compare[39:0]</obj_property>
+         <obj_property name="ObjectShortName">compare[39:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/timer_inst/pwm_tc">
+         <obj_property name="ElementShortName">pwm_tc[39:0]</obj_property>
+         <obj_property name="ObjectShortName">pwm_tc[39:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/test_CPU_wh_AXI/DUT/test_design_i/CPU_0/U0/timer_inst/pwm_int">
+         <obj_property name="ElementShortName">pwm_int</obj_property>
+         <obj_property name="ObjectShortName">pwm_int</obj_property>
+      </wvobject>
+   </wvobject>
+</wave_config>

@@ -1760,7 +1760,8 @@ module test_AXI_ctrl( );
     end
     endtask
 
-    parameter string resultFileName = "/home/alan.masutti/Documents/CPU Repo/simulation/matrixMul_result.csv";
+    // Relative to the xsim run directory, hw/vivado/CPU.sim/AXI_mem_ctrl/behav/xsim/
+    parameter string resultFileName = "../../../../../ghdl/matrixMul_result.csv";
 
     //Task per controllare un blocco
     task automatic testBlock(input int blockRow, input int blockCol, input logic [31:0] result_Matrix[$], input int testN, output logic res);
