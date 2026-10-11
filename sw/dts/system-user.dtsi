@@ -1,0 +1,14 @@
+/*
+ * Hand-written additions to the device tree generated from the .xsa,
+ * included at its end: nodes can be changed through their labels, which
+ * are the instance names of the block design.
+ */
+
+/*
+ * example_ip: the generated node gets a generic compatible; the driver in
+ * hw/ip/example_ip/linux-driver/ matches this one. Delete this block if the
+ * block design has no example_ip_0, or dtc stops on the unknown label.
+ */
+&example_ip_0 {
+	compatible = "example,example-ip-0.1";
+};

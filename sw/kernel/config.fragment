@@ -1,0 +1,4 @@
+# Kernel options added on top of KERNEL_DEFCONFIG (sw/config.sh), one
+# CONFIG_... line each, merged into the configuration at every 'make kernel'.
+# Example:
+# CONFIG_UIO_PDRV_GENIRQ=y

@@ -1,11 +1,85 @@
+# Generated: always recreated by 'make project' and the build targets
+/hw/vivado/
+/out/
+/work/
+.Xil/
+*.jou
+*.log
+*.str
+*.pb
+# PS7 summary that Vivado writes into NA/ of its working directory
+/NA/
+
+# Local settings
+.env
+
+# Build products of the kernel modules, made next to their sources
+/hw/ip/*/linux-driver/*.o
+/hw/ip/*/linux-driver/*.ko
+/hw/ip/*/linux-driver/*.mod
+/hw/ip/*/linux-driver/*.mod.c
+/hw/ip/*/linux-driver/.*.cmd
+/hw/ip/*/linux-driver/Module.symvers
+/hw/ip/*/linux-driver/modules.order
+
+# Catalog IPs outside a block design: only the configuration is committed,
+# the output products Vivado writes next to it are not
+/hw/src/ip/*/*
+!/hw/src/ip/*/*.xci
+
+# Vitis workspace of the bare-metal part (sw/vitis/): state of the IDE,
+# build products, and everything Vitis recreates from the .xsa (hw/ of the
+# platforms, _ide/ of the applications) or from the configuration of the
+# BSPs (their sources, headers and libraries). Rules for both IDEs: classic
+# Vitis (up to 2023.1) and Vitis Unified (from 2023.2).
+/sw/vitis/.metadata/
+/sw/vitis/RemoteSystemsTempFiles/
+/sw/vitis/.analytics
+/sw/vitis/IDE.log
+/sw/vitis/temp_xsdb_launch_script.tcl
+/sw/vitis/_ide/
+/sw/vitis/.rigel_lopper/
+/sw/vitis/*/Debug/
+/sw/vitis/*/Release/
+/sw/vitis/*/build/
+/sw/vitis/*/_ide/
+/sw/vitis/*/export/
+/sw/vitis/*/hw/
+/sw/vitis/*/resources/
+/sw/vitis/*/tempdsa/
+/sw/vitis/*/logs/
+/sw/vitis/*/.log/
+/sw/vitis/*/platform.tcl
+/sw/vitis/*/zynq_fsbl/build/
+/sw/vitis/*/zynq_fsbl/fsbl.elf
+# BSPs: classic Vitis keeps everything generated in bsp/<processor>/ next to
+# system.mss; Vitis Unified in bsp/libsrc/, include/ and lib/ next to
+# bsp.yaml and the CMake files, and needs hw_artifacts/ to regenerate.
+/sw/vitis/*/*/*/bsp/*/
+!/sw/vitis/*/*/*/bsp/hw_artifacts/
+/sw/vitis/*/zynq_fsbl/zynq_fsbl_bsp/*/
+!/sw/vitis/*/zynq_fsbl/zynq_fsbl_bsp/hw_artifacts/
+/sw/vitis/*/zynq_fsbl/zynq_fsbl_bsp/lop-config.*
+# Lists of the applications and libraries of embeddedsw, written again by
+# Regenerate BSP
+/sw/vitis/**/app_list.yaml
+/sw/vitis/**/lib_list.yaml
+# Index files of clangd, written by Vitis Unified with absolute paths
+/sw/vitis/**/compile_commands.json
+/sw/vitis/**/.compile_commands
+/sw/vitis/**/.cache/
+/sw/vitis/**/.clangd
+/sw/vitis/**/*.o
+/sw/vitis/**/*.d
+
+# This project: simulation waveforms and results, RISC-V build products,
+# Python environment, editor settings
 **.cf
 **.fst.upk**
 *.pdf
 test_barrell.vhd
 /Vivado
 **$ALU**
-.Xil
-*.log
 *bin
 pyEnv
 *obj
