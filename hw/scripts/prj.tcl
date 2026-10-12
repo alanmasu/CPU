@@ -4,7 +4,7 @@
 # The Makefile runs the same commands in batch mode through run.tcl.
 
 namespace eval ::prj {
-    foreach script {common usr_access package_ip create export ip sim build check} {
+    foreach script {common usr_access package_ip create export ip sim regen_pkg build check} {
         source [file join [file dirname [file normalize [info script]]] $script.tcl]
     }
     # In a namespace eval the loop variable is a variable of the namespace.
@@ -18,6 +18,7 @@ proc ::prj::help {} {
   prj::ip ?name? ?M.m?         repackage IPs, upgrade, export        [ip]
   prj::package_ip name ?M.m?   package one IP, nothing else
   prj::sim ?name?              run IP testbenches with xsim          [sim]
+  prj::regen_pkg ?simset?      compile the VHDL packages of a simulation set
   prj::build synth|bitstream|xsa                                     [synth, bitstream, xsa]
   prj::check                   checks to run before a commit         [check]}
 }

@@ -20,7 +20,7 @@ SW := bash sw/scripts/build.sh
 GENERATED := hw/vivado out/hw out/sim out/ip_edit $(WORK) .Xil hw/.Xil
 IP ?= all
 
-.PHONY: help hooks project vivado export ip sim synth bitstream xsa check clean clean-force
+.PHONY: help hooks project vivado export ip sim regen-pkg synth bitstream xsa check clean clean-force
 .PHONY: linux-fsbl linux-dtb linux-uboot linux-boot linux-kernel linux-modules linux-sd linux-clean
 .PHONY: vitis vitis-build
 
@@ -34,6 +34,9 @@ help:
 	@echo   ip           repackage the IPs of hw/ip/, upgrade and export the project
 	@echo                IP=name for one IP, VERSION=M.m to change its version
 	@echo   sim          run the IP testbenches, IP=name for one IP
+	@echo   regen-pkg    compile the VHDL packages of a simulation set of the project,
+	@echo                when it stops on a package imported by a SystemVerilog
+	@echo                testbench; SIMSET=name, the active one if not set
 	@echo   synth        run synthesis
 	@echo   bitstream    build out/hw/PROJECT.bit
 	@echo   xsa          build out/hw/PROJECT.bit and out/hw/PROJECT.xsa
@@ -78,6 +81,9 @@ ip:
 sim:
 	$(RUN) sim $(IP)
 
+regen-pkg:
+	$(RUN) regen_pkg $(SIMSET)
+
 synth:
 	$(RUN) build synth
 
@@ -99,7 +105,7 @@ vitis-build:
 	bash sw/scripts/vitis.sh build
 
 # Every target that starts Vivado needs work/ (vitis.sh creates it itself).
-project vivado export ip sim synth bitstream xsa check: | $(WORK)
+project vivado export ip sim regen-pkg synth bitstream xsa check: | $(WORK)
 
 # The targets that work on the project create it first when hw/vivado/ does
 # not exist, as 'make project' does: after a clone, 'make xsa' is enough.
@@ -110,7 +116,7 @@ project vivado export ip sim synth bitstream xsa check: | $(WORK)
 # The hooks are installed by calling install.sh, because a phony
 # prerequisite would make the project out of date at every run.
 PROJECT_STAMP := hw/vivado/.exported
-vivado export synth bitstream xsa: | $(PROJECT_STAMP)
+vivado export regen-pkg synth bitstream xsa: | $(PROJECT_STAMP)
 
 $(PROJECT_STAMP): | $(WORK)
 	bash hooks/install.sh

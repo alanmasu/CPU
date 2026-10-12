@@ -47,7 +47,7 @@ proc ::prj::check {} {
 
     set foreign {}
     foreach command [lsort [info commands ::prj::*]] {
-        if {[namespace tail $command] ni {build check create export help ip package_ip sim}} {
+        if {[namespace tail $command] ni {build check create export help ip package_ip regen_pkg sim}} {
             lappend foreign [namespace tail $command]
         }
     }
