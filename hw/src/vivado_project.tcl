@@ -54,10 +54,6 @@ proc checkRequiredFiles { origin_dir} {
  "[file normalize "$origin_dir/src/sim/wcfg/test_TriplePortRam_behav.wcfg"]"\
  "[file normalize "$origin_dir/src/sim/cpu/test_IF.vhd"]"\
  "[file normalize "$origin_dir/src/sim/wcfg/test_IF_behav.wcfg"]"\
- "[file normalize "$origin_dir/src/sim/cpu/test_memoryAndWriteback.vhd"]"\
- "[file normalize "$origin_dir/src/sim/wcfg/test_memoryAndWriteback_behav.wcfg"]"\
- "[file normalize "$origin_dir/src/sim/cpu/test_RAM.vhd"]"\
- "[file normalize "$origin_dir/src/sim/wcfg/test_RAM_behav.wcfg"]"\
  "[file normalize "$origin_dir/src/sim/common/slave_interface.vhd"]"\
  "[file normalize "$origin_dir/src/sim/bnn/testBlockMatrixMul.svh"]"\
  "[file normalize "$origin_dir/src/sim/bnn/testBTPUProgram.svh"]"\
@@ -67,7 +63,6 @@ proc checkRequiredFiles { origin_dir} {
  "[file normalize "$origin_dir/src/sim/periph/test_TimerContinuous.svh"]"\
  "[file normalize "$origin_dir/src/sim/bnn/test_LoadStoreBTPUProgram.svh"]"\
  "[file normalize "$origin_dir/src/sim/cpu/test_CPU_wh_AXI.sv"]"\
- "[file normalize "$origin_dir/src/sim/cpu/test_CPU_AXI_recursive.sv"]"\
  "[file normalize "$origin_dir/src/sim/cpu/test_GPIO_prog_on_CPU.sv"]"\
  "[file normalize "$origin_dir/src/sim/wcfg/test_CPU_behav_AXI.wcfg"]"\
  "[file normalize "$origin_dir/src/sim/cpu/test_addr_manager.vhd"]"\
@@ -86,10 +81,6 @@ proc checkRequiredFiles { origin_dir} {
  "[file normalize "$origin_dir/src/sim/periph/test_I2C_module.vhd"]"\
  "[file normalize "$origin_dir/src/sim/periph/test_I2C_uitilities.vhd"]"\
  "[file normalize "$origin_dir/src/sim/wcfg/test_I2C_module_behav.wcfg"]"\
- "[file normalize "$origin_dir/src/sim/cpu/testUtilities.svh"]"\
- "[file normalize "$origin_dir/src/sim/cpu/test_CPU_AXI_recursive.sv"]"\
- "[file normalize "$origin_dir/src/sim/common/slave_interface.vhd"]"\
- "[file normalize "$origin_dir/src/sim/wcfg/test_CPU_AXI_recursive_behav.wcfg"]"\
  "[file normalize "$origin_dir/src/hdl/bnn/compressor_3_2.vhd"]"\
  "[file normalize "$origin_dir/src/hdl/bnn/compressor_6_3.vhd"]"\
  "[file normalize "$origin_dir/src/sim/bnn/test_compressor.vhd"]"\
@@ -99,6 +90,7 @@ proc checkRequiredFiles { origin_dir} {
  "[file normalize "$origin_dir/src/hdl/bnn/compressor_layer.vhd"]"\
  "[file normalize "$origin_dir/src/hdl/bnn/popcounter_tree.vhd"]"\
  "[file normalize "$origin_dir/src/hdl/bnn/ternary_adder.vhd"]"\
+ "[file normalize "$origin_dir/src/hdl/bnn/popcounter.vhd"]"\
  "[file normalize "$origin_dir/src/sim/bnn/test_popcounter.vhd"]"\
  "[file normalize "$origin_dir/src/sim/wcfg/test_popcounter_behav.wcfg"]"\
  "[file normalize "$origin_dir/src/hdl/packages/utilities_pkg.vhd"]"\
@@ -108,13 +100,6 @@ proc checkRequiredFiles { origin_dir} {
  "[file normalize "$origin_dir/src/sim/bnn/test_compressor_layer.vhd"]"\
  "[file normalize "$origin_dir/src/sim/bnn/testBNN_utilities.vhd"]"\
  "[file normalize "$origin_dir/src/sim/wcfg/test_compressor_layer_behav.wcfg"]"\
- "[file normalize "$origin_dir/src/hdl/packages/utilities_pkg.vhd"]"\
- "[file normalize "$origin_dir/src/hdl/packages/BNN_pkg.vhd"]"\
- "[file normalize "$origin_dir/src/hdl/packages/types_pkg.vhd"]"\
- "[file normalize "$origin_dir/src/hdl/packages/constant_package.vhd"]"\
- "[file normalize "$origin_dir/src/hdl/packages/memory_pkg.vhd"]"\
- "[file normalize "$origin_dir/src/sim/bnn/test_BTPU_memory.vhd"]"\
- "[file normalize "$origin_dir/src/sim/wcfg/test_BTPU_memory_behav.wcfg"]"\
  "[file normalize "$origin_dir/scripts/write_bitstream_pre.tcl"]"\
   ]
   foreach ifile $files {
@@ -224,13 +209,13 @@ set_property -name "sim.central_dir" -value "$proj_dir/${_xil_proj_name_}.ip_use
 set_property -name "sim.ip.auto_export_scripts" -value "1" -objects $obj
 set_property -name "simulator_language" -value "Mixed" -objects $obj
 set_property -name "target_language" -value "VHDL" -objects $obj
-set_property -name "webtalk.activehdl_export_sim" -value "293" -objects $obj
-set_property -name "webtalk.modelsim_export_sim" -value "293" -objects $obj
-set_property -name "webtalk.questa_export_sim" -value "293" -objects $obj
-set_property -name "webtalk.riviera_export_sim" -value "293" -objects $obj
-set_property -name "webtalk.vcs_export_sim" -value "293" -objects $obj
-set_property -name "webtalk.xsim_export_sim" -value "298" -objects $obj
-set_property -name "webtalk.xsim_launch_sim" -value "4208" -objects $obj
+set_property -name "webtalk.activehdl_export_sim" -value "294" -objects $obj
+set_property -name "webtalk.modelsim_export_sim" -value "294" -objects $obj
+set_property -name "webtalk.questa_export_sim" -value "294" -objects $obj
+set_property -name "webtalk.riviera_export_sim" -value "294" -objects $obj
+set_property -name "webtalk.vcs_export_sim" -value "294" -objects $obj
+set_property -name "webtalk.xsim_export_sim" -value "299" -objects $obj
+set_property -name "webtalk.xsim_launch_sim" -value "4212" -objects $obj
 set_property -name "xpm_libraries" -value "XPM_CDC XPM_FIFO XPM_MEMORY" -objects $obj
 
 # Create 'sources_1' fileset (if not found)
@@ -638,64 +623,6 @@ set_property -name "top" -value "test_IF" -objects $obj
 set_property -name "top_auto_set" -value "0" -objects $obj
 set_property -name "top_lib" -value "xil_defaultlib" -objects $obj
 
-# Create 'memoryEwriteBack_sim' fileset (if not found)
-if {[string equal [get_filesets -quiet memoryEwriteBack_sim] ""]} {
-  create_fileset -simset memoryEwriteBack_sim
-}
-
-# Set 'memoryEwriteBack_sim' fileset object
-set obj [get_filesets memoryEwriteBack_sim]
-set files [list \
- [file normalize "${origin_dir}/src/sim/cpu/test_memoryAndWriteback.vhd"] \
- [file normalize "${origin_dir}/src/sim/wcfg/test_memoryAndWriteback_behav.wcfg"] \
-]
-add_files -norecurse -fileset $obj $files
-
-# Set 'memoryEwriteBack_sim' fileset file properties for remote files
-set file "$origin_dir/src/sim/cpu/test_memoryAndWriteback.vhd"
-set file [file normalize $file]
-set file_obj [get_files -of_objects [get_filesets memoryEwriteBack_sim] [list "*$file"]]
-set_property -name "file_type" -value "VHDL" -objects $file_obj
-
-
-# Set 'memoryEwriteBack_sim' fileset file properties for local files
-# None
-
-# Set 'memoryEwriteBack_sim' fileset properties
-set obj [get_filesets memoryEwriteBack_sim]
-set_property -name "top" -value "test_memoryAndWriteback" -objects $obj
-set_property -name "top_auto_set" -value "0" -objects $obj
-set_property -name "top_lib" -value "xil_defaultlib" -objects $obj
-
-# Create 'RAM_sim' fileset (if not found)
-if {[string equal [get_filesets -quiet RAM_sim] ""]} {
-  create_fileset -simset RAM_sim
-}
-
-# Set 'RAM_sim' fileset object
-set obj [get_filesets RAM_sim]
-set files [list \
- [file normalize "${origin_dir}/src/sim/cpu/test_RAM.vhd"] \
- [file normalize "${origin_dir}/src/sim/wcfg/test_RAM_behav.wcfg"] \
-]
-add_files -norecurse -fileset $obj $files
-
-# Set 'RAM_sim' fileset file properties for remote files
-set file "$origin_dir/src/sim/cpu/test_RAM.vhd"
-set file [file normalize $file]
-set file_obj [get_files -of_objects [get_filesets RAM_sim] [list "*$file"]]
-set_property -name "file_type" -value "VHDL" -objects $file_obj
-
-
-# Set 'RAM_sim' fileset file properties for local files
-# None
-
-# Set 'RAM_sim' fileset properties
-set obj [get_filesets RAM_sim]
-set_property -name "top" -value "test_RAM" -objects $obj
-set_property -name "top_auto_set" -value "0" -objects $obj
-set_property -name "top_lib" -value "xil_defaultlib" -objects $obj
-
 # Create 'CPU_sim' fileset (if not found)
 if {[string equal [get_filesets -quiet CPU_sim] ""]} {
   create_fileset -simset CPU_sim
@@ -713,7 +640,6 @@ set files [list \
  [file normalize "${origin_dir}/src/sim/periph/test_TimerContinuous.svh"] \
  [file normalize "${origin_dir}/src/sim/bnn/test_LoadStoreBTPUProgram.svh"] \
  [file normalize "${origin_dir}/src/sim/cpu/test_CPU_wh_AXI.sv"] \
- [file normalize "${origin_dir}/src/sim/cpu/test_CPU_AXI_recursive.sv"] \
  [file normalize "${origin_dir}/src/sim/cpu/test_GPIO_prog_on_CPU.sv"] \
  [file normalize "${origin_dir}/src/sim/wcfg/test_CPU_behav_AXI.wcfg"] \
 ]
@@ -761,11 +687,6 @@ set file_obj [get_files -of_objects [get_filesets CPU_sim] [list "*$file"]]
 set_property -name "file_type" -value "Verilog Header" -objects $file_obj
 
 set file "$origin_dir/src/sim/cpu/test_CPU_wh_AXI.sv"
-set file [file normalize $file]
-set file_obj [get_files -of_objects [get_filesets CPU_sim] [list "*$file"]]
-set_property -name "file_type" -value "SystemVerilog" -objects $file_obj
-
-set file "$origin_dir/src/sim/cpu/test_CPU_AXI_recursive.sv"
 set file [file normalize $file]
 set file_obj [get_files -of_objects [get_filesets CPU_sim] [list "*$file"]]
 set_property -name "file_type" -value "SystemVerilog" -objects $file_obj
@@ -959,49 +880,6 @@ set_property -name "top_lib" -value "xil_defaultlib" -objects $obj
 set_property -name "xsim.simulate.log_all_signals" -value "1" -objects $obj
 set_property -name "xsim.simulate.runtime" -value "50ms" -objects $obj
 
-# Create 'top_level_sim' fileset (if not found)
-if {[string equal [get_filesets -quiet top_level_sim] ""]} {
-  create_fileset -simset top_level_sim
-}
-
-# Set 'top_level_sim' fileset object
-set obj [get_filesets top_level_sim]
-set files [list \
- [file normalize "${origin_dir}/src/sim/cpu/testUtilities.svh"] \
- [file normalize "${origin_dir}/src/sim/cpu/test_CPU_AXI_recursive.sv"] \
- [file normalize "${origin_dir}/src/sim/common/slave_interface.vhd"] \
- [file normalize "${origin_dir}/src/sim/wcfg/test_CPU_AXI_recursive_behav.wcfg"] \
-]
-add_files -norecurse -fileset $obj $files
-
-# Set 'top_level_sim' fileset file properties for remote files
-set file "$origin_dir/src/sim/cpu/testUtilities.svh"
-set file [file normalize $file]
-set file_obj [get_files -of_objects [get_filesets top_level_sim] [list "*$file"]]
-set_property -name "file_type" -value "Verilog Header" -objects $file_obj
-
-set file "$origin_dir/src/sim/cpu/test_CPU_AXI_recursive.sv"
-set file [file normalize $file]
-set file_obj [get_files -of_objects [get_filesets top_level_sim] [list "*$file"]]
-set_property -name "file_type" -value "SystemVerilog" -objects $file_obj
-
-set file "$origin_dir/src/sim/common/slave_interface.vhd"
-set file [file normalize $file]
-set file_obj [get_files -of_objects [get_filesets top_level_sim] [list "*$file"]]
-set_property -name "file_type" -value "VHDL" -objects $file_obj
-
-
-# Set 'top_level_sim' fileset file properties for local files
-# None
-
-# Set 'top_level_sim' fileset properties
-set obj [get_filesets top_level_sim]
-set_property -name "top" -value "test_CPU_AXI_recursive" -objects $obj
-set_property -name "top_auto_set" -value "0" -objects $obj
-set_property -name "top_lib" -value "xil_defaultlib" -objects $obj
-set_property -name "xsim.simulate.log_all_signals" -value "1" -objects $obj
-set_property -name "xsim.simulate.runtime" -value "100 us" -objects $obj
-
 # Create 'compressor_6_3_sim' fileset (if not found)
 if {[string equal [get_filesets -quiet compressor_6_3_sim] ""]} {
   create_fileset -simset compressor_6_3_sim
@@ -1059,6 +937,7 @@ set files [list \
  [file normalize "${origin_dir}/src/hdl/bnn/compressor_layer.vhd"] \
  [file normalize "${origin_dir}/src/hdl/bnn/popcounter_tree.vhd"] \
  [file normalize "${origin_dir}/src/hdl/bnn/ternary_adder.vhd"] \
+ [file normalize "${origin_dir}/src/hdl/bnn/popcounter.vhd"] \
  [file normalize "${origin_dir}/src/sim/bnn/test_popcounter.vhd"] \
  [file normalize "${origin_dir}/src/sim/wcfg/test_popcounter_behav.wcfg"] \
 ]
@@ -1091,6 +970,11 @@ set file_obj [get_files -of_objects [get_filesets popcount_sim] [list "*$file"]]
 set_property -name "file_type" -value "VHDL" -objects $file_obj
 
 set file "$origin_dir/src/hdl/bnn/ternary_adder.vhd"
+set file [file normalize $file]
+set file_obj [get_files -of_objects [get_filesets popcount_sim] [list "*$file"]]
+set_property -name "file_type" -value "VHDL" -objects $file_obj
+
+set file "$origin_dir/src/hdl/bnn/popcounter.vhd"
 set file [file normalize $file]
 set file_obj [get_files -of_objects [get_filesets popcount_sim] [list "*$file"]]
 set_property -name "file_type" -value "VHDL" -objects $file_obj
@@ -1174,67 +1058,6 @@ set_property -name "top_auto_set" -value "0" -objects $obj
 set_property -name "top_lib" -value "xil_defaultlib" -objects $obj
 set_property -name "xsim.simulate.log_all_signals" -value "1" -objects $obj
 set_property -name "xsim.simulate.runtime" -value "100 ns" -objects $obj
-
-# Create 'BTPU_memory_sim' fileset (if not found)
-if {[string equal [get_filesets -quiet BTPU_memory_sim] ""]} {
-  create_fileset -simset BTPU_memory_sim
-}
-
-# Set 'BTPU_memory_sim' fileset object
-set obj [get_filesets BTPU_memory_sim]
-set files [list \
- [file normalize "${origin_dir}/src/hdl/packages/utilities_pkg.vhd"] \
- [file normalize "${origin_dir}/src/hdl/packages/BNN_pkg.vhd"] \
- [file normalize "${origin_dir}/src/hdl/packages/types_pkg.vhd"] \
- [file normalize "${origin_dir}/src/hdl/packages/constant_package.vhd"] \
- [file normalize "${origin_dir}/src/hdl/packages/memory_pkg.vhd"] \
- [file normalize "${origin_dir}/src/sim/bnn/test_BTPU_memory.vhd"] \
- [file normalize "${origin_dir}/src/sim/wcfg/test_BTPU_memory_behav.wcfg"] \
-]
-add_files -norecurse -fileset $obj $files
-
-# Set 'BTPU_memory_sim' fileset file properties for remote files
-set file "$origin_dir/src/hdl/packages/utilities_pkg.vhd"
-set file [file normalize $file]
-set file_obj [get_files -of_objects [get_filesets BTPU_memory_sim] [list "*$file"]]
-set_property -name "file_type" -value "VHDL" -objects $file_obj
-
-set file "$origin_dir/src/hdl/packages/BNN_pkg.vhd"
-set file [file normalize $file]
-set file_obj [get_files -of_objects [get_filesets BTPU_memory_sim] [list "*$file"]]
-set_property -name "file_type" -value "VHDL" -objects $file_obj
-
-set file "$origin_dir/src/hdl/packages/types_pkg.vhd"
-set file [file normalize $file]
-set file_obj [get_files -of_objects [get_filesets BTPU_memory_sim] [list "*$file"]]
-set_property -name "file_type" -value "VHDL" -objects $file_obj
-
-set file "$origin_dir/src/hdl/packages/constant_package.vhd"
-set file [file normalize $file]
-set file_obj [get_files -of_objects [get_filesets BTPU_memory_sim] [list "*$file"]]
-set_property -name "file_type" -value "VHDL" -objects $file_obj
-
-set file "$origin_dir/src/hdl/packages/memory_pkg.vhd"
-set file [file normalize $file]
-set file_obj [get_files -of_objects [get_filesets BTPU_memory_sim] [list "*$file"]]
-set_property -name "file_type" -value "VHDL" -objects $file_obj
-
-set file "$origin_dir/src/sim/bnn/test_BTPU_memory.vhd"
-set file [file normalize $file]
-set file_obj [get_files -of_objects [get_filesets BTPU_memory_sim] [list "*$file"]]
-set_property -name "file_type" -value "VHDL" -objects $file_obj
-
-
-# Set 'BTPU_memory_sim' fileset file properties for local files
-# None
-
-# Set 'BTPU_memory_sim' fileset properties
-set obj [get_filesets BTPU_memory_sim]
-set_property -name "top" -value "test_BTPU_memory" -objects $obj
-set_property -name "top_auto_set" -value "0" -objects $obj
-set_property -name "top_lib" -value "xil_defaultlib" -objects $obj
-set_property -name "xsim.simulate.log_all_signals" -value "1" -objects $obj
-set_property -name "xsim.simulate.runtime" -value "50us" -objects $obj
 
 # Set 'utils_1' fileset object
 set obj [get_filesets utils_1]
@@ -5036,8 +4859,8 @@ proc cr_bd_test_design { parentCell } {
   # Perform GUI Layout
   regenerate_bd_layout -layout_string {
    "ActiveEmotionalView":"Default View",
-   "Default View_ScaleFactor":"0.638636",
-   "Default View_TopLeft":"-380,0",
+   "Default View_ScaleFactor":"0.159659",
+   "Default View_TopLeft":"-3965,-1322",
    "ExpandedHierarchyInLayout":"",
    "guistr":"# # String gsaved with Nlview 7.0r4  2019-12-20 bk=1.5203 VDI=41 GEI=36 GUI=JA:10.0 TLS
 #  -string -flagsOSRD
@@ -5108,9 +4931,8 @@ pagesize -pg 1 -db -bbox -sgen -200 0 1350 880
   # Restore current instance
   current_bd_instance $oldCurInst
 
+  validate_bd_design
   save_bd_design
-common::send_gid_msg -ssname BD::TCL -id 2050 -severity "WARNING" "This Tcl script was generated from a block design that has not been validated. It is possible that design <$design_name> may result in errors during validation."
-
   close_bd_design $design_name 
 }
 # End of cr_bd_test_design()
