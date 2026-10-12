@@ -6,7 +6,7 @@
 `define BD_WRAPPER test_design_wrapper
 
 import axi_vip_pkg::*;
-import test_design_axi_vip_0_3_pkg::*;
+import test_design_axi_vip_0_0_pkg::*;
 import test_design_axi_vip_1_0_pkg::*;
 
 import types_pkg::*;
@@ -73,7 +73,7 @@ module test_CPU_wh_AXI();
   xil_axi_resp_t[255:0]                   mtestRresp;  
   bit [63:0]                              mtestWDataL; 
   bit [63:0]                              mtestRDataL; 
-  test_design_axi_vip_0_3_mst_t           mst_agent_0;
+  test_design_axi_vip_0_0_mst_t           mst_agent_0;
 
   pullup(SDA);
   pullup(SCL);
