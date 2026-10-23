@@ -2,6 +2,8 @@
 /hw/vivado/
 /out/
 /work/
+# Personal notes and temporary outputs, never committed
+/scratch/
 .Xil/
 *.jou
 *.log
