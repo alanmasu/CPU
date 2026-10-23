@@ -1,3 +1,6 @@
+# test_LoadStore: builds bin/test_LoadStore.elf from the assembly sources in src/, without
+# libraries, with its own linker script.
+
 # Toolchain
 CC      = riscv32-unknown-elf-gcc
 OBJDUMP = riscv32-unknown-elf-objdump
@@ -9,39 +12,37 @@ OBJ_DIR = obj
 OUT_DIR = bin
 
 # File
-OUT     = $(OUT_DIR)/main.elf
+OUT     = $(OUT_DIR)/test_LoadStore.elf
 LINKER  = linker_script.ld
 
-# Flags di compilazione e linking
+# Compiler and linker flags
 CFLAGS  = -nostdlib -nostartfiles -ffreestanding
 LDFLAGS = -T $(LINKER) -e main
 
-# Trova tutti i file .s nella directory src/
-SRCS    = $(wildcard $(SRC_DIR)/*.s)
-OBJS    = $(patsubst $(SRC_DIR)/%.s, $(OBJ_DIR)/%.o, $(SRCS))
+# Every .S file in src/
+SRCS    = $(wildcard $(SRC_DIR)/*.S)
+OBJS    = $(patsubst $(SRC_DIR)/%.S, $(OBJ_DIR)/%.o, $(SRCS))
 
-# Regole
+# Rules
 all: $(OUT)
 
-# Compila l'eseguibile unendo tutti gli oggetti
+# Link the objects into the executable
 $(OUT): $(OBJS) $(LINKER)
 	@mkdir -p $(OUT_DIR)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJS)
 
-# Compila ogni file Assembly in un oggetto
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.s
+# Assemble each source file, after the C preprocessor
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.S
 	@mkdir -p $(OBJ_DIR)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-# Analisi del binario
 dump: all
 	$(OBJDUMP) -d $(OUT)
 
-sections: $(OUT)
+sections: all
 	$(READELF) -S $(OUT)
 
 clean:
 	rm -rf $(OBJ_DIR) $(OUT_DIR)
-	mkdir -p $(OBJ_DIR) $(OUT_DIR)
 
-.PHONY: all clean dump sections hardware
+.PHONY: all clean dump sections
