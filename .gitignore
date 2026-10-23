@@ -4,6 +4,8 @@
 /work/
 # Personal notes and temporary outputs, never committed
 /scratch/
+# Build products of the RISC-V programs
+/riscv/tests/build/
 .Xil/
 *.jou
 *.log
