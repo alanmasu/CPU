@@ -1,0 +1,20 @@
+# Paths from the location of this file (tools/), so it can be sourced from any directory
+CPU_PYTHON_DIR=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
+CPU_PYTHON_ENV="$(dirname "$CPU_PYTHON_DIR")/pyEnv"
+CPU_PYTHON_V_ENV="${CPU_PYTHON_ENV}/bin/activate"
+
+CPU_ENV=1
+
+export CPU_ENV
+
+export CPU_PYTHON_DIR
+export CPU_PYTHON_ENV
+export CPU_PYTHON_V_ENV
+
+alias executePython="source \"${CPU_PYTHON_DIR}/executePython\""
+
+# Creazione e attivazione dell'ambiente virtuale
+python3 -m venv "$CPU_PYTHON_ENV"
+source "$CPU_PYTHON_V_ENV"
+pip3 install pyelftools
+deactivate

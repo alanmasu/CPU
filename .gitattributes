@@ -1,0 +1,14 @@
+* text=auto
+*.sh text eol=lf
+hooks/* text eol=lf
+*.tcl text eol=lf
+Makefile text eol=lf
+*.bat text eol=crlf
+# Vitis writes the absolute path of the product into these files (.yaml and
+# .json of Vitis Unified, .spr, .prj and .sprj of classic Vitis): git stores
+# @PRODUCT_ROOT@ instead (hooks/vitis-paths.sh, enabled by hooks/install.sh)
+sw/vitis/**/*.yaml filter=vitis-paths
+sw/vitis/**/*.json filter=vitis-paths
+sw/vitis/**/*.spr filter=vitis-paths
+sw/vitis/**/*.prj filter=vitis-paths
+sw/vitis/**/*.sprj filter=vitis-paths

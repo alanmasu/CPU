@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="test_compressor_layer_behav.wdb" id="1">
+         <top_modules>
+            <top_module name="bnn_pkg" />
+            <top_module name="glbl" />
+            <top_module name="test_compressor_layer" />
+            <top_module name="utilities_pkg" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <zoom_setting>
+      <ZoomStartTime time="50.333 ns"></ZoomStartTime>
+      <ZoomEndTime time="109.934 ns"></ZoomEndTime>
+      <Cursor1Time time="57.133 ns"></Cursor1Time>
+   </zoom_setting>
+   <column_width_setting>
+      <NameColumnWidth column_width="187"></NameColumnWidth>
+      <ValueColumnWidth column_width="90"></ValueColumnWidth>
+   </column_width_setting>
+   <WVObjectSize size="7" />
+   <wvobject type="array" fp_name="/test_compressor_layer/input_data">
+      <obj_property name="ElementShortName">input_data[17:0]</obj_property>
+      <obj_property name="ObjectShortName">input_data[17:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_compressor_layer/output_data">
+      <obj_property name="ElementShortName">output_data[12:0]</obj_property>
+      <obj_property name="ObjectShortName">output_data[12:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_compressor_layer/uut/compressor_in">
+      <obj_property name="ElementShortName">compressor_in[1:3][5:0]</obj_property>
+      <obj_property name="ObjectShortName">compressor_in[1:3][5:0]</obj_property>
+      <obj_property name="CustomSignalColor">#00FFFF</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+      <wvobject type="array" fp_name="/test_compressor_layer/uut/compressor_in[1]">
+         <obj_property name="ElementShortName">[1][5:0]</obj_property>
+         <obj_property name="ObjectShortName">[1][5:0]</obj_property>
+         <obj_property name="CustomSignalColor">#00FFFF</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_compressor_layer/uut/compressor_in[2]">
+         <obj_property name="ElementShortName">[2][5:0]</obj_property>
+         <obj_property name="ObjectShortName">[2][5:0]</obj_property>
+         <obj_property name="CustomSignalColor">#00FFFF</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_compressor_layer/uut/compressor_in[3]">
+         <obj_property name="ElementShortName">[3][5:0]</obj_property>
+         <obj_property name="ObjectShortName">[3][5:0]</obj_property>
+         <obj_property name="CustomSignalColor">#00FFFF</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_compressor_layer/uut/compressor_out">
+      <obj_property name="ElementShortName">compressor_out[1:3][2:0]</obj_property>
+      <obj_property name="ObjectShortName">compressor_out[1:3][2:0]</obj_property>
+      <obj_property name="CustomSignalColor">#FF00FF</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+      <wvobject type="array" fp_name="/test_compressor_layer/uut/compressor_out[1]">
+         <obj_property name="ElementShortName">[1][2:0]</obj_property>
+         <obj_property name="ObjectShortName">[1][2:0]</obj_property>
+         <obj_property name="CustomSignalColor">#FF00FF</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_compressor_layer/uut/compressor_out[2]">
+         <obj_property name="ElementShortName">[2][2:0]</obj_property>
+         <obj_property name="ObjectShortName">[2][2:0]</obj_property>
+         <obj_property name="CustomSignalColor">#FF00FF</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_compressor_layer/uut/compressor_out[3]">
+         <obj_property name="ElementShortName">[3][2:0]</obj_property>
+         <obj_property name="ObjectShortName">[3][2:0]</obj_property>
+         <obj_property name="CustomSignalColor">#FF00FF</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_compressor_layer/weights">
+      <obj_property name="ElementShortName">weights[0:5]</obj_property>
+      <obj_property name="ObjectShortName">weights[0:5]</obj_property>
+      <obj_property name="CustomSignalColor">#FF0000</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_compressor_layer/stdv_array">
+      <obj_property name="ElementShortName">stdv_array[0:5][3:0]</obj_property>
+      <obj_property name="ObjectShortName">stdv_array[0:5][3:0]</obj_property>
+      <obj_property name="CustomSignalColor">#FFD700</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+      <wvobject type="array" fp_name="/test_compressor_layer/stdv_array[0]">
+         <obj_property name="ElementShortName">[0][3:0]</obj_property>
+         <obj_property name="ObjectShortName">[0][3:0]</obj_property>
+         <obj_property name="Radix">BINARYRADIX</obj_property>
+         <obj_property name="CustomSignalColor">#FFD700</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_compressor_layer/stdv_array[1]">
+         <obj_property name="ElementShortName">[1][3:0]</obj_property>
+         <obj_property name="ObjectShortName">[1][3:0]</obj_property>
+         <obj_property name="Radix">BINARYRADIX</obj_property>
+         <obj_property name="CustomSignalColor">#FFD700</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_compressor_layer/stdv_array[2]">
+         <obj_property name="ElementShortName">[2][3:0]</obj_property>
+         <obj_property name="ObjectShortName">[2][3:0]</obj_property>
+         <obj_property name="Radix">BINARYRADIX</obj_property>
+         <obj_property name="CustomSignalColor">#FFD700</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_compressor_layer/stdv_array[3]">
+         <obj_property name="ElementShortName">[3][3:0]</obj_property>
+         <obj_property name="ObjectShortName">[3][3:0]</obj_property>
+         <obj_property name="Radix">BINARYRADIX</obj_property>
+         <obj_property name="CustomSignalColor">#FFD700</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_compressor_layer/stdv_array[4]">
+         <obj_property name="ElementShortName">[4][3:0]</obj_property>
+         <obj_property name="ObjectShortName">[4][3:0]</obj_property>
+         <obj_property name="Radix">BINARYRADIX</obj_property>
+         <obj_property name="CustomSignalColor">#FFD700</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_compressor_layer/stdv_array[5]">
+         <obj_property name="ElementShortName">[5][3:0]</obj_property>
+         <obj_property name="ObjectShortName">[5][3:0]</obj_property>
+         <obj_property name="Radix">BINARYRADIX</obj_property>
+         <obj_property name="CustomSignalColor">#FFD700</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject type="other" fp_name="/test_compressor_layer/sum_s">
+      <obj_property name="ElementShortName">sum_s</obj_property>
+      <obj_property name="ObjectShortName">sum_s</obj_property>
+   </wvobject>
+</wave_config>

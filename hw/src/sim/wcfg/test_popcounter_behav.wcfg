@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="test_popcounter_behav.wdb" id="1">
+         <top_modules>
+            <top_module name="bnn_pkg" />
+            <top_module name="glbl" />
+            <top_module name="test_popcounter" />
+            <top_module name="utilities_pkg" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <zoom_setting>
+      <ZoomStartTime time="0.000 ns"></ZoomStartTime>
+      <ZoomEndTime time="10.525 ns"></ZoomEndTime>
+      <Cursor1Time time="99.630 ns"></Cursor1Time>
+   </zoom_setting>
+   <column_width_setting>
+      <NameColumnWidth column_width="220"></NameColumnWidth>
+      <ValueColumnWidth column_width="103"></ValueColumnWidth>
+   </column_width_setting>
+   <WVObjectSize size="9" />
+   <wvobject type="logic" fp_name="/test_popcounter/reset">
+      <obj_property name="ElementShortName">reset</obj_property>
+      <obj_property name="ObjectShortName">reset</obj_property>
+      <obj_property name="CustomSignalColor">#FF0000</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_popcounter/input_data">
+      <obj_property name="ElementShortName">input_data[71:0]</obj_property>
+      <obj_property name="ObjectShortName">input_data[71:0]</obj_property>
+   </wvobject>
+   <wvobject type="group" fp_name="group92">
+      <obj_property name="label">Layer 1</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject type="array" fp_name="/test_popcounter/dut/\layers_gen(1)\/first_layer/layer_comp/compressor_in">
+         <obj_property name="ElementShortName">compressor_in[1:12][5:0]</obj_property>
+         <obj_property name="ObjectShortName">compressor_in[1:12][5:0]</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_popcounter/dut/layer_interconnect">
+      <obj_property name="ElementShortName">layer_interconnect[1:4][71:0]</obj_property>
+      <obj_property name="ObjectShortName">layer_interconnect[1:4][71:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_popcounter/output_data">
+      <obj_property name="ElementShortName">output_data[11:0]</obj_property>
+      <obj_property name="ObjectShortName">output_data[11:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_popcounter/weights">
+      <obj_property name="ElementShortName">weights[0:6]</obj_property>
+      <obj_property name="ObjectShortName">weights[0:6]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_popcounter/stdv_array">
+      <obj_property name="ElementShortName">stdv_array[0:6][2:0]</obj_property>
+      <obj_property name="ObjectShortName">stdv_array[0:6][2:0]</obj_property>
+   </wvobject>
+   <wvobject type="other" fp_name="/test_popcounter/sum_s">
+      <obj_property name="ElementShortName">sum_s</obj_property>
+      <obj_property name="ObjectShortName">sum_s</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_popcounter/my_sum">
+      <obj_property name="ElementShortName">my_sum[6:0]</obj_property>
+      <obj_property name="ObjectShortName">my_sum[6:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+</wave_config>

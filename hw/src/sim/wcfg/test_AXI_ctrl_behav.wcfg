@@ -1,0 +1,1449 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="test_AXI_ctrl_behav.wdb" id="1">
+         <top_modules>
+            <top_module name="axi_vip_pkg" />
+            <top_module name="bnn_pkg" />
+            <top_module name="constant_package" />
+            <top_module name="glbl" />
+            <top_module name="i2c_utils_pkg" />
+            <top_module name="memory_pkg" />
+            <top_module name="std" />
+            <top_module name="test_AXI_ctrl" />
+            <top_module name="types_pkg" />
+            <top_module name="types_pkg" />
+            <top_module name="utilities_pkg" />
+            <top_module name="xil_common_vip_pkg" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <zoom_setting>
+      <ZoomStartTime time="111,950.000 ns"></ZoomStartTime>
+      <ZoomEndTime time="112,181.568 ns"></ZoomEndTime>
+      <Cursor1Time time="112,440.000 ns"></Cursor1Time>
+   </zoom_setting>
+   <column_width_setting>
+      <NameColumnWidth column_width="247"></NameColumnWidth>
+      <ValueColumnWidth column_width="88"></ValueColumnWidth>
+   </column_width_setting>
+   <WVObjectSize size="27" />
+   <wave_markers>
+      <marker label="" time="40000" />
+      <marker label="" time="60000" />
+      <marker label="" time="70000" />
+      <marker label="" time="90000" />
+      <marker label="" time="100000" />
+      <marker label="" time="120000" />
+      <marker label="" time="140000" />
+      <marker label="" time="150000" />
+      <marker label="" time="971052" />
+      <marker label="" time="971052" />
+      <marker label="" time="960000" />
+      <marker label="" time="3200000" />
+      <marker label="" time="3240000" />
+      <marker label="" time="3250000" />
+      <marker label="" time="3260000" />
+      <marker label="" time="3270000" />
+      <marker label="" time="3190000" />
+      <marker label="" time="3210000" />
+      <marker label="" time="3220000" />
+      <marker label="" time="80000" />
+      <marker label="" time="20000" />
+      <marker label="" time="10000" />
+      <marker label="" time="3170000" />
+      <marker label="" time="3180000" />
+      <marker label="" time="3230000" />
+      <marker label="" time="229000" />
+      <marker label="" time="189000" />
+      <marker label="" time="100086734" />
+      <marker label="" time="100050000" />
+      <marker label="" time="100110000" />
+      <marker label="" time="30000" />
+      <marker label="" time="3280000" />
+      <marker label="" time="11950000" />
+      <marker label="" time="12060000" />
+      <marker label="" time="12170000" />
+      <marker label="" time="12280000" />
+      <marker label="" time="11840000" />
+      <marker label="" time="20060000" />
+      <marker label="" time="20075000" />
+      <marker label="" time="20125000" />
+      <marker label="" time="27841000" />
+      <marker label="" time="17624766" />
+      <marker label="" time="20175000" />
+      <marker label="" time="760000" />
+      <marker label="" time="2230000" />
+      <marker label="" time="2270000" />
+      <marker label="" time="269000" />
+      <marker label="" time="110000" />
+      <marker label="" time="369000" />
+      <marker label="" time="130000" />
+      <marker label="" time="50000" />
+      <marker label="" time="560000" />
+   </wave_markers>
+   <wvobject type="logic" fp_name="/test_AXI_ctrl/clock">
+      <obj_property name="ElementShortName">clock</obj_property>
+      <obj_property name="ObjectShortName">clock</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/test_AXI_ctrl/reset">
+      <obj_property name="ElementShortName">reset</obj_property>
+      <obj_property name="ObjectShortName">reset</obj_property>
+      <obj_property name="CustomSignalColor">#FF0000</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/test_AXI_ctrl/jmp">
+      <obj_property name="ElementShortName">jmp</obj_property>
+      <obj_property name="ObjectShortName">jmp</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/test_AXI_ctrl/we_in">
+      <obj_property name="ElementShortName">we_in</obj_property>
+      <obj_property name="ObjectShortName">we_in</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/test_AXI_ctrl/en_in">
+      <obj_property name="ElementShortName">en_in</obj_property>
+      <obj_property name="ObjectShortName">en_in</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/en_0">
+      <obj_property name="ElementShortName">en_0</obj_property>
+      <obj_property name="ObjectShortName">en_0</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_AXI_ctrl/testN">
+      <obj_property name="ElementShortName">testN[31:0]</obj_property>
+      <obj_property name="ObjectShortName">testN[31:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      <obj_property name="CustomSignalColor">#FF00FF</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_AXI_ctrl/test_type">
+      <obj_property name="ElementShortName">test_type[31:0]</obj_property>
+      <obj_property name="ObjectShortName">test_type[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/test_AXI_ctrl/validating">
+      <obj_property name="ElementShortName">validating</obj_property>
+      <obj_property name="ObjectShortName">validating</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_AXI_ctrl/op_class">
+      <obj_property name="ElementShortName">op_class[4:0]</obj_property>
+      <obj_property name="ObjectShortName">op_class[4:0]</obj_property>
+      <obj_property name="Radix">BINARYRADIX</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_AXI_ctrl/mem_opcode">
+      <obj_property name="ElementShortName">mem_opcode[2:0]</obj_property>
+      <obj_property name="ObjectShortName">mem_opcode[2:0]</obj_property>
+      <obj_property name="Radix">BINARYRADIX</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_AXI_ctrl/alu_resoult">
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="ElementShortName">alu_resoult[31:0]</obj_property>
+      <obj_property name="ObjectShortName">alu_resoult[31:0]</obj_property>
+      <obj_property name="label">address[31:0]</obj_property>
+      <obj_property name="CustomSignalColor">#FFD700</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_AXI_ctrl/mem/byte_address">
+      <obj_property name="ElementShortName">byte_address[1:0]</obj_property>
+      <obj_property name="ObjectShortName">byte_address[1:0]</obj_property>
+      <obj_property name="CustomSignalColor">#FFD700</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_AXI_ctrl/mem/d_out">
+      <obj_property name="ElementShortName">d_out[31:0]</obj_property>
+      <obj_property name="ObjectShortName">d_out[31:0]</obj_property>
+      <obj_property name="CustomSignalColor">#FF00FF</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_AXI_ctrl/mem/en_bus">
+      <obj_property name="ElementShortName">en_bus</obj_property>
+      <obj_property name="ObjectShortName">en_bus</obj_property>
+      <obj_property name="Radix">BINARYRADIX</obj_property>
+      <obj_property name="CustomSignalColor">#00FFFF</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_AXI_ctrl/we_out">
+      <obj_property name="ElementShortName">we_out[3:0]</obj_property>
+      <obj_property name="ObjectShortName">we_out[3:0]</obj_property>
+      <obj_property name="CustomSignalColor">#00FFFF</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+      <obj_property name="Radix">BINARYRADIX</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_AXI_ctrl/rd_addr_out">
+      <obj_property name="ElementShortName">rd_addr_out[4:0]</obj_property>
+      <obj_property name="ObjectShortName">rd_addr_out[4:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      <obj_property name="CustomSignalColor">#FFFF00</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_AXI_ctrl/rd_value_out">
+      <obj_property name="ElementShortName">rd_value_out[31:0]</obj_property>
+      <obj_property name="ObjectShortName">rd_value_out[31:0]</obj_property>
+      <obj_property name="CustomSignalColor">#FF00FF</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject type="group" fp_name="group198">
+      <obj_property name="label">MEM</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject type="array" fp_name="/test_AXI_ctrl/mem/mem_in">
+         <obj_property name="ElementShortName">mem_in[31:0]</obj_property>
+         <obj_property name="ObjectShortName">mem_in[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_AXI_ctrl/mem/mem_out">
+         <obj_property name="ElementShortName">mem_out[31:0]</obj_property>
+         <obj_property name="ObjectShortName">mem_out[31:0]</obj_property>
+         <obj_property name="CustomSignalColor">#FAAFBE</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_AXI_ctrl/mem/mem_out_extended">
+         <obj_property name="ElementShortName">mem_out_extended[31:0]</obj_property>
+         <obj_property name="ObjectShortName">mem_out_extended[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_AXI_ctrl/rs2_value">
+         <obj_property name="ElementShortName">rs2_value[31:0]</obj_property>
+         <obj_property name="ObjectShortName">rs2_value[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_AXI_ctrl/rd_addr_in">
+         <obj_property name="ElementShortName">rd_addr_in[4:0]</obj_property>
+         <obj_property name="ObjectShortName">rd_addr_in[4:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_AXI_ctrl/d_out">
+         <obj_property name="ElementShortName">d_out[31:0]</obj_property>
+         <obj_property name="ObjectShortName">d_out[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_AXI_ctrl/axi_data_out">
+         <obj_property name="ElementShortName">axi_data_out[31:0]</obj_property>
+         <obj_property name="ObjectShortName">axi_data_out[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_AXI_ctrl/d_in">
+         <obj_property name="ElementShortName">d_in</obj_property>
+         <obj_property name="ObjectShortName">d_in</obj_property>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/d_in.axi_data">
+            <obj_property name="ElementShortName">.axi_data[31:0]</obj_property>
+            <obj_property name="ObjectShortName">.axi_data[31:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/d_in.gpio_data">
+            <obj_property name="ElementShortName">.gpio_data[31:0]</obj_property>
+            <obj_property name="ObjectShortName">.gpio_data[31:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/d_in.i2c_data">
+            <obj_property name="ElementShortName">.i2c_data[31:0]</obj_property>
+            <obj_property name="ObjectShortName">.i2c_data[31:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/d_in.btpu_data">
+            <obj_property name="ElementShortName">.btpu_data[31:0]</obj_property>
+            <obj_property name="ObjectShortName">.btpu_data[31:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/d_in.timer_data">
+            <obj_property name="ElementShortName">.timer_data[31:0]</obj_property>
+            <obj_property name="ObjectShortName">.timer_data[31:0]</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/d_in.axi_data">
+            <obj_property name="ElementShortName">.axi_data[31:0]</obj_property>
+            <obj_property name="ObjectShortName">.axi_data[31:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/d_in.gpio_data">
+            <obj_property name="ElementShortName">.gpio_data[31:0]</obj_property>
+            <obj_property name="ObjectShortName">.gpio_data[31:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/d_in.i2c_data">
+            <obj_property name="ElementShortName">.i2c_data[31:0]</obj_property>
+            <obj_property name="ObjectShortName">.i2c_data[31:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/d_in.btpu_data">
+            <obj_property name="ElementShortName">.btpu_data[31:0]</obj_property>
+            <obj_property name="ObjectShortName">.btpu_data[31:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/d_in.timer_data">
+            <obj_property name="ElementShortName">.timer_data[31:0]</obj_property>
+            <obj_property name="ObjectShortName">.timer_data[31:0]</obj_property>
+         </wvobject>
+      </wvobject>
+      <wvobject type="group" fp_name="group84">
+         <obj_property name="label">PC</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/pc_out">
+            <obj_property name="ElementShortName">pc_out[31:0]</obj_property>
+            <obj_property name="ObjectShortName">pc_out[31:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/npc_in">
+            <obj_property name="ElementShortName">npc_in[31:0]</obj_property>
+            <obj_property name="ObjectShortName">npc_in[31:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/rd_value_out">
+            <obj_property name="ElementShortName">rd_value_out[31:0]</obj_property>
+            <obj_property name="ObjectShortName">rd_value_out[31:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/alu_resoult_reg">
+            <obj_property name="ElementShortName">alu_resoult_reg[31:0]</obj_property>
+            <obj_property name="ObjectShortName">alu_resoult_reg[31:0]</obj_property>
+         </wvobject>
+      </wvobject>
+   </wvobject>
+   <wvobject type="group" fp_name="group199">
+      <obj_property name="label">AXI</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject type="protoinst" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/AXI_memory_controller_0/M_AXI">
+         <obj_property name="ElementShortName">M_AXI</obj_property>
+         <obj_property name="ObjectShortName">M_AXI</obj_property>
+         <obj_property name="children_use_element_short_name">true</obj_property>
+         <obj_property name="WaveformStyle">STYLE_ENUM_TRANSACTION</obj_property>
+         <obj_property name="EnumTransactionColorTable">0=blank 1=#D399FF 2=pink</obj_property>
+         <obj_property name="EnumTransactionValueTable">0=blank;1=Read;2=Write;3=Read/Write</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+         <obj_property name="CustomSignalColor">turquoise</obj_property>
+         <obj_property name="Render_Data">/test_AXI_ctrl/DUT/mem_ctrl_test_i/AXI_memory_controller_0/M_AXI.readWriteSummary</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         <obj_property name="CellHeight">36</obj_property>
+         <obj_property name="isExpanded"></obj_property>
+      </wvobject>
+      <wvobject type="protoinst" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/axi_vip_0/S_AXI">
+         <obj_property name="ElementShortName">S_AXI</obj_property>
+         <obj_property name="ObjectShortName">S_AXI</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/AXI_memory_controller_0/U0/en">
+         <obj_property name="ElementShortName">en</obj_property>
+         <obj_property name="ObjectShortName">en</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/AXI_memory_controller_0/U0/we">
+         <obj_property name="ElementShortName">we[3:0]</obj_property>
+         <obj_property name="ObjectShortName">we[3:0]</obj_property>
+      </wvobject>
+      <wvobject type="other" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/AXI_memory_controller_0/U0/read_state">
+         <obj_property name="ElementShortName">read_state</obj_property>
+         <obj_property name="ObjectShortName">read_state</obj_property>
+      </wvobject>
+      <wvobject type="other" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/AXI_memory_controller_0/U0/awrite_state">
+         <obj_property name="ElementShortName">awrite_state</obj_property>
+         <obj_property name="ObjectShortName">awrite_state</obj_property>
+      </wvobject>
+      <wvobject type="other" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/AXI_memory_controller_0/U0/dwrite_state">
+         <obj_property name="ElementShortName">dwrite_state</obj_property>
+         <obj_property name="ObjectShortName">dwrite_state</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/AXI_memory_controller_0/U0/address">
+         <obj_property name="ElementShortName">address[31:0]</obj_property>
+         <obj_property name="ObjectShortName">address[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/AXI_memory_controller_0/U0/write_data">
+         <obj_property name="ElementShortName">write_data[31:0]</obj_property>
+         <obj_property name="ObjectShortName">write_data[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/AXI_memory_controller_0/U0/read_data">
+         <obj_property name="ElementShortName">read_data[31:0]</obj_property>
+         <obj_property name="ObjectShortName">read_data[31:0]</obj_property>
+         <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/test_AXI_ctrl/stall">
+         <obj_property name="ElementShortName">stall</obj_property>
+         <obj_property name="ObjectShortName">stall</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject type="group" fp_name="group1293">
+      <obj_property name="label">AXI controller 2</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject type="protoinst" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/AXI_memory_controller_1/M_AXI">
+         <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="children_use_element_short_name">true</obj_property>
+         <obj_property name="WaveformStyle">STYLE_ENUM_TRANSACTION</obj_property>
+         <obj_property name="EnumTransactionColorTable">0=blank 1=#D399FF 2=pink</obj_property>
+         <obj_property name="EnumTransactionValueTable">0=blank;1=Read;2=Write;3=Read/Write</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+         <obj_property name="CustomSignalColor">turquoise</obj_property>
+         <obj_property name="Render_Data">/test_AXI_ctrl/DUT/mem_ctrl_test_i/AXI_memory_controller_1/M_AXI.readWriteSummary</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         <obj_property name="CellHeight">36</obj_property>
+         <obj_property name="ElementShortName">M_AXI</obj_property>
+         <obj_property name="ObjectShortName">M_AXI</obj_property>
+         <obj_property name="label">M_AXI</obj_property>
+         <obj_property name="isExpanded"></obj_property>
+      </wvobject>
+      <wvobject type="other" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/AXISlaveInterface_0/U0/bresp_cnt">
+         <obj_property name="ElementShortName">bresp_cnt</obj_property>
+         <obj_property name="ObjectShortName">bresp_cnt</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_AXI_ctrl/we_1">
+         <obj_property name="ElementShortName">we_1[3:0]</obj_property>
+         <obj_property name="ObjectShortName">we_1[3:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/test_AXI_ctrl/en_1">
+         <obj_property name="ElementShortName">en_1</obj_property>
+         <obj_property name="ObjectShortName">en_1</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_AXI_ctrl/address_1">
+         <obj_property name="ElementShortName">address_1[31:0]</obj_property>
+         <obj_property name="ObjectShortName">address_1[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_AXI_ctrl/write_data_1">
+         <obj_property name="ElementShortName">write_data_1[31:0]</obj_property>
+         <obj_property name="ObjectShortName">write_data_1[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_AXI_ctrl/read_data_1">
+         <obj_property name="ElementShortName">read_data_1[31:0]</obj_property>
+         <obj_property name="ObjectShortName">read_data_1[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/test_AXI_ctrl/stall_1">
+         <obj_property name="ElementShortName">stall_1</obj_property>
+         <obj_property name="ObjectShortName">stall_1</obj_property>
+      </wvobject>
+      <wvobject type="protoinst" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/AXISlaveInterface_0/S_AXI">
+         <obj_property name="ElementShortName">S_AXI</obj_property>
+         <obj_property name="ObjectShortName">S_AXI</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject type="group" fp_name="group897">
+      <obj_property name="label">GPIO</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject type="array" fp_name="/test_AXI_ctrl/DUT2/address">
+         <obj_property name="ElementShortName">address[31:0]</obj_property>
+         <obj_property name="ObjectShortName">address[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_AXI_ctrl/DUT2/d_out">
+         <obj_property name="ElementShortName">d_out[31:0]</obj_property>
+         <obj_property name="ObjectShortName">d_out[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_AXI_ctrl/DUT2/d_in">
+         <obj_property name="ElementShortName">d_in[31:0]</obj_property>
+         <obj_property name="ObjectShortName">d_in[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="group" fp_name="group900">
+         <obj_property name="label">Signals</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="isExpanded"></obj_property>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT2/GPIO_reg">
+            <obj_property name="ElementShortName">GPIO_reg[31:0]</obj_property>
+            <obj_property name="ObjectShortName">GPIO_reg[31:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT2/GPIO_dir">
+            <obj_property name="ElementShortName">GPIO_dir[31:0]</obj_property>
+            <obj_property name="ObjectShortName">GPIO_dir[31:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT2/GPIO">
+            <obj_property name="ElementShortName">GPIO[31:0]</obj_property>
+            <obj_property name="ObjectShortName">GPIO[31:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/gpio_pins_wire">
+            <obj_property name="ElementShortName">gpio_pins_wire[31:0]</obj_property>
+            <obj_property name="ObjectShortName">gpio_pins_wire[31:0]</obj_property>
+         </wvobject>
+      </wvobject>
+      <wvobject type="group" fp_name="group899">
+         <obj_property name="label">Crop Signals</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT2/gpio_reg_s">
+            <obj_property name="ElementShortName">gpio_reg_s[7:0]</obj_property>
+            <obj_property name="ObjectShortName">gpio_reg_s[7:0]</obj_property>
+            <obj_property name="Radix">BINARYRADIX</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT2/gpio_dir_s">
+            <obj_property name="ElementShortName">gpio_dir_s[7:0]</obj_property>
+            <obj_property name="ObjectShortName">gpio_dir_s[7:0]</obj_property>
+            <obj_property name="Radix">BINARYRADIX</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT2/gpio_out_s">
+            <obj_property name="ElementShortName">gpio_out_s[7:0]</obj_property>
+            <obj_property name="ObjectShortName">gpio_out_s[7:0]</obj_property>
+            <obj_property name="Radix">BINARYRADIX</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT2/gpio_state_s">
+            <obj_property name="ElementShortName">gpio_state_s[7:0]</obj_property>
+            <obj_property name="ObjectShortName">gpio_state_s[7:0]</obj_property>
+            <obj_property name="Radix">BINARYRADIX</obj_property>
+         </wvobject>
+      </wvobject>
+   </wvobject>
+   <wvobject type="group" fp_name="group171">
+      <obj_property name="label">I2C</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT3/ena">
+         <obj_property name="ElementShortName">ena</obj_property>
+         <obj_property name="ObjectShortName">ena</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_AXI_ctrl/DUT3/wea">
+         <obj_property name="ElementShortName">wea[3:0]</obj_property>
+         <obj_property name="ObjectShortName">wea[3:0]</obj_property>
+         <obj_property name="Radix">BINARYRADIX</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_AXI_ctrl/DUT3/addra">
+         <obj_property name="ElementShortName">addra[31:0]</obj_property>
+         <obj_property name="ObjectShortName">addra[31:0]</obj_property>
+         <obj_property name="CustomSignalColor">#FFD700</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_AXI_ctrl/DUT3/regFile">
+         <obj_property name="ElementShortName">regFile[0:31][31:0]</obj_property>
+         <obj_property name="ObjectShortName">regFile[0:31][31:0]</obj_property>
+         <obj_property name="CustomSignalColor">#FF00FF</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_AXI_ctrl/DUT3/dina">
+         <obj_property name="ElementShortName">dina[31:0]</obj_property>
+         <obj_property name="ObjectShortName">dina[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_AXI_ctrl/DUT3/douta">
+         <obj_property name="ElementShortName">douta[31:0]</obj_property>
+         <obj_property name="ObjectShortName">douta[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/test_AXI_ctrl/SDA">
+         <obj_property name="ElementShortName">SDA</obj_property>
+         <obj_property name="ObjectShortName">SDA</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/test_AXI_ctrl/SCL">
+         <obj_property name="ElementShortName">SCL</obj_property>
+         <obj_property name="ObjectShortName">SCL</obj_property>
+      </wvobject>
+      <wvobject type="group" fp_name="group941">
+         <obj_property name="label">Slave</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+      </wvobject>
+      <wvobject type="group" fp_name="group1185">
+         <obj_property name="label">Driver</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT3/driver/addr_in">
+            <obj_property name="ElementShortName">addr_in[6:0]</obj_property>
+            <obj_property name="ObjectShortName">addr_in[6:0]</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT3/driver/rw_n">
+            <obj_property name="ElementShortName">rw_n</obj_property>
+            <obj_property name="ObjectShortName">rw_n</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT3/driver/d_in">
+            <obj_property name="ElementShortName">d_in[31:0]</obj_property>
+            <obj_property name="ObjectShortName">d_in[31:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT3/driver/data_length">
+            <obj_property name="ElementShortName">data_length[2:0]</obj_property>
+            <obj_property name="ObjectShortName">data_length[2:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT3/driver/d_out">
+            <obj_property name="ElementShortName">d_out[31:0]</obj_property>
+            <obj_property name="ObjectShortName">d_out[31:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT3/driver/data_length_out">
+            <obj_property name="ElementShortName">data_length_out[2:0]</obj_property>
+            <obj_property name="ObjectShortName">data_length_out[2:0]</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT3/driver/busy">
+            <obj_property name="ElementShortName">busy</obj_property>
+            <obj_property name="ObjectShortName">busy</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT3/driver/error">
+            <obj_property name="ElementShortName">error</obj_property>
+            <obj_property name="ObjectShortName">error</obj_property>
+         </wvobject>
+         <wvobject type="other" fp_name="/test_AXI_ctrl/DUT3/driver/i2c_state">
+            <obj_property name="ElementShortName">i2c_state</obj_property>
+            <obj_property name="ObjectShortName">i2c_state</obj_property>
+         </wvobject>
+         <wvobject type="other" fp_name="/test_AXI_ctrl/DUT3/driver/i2c_state_p">
+            <obj_property name="ElementShortName">i2c_state_p</obj_property>
+            <obj_property name="ObjectShortName">i2c_state_p</obj_property>
+         </wvobject>
+      </wvobject>
+   </wvobject>
+   <wvobject type="logic" fp_name="/test_AXI_ctrl/validating">
+      <obj_property name="ElementShortName">validating</obj_property>
+      <obj_property name="ObjectShortName">validating</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_AXI_ctrl/testN">
+      <obj_property name="ElementShortName">testN[31:0]</obj_property>
+      <obj_property name="ObjectShortName">testN[31:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      <obj_property name="CustomSignalColor">#FF00FF</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject type="group" fp_name="group1992">
+      <obj_property name="label">BTPU</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="isExpanded"></obj_property>
+      <wvobject type="logic" fp_name="/test_AXI_ctrl/clock">
+         <obj_property name="ElementShortName">clock</obj_property>
+         <obj_property name="ObjectShortName">clock</obj_property>
+      </wvobject>
+      <wvobject type="other" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/state">
+         <obj_property name="ElementShortName">state</obj_property>
+         <obj_property name="ObjectShortName">state</obj_property>
+         <obj_property name="CustomSignalColor">#00FFFF</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/start">
+         <obj_property name="ElementShortName">start</obj_property>
+         <obj_property name="ObjectShortName">start</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/busy">
+         <obj_property name="ElementShortName">busy</obj_property>
+         <obj_property name="ObjectShortName">busy</obj_property>
+         <obj_property name="CustomSignalColor">#D2691E</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/err">
+         <obj_property name="ElementShortName">err</obj_property>
+         <obj_property name="ObjectShortName">err</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/control_reg">
+         <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="ElementShortName">control_reg[0:31][31:0]</obj_property>
+         <obj_property name="ObjectShortName">control_reg[0:31][31:0]</obj_property>
+         <obj_property name="label">control_regntrol_reg[0:31]</obj_property>
+      </wvobject>
+      <wvobject type="group" fp_name="group1744">
+         <obj_property name="label">MSF</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="isExpanded"></obj_property>
+         <wvobject type="logic" fp_name="/test_AXI_ctrl/clock">
+            <obj_property name="ElementShortName">clock</obj_property>
+            <obj_property name="ObjectShortName">clock</obj_property>
+         </wvobject>
+         <wvobject type="other" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/state">
+            <obj_property name="ElementShortName">state</obj_property>
+            <obj_property name="ObjectShortName">state</obj_property>
+            <obj_property name="CustomSignalColor">#00FFFF</obj_property>
+            <obj_property name="UseCustomSignalColor">true</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/start">
+            <obj_property name="ElementShortName">start</obj_property>
+            <obj_property name="ObjectShortName">start</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/busy">
+            <obj_property name="ElementShortName">busy</obj_property>
+            <obj_property name="ObjectShortName">busy</obj_property>
+            <obj_property name="CustomSignalColor">#FF0000</obj_property>
+            <obj_property name="UseCustomSignalColor">true</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/acc_en">
+            <obj_property name="ElementShortName">acc_en</obj_property>
+            <obj_property name="ObjectShortName">acc_en</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/tile_number">
+            <obj_property name="ElementShortName">tile_number[1:0]</obj_property>
+            <obj_property name="ObjectShortName">tile_number[1:0]</obj_property>
+            <obj_property name="CustomSignalColor">#FF00FF</obj_property>
+            <obj_property name="UseCustomSignalColor">true</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/r_s">
+            <obj_property name="ElementShortName">r_s[9:0]</obj_property>
+            <obj_property name="ObjectShortName">r_s[9:0]</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+            <obj_property name="CustomSignalColor">#FFFF00</obj_property>
+            <obj_property name="UseCustomSignalColor">true</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/c_s">
+            <obj_property name="ElementShortName">c_s[9:0]</obj_property>
+            <obj_property name="ObjectShortName">c_s[9:0]</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+            <obj_property name="CustomSignalColor">#FF0000</obj_property>
+            <obj_property name="UseCustomSignalColor">true</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/i_s">
+            <obj_property name="ElementShortName">i_s[9:0]</obj_property>
+            <obj_property name="ObjectShortName">i_s[9:0]</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         </wvobject>
+         <wvobject type="group" fp_name="group290">
+            <obj_property name="label">M, N, K</obj_property>
+            <obj_property name="DisplayName">label</obj_property>
+            <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/m">
+               <obj_property name="ElementShortName">m[9:0]</obj_property>
+               <obj_property name="ObjectShortName">m[9:0]</obj_property>
+            </wvobject>
+            <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/n">
+               <obj_property name="ElementShortName">n[9:0]</obj_property>
+               <obj_property name="ObjectShortName">n[9:0]</obj_property>
+            </wvobject>
+            <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/k">
+               <obj_property name="ElementShortName">k[9:0]</obj_property>
+               <obj_property name="ObjectShortName">k[9:0]</obj_property>
+            </wvobject>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/bram_i_addr">
+            <obj_property name="ElementShortName">bram_i_addr[9:0]</obj_property>
+            <obj_property name="ObjectShortName">bram_i_addr[9:0]</obj_property>
+            <obj_property name="CustomSignalColor">#00FFFF</obj_property>
+            <obj_property name="UseCustomSignalColor">true</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/bram_w_addrb">
+            <obj_property name="ElementShortName">bram_w_addrb[9:0]</obj_property>
+            <obj_property name="ObjectShortName">bram_w_addrb[9:0]</obj_property>
+            <obj_property name="CustomSignalColor">#00FFFF</obj_property>
+            <obj_property name="UseCustomSignalColor">true</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/bram_o_addr">
+            <obj_property name="ElementShortName">bram_o_addr[9:0]</obj_property>
+            <obj_property name="ObjectShortName">bram_o_addr[9:0]</obj_property>
+            <obj_property name="CustomSignalColor">#00FFFF</obj_property>
+            <obj_property name="UseCustomSignalColor">true</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         </wvobject>
+      </wvobject>
+      <wvobject type="group" fp_name="group2143">
+         <obj_property name="label">Control signals</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/acc_clear">
+            <obj_property name="ElementShortName">acc_clear</obj_property>
+            <obj_property name="ObjectShortName">acc_clear</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/bram_port_sel">
+            <obj_property name="ElementShortName">bram_port_sel</obj_property>
+            <obj_property name="ObjectShortName">bram_port_sel</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/o_mem_select">
+            <obj_property name="ElementShortName">o_mem_select</obj_property>
+            <obj_property name="ObjectShortName">o_mem_select</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/control_reg[0][1]">
+            <obj_property name="DisplayName">label</obj_property>
+            <obj_property name="ElementShortName">[1]</obj_property>
+            <obj_property name="ObjectShortName">[1]</obj_property>
+            <obj_property name="label">busy_bit</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/start">
+            <obj_property name="ElementShortName">start</obj_property>
+            <obj_property name="ObjectShortName">start</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/control_reg[6]">
+            <obj_property name="DisplayName">label</obj_property>
+            <obj_property name="ElementShortName">[6][31:0]</obj_property>
+            <obj_property name="ObjectShortName">[6][31:0]</obj_property>
+            <obj_property name="label">status_reg</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         </wvobject>
+      </wvobject>
+      <wvobject type="group" fp_name="group2208">
+         <obj_property name="label">LS BRAM Interfaces</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/bram_port_sel">
+            <obj_property name="ElementShortName">bram_port_sel</obj_property>
+            <obj_property name="ObjectShortName">bram_port_sel</obj_property>
+         </wvobject>
+         <wvobject type="group" fp_name="group986">
+            <obj_property name="label">PORT A</obj_property>
+            <obj_property name="DisplayName">label</obj_property>
+            <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/ena">
+               <obj_property name="ElementShortName">ena</obj_property>
+               <obj_property name="ObjectShortName">ena</obj_property>
+            </wvobject>
+            <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/wea">
+               <obj_property name="ElementShortName">wea[3:0]</obj_property>
+               <obj_property name="ObjectShortName">wea[3:0]</obj_property>
+            </wvobject>
+            <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/addra">
+               <obj_property name="ElementShortName">addra[31:0]</obj_property>
+               <obj_property name="ObjectShortName">addra[31:0]</obj_property>
+            </wvobject>
+            <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/dina">
+               <obj_property name="ElementShortName">dina[31:0]</obj_property>
+               <obj_property name="ObjectShortName">dina[31:0]</obj_property>
+            </wvobject>
+            <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/douta">
+               <obj_property name="ElementShortName">douta[31:0]</obj_property>
+               <obj_property name="ObjectShortName">douta[31:0]</obj_property>
+            </wvobject>
+         </wvobject>
+         <wvobject type="group" fp_name="group991">
+            <obj_property name="label">PORT B</obj_property>
+            <obj_property name="DisplayName">label</obj_property>
+            <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/enb">
+               <obj_property name="ElementShortName">enb</obj_property>
+               <obj_property name="ObjectShortName">enb</obj_property>
+            </wvobject>
+            <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/web">
+               <obj_property name="ElementShortName">web[3:0]</obj_property>
+               <obj_property name="ObjectShortName">web[3:0]</obj_property>
+            </wvobject>
+            <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/addrb">
+               <obj_property name="ElementShortName">addrb[31:0]</obj_property>
+               <obj_property name="ObjectShortName">addrb[31:0]</obj_property>
+            </wvobject>
+            <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/dinb">
+               <obj_property name="ElementShortName">dinb[31:0]</obj_property>
+               <obj_property name="ObjectShortName">dinb[31:0]</obj_property>
+            </wvobject>
+            <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/doutb">
+               <obj_property name="ElementShortName">doutb[31:0]</obj_property>
+               <obj_property name="ObjectShortName">doutb[31:0]</obj_property>
+            </wvobject>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/bram_addra">
+            <obj_property name="ElementShortName">bram_addra[14:0]</obj_property>
+            <obj_property name="ObjectShortName">bram_addra[14:0]</obj_property>
+            <obj_property name="Radix">HEXRADIX</obj_property>
+            <obj_property name="CustomSignalColor">#FFD700</obj_property>
+            <obj_property name="UseCustomSignalColor">true</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/bram_dina">
+            <obj_property name="ElementShortName">bram_dina[31:0]</obj_property>
+            <obj_property name="ObjectShortName">bram_dina[31:0]</obj_property>
+            <obj_property name="CustomSignalColor">#FF00FF</obj_property>
+            <obj_property name="UseCustomSignalColor">true</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/bram_wea[0]">
+            <obj_property name="DisplayName">label</obj_property>
+            <obj_property name="ElementShortName">[0]</obj_property>
+            <obj_property name="ObjectShortName">[0]</obj_property>
+            <obj_property name="label">bram_wea</obj_property>
+         </wvobject>
+         <wvobject type="group" fp_name="group2205">
+            <obj_property name="label">W BRAM</obj_property>
+            <obj_property name="DisplayName">label</obj_property>
+            <obj_property name="isExpanded"></obj_property>
+            <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/w_mem_inst/addra">
+               <obj_property name="ElementShortName">addra[14:0]</obj_property>
+               <obj_property name="ObjectShortName">addra[14:0]</obj_property>
+               <obj_property name="CustomSignalColor">#FFD700</obj_property>
+               <obj_property name="UseCustomSignalColor">true</obj_property>
+            </wvobject>
+            <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/bram_w_ena">
+               <obj_property name="ElementShortName">bram_w_ena</obj_property>
+               <obj_property name="ObjectShortName">bram_w_ena</obj_property>
+            </wvobject>
+            <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/bram_w_douta">
+               <obj_property name="ElementShortName">bram_w_douta[31:0]</obj_property>
+               <obj_property name="ObjectShortName">bram_w_douta[31:0]</obj_property>
+            </wvobject>
+         </wvobject>
+         <wvobject type="group" fp_name="group2206">
+            <obj_property name="label">IO0 BRAM</obj_property>
+            <obj_property name="DisplayName">label</obj_property>
+            <obj_property name="isExpanded"></obj_property>
+            <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/IO0_mem_inst/addra">
+               <obj_property name="ElementShortName">addra[14:0]</obj_property>
+               <obj_property name="ObjectShortName">addra[14:0]</obj_property>
+               <obj_property name="CustomSignalColor">#FFD700</obj_property>
+               <obj_property name="UseCustomSignalColor">true</obj_property>
+            </wvobject>
+            <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/bram_IO0_ena">
+               <obj_property name="ElementShortName">bram_IO0_ena</obj_property>
+               <obj_property name="ObjectShortName">bram_IO0_ena</obj_property>
+            </wvobject>
+            <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/bram_IO0_douta">
+               <obj_property name="ElementShortName">bram_IO0_douta[31:0]</obj_property>
+               <obj_property name="ObjectShortName">bram_IO0_douta[31:0]</obj_property>
+            </wvobject>
+         </wvobject>
+         <wvobject type="group" fp_name="group2207">
+            <obj_property name="label">IO1 BRAM</obj_property>
+            <obj_property name="DisplayName">label</obj_property>
+            <obj_property name="isExpanded"></obj_property>
+            <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/IO1_mem_inst/addra">
+               <obj_property name="ElementShortName">addra[14:0]</obj_property>
+               <obj_property name="ObjectShortName">addra[14:0]</obj_property>
+               <obj_property name="CustomSignalColor">#FFD700</obj_property>
+               <obj_property name="UseCustomSignalColor">true</obj_property>
+            </wvobject>
+            <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/bram_IO1_ena">
+               <obj_property name="ElementShortName">bram_IO1_ena</obj_property>
+               <obj_property name="ObjectShortName">bram_IO1_ena</obj_property>
+            </wvobject>
+            <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/bram_IO1_douta">
+               <obj_property name="ElementShortName">bram_IO1_douta[31:0]</obj_property>
+               <obj_property name="ObjectShortName">bram_IO1_douta[31:0]</obj_property>
+            </wvobject>
+         </wvobject>
+      </wvobject>
+      <wvobject type="group" fp_name="group2210">
+         <obj_property name="label">HS BRAM Interfaces</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/o_mem_select">
+            <obj_property name="ElementShortName">o_mem_select</obj_property>
+            <obj_property name="ObjectShortName">o_mem_select</obj_property>
+         </wvobject>
+         <wvobject type="group" fp_name="group1395">
+            <obj_property name="label">W BRAM</obj_property>
+            <obj_property name="DisplayName">label</obj_property>
+            <obj_property name="isExpanded"></obj_property>
+            <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/bram_w_enb">
+               <obj_property name="ElementShortName">bram_w_enb</obj_property>
+               <obj_property name="ObjectShortName">bram_w_enb</obj_property>
+            </wvobject>
+            <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/bram_w_addrb">
+               <obj_property name="ElementShortName">bram_w_addrb[9:0]</obj_property>
+               <obj_property name="ObjectShortName">bram_w_addrb[9:0]</obj_property>
+               <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+               <obj_property name="CustomSignalColor">#FFD700</obj_property>
+               <obj_property name="UseCustomSignalColor">true</obj_property>
+            </wvobject>
+         </wvobject>
+         <wvobject type="group" fp_name="group1408">
+            <obj_property name="label">IO0 BRAM</obj_property>
+            <obj_property name="DisplayName">label</obj_property>
+            <obj_property name="isExpanded"></obj_property>
+            <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/bram_IO0_enb">
+               <obj_property name="ElementShortName">bram_IO0_enb</obj_property>
+               <obj_property name="ObjectShortName">bram_IO0_enb</obj_property>
+            </wvobject>
+            <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/bram_IO0_web[0]">
+               <obj_property name="DisplayName">label</obj_property>
+               <obj_property name="ElementShortName">[0]</obj_property>
+               <obj_property name="ObjectShortName">[0]</obj_property>
+               <obj_property name="label">bram_IO0_web</obj_property>
+            </wvobject>
+            <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/bram_IO0_addrb">
+               <obj_property name="ElementShortName">bram_IO0_addrb[9:0]</obj_property>
+               <obj_property name="ObjectShortName">bram_IO0_addrb[9:0]</obj_property>
+               <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+               <obj_property name="CustomSignalColor">#FFD700</obj_property>
+               <obj_property name="UseCustomSignalColor">true</obj_property>
+            </wvobject>
+            <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/IO0_mem_inst/doutb">
+               <obj_property name="ElementShortName">doutb[1023:0]</obj_property>
+               <obj_property name="ObjectShortName">doutb[1023:0]</obj_property>
+            </wvobject>
+         </wvobject>
+         <wvobject type="group" fp_name="group1398">
+            <obj_property name="label">IO1 BRAM</obj_property>
+            <obj_property name="DisplayName">label</obj_property>
+            <obj_property name="isExpanded"></obj_property>
+            <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/bram_IO1_enb">
+               <obj_property name="ElementShortName">bram_IO1_enb</obj_property>
+               <obj_property name="ObjectShortName">bram_IO1_enb</obj_property>
+            </wvobject>
+            <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/bram_IO1_web[0]">
+               <obj_property name="DisplayName">label</obj_property>
+               <obj_property name="ElementShortName">[0]</obj_property>
+               <obj_property name="ObjectShortName">[0]</obj_property>
+               <obj_property name="label">bram_IO1_web</obj_property>
+            </wvobject>
+            <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/bram_IO1_addrb">
+               <obj_property name="ElementShortName">bram_IO1_addrb[9:0]</obj_property>
+               <obj_property name="ObjectShortName">bram_IO1_addrb[9:0]</obj_property>
+               <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+               <obj_property name="CustomSignalColor">#FFD700</obj_property>
+               <obj_property name="UseCustomSignalColor">true</obj_property>
+            </wvobject>
+            <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/IO1_mem_inst/dinb">
+               <obj_property name="ElementShortName">dinb[1023:0]</obj_property>
+               <obj_property name="ObjectShortName">dinb[1023:0]</obj_property>
+            </wvobject>
+            <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/IO1_mem_inst/doutb">
+               <obj_property name="ElementShortName">doutb[1023:0]</obj_property>
+               <obj_property name="ObjectShortName">doutb[1023:0]</obj_property>
+            </wvobject>
+         </wvobject>
+      </wvobject>
+      <wvobject type="group" fp_name="group1735">
+         <obj_property name="label">Memorie</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <wvobject fp_name="divider1874" type="divider">
+            <obj_property name="label">W</obj_property>
+            <obj_property name="DisplayName">label</obj_property>
+            <obj_property name="BkColor">#008080</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/bram_w_enb">
+            <obj_property name="ElementShortName">bram_w_enb</obj_property>
+            <obj_property name="ObjectShortName">bram_w_enb</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/bram_w_addrb">
+            <obj_property name="ElementShortName">bram_w_addrb[9:0]</obj_property>
+            <obj_property name="ObjectShortName">bram_w_addrb[9:0]</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+            <obj_property name="CustomSignalColor">#FFD700</obj_property>
+            <obj_property name="UseCustomSignalColor">true</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/weights_matrix">
+            <obj_property name="ElementShortName">weights_matrix[0:31][31:0]</obj_property>
+            <obj_property name="ObjectShortName">weights_matrix[0:31][31:0]</obj_property>
+            <obj_property name="CustomSignalColor">#FF00FF</obj_property>
+            <obj_property name="UseCustomSignalColor">true</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/weigth_word">
+            <obj_property name="ElementShortName">weigth_word[1023:0]</obj_property>
+            <obj_property name="ObjectShortName">weigth_word[1023:0]</obj_property>
+            <obj_property name="CustomSignalColor">#800080</obj_property>
+            <obj_property name="UseCustomSignalColor">true</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/mac_inst_weights_choises">
+            <obj_property name="ElementShortName">mac_inst_weights_choises[0:255][0:3][31:0]</obj_property>
+            <obj_property name="ObjectShortName">mac_inst_weights_choises[0:255][0:3][31:0]</obj_property>
+            <obj_property name="CustomSignalColor">#FF0000</obj_property>
+            <obj_property name="UseCustomSignalColor">true</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/mac_b_in">
+            <obj_property name="ElementShortName">mac_b_in[0:255][31:0]</obj_property>
+            <obj_property name="ObjectShortName">mac_b_in[0:255][31:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="divider1874" type="divider">
+            <obj_property name="label">I</obj_property>
+            <obj_property name="DisplayName">label</obj_property>
+            <obj_property name="BkColor">#008080</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/bram_i_en">
+            <obj_property name="ElementShortName">bram_i_en</obj_property>
+            <obj_property name="ObjectShortName">bram_i_en</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/bram_i_addr">
+            <obj_property name="ElementShortName">bram_i_addr[9:0]</obj_property>
+            <obj_property name="ObjectShortName">bram_i_addr[9:0]</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+            <obj_property name="CustomSignalColor">#FFD700</obj_property>
+            <obj_property name="UseCustomSignalColor">true</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/activations_matrix">
+            <obj_property name="ElementShortName">activations_matrix[0:31][31:0]</obj_property>
+            <obj_property name="ObjectShortName">activations_matrix[0:31][31:0]</obj_property>
+            <obj_property name="CustomSignalColor">#FF00FF</obj_property>
+            <obj_property name="UseCustomSignalColor">true</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/activaction_word">
+            <obj_property name="ElementShortName">activaction_word[1023:0]</obj_property>
+            <obj_property name="ObjectShortName">activaction_word[1023:0]</obj_property>
+            <obj_property name="CustomSignalColor">#800080</obj_property>
+            <obj_property name="UseCustomSignalColor">true</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/mac_inst_activations_choises">
+            <obj_property name="ElementShortName">mac_inst_activations_choises[0:255][0:3][31:0]</obj_property>
+            <obj_property name="ObjectShortName">mac_inst_activations_choises[0:255][0:3][31:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/mac_a_in">
+            <obj_property name="ElementShortName">mac_a_in[0:255][31:0]</obj_property>
+            <obj_property name="ObjectShortName">mac_a_in[0:255][31:0]</obj_property>
+         </wvobject>
+         <wvobject type="vbus" fp_name="vbus3290">
+            <obj_property name="label">activation_word[31:0]</obj_property>
+            <obj_property name="DisplayName">label</obj_property>
+            <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/activaction_word[31]">
+               <obj_property name="ElementShortName">[31]</obj_property>
+               <obj_property name="ObjectShortName">[31]</obj_property>
+            </wvobject>
+            <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/activaction_word[30]">
+               <obj_property name="ElementShortName">[30]</obj_property>
+               <obj_property name="ObjectShortName">[30]</obj_property>
+            </wvobject>
+            <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/activaction_word[29]">
+               <obj_property name="ElementShortName">[29]</obj_property>
+               <obj_property name="ObjectShortName">[29]</obj_property>
+            </wvobject>
+            <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/activaction_word[28]">
+               <obj_property name="ElementShortName">[28]</obj_property>
+               <obj_property name="ObjectShortName">[28]</obj_property>
+            </wvobject>
+            <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/activaction_word[27]">
+               <obj_property name="ElementShortName">[27]</obj_property>
+               <obj_property name="ObjectShortName">[27]</obj_property>
+            </wvobject>
+            <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/activaction_word[26]">
+               <obj_property name="ElementShortName">[26]</obj_property>
+               <obj_property name="ObjectShortName">[26]</obj_property>
+            </wvobject>
+            <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/activaction_word[25]">
+               <obj_property name="ElementShortName">[25]</obj_property>
+               <obj_property name="ObjectShortName">[25]</obj_property>
+            </wvobject>
+            <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/activaction_word[24]">
+               <obj_property name="ElementShortName">[24]</obj_property>
+               <obj_property name="ObjectShortName">[24]</obj_property>
+            </wvobject>
+            <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/activaction_word[23]">
+               <obj_property name="ElementShortName">[23]</obj_property>
+               <obj_property name="ObjectShortName">[23]</obj_property>
+            </wvobject>
+            <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/activaction_word[22]">
+               <obj_property name="ElementShortName">[22]</obj_property>
+               <obj_property name="ObjectShortName">[22]</obj_property>
+            </wvobject>
+            <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/activaction_word[21]">
+               <obj_property name="ElementShortName">[21]</obj_property>
+               <obj_property name="ObjectShortName">[21]</obj_property>
+            </wvobject>
+            <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/activaction_word[20]">
+               <obj_property name="ElementShortName">[20]</obj_property>
+               <obj_property name="ObjectShortName">[20]</obj_property>
+            </wvobject>
+            <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/activaction_word[19]">
+               <obj_property name="ElementShortName">[19]</obj_property>
+               <obj_property name="ObjectShortName">[19]</obj_property>
+            </wvobject>
+            <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/activaction_word[18]">
+               <obj_property name="ElementShortName">[18]</obj_property>
+               <obj_property name="ObjectShortName">[18]</obj_property>
+            </wvobject>
+            <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/activaction_word[17]">
+               <obj_property name="ElementShortName">[17]</obj_property>
+               <obj_property name="ObjectShortName">[17]</obj_property>
+            </wvobject>
+            <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/activaction_word[16]">
+               <obj_property name="ElementShortName">[16]</obj_property>
+               <obj_property name="ObjectShortName">[16]</obj_property>
+            </wvobject>
+            <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/activaction_word[15]">
+               <obj_property name="ElementShortName">[15]</obj_property>
+               <obj_property name="ObjectShortName">[15]</obj_property>
+            </wvobject>
+            <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/activaction_word[14]">
+               <obj_property name="ElementShortName">[14]</obj_property>
+               <obj_property name="ObjectShortName">[14]</obj_property>
+            </wvobject>
+            <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/activaction_word[13]">
+               <obj_property name="ElementShortName">[13]</obj_property>
+               <obj_property name="ObjectShortName">[13]</obj_property>
+            </wvobject>
+            <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/activaction_word[12]">
+               <obj_property name="ElementShortName">[12]</obj_property>
+               <obj_property name="ObjectShortName">[12]</obj_property>
+            </wvobject>
+            <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/activaction_word[11]">
+               <obj_property name="ElementShortName">[11]</obj_property>
+               <obj_property name="ObjectShortName">[11]</obj_property>
+            </wvobject>
+            <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/activaction_word[10]">
+               <obj_property name="ElementShortName">[10]</obj_property>
+               <obj_property name="ObjectShortName">[10]</obj_property>
+            </wvobject>
+            <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/activaction_word[9]">
+               <obj_property name="ElementShortName">[9]</obj_property>
+               <obj_property name="ObjectShortName">[9]</obj_property>
+            </wvobject>
+            <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/activaction_word[8]">
+               <obj_property name="ElementShortName">[8]</obj_property>
+               <obj_property name="ObjectShortName">[8]</obj_property>
+            </wvobject>
+            <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/activaction_word[7]">
+               <obj_property name="ElementShortName">[7]</obj_property>
+               <obj_property name="ObjectShortName">[7]</obj_property>
+            </wvobject>
+            <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/activaction_word[6]">
+               <obj_property name="ElementShortName">[6]</obj_property>
+               <obj_property name="ObjectShortName">[6]</obj_property>
+            </wvobject>
+            <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/activaction_word[5]">
+               <obj_property name="ElementShortName">[5]</obj_property>
+               <obj_property name="ObjectShortName">[5]</obj_property>
+            </wvobject>
+            <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/activaction_word[4]">
+               <obj_property name="ElementShortName">[4]</obj_property>
+               <obj_property name="ObjectShortName">[4]</obj_property>
+            </wvobject>
+            <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/activaction_word[3]">
+               <obj_property name="ElementShortName">[3]</obj_property>
+               <obj_property name="ObjectShortName">[3]</obj_property>
+            </wvobject>
+            <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/activaction_word[2]">
+               <obj_property name="ElementShortName">[2]</obj_property>
+               <obj_property name="ObjectShortName">[2]</obj_property>
+            </wvobject>
+            <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/activaction_word[1]">
+               <obj_property name="ElementShortName">[1]</obj_property>
+               <obj_property name="ObjectShortName">[1]</obj_property>
+            </wvobject>
+            <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/activaction_word[0]">
+               <obj_property name="ElementShortName">[0]</obj_property>
+               <obj_property name="ObjectShortName">[0]</obj_property>
+            </wvobject>
+         </wvobject>
+         <wvobject fp_name="divider1874" type="divider">
+            <obj_property name="label">O</obj_property>
+            <obj_property name="DisplayName">label</obj_property>
+            <obj_property name="BkColor">#008080</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/bram_o_en">
+            <obj_property name="ElementShortName">bram_o_en</obj_property>
+            <obj_property name="ObjectShortName">bram_o_en</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/bram_o_addr">
+            <obj_property name="ElementShortName">bram_o_addr[9:0]</obj_property>
+            <obj_property name="ObjectShortName">bram_o_addr[9:0]</obj_property>
+            <obj_property name="CustomSignalColor">#FFD700</obj_property>
+            <obj_property name="UseCustomSignalColor">true</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         </wvobject>
+      </wvobject>
+      <wvobject type="group" fp_name="group7881">
+         <obj_property name="label">OUTPUT</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/acc_clear">
+            <obj_property name="ElementShortName">acc_clear</obj_property>
+            <obj_property name="ObjectShortName">acc_clear</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/mac_res_out">
+            <obj_property name="ElementShortName">mac_res_out[0:255][4:0]</obj_property>
+            <obj_property name="ObjectShortName">mac_res_out[0:255][4:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/mac_acc_out">
+            <obj_property name="ElementShortName">mac_acc_out[0:255][31:0]</obj_property>
+            <obj_property name="ObjectShortName">mac_acc_out[0:255][31:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/mac_sign_out">
+            <obj_property name="ElementShortName">mac_sign_out[255:0]</obj_property>
+            <obj_property name="ObjectShortName">mac_sign_out[255:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/res0">
+            <obj_property name="ElementShortName">res0[255:0]</obj_property>
+            <obj_property name="ObjectShortName">res0[255:0]</obj_property>
+            <obj_property name="CustomSignalColor">#FF00FF</obj_property>
+            <obj_property name="UseCustomSignalColor">true</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/res1">
+            <obj_property name="ElementShortName">res1[255:0]</obj_property>
+            <obj_property name="ObjectShortName">res1[255:0]</obj_property>
+            <obj_property name="CustomSignalColor">#FF00FF</obj_property>
+            <obj_property name="UseCustomSignalColor">true</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/res2">
+            <obj_property name="ElementShortName">res2[255:0]</obj_property>
+            <obj_property name="ObjectShortName">res2[255:0]</obj_property>
+            <obj_property name="CustomSignalColor">#FF00FF</obj_property>
+            <obj_property name="UseCustomSignalColor">true</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/res3">
+            <obj_property name="ElementShortName">res3[255:0]</obj_property>
+            <obj_property name="ObjectShortName">res3[255:0]</obj_property>
+            <obj_property name="CustomSignalColor">#FF00FF</obj_property>
+            <obj_property name="UseCustomSignalColor">true</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/result_matrix">
+            <obj_property name="ElementShortName">result_matrix[0:31][31:0]</obj_property>
+            <obj_property name="ObjectShortName">result_matrix[0:31][31:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/sign_row">
+            <obj_property name="ElementShortName">sign_row[0:7][31:0]</obj_property>
+            <obj_property name="ObjectShortName">sign_row[0:7][31:0]</obj_property>
+            <obj_property name="CustomSignalColor">#800000</obj_property>
+            <obj_property name="UseCustomSignalColor">true</obj_property>
+            <obj_property name="isExpanded"></obj_property>
+         </wvobject>
+      </wvobject>
+      <wvobject fp_name="divider1874" type="divider">
+         <obj_property name="label">MAC</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="BkColor">#008080</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/mac_size_in">
+         <obj_property name="ElementShortName">mac_size_in[31:0]</obj_property>
+         <obj_property name="ObjectShortName">mac_size_in[31:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject type="group" fp_name="group7873">
+         <obj_property name="label">MAC 0</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/\mac_inst_gen(0)\/mac_inst/a">
+            <obj_property name="ElementShortName">a[31:0]</obj_property>
+            <obj_property name="ObjectShortName">a[31:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/\mac_inst_gen(0)\/mac_inst/b">
+            <obj_property name="ElementShortName">b[31:0]</obj_property>
+            <obj_property name="ObjectShortName">b[31:0]</obj_property>
+            <obj_property name="Radix">HEXRADIX</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/\mac_inst_gen(0)\/mac_inst/res_sign">
+            <obj_property name="ElementShortName">res_sign</obj_property>
+            <obj_property name="ObjectShortName">res_sign</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/\mac_inst_gen(0)\/mac_inst/binary_product">
+            <obj_property name="ElementShortName">binary_product[31:0]</obj_property>
+            <obj_property name="ObjectShortName">binary_product[31:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/\mac_inst_gen(0)\/mac_inst/popcount">
+            <obj_property name="ElementShortName">popcount[4:0]</obj_property>
+            <obj_property name="ObjectShortName">popcount[4:0]</obj_property>
+            <obj_property name="Radix">HEXRADIX</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/\mac_inst_gen(0)\/mac_inst/res">
+            <obj_property name="ElementShortName">res[4:0]</obj_property>
+            <obj_property name="ObjectShortName">res[4:0]</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+            <obj_property name="CustomSignalColor">#FFD700</obj_property>
+            <obj_property name="UseCustomSignalColor">true</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/\mac_inst_gen(0)\/mac_inst/acc">
+            <obj_property name="ElementShortName">acc[31:0]</obj_property>
+            <obj_property name="ObjectShortName">acc[31:0]</obj_property>
+            <obj_property name="Radix">HEXRADIX</obj_property>
+            <obj_property name="CustomSignalColor">#FF00FF</obj_property>
+            <obj_property name="UseCustomSignalColor">true</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/\mac_inst_gen(0)\/mac_inst/accumulator">
+            <obj_property name="ElementShortName">accumulator[0:3][31:0]</obj_property>
+            <obj_property name="ObjectShortName">accumulator[0:3][31:0]</obj_property>
+         </wvobject>
+      </wvobject>
+      <wvobject type="group" fp_name="group7880">
+         <obj_property name="label">MAC 1</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/\mac_inst_gen(1)\/mac_inst/a">
+            <obj_property name="ElementShortName">a[31:0]</obj_property>
+            <obj_property name="ObjectShortName">a[31:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/\mac_inst_gen(1)\/mac_inst/b">
+            <obj_property name="ElementShortName">b[31:0]</obj_property>
+            <obj_property name="ObjectShortName">b[31:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/\mac_inst_gen(1)\/mac_inst/size">
+            <obj_property name="ElementShortName">size[31:0]</obj_property>
+            <obj_property name="ObjectShortName">size[31:0]</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/\mac_inst_gen(1)\/mac_inst/res_sign">
+            <obj_property name="ElementShortName">res_sign</obj_property>
+            <obj_property name="ObjectShortName">res_sign</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/\mac_inst_gen(1)\/mac_inst/res">
+            <obj_property name="ElementShortName">res[4:0]</obj_property>
+            <obj_property name="ObjectShortName">res[4:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/\mac_inst_gen(1)\/mac_inst/acc">
+            <obj_property name="ElementShortName">acc[31:0]</obj_property>
+            <obj_property name="ObjectShortName">acc[31:0]</obj_property>
+            <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
+            <obj_property name="CustomSignalColor">#FF00FF</obj_property>
+            <obj_property name="UseCustomSignalColor">true</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/btpu_wrapper_0/U0/btpu_inst/\mac_inst_gen(1)\/mac_inst/accumulator">
+            <obj_property name="ElementShortName">accumulator[0:3][31:0]</obj_property>
+            <obj_property name="ObjectShortName">accumulator[0:3][31:0]</obj_property>
+         </wvobject>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_AXI_ctrl/testN">
+         <obj_property name="ElementShortName">testN[31:0]</obj_property>
+         <obj_property name="ObjectShortName">testN[31:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         <obj_property name="CustomSignalColor">#FF00FF</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/test_AXI_ctrl/validating">
+         <obj_property name="ElementShortName">validating</obj_property>
+         <obj_property name="ObjectShortName">validating</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/test_AXI_ctrl/testResult">
+         <obj_property name="ElementShortName">testResult</obj_property>
+         <obj_property name="ObjectShortName">testResult</obj_property>
+         <obj_property name="CustomSignalColor">#00FF00</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+      <wvobject type="group" fp_name="group1451">
+         <obj_property name="label">BTPU TB signals</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <wvobject type="logic" fp_name="/test_AXI_ctrl/btpu_busy_tb">
+            <obj_property name="ElementShortName">btpu_busy_tb</obj_property>
+            <obj_property name="ObjectShortName">btpu_busy_tb</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/btpu_creg_tb">
+            <obj_property name="ElementShortName">btpu_creg_tb[0:31][31:0]</obj_property>
+            <obj_property name="ObjectShortName">btpu_creg_tb[0:31][31:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/r_tb">
+            <obj_property name="ElementShortName">r_tb[9:0]</obj_property>
+            <obj_property name="ObjectShortName">r_tb[9:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/c_tb">
+            <obj_property name="ElementShortName">c_tb[9:0]</obj_property>
+            <obj_property name="ObjectShortName">c_tb[9:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/i_tb">
+            <obj_property name="ElementShortName">i_tb[9:0]</obj_property>
+            <obj_property name="ObjectShortName">i_tb[9:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/tile_number_tb">
+            <obj_property name="ElementShortName">tile_number_tb[3:0]</obj_property>
+            <obj_property name="ObjectShortName">tile_number_tb[3:0]</obj_property>
+         </wvobject>
+      </wvobject>
+   </wvobject>
+   <wvobject type="group" fp_name="group357">
+      <obj_property name="label">Timer</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/timer_0/U0/clk">
+         <obj_property name="ElementShortName">clk</obj_property>
+         <obj_property name="ObjectShortName">clk</obj_property>
+      </wvobject>
+      <wvobject type="group" fp_name="group363">
+         <obj_property name="label">BRAM Port</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/timer_0/U0/en">
+            <obj_property name="ElementShortName">en</obj_property>
+            <obj_property name="ObjectShortName">en</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/timer_0/U0/wea">
+            <obj_property name="ElementShortName">wea[3:0]</obj_property>
+            <obj_property name="ObjectShortName">wea[3:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/timer_0/U0/addr">
+            <obj_property name="ElementShortName">addr[31:0]</obj_property>
+            <obj_property name="ObjectShortName">addr[31:0]</obj_property>
+            <obj_property name="CustomSignalColor">#FFD700</obj_property>
+            <obj_property name="UseCustomSignalColor">true</obj_property>
+         </wvobject>
+         <wvobject type="other" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/timer_0/U0/regAddr_s">
+            <obj_property name="ElementShortName">regAddr_s</obj_property>
+            <obj_property name="ObjectShortName">regAddr_s</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/timer_0/U0/din">
+            <obj_property name="ElementShortName">din[31:0]</obj_property>
+            <obj_property name="ObjectShortName">din[31:0]</obj_property>
+            <obj_property name="CustomSignalColor">#FF00FF</obj_property>
+            <obj_property name="UseCustomSignalColor">true</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/timer_0/U0/dout">
+            <obj_property name="ElementShortName">dout[31:0]</obj_property>
+            <obj_property name="ObjectShortName">dout[31:0]</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         </wvobject>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/timer_0/U0/regFile">
+         <obj_property name="ElementShortName">regFile[0:31][31:0]</obj_property>
+         <obj_property name="ObjectShortName">regFile[0:31][31:0]</obj_property>
+      </wvobject>
+      <wvobject type="other" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/timer_0/U0/cc_sel">
+         <obj_property name="ElementShortName">cc_sel</obj_property>
+         <obj_property name="ObjectShortName">cc_sel</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/timer_0/U0/start">
+         <obj_property name="ElementShortName">start</obj_property>
+         <obj_property name="ObjectShortName">start</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/timer_0/U0/busy">
+         <obj_property name="ElementShortName">busy</obj_property>
+         <obj_property name="ObjectShortName">busy</obj_property>
+         <obj_property name="CustomSignalColor">#A52A2A</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/timer_0/U0/stop">
+         <obj_property name="ElementShortName">stop</obj_property>
+         <obj_property name="ObjectShortName">stop</obj_property>
+      </wvobject>
+      <wvobject type="other" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/timer_0/U0/timer_state">
+         <obj_property name="ElementShortName">timer_state</obj_property>
+         <obj_property name="ObjectShortName">timer_state</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/timer_0/U0/cc">
+         <obj_property name="ElementShortName">cc[31:0]</obj_property>
+         <obj_property name="ObjectShortName">cc[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/timer_0/U0/counter">
+         <obj_property name="ElementShortName">counter[39:0]</obj_property>
+         <obj_property name="ObjectShortName">counter[39:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/timer_0/U0/timer_mode">
+         <obj_property name="ElementShortName">timer_mode[1:0]</obj_property>
+         <obj_property name="ObjectShortName">timer_mode[1:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/timer_0/U0/capture_mode">
+         <obj_property name="ElementShortName">capture_mode</obj_property>
+         <obj_property name="ObjectShortName">capture_mode</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/timer_0/U0/capture_reg">
+         <obj_property name="ElementShortName">capture_reg</obj_property>
+         <obj_property name="ObjectShortName">capture_reg</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/timer_0/U0/capture">
+         <obj_property name="ElementShortName">capture</obj_property>
+         <obj_property name="ObjectShortName">capture</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/timer_0/U0/compare">
+         <obj_property name="ElementShortName">compare[39:0]</obj_property>
+         <obj_property name="ObjectShortName">compare[39:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/timer_0/U0/compare_reg">
+         <obj_property name="ElementShortName">compare_reg[39:0]</obj_property>
+         <obj_property name="ObjectShortName">compare_reg[39:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/test_AXI_ctrl/DUT/mem_ctrl_test_i/timer_0/U0/pwm_int">
+         <obj_property name="ElementShortName">pwm_int</obj_property>
+         <obj_property name="ObjectShortName">pwm_int</obj_property>
+      </wvobject>
+   </wvobject>
+</wave_config>

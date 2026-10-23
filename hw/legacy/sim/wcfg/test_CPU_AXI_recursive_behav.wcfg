@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="test_CPU_AXI_recursive_behav.wdb" id="1">
+         <top_modules>
+            <top_module name="axi_bram_ctrl_funcs" />
+            <top_module name="axi_vip_pkg" />
+            <top_module name="constant_package" />
+            <top_module name="glbl" />
+            <top_module name="i2c_utils_pkg" />
+            <top_module name="memory_pkg" />
+            <top_module name="std" />
+            <top_module name="test_CPU_AXI_recursive" />
+            <top_module name="types_pkg" />
+            <top_module name="types_pkg" />
+            <top_module name="vcomponents" />
+            <top_module name="xil_common_vip_pkg" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <zoom_setting>
+      <ZoomStartTime time="1,166.700 ns"></ZoomStartTime>
+      <ZoomEndTime time="1,306.501 ns"></ZoomEndTime>
+      <Cursor1Time time="1,190.000 ns"></Cursor1Time>
+   </zoom_setting>
+   <column_width_setting>
+      <NameColumnWidth column_width="266"></NameColumnWidth>
+      <ValueColumnWidth column_width="60"></ValueColumnWidth>
+   </column_width_setting>
+   <WVObjectSize size="15" />
+   <wave_markers>
+      <marker label="" time="1190000" />
+   </wave_markers>
+   <wvobject type="logic" fp_name="/test_CPU_AXI_recursive/clock">
+      <obj_property name="ElementShortName">clock</obj_property>
+      <obj_property name="ObjectShortName">clock</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/test_CPU_AXI_recursive/reset">
+      <obj_property name="ElementShortName">reset</obj_property>
+      <obj_property name="ObjectShortName">reset</obj_property>
+      <obj_property name="CustomSignalColor">#FF0000</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/test_CPU_AXI_recursive/run">
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="ElementShortName">run</obj_property>
+      <obj_property name="ObjectShortName">run</obj_property>
+      <obj_property name="label">run_in</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/test_CPU_AXI_recursive/run">
+      <obj_property name="ElementShortName">run</obj_property>
+      <obj_property name="ObjectShortName">run</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/test_CPU_AXI_recursive/aliveLed">
+      <obj_property name="ElementShortName">aliveLed</obj_property>
+      <obj_property name="ObjectShortName">aliveLed</obj_property>
+   </wvobject>
+   <wvobject type="protoinst" fp_name="/test_CPU_AXI_recursive/DUT/test_design_axi_recursive_i/axi_vip_0/M_AXI">
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="children_use_element_short_name">true</obj_property>
+      <obj_property name="WaveformStyle">STYLE_ENUM_TRANSACTION</obj_property>
+      <obj_property name="EnumTransactionColorTable">0=blank 1=#D399FF 2=pink</obj_property>
+      <obj_property name="EnumTransactionValueTable">0=blank;1=Read;2=Write;3=Read/Write</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+      <obj_property name="CustomSignalColor">turquoise</obj_property>
+      <obj_property name="Render_Data">/test_CPU_AXI_recursive/DUT/test_design_axi_recursive_i/axi_vip_0/M_AXI.readWriteSummary</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      <obj_property name="CellHeight">36</obj_property>
+      <obj_property name="ElementShortName">M_AXI</obj_property>
+      <obj_property name="ObjectShortName">M_AXI</obj_property>
+      <obj_property name="label">VIP MAster M_AXI</obj_property>
+   </wvobject>
+   <wvobject type="group" fp_name="group410">
+      <obj_property name="label">IF</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+   </wvobject>
+   <wvobject fp_name="divider411" type="divider">
+      <obj_property name="label">Periferiche</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+   </wvobject>
+   <wvobject type="group" fp_name="group250">
+      <obj_property name="label">I2C</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject type="logic" fp_name="/test_CPU_AXI_recursive/SCL">
+         <obj_property name="ElementShortName">SCL</obj_property>
+         <obj_property name="ObjectShortName">SCL</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/test_CPU_AXI_recursive/SDA">
+         <obj_property name="ElementShortName">SDA</obj_property>
+         <obj_property name="ObjectShortName">SDA</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject type="group" fp_name="group251">
+      <obj_property name="label">PS_GPIO</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject type="array" fp_name="/test_CPU_AXI_recursive/LEDs">
+         <obj_property name="ElementShortName">LEDs[2:0]</obj_property>
+         <obj_property name="ObjectShortName">LEDs[2:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_AXI_recursive/switches">
+         <obj_property name="ElementShortName">switches[1:0]</obj_property>
+         <obj_property name="ObjectShortName">switches[1:0]</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject type="group" fp_name="group252">
+      <obj_property name="label">GPIO</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject type="array" fp_name="/test_CPU_AXI_recursive/GPIO">
+         <obj_property name="ElementShortName">GPIO[31:0]</obj_property>
+         <obj_property name="ObjectShortName">GPIO[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_AXI_recursive/GPIO_sig">
+         <obj_property name="ElementShortName">GPIO_sig[31:0]</obj_property>
+         <obj_property name="ObjectShortName">GPIO_sig[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/test_CPU_AXI_recursive/BTNs">
+         <obj_property name="ElementShortName">BTNs[4:0]</obj_property>
+         <obj_property name="ObjectShortName">BTNs[4:0]</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject type="group" fp_name="group421">
+      <obj_property name="label">AXI Controller</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="isExpanded"></obj_property>
+      <wvobject type="protoinst" fp_name="/test_CPU_AXI_recursive/DUT/test_design_axi_recursive_i/CPU_0/M_AXI">
+         <obj_property name="ElementShortName">M_AXI</obj_property>
+         <obj_property name="ObjectShortName">M_AXI</obj_property>
+         <obj_property name="children_use_element_short_name">true</obj_property>
+         <obj_property name="WaveformStyle">STYLE_ENUM_TRANSACTION</obj_property>
+         <obj_property name="EnumTransactionColorTable">0=blank 1=#D399FF 2=pink</obj_property>
+         <obj_property name="EnumTransactionValueTable">0=blank;1=Read;2=Write;3=Read/Write</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+         <obj_property name="CustomSignalColor">turquoise</obj_property>
+         <obj_property name="Render_Data">/test_CPU_AXI_recursive/DUT/test_design_axi_recursive_i/CPU_0/M_AXI.readWriteSummary</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         <obj_property name="CellHeight">36</obj_property>
+         <obj_property name="isExpanded"></obj_property>
+      </wvobject>
+      <wvobject type="other" fp_name="/test_CPU_AXI_recursive/DUT/test_design_axi_recursive_i/CPU_0/U0/axi_mem_ctrl/read_state">
+         <obj_property name="ElementShortName">read_state</obj_property>
+         <obj_property name="ObjectShortName">read_state</obj_property>
+      </wvobject>
+      <wvobject type="other" fp_name="/test_CPU_AXI_recursive/DUT/test_design_axi_recursive_i/CPU_0/U0/axi_mem_ctrl/awrite_state">
+         <obj_property name="ElementShortName">awrite_state</obj_property>
+         <obj_property name="ObjectShortName">awrite_state</obj_property>
+      </wvobject>
+      <wvobject type="other" fp_name="/test_CPU_AXI_recursive/DUT/test_design_axi_recursive_i/CPU_0/U0/axi_mem_ctrl/dwrite_state">
+         <obj_property name="ElementShortName">dwrite_state</obj_property>
+         <obj_property name="ObjectShortName">dwrite_state</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject type="logic" fp_name="/test_CPU_AXI_recursive/DUT/test_design_axi_recursive_i/CPU_0/U0/axi_mem_ctrl/stall">
+      <obj_property name="ElementShortName">stall</obj_property>
+      <obj_property name="ObjectShortName">stall</obj_property>
+   </wvobject>
+   <wvobject type="protoinst" fp_name="/test_CPU_AXI_recursive/DUT/test_design_axi_recursive_i/CPU_0/s_axi_d">
+      <obj_property name="ElementShortName">s_axi_d</obj_property>
+      <obj_property name="ObjectShortName">s_axi_d</obj_property>
+   </wvobject>
+   <wvobject type="protoinst" fp_name="/test_CPU_AXI_recursive/DUT/test_design_axi_recursive_i/CPU_0/s_axi_i">
+      <obj_property name="ElementShortName">s_axi_i</obj_property>
+      <obj_property name="ObjectShortName">s_axi_i</obj_property>
+      <obj_property name="children_use_element_short_name">true</obj_property>
+      <obj_property name="WaveformStyle">STYLE_ENUM_TRANSACTION</obj_property>
+      <obj_property name="EnumTransactionColorTable">0=blank 1=#D399FF 2=pink</obj_property>
+      <obj_property name="EnumTransactionValueTable">0=blank;1=Read;2=Write;3=Read/Write</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+      <obj_property name="CustomSignalColor">turquoise</obj_property>
+      <obj_property name="Render_Data">/test_CPU_AXI_recursive/DUT/test_design_axi_recursive_i/CPU_0/s_axi_i.readWriteSummary</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      <obj_property name="CellHeight">36</obj_property>
+      <obj_property name="isExpanded"></obj_property>
+   </wvobject>
+</wave_config>

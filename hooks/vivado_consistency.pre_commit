@@ -1,0 +1,106 @@
+#!/usr/bin/env bash
+# Checks before every commit, of the Vivado template: git and shell commands
+# only, no Vivado, so they take less than a second. 'make hooks' makes the
+# pre-commit hook of git run this file (see hooks/install.sh).
+# To commit anyway, once: git commit --no-verify
+#
+# Assumes the product is the root of the git repository.
+
+set -uo pipefail
+
+cd "$(git rev-parse --show-toplevel)" || exit 1
+
+errors=0
+
+fail() {
+    echo "pre-commit: $1"
+    errors=$((errors + 1))
+}
+
+staged=$(git diff --cached --name-only --diff-filter=ACM)
+
+# 1. Absolute paths of this machine in the staged content of text files:
+#    hardware sources and scripts, the files of the Linux part, and the
+#    project files of a Vitis workspace (the filter of
+#    hooks/vitis-paths.sh removes the path of the product from them: this
+#    catches a clone where it is not enabled, run make hooks there).
+for file in $staged; do
+    case "$file" in
+        *.tcl | *.xdc | *.xci | *.xml | *.v | *.sv | *.vh | *.svh | *.vhd | *.vhdl | \
+        *.sh | *.dts | *.dtsi | *.c | *.h | *.fragment | Makefile | */Makefile | \
+        *.yaml | *.json | *.spr | *.prj | *.sprj)
+            if git show ":$file" | grep -q -F -e "$PWD" -e "$HOME"; then
+                fail "$file contains an absolute path of this machine"
+            fi
+            ;;
+    esac
+done
+
+# 2. Block designs saved after the last export: the snapshot is out of date.
+if [ -d hw/vivado ]; then
+    if [ -f hw/vivado/.exported ]; then
+        stale=$(find hw/vivado -name '*.bd' -newer hw/vivado/.exported)
+    else
+        stale=$(find hw/vivado -name '*.bd')
+    fi
+    if [ -n "$stale" ]; then
+        fail "block designs changed after the last export, run 'make export' or prj::export"
+    fi
+fi
+
+# 3. Local IPs whose RTL is staged without their component.xml: the RTL was
+#    changed but the IP was not packaged again.
+for file in $staged; do
+    case "$file" in
+        hw/ip/*/hdl/*)
+            ip_dir=$(echo "$file" | cut -d/ -f1-3)
+            if ! echo "$staged" | grep -q -x -F "$ip_dir/component.xml"; then
+                fail "$file is staged but $ip_dir/component.xml is not: run 'make ip IP=$(basename "$ip_dir")'"
+            fi
+            ;;
+    esac
+done
+
+# 4. Stage-C IPs (submodules in hw/ip_ext/): initialized, on a release tag,
+#    without local changes, and at the commit that is being recorded.
+if [ -f .gitmodules ]; then
+    submodules=$(git config --file .gitmodules --get-regexp '\.path$' | cut -d' ' -f2)
+    for path in $submodules; do
+        case "$path" in
+            hw/ip_ext/*)
+                ;;
+            *)
+                continue
+                ;;
+        esac
+        if [ ! -e "$path/.git" ]; then
+            fail "$path is not initialized: git submodule update --init $path"
+            continue
+        fi
+        recorded=$(git ls-files --stage -- "$path" | cut -d' ' -f2)
+        current=$(git -C "$path" rev-parse HEAD)
+        if [ "$recorded" != "$current" ]; then
+            fail "$path is at a commit different from the recorded one: git add $path, or check it out again"
+        fi
+        if ! git -C "$path" describe --exact-match --tags HEAD > /dev/null 2>&1; then
+            fail "$path is not on a release tag"
+        fi
+        if [ -n "$(git -C "$path" status --porcelain)" ]; then
+            fail "$path has local changes: a released IP is never changed in place"
+        fi
+    done
+fi
+
+# 5. The licensed IP repository of .env, if set, exists.
+if [ -f .env ]; then
+    repo_line=$(grep '^VIVADO_IP_REPO_EXT=' .env)
+    repo=${repo_line#VIVADO_IP_REPO_EXT=}
+    if [ -n "$repo" ] && [ ! -d "$repo" ]; then
+        fail "VIVADO_IP_REPO_EXT in .env is not a directory: $repo"
+    fi
+fi
+
+if [ "$errors" -gt 0 ]; then
+    echo "pre-commit: $errors problem(s), commit refused (skip once with --no-verify)"
+    exit 1
+fi
