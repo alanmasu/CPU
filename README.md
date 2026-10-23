@@ -1,140 +1,143 @@
 # CPU
 
-Costruzione di una CPU basata su RISC-V in VHDL divisa in 5 stadi:
+A 5-stage RISC-V soft core (RV32I) written in VHDL, with a binary neural network accelerator (BTPU), timer, GPIO and I2C peripherals, connected to the Zynq-7000 processing system of a ZedBoard. The project targets **Vivado 2021.2** and is organised with the `vivado_project_template`: the Vivado project is not committed, it is rebuilt from a Tcl snapshot.
 
----
-## Instruction Fetch
-Esce con l'istruzione a 32 bit, il program counter (pc) e il prossimo valore del program counter (npc) indirizzato a BYTE, dentro contiene una BRAM 32 x 1024 (32Kb) utilizzata come memoria istruzioni.
+## Contents
 
-Configurazione BRAM:
-  * Single port ram,
-  * No byte accessing,
-  * Pin ENA per abilitazione (collegato a 'pc_load')
-  * Primitives Output Register disabilitato
----
-## Instruction Decode
-Decodifica l'istruzione dai 32bit alla control word (segnali di selezione degli operandi, valori dei registri, immediato) che serve allo stadio successivo per eseguire l'operazione, estende in segno l'immediato, contiene il Register File.
+- [Repository layout](#repository-layout)
+- [Requirements](#requirements)
+- [Getting started](#getting-started)
+- [Everyday commands](#everyday-commands)
+- [Architecture](#architecture)
+- [Simulation](#simulation)
+- [RISC-V software](#risc-v-software)
+- [Branches](#branches)
+- [Known issues](#known-issues)
 
----
-## Execute
-Contiene la ALU ed il Comparatore, legge la control word ed esegue effettivamente i calcoli necessari ad eseguire l'istruzione (calcoli aritmetici [op], calcoli di indirizzi di memoria [L & S] o calcoli sul prossimo valore di PC [B & J]) inoltre il comparatore calcola l'eventuale condizione per eseguire i salti tra istruzioni
-
----
-## Memory & Write back
-Contiene la RAM ed il circuito di selezione del prossimo valore di PC.
-Permette l'indirizzamento a BYTE
-
-> **Attenzione**: l'accesso non allineato in memoria non è pienamente supportato per il momento, questo potrebbe comportare ad errori nel calcolo!
-
-Configurazione BRAM 
-  * Single port ram, 32x2048
-  * Byte accessing -> wea[2:0],
-  * Pin ENA per abilitazione (gestito dalla MSF)
-  * Primitives Output Register disabilitato
-
-Note:
-   - Nel caso di una Jump è il comparator (dello stadio precedente) a mettere ad '1' il segnale 'cond'.
- 
-## Struttura della Repository
+## Repository layout
 
 ```
 .
-├── assembly
-│   ├── bin
-│   │   └── <here are placed all free Assembly Files binaries>
-│   └── <here are placed all free Assembly Files>
-├── C
-│   ├── <Project Name>
-│   │   ├── bin [GIT UNTRACKED]
-│   │   │   └── <here are placed Project Binaries>
-│   │   ├── src
-│   │   │   └── <here are placed Project Sources>
-│   │   ├── linker_script.ld
-│   │   └── Makefile
-│   └── <Here are placed all C/Assembly Project folders>
-├── coe
-│   └── <here are placed all free coe files>
-├── hex
-│   └── <here are placed all free hex files>
-├── packages
-│   └── <here are placed HDL packages>
-├── scripts
-│   └── <here are placed all utility scripts>
-├── simulation
-│   └── <here are placed all simulation files>
-├── src
-│   └── <here are placed all HDL sources>
-├── testbench
-│   └── <here are placed all testbench files>
-└── README.md [This file]
+├── hw/
+│   ├── src/
+│   │   ├── hdl/                  VHDL sources
+│   │   │   ├── cpu/              the core, one folder per stage: IF, ID, IE, MEM_WB
+│   │   │   ├── bnn/              BTPU and its building blocks
+│   │   │   ├── axi/              AXI memory controller
+│   │   │   ├── periph/           GPIO, I2C, timer, OLED driver
+│   │   │   ├── packages/         shared VHDL packages (memory map, constants, types)
+│   │   │   └── coe/              memory initialisation files
+│   │   ├── sim/                  testbenches and waveform configurations (wcfg/)
+│   │   ├── ip/                   configuration (.xci) of the catalog IPs used by the RTL
+│   │   ├── constr/               constraints
+│   │   └── vivado_project.tcl    snapshot of the Vivado project, rebuilt by "make project"
+│   ├── legacy/                   sources and testbenches no longer in the project, kept for reference
+│   ├── ghdl/                     GHDL simulations of the BNN datapath, with Python helpers
+│   ├── scripts/                  prj:: commands of the template
+│   ├── project.tcl               project settings (name, part, top)
+│   └── vivado/                   GENERATED: the Vivado project
+├── riscv/                        software of the RISC-V core (being reorganised, see below)
+├── sw/                           software of the Zynq ARM cores (Vitis, Linux), from the template
+├── tools/                        ELF conversion scripts (being replaced, see below)
+├── hooks/                        git hooks of the template
+├── out/                          GENERATED: bitstream, .xsa, build products
+└── Makefile                      entry point for every command
 ```
 
----
+## Requirements
 
-# RISC-V toolchain 
-## Installazione 
-1) Seguire le informazioni di installazione dei prerequisiti presenti nel repository [riscv-gnu-toolchain](https://github.com/riscv-collab/riscv-gnu-toolchain)
-2) Eseguire lo script fornito nel repository per la compilazione del toolchain con il comando 
+- Vivado 2021.2 (and Vitis 2021.2 for the `sw/` part), with their settings sourced in the shell.
+- The RISC-V GNU toolchain, built for RV32I with newlib, so that `riscv32-unknown-elf-gcc` is in the `PATH`. Install the prerequisites listed in [riscv-gnu-toolchain](https://github.com/riscv-collab/riscv-gnu-toolchain), then in its checkout:
+
+  ```bash
+  ./configure --prefix=<install path> --with-arch=rv32i --with-abi=ilp32
+  make
+  ```
+
+  and add `<install path>/bin` to the `PATH`, for example in `~/.bashrc`:
+
+  ```bash
+  export PATH=$PATH:<install path>/bin
+  ```
+
+## Getting started
+
+After a clone, create the Vivado project and build the hardware:
+
 ```bash
-./configure --prefix=<Your Compilation Paht> --with-arch=rv32i --with-abi=ilp32
-```
-3) Eseguire il comando
-```bash
-make 
-```
-per la compilazione del toolchain
-
-4) Aggiungere la variabile d'ambiente `PATH` al file `.bashrc` con il comando 
-```bash
-export PATH=$PATH:<Your Compilation Path>/bin`
+make hooks
+make project
+make xsa
 ```
 
-## Utilizzo
-Per compilare un file sorgente in assembly RISC-V è sufficiente eseguire il comando 
-```bash
-riscv32-unknown-elf-gcc -march=rv32i -mabi=ilp32 -nostdlib -nostartfiles -ffreestanding
-```
+`make hooks` installs the git hooks of the template, which check that the snapshot is consistent before every commit; `make project` rebuilds `hw/vivado/` from `hw/src/vivado_project.tcl`; `make xsa` produces `out/hw/CPU.bit` and `out/hw/CPU.xsa`.
 
-## Compilare Progetti C/Assembly della repository
-Nei progetti C/assembly presenti in questa repository nella directory `./C` è presente un Makefile che permette di compilare il progetto con il comando 
-```bash
-make
-```
+## Everyday commands
 
+| Command | What it does |
+|---|---|
+| `make vivado` | open the project in the GUI, with the `prj::` commands loaded (`prj::help` in the Tcl console) |
+| `make export` | save the project into `hw/src/vivado_project.tcl`: run it before committing any change made in Vivado |
+| `make xsa` | build bitstream and `.xsa` in `out/hw/` |
+| `make regen-pkg SIMSET=<name>` | compile the VHDL packages of a simulation set (see [Simulation](#simulation)) |
+| `make check` | the checks run before a commit |
+| `make clean` | delete everything generated; refuses if the project has not been exported |
 
-# TO DO LIST
- ## Instuction fetch 
-- [x] Cambiare il PC in contatore a 12 bit;
-- [x] Portare fuori il contatore
-- [x] Cambiare la memoria istruzioni in BRAM
-- [ ] Provare a vedere come influisce il pc_enable e il registro dell'istruzione
-- [x] Inserire il controller AXI per la BRAM e creare la modalità programmazione
+`make help` lists all the targets, including the Linux and Vitis ones.
 
-## Instruction decode
-- [x] Modificare il sign-extender
-  - [x] Da testare 
-- [x] Aggiungere un 'load_enable' al register file
-  - [x] Testare il file register
-- [x] Creare il decoder
-- [ ] Aggiungere il load_enable
+## Architecture
 
-## Execute 
-- [x] Inserire i multiplaxer
+The core is a 5-stage pipeline, one folder per stage in `hw/src/hdl/cpu/`:
 
-## Memoria & Write back
-- [x] Da Testare
-- [ ] Provare a simulare il comportamento della RAM nel caso in cui l'indirizzo arrivi in un ciclo di clock, mentre il dato arrivi al fronte successivo!
-- [x] Probabilmente bisogna togliere i registri in uscita per PC, per i dati; va verificato
-- [x] Indirizzamento a BYTE
-- [ ] Unaligned memory access
+- **Instruction fetch** (`IF/`) outputs the 32-bit instruction, the program counter and the next program counter, byte addressed. It contains the instruction memory. The core starts at `0x40000000`.
+- **Instruction decode** (`ID/`) turns the instruction into the control word used by the next stage (operand selection, register values, immediate), sign-extends the immediate and contains the register file.
+- **Execute** (`IE/`) contains the ALU and the comparator: it performs arithmetic, computes load/store addresses and the next program counter for branches and jumps, and the comparator evaluates the branch condition (for a jump it always sets `cond`).
+- **Memory and write back** (`MEM_WB/`) contains the data memory, the address decoder that routes accesses to memories and peripherals, and the selection of the next program counter. Memory is byte addressed.
 
-## Macchina a stati di controllo
-**Test flow**
-- [x] Operazioni con immediati
-- [x] Load
-- [x] Store
-- [x] Brench
-- [x] Jump
-- [x] LUI
-- [x] AUIPC
-- [x] Provare a togliere 'ena' al MEM&WB nello stato di 'mem_wb' per sistemare le load riflessive tipo `lw x1, 0(x1)`
+Memories are Block Memory Generator IPs in true dual port mode. Instruction and data memory are also reachable from the Zynq over AXI, which is how the ARM cores load programs and read results:
+
+| Memory | IP | Size |
+|---|---|---|
+| Instruction memory | `instruction_mem` | 4096 × 32 bit (16 KB), byte write enable |
+| Data memory | `data_memory` | 16384 × 32 bit (64 KB), byte write enable |
+| BTPU weights and I/O memories | `BTPU_memory` | 32768 × 32 bit (128 KB) each |
+
+The memory map of the core is defined in one place on the hardware side, `hw/src/hdl/packages/memory_pkg.vhd`; the software side reads it from the headers of the RISC-V libraries and from the linker script (see [RISC-V software](#risc-v-software)). Bit positions of the control registers are in `hw/src/hdl/packages/constant_package.vhd`.
+
+## Simulation
+
+The simulation sets of the project are run from the Vivado GUI (`make vivado`, then select the set and *Run Simulation*). The ones that compile and run are `AXI_mem_ctrl`, `CPU_sim`, `address_manager`, `compressor_6_3_sim`, `compressor_level_sim`, `decode`, `fetch_sim`, `popcount_sim`, `test_GPIO`, `test_I2C_module`, `test_register_file`.
+
+Some SystemVerilog testbenches import VHDL packages. The simulation script generated by Vivado compiles SystemVerilog before VHDL, so on an empty simulation library the compilation stops on the missing package. Running `make regen-pkg SIMSET=<name>` once (or `prj::regen_pkg <name>` in the Tcl console) compiles the VHDL packages of that set into its library, after which the simulation compiles normally.
+
+Testbenches that no longer match the RTL are in `hw/legacy/sim/`, out of the project, until they are updated (see [Known issues](#known-issues)).
+
+## RISC-V software
+
+`riscv/` is being reorganised. The target layout is:
+
+- `riscv/sdk/`: linker script, start-up code and peripheral libraries, shared by every program;
+- `riscv/tests/<name>/`: one folder per test program, C or assembly, built with the `sdk`.
+
+Applications with a life of their own live in their own repositories and include this one as a submodule, pinned to a tagged version, so that each application records the exact hardware and `sdk` it runs on.
+
+Until the reorganisation is complete, `riscv/apps/` and `riscv/asm/` hold the previous programs, each with its own `Makefile` and linker script, and `tools/` the previous ELF conversion scripts. Their linker scripts are out of date with respect to the memory sizes above.
+
+## Branches
+
+- `main`: stable versions only, each one tagged.
+- `develop`: integration branch.
+- Work branches start from `develop`, one per topic, and are merged back into `develop` as soon as the topic works, then deleted. A branch is never started from another work branch.
+
+## Known issues
+
+- Unaligned memory accesses are not fully supported and can give wrong results.
+- Critical warnings already present in the original design:
+  - in `top_level`, the 32-bit `GPIO` of `CPU_0` is connected to the 16-bit port `GPIO_0`;
+  - in `top_level_dbg`, the probes of the `system_ila` are unconnected, because the `*_dbg` ports no longer exist in the RTL;
+  - in `test_design_axi_recursive`, `CPU_0/cdma_interrupt` is unconnected.
+- Testbenches in `hw/legacy/sim/` to be updated to the current RTL: `test_BTPU_memory.vhd`, `test_RAM.vhd`, `test_memoryAndWriteback.vhd`, and `test_CPU_AXI_recursive.sv`, which also needs the block design `test_design_axi_recursive` enabled for simulation.
+- In `memory_pkg.vhd` the comment on the data memory still says that it ends at `0x40011FFF`, and in `constant_package.vhd` the reset value of `sp` and `s0` is `0x40011FFC`: both date from the 8 KB data memory. The start-up code sets `sp` anyway.
+- Open items from the previous to-do list:
+  - check how `pc_enable` and the instruction register affect the fetch stage;
+  - simulate the data memory when the address arrives in one clock cycle and the data on the next edge.
