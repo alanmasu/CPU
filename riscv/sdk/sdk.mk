@@ -8,6 +8,8 @@
 #   prog.elf: prog.o $(SDK_OBJS)
 #   	$(CC) $(SDK_CFLAGS) $^ -o $@ $(SDK_LDFLAGS)
 #
+# The Makefiles of riscv/tests/ are complete examples.
+#
 # SDK_BUILD_DIR is where the objects of the SDK go; set it before the include
 # to change it. Every path below starts from the folder of this file, so the
 # SDK does not depend on where it is checked out.
@@ -25,6 +27,13 @@ SDK_LIBS := BinaryMatMul GPIO I2C OLED Timer UART syscall utilities
 SDK_CFLAGS := -I$(SDK_DIR)include $(foreach lib,$(SDK_LIBS),-I$(SDK_DIR)libraries/$(lib)/include)
 SDK_CFLAGS += -ffreestanding -Os --specs=nano.specs -ffunction-sections -fdata-sections -Wl,--gc-sections
 SDK_CFLAGS += -DMY_RISCV -Wstack-usage=8000
+
+# SIMULATION=1 builds for the simulation: shorter delays in the libraries and
+# no debug prints in the programs. The objects do not change name, so clean
+# before switching between the two builds.
+ifeq ($(SIMULATION),1)
+SDK_CFLAGS += -DSIMULATION
+endif
 
 # -e main only silences the linker: the core always starts from _init in
 # start.S, placed at 0x40000000 by the linker script
