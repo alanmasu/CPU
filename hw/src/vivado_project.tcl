@@ -2164,6 +2164,7 @@ gpio[0]#qspi0_ss_b#qspi0_io[0]#qspi0_io[1]#qspi0_io[2]#qspi0_io[3]/HOLD_B#qspi0_
   connect_bd_net -net switches_0_1 [get_bd_ports switches_0] [get_bd_pins CPU_0/switches]
 
   # Create address segments
+  assign_bd_address -offset 0x40000000 -range 0x00010000 -target_address_space [get_bd_addr_spaces CPU_0/M_AXI] [get_bd_addr_segs CPU_0/s_axi_i/reg0] -force
   assign_bd_address -offset 0x40030000 -range 0x00010000 -target_address_space [get_bd_addr_spaces CPU_0/M_AXI] [get_bd_addr_segs axi_cdma_0/S_AXI_LITE/Reg] -force
   assign_bd_address -offset 0x00000000 -range 0x20000000 -target_address_space [get_bd_addr_spaces CPU_0/M_AXI] [get_bd_addr_segs processing_system7_0/S_AXI_GP0/GP0_DDR_LOWOCM] -force
   assign_bd_address -offset 0xE0000000 -range 0x00400000 -target_address_space [get_bd_addr_spaces CPU_0/M_AXI] [get_bd_addr_segs processing_system7_0/S_AXI_GP0/GP0_IOP] -force
@@ -2187,8 +2188,8 @@ gpio[0]#qspi0_ss_b#qspi0_io[0]#qspi0_io[1]#qspi0_io[2]#qspi0_io[3]/HOLD_B#qspi0_
 
   # Exclude Address Segments
   exclude_bd_addr_seg -offset 0x40010000 -range 0x00010000 -target_address_space [get_bd_addr_spaces CPU_0/M_AXI] [get_bd_addr_segs CPU_0/s_axi_d/reg0]
-  exclude_bd_addr_seg -offset 0x40000000 -range 0x00010000 -target_address_space [get_bd_addr_spaces CPU_0/M_AXI] [get_bd_addr_segs CPU_0/s_axi_i/reg0]
   exclude_bd_addr_seg -offset 0x43C00000 -range 0x00100000 -target_address_space [get_bd_addr_spaces CPU_0/M_AXI] [get_bd_addr_segs CPU_0/s_axi_btpu/reg0]
+  exclude_bd_addr_seg -offset 0x40000000 -range 0x40000000 -target_address_space [get_bd_addr_spaces CPU_0/M_AXI] [get_bd_addr_segs processing_system7_0/S_AXI_GP0/GP0_M_AXI_GP0]
   exclude_bd_addr_seg -offset 0x40030000 -range 0x00010000 -target_address_space [get_bd_addr_spaces axi_cdma_0/Data] [get_bd_addr_segs axi_cdma_0/S_AXI_LITE/Reg]
   exclude_bd_addr_seg -offset 0x40000000 -range 0x40000000 -target_address_space [get_bd_addr_spaces axi_cdma_0/Data] [get_bd_addr_segs processing_system7_0/S_AXI_GP0/GP0_M_AXI_GP0]
   exclude_bd_addr_seg -offset 0x40030000 -range 0x00010000 -target_address_space [get_bd_addr_spaces axi_cdma_0/Data_SG] [get_bd_addr_segs axi_cdma_0/S_AXI_LITE/Reg]
