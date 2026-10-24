@@ -17,6 +17,12 @@ LINKER  = linker_script.ld
 
 # Compiler and linker flags
 CFLAGS  = -nostdlib -nostartfiles -ffreestanding
+
+# SIMULATION=1, exported by riscv/tests/Makefile, selects the simulation
+# variant of the sources (#ifdef SIMULATION)
+ifeq ($(SIMULATION),1)
+CFLAGS += -DSIMULATION
+endif
 LDFLAGS = -T $(LINKER) -e main
 
 # Every .S file in src/
