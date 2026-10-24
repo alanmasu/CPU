@@ -20,6 +20,15 @@
 # A SystemVerilog testbench that imports a VHDL package can stop when the
 # library of the simulation is empty: run prj::regen_pkg, then prj::sim
 # again (see regen_pkg.tcl).
+# The simulation set is made the active one first: launch_simulation -simset
+# takes some settings, the include_dirs at least, from the active set and
+# not from the one it is given (found by the porting on 2021.2, 24/10/2026).
+# In batch the active set of before is restored at the end, also when the
+# simulation fails: the active set is saved in the .xpr, which prj::sync
+# compares, so leaving another one would look like a local change, and
+# after a pull that changes the snapshot 'make sync' would spend an export
+# to find out that it is not. In the GUI the simulated set stays active,
+# as when it is chosen by hand, because the simulation stays open.
 
 proc ::prj::sim {{simset ""}} {
     namespace upvar ::prj_priv project_dir project_dir
@@ -35,7 +44,12 @@ proc ::prj::sim {{simset ""}} {
     if {[llength $fileset] == 0 || [get_property FILESET_TYPE $fileset] ne "SimulationSrcs"} {
         error "$simset is not a simulation set"
     }
+    set previous [current_fileset -simset]
+    current_fileset -simset $fileset
     if {[catch {global_eval launch_simulation -simset $simset -mode behavioral} message]} {
+        if {$batch} {
+            current_fileset -simset $previous
+        }
         error "The simulation of $simset failed: $message\nIf the log says '<package>' is not declared, a SystemVerilog file imports a VHDL package: run prj::regen_pkg $simset (make regen-pkg SIMSET=$simset), then simulate again"
     }
 
@@ -44,6 +58,7 @@ proc ::prj::sim {{simset ""}} {
         return
     }
     global_eval close_sim -force
+    current_fileset -simset $previous
     set log [file join $project_dir $project_name.sim $simset behav xsim simulate.log]
     if {![file exists $log]} {
         error "$simset: no simulate.log in [file dirname $log]"
