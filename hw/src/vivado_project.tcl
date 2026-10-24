@@ -1305,6 +1305,7 @@ proc cr_bd_top_level { parentCell } {
   set_property -dict [ list \
    CONFIG.NUM_MI {2} \
    CONFIG.NUM_SI {3} \
+   CONFIG.STRATEGY {1} \
  ] $axi_mem_intercon
 
   # Create instance: processing_system7_0, and set properties
