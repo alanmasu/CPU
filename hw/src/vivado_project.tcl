@@ -56,12 +56,6 @@ proc checkRequiredFiles { origin_dir} {
  "[file normalize "$origin_dir/src/sim/wcfg/test_IF_behav.wcfg"]"\
  "[file normalize "$origin_dir/src/sim/common/slave_interface.vhd"]"\
  "[file normalize "$origin_dir/src/sim/bnn/testBlockMatrixMul.svh"]"\
- "[file normalize "$origin_dir/src/sim/bnn/testBTPUProgram.svh"]"\
- "[file normalize "$origin_dir/src/sim/bnn/test_SerialCodeProgram.svh"]"\
- "[file normalize "$origin_dir/src/sim/periph/test_TimerPWM.svh"]"\
- "[file normalize "$origin_dir/src/sim/periph/test_TimerCapture.svh"]"\
- "[file normalize "$origin_dir/src/sim/periph/test_TimerContinuous.svh"]"\
- "[file normalize "$origin_dir/src/sim/bnn/test_LoadStoreBTPUProgram.svh"]"\
  "[file normalize "$origin_dir/src/sim/cpu/test_CPU_wh_AXI.sv"]"\
  "[file normalize "$origin_dir/src/sim/cpu/test_GPIO_prog_on_CPU.sv"]"\
  "[file normalize "$origin_dir/src/sim/wcfg/test_CPU_behav_AXI.wcfg"]"\
@@ -209,13 +203,6 @@ set_property -name "sim.central_dir" -value "$proj_dir/${_xil_proj_name_}.ip_use
 set_property -name "sim.ip.auto_export_scripts" -value "1" -objects $obj
 set_property -name "simulator_language" -value "Mixed" -objects $obj
 set_property -name "target_language" -value "VHDL" -objects $obj
-set_property -name "webtalk.activehdl_export_sim" -value "294" -objects $obj
-set_property -name "webtalk.modelsim_export_sim" -value "294" -objects $obj
-set_property -name "webtalk.questa_export_sim" -value "294" -objects $obj
-set_property -name "webtalk.riviera_export_sim" -value "294" -objects $obj
-set_property -name "webtalk.vcs_export_sim" -value "294" -objects $obj
-set_property -name "webtalk.xsim_export_sim" -value "299" -objects $obj
-set_property -name "webtalk.xsim_launch_sim" -value "4212" -objects $obj
 set_property -name "xpm_libraries" -value "XPM_CDC XPM_FIFO XPM_MEMORY" -objects $obj
 
 # Create 'sources_1' fileset (if not found)
@@ -633,12 +620,6 @@ set obj [get_filesets CPU_sim]
 set files [list \
  [file normalize "${origin_dir}/src/sim/common/slave_interface.vhd"] \
  [file normalize "${origin_dir}/src/sim/bnn/testBlockMatrixMul.svh"] \
- [file normalize "${origin_dir}/src/sim/bnn/testBTPUProgram.svh"] \
- [file normalize "${origin_dir}/src/sim/bnn/test_SerialCodeProgram.svh"] \
- [file normalize "${origin_dir}/src/sim/periph/test_TimerPWM.svh"] \
- [file normalize "${origin_dir}/src/sim/periph/test_TimerCapture.svh"] \
- [file normalize "${origin_dir}/src/sim/periph/test_TimerContinuous.svh"] \
- [file normalize "${origin_dir}/src/sim/bnn/test_LoadStoreBTPUProgram.svh"] \
  [file normalize "${origin_dir}/src/sim/cpu/test_CPU_wh_AXI.sv"] \
  [file normalize "${origin_dir}/src/sim/cpu/test_GPIO_prog_on_CPU.sv"] \
  [file normalize "${origin_dir}/src/sim/wcfg/test_CPU_behav_AXI.wcfg"] \
@@ -652,36 +633,6 @@ set file_obj [get_files -of_objects [get_filesets CPU_sim] [list "*$file"]]
 set_property -name "file_type" -value "VHDL 2008" -objects $file_obj
 
 set file "$origin_dir/src/sim/bnn/testBlockMatrixMul.svh"
-set file [file normalize $file]
-set file_obj [get_files -of_objects [get_filesets CPU_sim] [list "*$file"]]
-set_property -name "file_type" -value "Verilog Header" -objects $file_obj
-
-set file "$origin_dir/src/sim/bnn/testBTPUProgram.svh"
-set file [file normalize $file]
-set file_obj [get_files -of_objects [get_filesets CPU_sim] [list "*$file"]]
-set_property -name "file_type" -value "Verilog Header" -objects $file_obj
-
-set file "$origin_dir/src/sim/bnn/test_SerialCodeProgram.svh"
-set file [file normalize $file]
-set file_obj [get_files -of_objects [get_filesets CPU_sim] [list "*$file"]]
-set_property -name "file_type" -value "Verilog Header" -objects $file_obj
-
-set file "$origin_dir/src/sim/periph/test_TimerPWM.svh"
-set file [file normalize $file]
-set file_obj [get_files -of_objects [get_filesets CPU_sim] [list "*$file"]]
-set_property -name "file_type" -value "Verilog Header" -objects $file_obj
-
-set file "$origin_dir/src/sim/periph/test_TimerCapture.svh"
-set file [file normalize $file]
-set file_obj [get_files -of_objects [get_filesets CPU_sim] [list "*$file"]]
-set_property -name "file_type" -value "Verilog Header" -objects $file_obj
-
-set file "$origin_dir/src/sim/periph/test_TimerContinuous.svh"
-set file [file normalize $file]
-set file_obj [get_files -of_objects [get_filesets CPU_sim] [list "*$file"]]
-set_property -name "file_type" -value "Verilog Header" -objects $file_obj
-
-set file "$origin_dir/src/sim/bnn/test_LoadStoreBTPUProgram.svh"
 set file [file normalize $file]
 set file_obj [get_files -of_objects [get_filesets CPU_sim] [list "*$file"]]
 set_property -name "file_type" -value "Verilog Header" -objects $file_obj
@@ -703,6 +654,7 @@ set_property -name "is_enabled" -value "0" -objects $file_obj
 
 # Set 'CPU_sim' fileset properties
 set obj [get_filesets CPU_sim]
+set_property -name "include_dirs" -value "[file normalize "$origin_dir/../out/riscv/test/sim"]" -objects $obj
 set_property -name "nl.mode" -value "funcsim" -objects $obj
 set_property -name "top" -value "test_CPU_wh_AXI" -objects $obj
 set_property -name "top_auto_set" -value "0" -objects $obj

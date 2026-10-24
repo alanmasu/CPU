@@ -246,13 +246,13 @@ logic [31:0] testAxiProgram [] = '{
     32'h0000006f
 };
 
-  `include "testBTPUProgram.svh"
+  `include "test_BTPU.svh"
   `include "testBlockMatrixMul.svh"
-  `include "test_SerialCodeProgram.svh"
+  `include "test_SerialCode.svh"
   `include "test_TimerContinuous.svh"
   `include "test_TimerCapture.svh"
-  `include "test_LoadStoreBTPUProgram.svh"
-  `include "test_TimerPWM.svh"
+  `include "test_LoadStoreBTPU.svh"
+  `include "test_PWM.svh"
 
   // Setup VIP agents
   initial begin
@@ -1951,14 +1951,14 @@ logic [31:0] testAxiProgram [] = '{
     int errorCount3 = 0;
     begin
       $display("\nTesting BTPU module");
-      `ifdef testBTPU_TEXT_ADDR
-        LOAD_PROGRAM(testBTPU_text, `testBTPU_TEXT_ADDR);
+      `ifdef test_BTPU_TEXT_ADDR
+        LOAD_PROGRAM(test_BTPU_text, `test_BTPU_TEXT_ADDR);
       `endif
-      `ifdef testBTPU_DATA_ADDR
-        LOAD_PROGRAM(testBTPU_data, `testBTPU_DATA_ADDR);
+      `ifdef test_BTPU_DATA_ADDR
+        LOAD_PROGRAM(test_BTPU_data, `test_BTPU_DATA_ADDR);
       `endif
-      `ifdef testBTPU_CONST_ADDR
-        LOAD_PROGRAM(testBTPU_const, `testBTPU_CONST_ADDR);
+      `ifdef test_BTPU_CONST_ADDR
+        LOAD_PROGRAM(test_BTPU_const, `test_BTPU_CONST_ADDR);
       `endif
       run = 1'b0; //Set RUN to 0 to stop the CPU
       writeCREG(32'b11); //Set CPU in RUN
@@ -2097,7 +2097,7 @@ logic [31:0] testAxiProgram [] = '{
       $display("CPU has trapped, starting test...");
 
       test_n = 1;
-      mtestADDR = `results_ADDR;
+      mtestADDR = `test_SerialCode_results_ADDR;
       read_memory(mtestADDR, data_readed);
       validating = 1'b1;
       //Test xnor32(0,0)
@@ -2266,9 +2266,9 @@ logic [31:0] testAxiProgram [] = '{
       #1;
       test_n = 3;
       // Check if result[0] contains the instruction count
-      read_memory(`resultsTestCapture_ADDR, data_readed);
+      read_memory(`test_TimerCapture_resultsTestCapture_ADDR, data_readed);
       timerValue[31:0] = data_readed;
-      read_memory(`resultsTestCapture_ADDR + 4, data_readed);
+      read_memory(`test_TimerCapture_resultsTestCapture_ADDR + 4, data_readed);
       timerValue[63:32] = data_readed;
       validating = 1'b1;
       if (timerValue == 6) begin
@@ -2284,8 +2284,8 @@ logic [31:0] testAxiProgram [] = '{
 
       test_n = 4;
       // Check if result[1] contains the timer value
-      read_memory(`resultsTestCapture_ADDR + 8, timerValue[31:0]);
-      read_memory(`resultsTestCapture_ADDR + 12, timerValue[63:32]);
+      read_memory(`test_TimerCapture_resultsTestCapture_ADDR + 8, timerValue[31:0]);
+      read_memory(`test_TimerCapture_resultsTestCapture_ADDR + 12, timerValue[63:32]);
       validating = 1'b1;
       if (timerValue == 6) begin
         testPassed = 1;
@@ -2328,21 +2328,21 @@ logic [31:0] testAxiProgram [] = '{
       #1;
 
       wait (instruction_tb == 32'h0000006f); // Wait for CPU traps
-      `ifdef value_ADDR
-        read_memory(`value_ADDR, data_readed);  
+      `ifdef test_LoadStoreBTPU_value_ADDR
+        read_memory(`test_LoadStoreBTPU_value_ADDR, data_readed);  
         validating = 1'b1;
         if (data_readed == 32'h12345678) begin
           testPassed = 1;
           message = "OK";
         end else begin
           testPassed = 0;
-          message = $sformatf("FAILED -> Memory[0x%08X] was", `value_ADDR);
+          message = $sformatf("FAILED -> Memory[0x%08X] was", `test_LoadStoreBTPU_value_ADDR);
         end
         addToLog(1, testPassed, message, data_readed);
         #1;
         validating = 1'b0;
       `else
-        $display("`value_ADDR is not defined, skipping Load/Store BTPU test");
+        $display("`test_LoadStoreBTPU_value_ADDR is not defined, skipping Load/Store BTPU test");
       `endif
 
 
@@ -2357,19 +2357,19 @@ logic [31:0] testAxiProgram [] = '{
     time t1;
     begin
       $display("\nTesting Timer PWM mode");
-      `ifdef test_TimerPWM_TEXT_ADDR
-        LOAD_PROGRAM(test_TimerPWM_text, `test_TimerPWM_TEXT_ADDR);
+      `ifdef test_PWM_TEXT_ADDR
+        LOAD_PROGRAM(test_PWM_text, `test_PWM_TEXT_ADDR);
       `endif
-      `ifdef test_TimerPWM_BSS_ADDR
-        for (int i = 0; i < `test_TimerPWM_BSS_SIZE / 4; i++) begin
-          write_memory(`test_TimerPWM_BSS_ADDR + i * 4, 0);
+      `ifdef test_PWM_BSS_ADDR
+        for (int i = 0; i < `test_PWM_BSS_SIZE / 4; i++) begin
+          write_memory(`test_PWM_BSS_ADDR + i * 4, 0);
         end
       `endif
-      `ifdef test_TimerPWM_DATA_ADDR
-        LOAD_PROGRAM(test_TimerPWM_data, `test_TimerPWM_DATA_ADDR);
+      `ifdef test_PWM_DATA_ADDR
+        LOAD_PROGRAM(test_PWM_data, `test_PWM_DATA_ADDR);
       `endif
-      `ifdef test_TimerPWM_CONST_ADDR
-        LOAD_PROGRAM(test_TimerPWM_const, `test_TimerPWM_CONST_ADDR);
+      `ifdef test_PWM_CONST_ADDR
+        LOAD_PROGRAM(test_PWM_const, `test_PWM_CONST_ADDR);
       `endif
 
       run = 1'b0; //Set RUN to 0 to stop the CPU
