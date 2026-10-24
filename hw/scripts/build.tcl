@@ -56,7 +56,17 @@ proc ::prj::build {target} {
 
     if {$target eq "xsa"} {
         write_hw_platform -fixed -include_bit -force -file [file join $out_dir $project_name.xsa]
-        puts "Hardware platform: out/hw/$project_name.xsa"
+        # The USR_ACCESS value of the bitstream inside the .xsa, read by
+        # 'make update-xsa' when it delivers the .xsa to sw/hw/: the commit
+        # it was built from.
+        set value_file [file join $out_dir $project_name.usr_access]
+        set saved [file join [get_property DIRECTORY $impl] usr_access.txt]
+        if {[file exists $saved]} {
+            file copy -force $saved $value_file
+        } else {
+            file delete $value_file
+        }
+        puts "Hardware platform: out/hw/$project_name.xsa (deliver it to the software with 'make update-xsa')"
     }
 }
 
@@ -111,4 +121,47 @@ proc ::prj_priv::usr_access_stale {impl} {
         return 1
     }
     return [expr {[read_text $saved] ne [usr_access_hex [usr_access_value $root_dir]]}]
+}
+
+# prj::get_commit: which build of the product is on the board. Reads
+# USR_ACCESS from the current device of the Hardware Manager (the FPGA, with
+# the target already open) and looks the commit up in git.
+proc ::prj::get_commit {} {
+    namespace upvar ::prj_priv root_dir root_dir
+
+    set device [global_eval current_hw_device]
+    if {$device eq ""} {
+        error "No hardware device: open the target in the Hardware Manager first"
+    }
+    global_eval refresh_hw_device $device
+    if {[catch {global_eval get_property REGISTER.USR_ACCESS $device} register]} {
+        error "$device has no USR_ACCESS: select the FPGA with current_hw_device"
+    }
+    # scan %x gives a negative number from 0x80000000 up: the mask keeps the
+    # shift from bringing in the sign.
+    scan $register %x value
+    set commit [format %07x [expr {($value >> 4) & 0xFFFFFFF}]]
+    set dirty [expr {$value & 1}]
+    puts "USR_ACCESS of $device: [usr_access_hex $value]"
+
+    if {$commit eq "0000000"} {
+        puts "  built outside a git repository"
+        return
+    }
+    if {$dirty} {
+        puts "  commit $commit, dirty: hw/ had uncommitted changes"
+    } else {
+        puts "  commit $commit"
+    }
+    set subject [git_output $root_dir log -1 --format=%s $commit]
+    if {$subject eq ""} {
+        puts "  not a commit of this repository"
+        return
+    }
+    set behind [git_output $root_dir rev-list --count $commit..HEAD]
+    if {$behind == 0} {
+        puts "  $commit $subject (HEAD)"
+    } else {
+        puts "  $commit $subject ($behind commits before HEAD)"
+    }
 }

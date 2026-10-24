@@ -1,13 +1,75 @@
-# prj::sim: run IP testbenches with xsim, directly on the RTL. No packaging
-# and no project needed, so it also runs with 'make sim' when the GUI is not
-# open. From the GUI, the simulation sets sim_<ip> do the same with waves.
-#   prj::sim            every IP with a sim/ directory
-#   prj::sim <name>     one IP
+# Two ways to simulate:
+#  - prj::sim, a simulation set of the project, launched by Vivado as with
+#    Run Simulation in the GUI: any simulation set, with its files, top,
+#    libraries and settings;
+#  - prj::sim_ip, the testbenches of the IPs compiled by hand with the xsim
+#    tools, without a project.
+
+# prj::sim: launch the behavioral simulation of a simulation set.
+#   prj::sim              the active simulation set
+#   prj::sim <simset>     another one
+# It runs for the time set in the simulation set (xsim.simulate.runtime;
+# "all" for the sets sim_<ip> made by prj::create). In batch (make sim) the
+# simulation is then closed and its log read: it fails when Vivado stops or
+# the log has a fatal error or an error, and a testbench that prints
+# "TEST PASSED" says so in the result. The log is read only after
+# close_sim, because Vivado 2021.2 writes it out only then (seen on
+# 23/10/2026). In the GUI the simulation stays open with its waves, and the
+# result is in the Tcl console; 'make sim GUI=1' opens the GUI and runs it
+# there.
+# A SystemVerilog testbench that imports a VHDL package can stop when the
+# library of the simulation is empty: run prj::regen_pkg, then prj::sim
+# again (see regen_pkg.tcl).
+
+proc ::prj::sim {{simset ""}} {
+    namespace upvar ::prj_priv project_dir project_dir
+    namespace upvar ::prj_priv batch batch
+    variable project_name
+
+    check_vivado_version
+    open_project_if_needed
+    if {$simset eq ""} {
+        set simset [current_fileset -simset]
+    }
+    set fileset [get_filesets -quiet $simset]
+    if {[llength $fileset] == 0 || [get_property FILESET_TYPE $fileset] ne "SimulationSrcs"} {
+        error "$simset is not a simulation set"
+    }
+    if {[catch {global_eval launch_simulation -simset $simset -mode behavioral} message]} {
+        error "The simulation of $simset failed: $message\nIf the log says '<package>' is not declared, a SystemVerilog file imports a VHDL package: run prj::regen_pkg $simset (make regen-pkg SIMSET=$simset), then simulate again"
+    }
+
+    if {!$batch} {
+        puts "$simset: simulation open in the GUI, the result is in the Tcl console"
+        return
+    }
+    global_eval close_sim -force
+    set log [file join $project_dir $project_name.sim $simset behav xsim simulate.log]
+    if {![file exists $log]} {
+        error "$simset: no simulate.log in [file dirname $log]"
+    }
+    set text [read_text $log]
+    if {[regexp -nocase -line {^(Fatal|ERROR):.*$} $text line]} {
+        error "$simset: TEST FAILED: $line (see $log)"
+    }
+    if {[string first "TEST PASSED" $text] >= 0} {
+        puts "$simset: TEST PASSED"
+    } else {
+        puts "$simset: finished without errors (the testbench prints no TEST PASSED; see $log)"
+    }
+}
+
+# prj::sim_ip: run IP testbenches with xsim, directly on the RTL. No
+# packaging and no project needed, so it also runs right after a clone, in
+# batch. The simulation sets sim_<ip> made by prj::create hold the same
+# files, for prj::sim and the GUI.
+#   prj::sim_ip            every IP with a sim/ directory
+#   prj::sim_ip <name>     one IP
 # The IP is hw/ip/<name>/ (stage B) or hw/src/hdl/<name>/ (stage A). The top
 # testbench is sim/<name>_tb: it stops at the first failed assertion and
 # prints "TEST PASSED" at the end.
 
-proc ::prj::sim {{target all}} {
+proc ::prj::sim_ip {{target all}} {
     set dirs {}
     foreach dir [ip_sim_dirs] {
         if {$target eq "all" || [file tail $dir] eq $target} {

@@ -12,6 +12,8 @@
 #  - the version (MAJOR.MINOR), only when a new one is given;
 #  - core_revision + 1, so that Vivado offers the upgrade of the instances;
 #  - the hidden parameters VERSION_* and BUILD_*, if the RTL has them.
+#    VERSION_DEV is 1, a development build, unless release is 1: prj::release
+#    packages with release 1 once the RTL is committed.
 
 # Output of a git command in dir, or "" when it fails (for example outside a
 # git repository).
@@ -22,7 +24,7 @@ proc ::prj_priv::git_output {dir args} {
     return [string trim $out]
 }
 
-proc ::prj::package_ip {name {new_version ""}} {
+proc ::prj::package_ip {name {new_version ""} {release 0}} {
     namespace upvar ::prj_priv hw_dir hw_dir
     namespace upvar ::prj_priv edit_dir edit_dir
     variable part
@@ -94,12 +96,16 @@ proc ::prj::package_ip {name {new_version ""}} {
         set dirty 0
     }
 
-    # VERSION_DEV is always 1 for now: release builds will come with the
-    # release script. An IP without these parameters is left alone.
+    # An IP without these parameters is left alone.
+    if {$release} {
+        set dev 0
+    } else {
+        set dev 1
+    }
     set hidden [dict create \
         VERSION_MAJOR $major \
         VERSION_MINOR $minor \
-        VERSION_DEV   1 \
+        VERSION_DEV   $dev \
         BUILD_DIRTY   $dirty \
         BUILD_ID      0x$build_id]
     dict for {param value} $hidden {
@@ -143,5 +149,5 @@ proc ::prj::package_ip {name {new_version ""}} {
     if {[project_is_open]} {
         close_project
     }
-    puts "Packaged $name $version (core revision $revision, build $build_id, dirty $dirty)"
+    puts "Packaged $name $version (core revision $revision, build $build_id, dirty $dirty, dev $dev)"
 }

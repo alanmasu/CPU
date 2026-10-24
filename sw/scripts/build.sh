@@ -59,7 +59,7 @@ die() {
 }
 
 # The only file matching a glob in a directory, for example the .xsa in
-# out/hw/. If there is none, the glob stays literal and the -f test fails.
+# sw/hw/. If there is none, the glob stays literal and the -f test fails.
 find_one() {
     local files=("$1"/$2)
     if [ ! -f "${files[0]}" ]; then
@@ -87,12 +87,23 @@ is_up_to_date() {
 
 # hsi extracts the content of the .xsa it opens (ps7_init, bitstream, .hwh)
 # into the directory of the .xsa: give it a copy in out/sw/xsa/, so that
-# out/hw/ keeps only what Vivado wrote.
+# sw/hw/ keeps only the delivered .xsa.
 xsa_copy() {
     local xsa=$1
     mkdir -p out/sw/xsa
     cp "$xsa" out/sw/xsa/
     echo "$ROOT/out/sw/xsa/$(basename "$xsa")"
+}
+
+# The bitstream of BOOT.bin comes from the delivered .xsa, which holds it
+# (an .xsa is a zip), not from out/hw/: the software uses only the hardware
+# of sw/hw/, so that FSBL, device tree and bitstream always match.
+xsa_bitstream() {
+    local xsa=$1
+    rm -rf out/sw/bit
+    mkdir -p out/sw/bit
+    unzip -q -j -o "$xsa" '*.bit' -d out/sw/bit
+    find_one out/sw/bit '*.bit' "$xsa holds no bitstream: write it with 'make xsa'"
 }
 
 # A PS without any UART gives Linux no serial console: the typical sign of a
@@ -182,7 +193,7 @@ step_fsbl() {
     header "FSBL"
     check_versions
     be=$(backend)
-    xsa=$(find_one out/hw '*.xsa' "run 'make xsa' first")
+    xsa=$(find_one sw/hw '*.xsa' "deliver the hardware with 'make update-xsa', after 'make xsa'")
     if is_up_to_date out/sw/fsbl/fsbl.elf "$xsa" sw/scripts/fsbl-xsct.tcl sw/scripts/fsbl-vitis.py sw/scripts/build.sh; then
         echo "FSBL up to date"
         return
@@ -229,7 +240,7 @@ step_dtb() {
     header "Device tree"
     check_versions
     be=$(backend)
-    xsa=$(find_one out/hw '*.xsa' "run 'make xsa' first")
+    xsa=$(find_one sw/hw '*.xsa' "deliver the hardware with 'make update-xsa', after 'make xsa'")
     mkdir -p out/sd-card
     if is_up_to_date out/sw/dt/devicetree.dtb "$xsa" sw/dts/system-user.dtsi sw/scripts/devicetree-xsct.tcl sw/scripts/build.sh sw/config.sh; then
         echo "Device tree up to date"
@@ -285,7 +296,7 @@ step_uboot() {
 step_boot() {
     local bit
     header "BOOT.bin"
-    bit=$(find_one out/hw '*.bit' "run 'make bitstream' first")
+    bit=$(xsa_bitstream "$(find_one sw/hw '*.xsa' "deliver the hardware with 'make update-xsa', after 'make xsa'")")
     if [ ! -f out/sw/fsbl/fsbl.elf ]; then
         die "no FSBL: run 'make linux-fsbl' first"
     fi

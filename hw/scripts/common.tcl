@@ -15,6 +15,11 @@ namespace eval ::prj_priv {
     variable edit_dir    [file join $root_dir out ip_edit]
     variable pin_file    [file join $hw_dir VIVADO_VERSION]
     variable stamp_file  [file join $project_dir .exported]
+    variable snapshot_copy [file join $project_dir .snapshot]
+    variable baseline_dir  [file join $project_dir .baseline]
+    variable backup_dir    [file join $hw_dir vivado.bak]
+    # 1 when the command runs in a batch Vivado (set by run.tcl), 0 in the GUI.
+    variable batch 0
     variable project_tcl [file join $hw_dir src vivado_project.tcl]
     variable hdl_exts    {.v .sv .vh .svh .vhd .vhdl}
 }

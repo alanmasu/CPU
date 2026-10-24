@@ -10,7 +10,8 @@
 # Called by 'make vitis' and 'make vitis-build'. Only part of the workspace is
 # committed (see .gitignore): after a clone the projects are not imported,
 # the platforms have no copy of the .xsa and the BSPs no sources; after
-# 'make xsa' the copy of the .xsa in the platforms is old. The checks below
+# 'make update-xsa' the copy of the .xsa in the platforms is old. The
+# hardware comes only from sw/hw/, the .xsa delivered by 'make update-xsa'. The checks below
 # take a fraction of a second and need no Vitis tool: xsct, which is slow to
 # start, runs only when something has to be repaired, or for a build. The
 # repairs and the build are in sw/scripts/vitis-xsct.tcl.
@@ -73,7 +74,7 @@ gui_is_open() {
 }
 
 # True when the workspace needs a repair by xsct: projects not imported, a
-# platform whose copy of the .xsa is missing or differs from out/hw/, a BSP
+# platform whose copy of the .xsa is missing or differs from sw/hw/, a BSP
 # without its sources. A workspace without platforms needs nothing.
 needs_update() {
     local spr
@@ -84,7 +85,7 @@ needs_update() {
     for spr in "$WS"/*/platform.spr; do
         found=1
         dir=$(dirname "$spr")
-        for xsa in out/hw/*.xsa; do
+        for xsa in sw/hw/*.xsa; do
             if ! cmp -s "$xsa" "$dir/hw/$(basename "$xsa")"; then
                 return 0
             fi
@@ -115,7 +116,7 @@ run_xsct() {
 
 # Vitis Unified: true when the workspace needs a repair: no _ide/version.ini
 # (a fresh clone), a platform whose copy of the .xsa is missing or differs
-# from out/hw/, a BSP without its sources. A workspace without platforms
+# from sw/hw/, a BSP without its sources. A workspace without platforms
 # needs nothing. The platforms are
 # the components whose vitis-comp.json has "type": "PLATFORM"; each BSP is a
 # directory with a bsp.yaml.
@@ -132,7 +133,7 @@ unified_needs_update() {
             return 0
         fi
         dir=$(dirname "$comp")
-        for xsa in out/hw/*.xsa; do
+        for xsa in sw/hw/*.xsa; do
             if ! cmp -s "$xsa" "$dir/hw/$(basename "$xsa")"; then
                 return 0
             fi

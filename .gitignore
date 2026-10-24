@@ -1,5 +1,7 @@
 # Generated: always recreated by 'make project' and the build targets
 /hw/vivado/
+# The old project moved aside by make sync FORCE=1 (see hw/scripts/sync.tcl)
+/hw/vivado.bak/
 /out/
 /work/
 # Personal notes and temporary outputs, never committed

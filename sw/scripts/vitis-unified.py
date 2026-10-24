@@ -7,7 +7,7 @@
 #   VITIS_ROOT  root of the product
 #   VITIS_MODE  update  repair what is missing, without building:
 #                       - a platform whose copy of the .xsa is missing (it is
-#                         not committed) or differs from out/hw/ (after
+#                         not committed) or differs from sw/hw/ (after
 #                         'make xsa'): update its hardware, and delete _ide/
 #                         of its applications, which would otherwise keep the
 #                         old bitstream;
@@ -30,6 +30,7 @@ import os
 import shutil
 import subprocess
 import sys
+import zipfile
 
 import vitis
 
@@ -77,9 +78,10 @@ if not platforms:
     step("no platform in " + ws + " yet: nothing to do, create one in the Vitis GUI")
     sys.exit(0)
 
-found = glob.glob(os.path.join(root, "out", "hw", "*.xsa"))
+# The hardware comes only from sw/hw/, the .xsa delivered by 'make update-xsa'.
+found = glob.glob(os.path.join(root, "sw", "hw", "*.xsa"))
 if len(found) != 1:
-    print("vitis: ERROR: expected one .xsa in out/hw/, found %d: run 'make xsa' first" % len(found), file=sys.stderr)
+    print("vitis: ERROR: expected one .xsa in sw/hw/, found %d: deliver the hardware with 'make update-xsa', after 'make xsa'" % len(found), file=sys.stderr)
     sys.exit(1)
 xsa = found[0]
 
@@ -163,9 +165,18 @@ if boot_app == "":
     boot_app = list(apps)[0]
 if boot_app not in apps:
     fail("VITIS_BOOT_APP=" + boot_app + " is not an application of the workspace")
-bits = glob.glob(os.path.join(root, "out", "hw", "*.bit"))
-if len(bits) != 1:
-    fail("expected one .bit in out/hw/, found %d: run 'make xsa' first" % len(bits))
+# The bitstream comes from the delivered .xsa, which holds it (an .xsa is a
+# zip), so that FSBL, application and bitstream match the same hardware.
+bit_dir = os.path.join(root, "out", "vitis", "bit")
+shutil.rmtree(bit_dir, ignore_errors=True)
+os.makedirs(bit_dir)
+with zipfile.ZipFile(xsa) as archive:
+    names = [n for n in archive.namelist() if n.endswith(".bit")]
+    if len(names) != 1:
+        fail("expected one .bit inside %s, found %d: write it with 'make xsa'" % (xsa, len(names)))
+    bits = [os.path.join(bit_dir, os.path.basename(names[0]))]
+    with open(bits[0], "wb") as f:
+        f.write(archive.read(names[0]))
 platform_name = apps[boot_app]["platform"]
 out_dir = os.path.join(root, "out", "vitis")
 os.makedirs(out_dir, exist_ok=True)

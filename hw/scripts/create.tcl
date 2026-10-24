@@ -49,6 +49,7 @@ proc ::prj::create {} {
         puts "Pinned the project to Vivado [version -short] in hw/VIVADO_VERSION: commit this file"
     }
     mark_exported
+    save_baseline
 }
 
 # The snapshot is a script written by write_project_tcl. It reads the
@@ -99,13 +100,18 @@ proc ::prj_priv::create_from_config {} {
 # Files under hw/src/ that are not in the project yet. A stage-A IP lives in
 # src/hdl/<ip>/, with testbenches in src/hdl/<ip>/sim/ that must not end up
 # among the design sources. Catalog IPs outside a block design live in
-# src/ip/<ip>/<ip>.xci.
+# src/ip/<ip>/<ip>.xci. The headers under src/sim/ (.vh, .svh) are not added
+# to sim_1: a testbench finds them through its `include, relative to its own
+# directory, and in sim_1 they only crowd a simulation set that does not use
+# them (seen in the ported CPU project, 12/10/2026). A header that a
+# simulation set needs is added to that set in the GUI, and the snapshot
+# keeps it.
 proc ::prj_priv::add_new_sources {} {
     variable hw_dir
     variable hdl_exts
     set sets [dict create \
         sources_1 [find_files [file join $hw_dir src hdl] $hdl_exts sim] \
-        sim_1     [find_files [file join $hw_dir src sim] $hdl_exts] \
+        sim_1     [find_files [file join $hw_dir src sim] {.v .sv .vhd .vhdl}] \
         constrs_1 [find_files [file join $hw_dir src constr] {.xdc}]]
     dict lappend sets sources_1 {*}[glob -nocomplain -directory [file join $hw_dir src ip] */*.xci]
     dict for {fileset files} $sets {

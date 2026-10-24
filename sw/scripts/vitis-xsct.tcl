@@ -3,7 +3,7 @@
 #   update  repair what is missing, without building:
 #           - projects not imported yet (a fresh clone has no .metadata/);
 #           - a platform whose copy of the .xsa is missing (it is not
-#             committed) or differs from out/hw/ (after 'make xsa'): update
+#             committed) or differs from sw/hw/ (after 'make update-xsa'): update
 #             its hardware, and delete _ide/ of the applications, which would
 #             otherwise keep the old bitstream;
 #           - BSP sources missing (they are not committed): regenerate them
@@ -21,11 +21,12 @@ proc vitis_step {text} {
     puts stderr "vitis: $text"
 }
 
-# The .xsa of the project: exactly one in out/hw/.
+# The .xsa of the project: exactly one in sw/hw/, delivered by
+# 'make update-xsa'.
 proc vitis_xsa {root} {
-    set found [glob -nocomplain -directory [file join $root out hw] *.xsa]
+    set found [glob -nocomplain -directory [file join $root sw hw] *.xsa]
     if {[llength $found] != 1} {
-        error "expected one .xsa in out/hw/, found [llength $found]: run 'make xsa' first"
+        error "expected one .xsa in sw/hw/, found [llength $found]: deliver the hardware with 'make update-xsa', after 'make xsa'"
     }
     return [lindex $found 0]
 }

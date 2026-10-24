@@ -2,12 +2,16 @@
 #  - this Vivado matches hw/VIVADO_VERSION
 #  - no block design has changes that were not exported
 #  - no committed file contains an absolute path of this machine
-# It also warns when the namespace prj holds commands that are not of the
-# template: procs of Vivado loaded while a command of prj was running.
+# It also warns, without failing:
+#  - about local IPs not released, or whose component.xml does not match
+#    their committed RTL (see prj::release);
+#  - when the namespace prj holds commands that are not of the template:
+#    procs of Vivado loaded while a command of prj was running.
 
 proc ::prj::check {} {
     namespace upvar ::prj_priv root_dir root_dir
     namespace upvar ::prj_priv project_dir project_dir
+    namespace upvar ::prj_priv snapshot_copy snapshot_copy
 
     check_vivado_version
     set problems 0
@@ -17,6 +21,11 @@ proc ::prj::check {} {
         if {[llength $stale] > 0} {
             puts "NOT EXPORTED: block designs changed after the last export: $stale (run prj::export)"
             incr problems
+        }
+        # Normal after a pull: not a problem for a commit, but the project
+        # is not the one in git.
+        if {[file exists $snapshot_copy] && [snapshot_changed]} {
+            puts "SNAPSHOT CHANGED: hw/src/vivado_project.tcl is not the snapshot this project matches; make vivado, synth, bitstream or xsa create the project again from it (see prj::sync)"
         }
     }
 
@@ -45,9 +54,21 @@ proc ::prj::check {} {
         }
     }
 
+    set xsa_state [delivered_xsa_state]
+    if {$xsa_state ne ""} {
+        puts "XSA: $xsa_state: run 'make xsa', then 'make update-xsa'"
+    }
+
+    foreach name [local_ips] {
+        set ip_problems [ip_release_state $name]
+        if {[llength $ip_problems] > 0} {
+            puts "IP $name [component_param [file join $root_dir hw ip $name component.xml] version]: [join $ip_problems {, }]: run make ip-release IP=$name when the RTL is ready"
+        }
+    }
+
     set foreign {}
     foreach command [lsort [info commands ::prj::*]] {
-        if {[namespace tail $command] ni {build check create export help ip package_ip regen_pkg sim}} {
+        if {[namespace tail $command] ni {build check create export help ip get_commit package_ip regen_pkg release sim sim_ip sync}} {
             lappend foreign [namespace tail $command]
         }
     }
@@ -59,4 +80,34 @@ proc ::prj::check {} {
         error "$problems problem(s) found"
     }
     puts "All checks passed"
+}
+
+# The .xsa delivered to the software in sw/hw/ (make update-xsa), against
+# the commits: "" when it is fine or there is none, otherwise what is wrong.
+# Its commit comes from <project>.usr_access, the USR_ACCESS value of its
+# bitstream. Older than hw/ means that a commit after it changed hw/ (the
+# scripts of the template left out: they do not change the hardware).
+proc ::prj_priv::delivered_xsa_state {} {
+    variable root_dir
+    set xsas [glob -nocomplain -directory [file join $root_dir sw hw] *.xsa]
+    if {[llength $xsas] == 0} {
+        return ""
+    }
+    set value_file "[file rootname [lindex $xsas 0]].usr_access"
+    if {![file exists $value_file]} {
+        return "sw/hw/[file tail [lindex $xsas 0]] has no commit (delivered with FORCE=1)"
+    }
+    scan [read_text $value_file] %x value
+    set commit [format %07x [expr {($value >> 4) & 0xFFFFFFF}]]
+    set problems {}
+    if {$value & 1} {
+        lappend problems "built from commit $commit with changes in hw/ that were not committed"
+    }
+    set last [git_output $root_dir log -1 --format=%h -- hw :(exclude)hw/scripts]
+    # merge-base exits with 1 when the first commit is not an ancestor of
+    # the second, and exec takes that for an error.
+    if {$last ne "" && [catch {exec git -C $root_dir merge-base --is-ancestor $last $commit}]} {
+        lappend problems "built from commit $commit, older than the last change to hw/ ($last)"
+    }
+    return [join $problems "; "]
 }
