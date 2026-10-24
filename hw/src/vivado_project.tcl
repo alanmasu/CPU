@@ -2199,85 +2199,84 @@ gpio[0]#qspi0_ss_b#qspi0_io[0]#qspi0_io[1]#qspi0_io[2]#qspi0_io[3]/HOLD_B#qspi0_
   # Perform GUI Layout
   regenerate_bd_layout -layout_string {
    "ActiveEmotionalView":"Default View",
-   "Default View_ScaleFactor":"0.5368",
-   "Default View_TopLeft":"-201,-99",
+   "Default View_ScaleFactor":"0.558972",
+   "Default View_TopLeft":"-150,-79",
    "ExpandedHierarchyInLayout":"",
    "guistr":"# # String gsaved with Nlview 7.0r4  2019-12-20 bk=1.5203 VDI=41 GEI=36 GUI=JA:10.0 TLS
 #  -string -flagsOSRD
-preplace port DDR -pg 1 -lvl 6 -x 2010 -y 130 -defaultsOSRD
-preplace port FIXED_IO -pg 1 -lvl 6 -x 2010 -y 160 -defaultsOSRD
-preplace port port-id_SCL_0 -pg 1 -lvl 6 -x 2010 -y 520 -defaultsOSRD
-preplace port port-id_SDA_0 -pg 1 -lvl 6 -x 2010 -y 490 -defaultsOSRD
-preplace port port-id_btn_center_0 -pg 1 -lvl 0 -x -50 -y 710 -defaultsOSRD
-preplace port port-id_btn_down_0 -pg 1 -lvl 0 -x -50 -y 620 -defaultsOSRD
-preplace port port-id_btn_left_0 -pg 1 -lvl 0 -x -50 -y 650 -defaultsOSRD
-preplace port port-id_btn_right_0 -pg 1 -lvl 0 -x -50 -y 680 -defaultsOSRD
-preplace port port-id_btn_up_0 -pg 1 -lvl 0 -x -50 -y 590 -defaultsOSRD
-preplace port port-id_oled_dc_0 -pg 1 -lvl 6 -x 2010 -y 670 -defaultsOSRD
-preplace port port-id_oled_res_0 -pg 1 -lvl 6 -x 2010 -y 700 -defaultsOSRD
-preplace port port-id_oled_sclk_0 -pg 1 -lvl 6 -x 2010 -y 640 -defaultsOSRD
-preplace port port-id_oled_sdin_0 -pg 1 -lvl 6 -x 2010 -y 610 -defaultsOSRD
-preplace port port-id_oled_select0_0 -pg 1 -lvl 0 -x -50 -y 770 -defaultsOSRD
-preplace port port-id_oled_vbat_0 -pg 1 -lvl 6 -x 2010 -y 730 -defaultsOSRD
-preplace port port-id_oled_vdd_0 -pg 1 -lvl 6 -x 2010 -y 760 -defaultsOSRD
-preplace port port-id_run_in_0 -pg 1 -lvl 0 -x -50 -y 560 -defaultsOSRD
-preplace port port-id_run_out_0 -pg 1 -lvl 6 -x 2010 -y 550 -defaultsOSRD
-preplace portBus GPIO_0 -pg 1 -lvl 6 -x 2010 -y 460 -defaultsOSRD
-preplace portBus leds_0 -pg 1 -lvl 6 -x 2010 -y 580 -defaultsOSRD
-preplace portBus switches_0 -pg 1 -lvl 0 -x -50 -y 740 -defaultsOSRD
-preplace inst axi_cdma_0 -pg 1 -lvl 3 -x 900 -y 400 -defaultsOSRD
-preplace inst axi_mem_intercon -pg 1 -lvl 4 -x 1270 -y 220 -defaultsOSRD
-preplace inst processing_system7_0 -pg 1 -lvl 5 -x 1670 -y 230 -defaultsOSRD
-preplace inst ps7_0_axi_periph -pg 1 -lvl 2 -x 560 -y 270 -defaultsOSRD
-preplace inst rst_ps7_0_100M -pg 1 -lvl 1 -x 200 -y 120 -defaultsOSRD
-preplace inst CPU_0 -pg 1 -lvl 5 -x 1670 -y 650 -defaultsOSRD
-preplace netloc CPU_0_leds 1 5 1 1950J 580n
-preplace netloc CPU_0_oled_dc 1 5 1 1980J 670n
-preplace netloc CPU_0_oled_res 1 5 1 1990J 700n
-preplace netloc CPU_0_oled_sclk 1 5 1 1970J 640n
-preplace netloc CPU_0_oled_sdin 1 5 1 1960J 610n
-preplace netloc CPU_0_oled_vbat 1 5 1 1930J 730n
-preplace netloc CPU_0_oled_vdd 1 5 1 NJ 760
-preplace netloc CPU_0_run_out 1 5 1 1940J 550n
-preplace netloc Net 1 5 1 1910J 460n
-preplace netloc Net1 1 5 1 1920J 490n
-preplace netloc Net2 1 5 1 1930J 520n
-preplace netloc axi_cdma_0_cdma_introut 1 3 2 1040 790 NJ
-preplace netloc btn_center_0_1 1 0 5 NJ 710 NJ 710 NJ 710 NJ 710 1420J
-preplace netloc btn_down_0_1 1 0 5 NJ 620 NJ 620 NJ 620 NJ 620 1450J
-preplace netloc btn_left_0_1 1 0 5 NJ 650 NJ 650 NJ 650 NJ 650 1440J
-preplace netloc btn_right_0_1 1 0 5 NJ 680 NJ 680 NJ 680 NJ 680 1430J
-preplace netloc btn_up_0_1 1 0 5 NJ 590 NJ 590 NJ 590 NJ 590 1460J
-preplace netloc oled_select0_0_1 1 0 5 NJ 770 NJ 770 NJ 770 NJ 770 NJ
-preplace netloc processing_system7_0_FCLK_CLK0 1 0 6 -30 20 390 40 750 140 1120 430 1460 380 1890
-preplace netloc processing_system7_0_FCLK_CLK1 1 4 2 1470 390 1880
-preplace netloc processing_system7_0_FCLK_RESET0_N 1 0 6 -30 490 NJ 490 NJ 490 1120J 450 NJ 450 1870
-preplace netloc rst_ps7_0_100M_peripheral_aresetn 1 1 4 380 50 730 160 1090 610 NJ
-preplace netloc run_in_0_1 1 0 5 -30J 630 NJ 630 NJ 630 NJ 630 NJ
-preplace netloc switches_0_1 1 0 5 NJ 740 NJ 740 NJ 740 NJ 740 1450J
-preplace netloc CPU_0_M_AXI 1 3 3 1120 20 NJ 20 1900
-preplace netloc axi_cdma_0_M_AXI 1 3 1 1060 100n
-preplace netloc axi_cdma_0_M_AXI_SG 1 3 1 1100 120n
+preplace port DDR -pg 1 -lvl 6 -x 1950 -y 130 -defaultsOSRD
+preplace port FIXED_IO -pg 1 -lvl 6 -x 1950 -y 160 -defaultsOSRD
+preplace port port-id_SCL_0 -pg 1 -lvl 6 -x 1950 -y 570 -defaultsOSRD
+preplace port port-id_SDA_0 -pg 1 -lvl 6 -x 1950 -y 540 -defaultsOSRD
+preplace port port-id_btn_center_0 -pg 1 -lvl 0 -x 0 -y 740 -defaultsOSRD
+preplace port port-id_btn_down_0 -pg 1 -lvl 0 -x 0 -y 650 -defaultsOSRD
+preplace port port-id_btn_left_0 -pg 1 -lvl 0 -x 0 -y 680 -defaultsOSRD
+preplace port port-id_btn_right_0 -pg 1 -lvl 0 -x 0 -y 710 -defaultsOSRD
+preplace port port-id_btn_up_0 -pg 1 -lvl 0 -x 0 -y 620 -defaultsOSRD
+preplace port port-id_oled_dc_0 -pg 1 -lvl 6 -x 1950 -y 720 -defaultsOSRD
+preplace port port-id_oled_res_0 -pg 1 -lvl 6 -x 1950 -y 750 -defaultsOSRD
+preplace port port-id_oled_sclk_0 -pg 1 -lvl 6 -x 1950 -y 690 -defaultsOSRD
+preplace port port-id_oled_sdin_0 -pg 1 -lvl 6 -x 1950 -y 660 -defaultsOSRD
+preplace port port-id_oled_select0_0 -pg 1 -lvl 0 -x 0 -y 800 -defaultsOSRD
+preplace port port-id_oled_vbat_0 -pg 1 -lvl 6 -x 1950 -y 780 -defaultsOSRD
+preplace port port-id_oled_vdd_0 -pg 1 -lvl 6 -x 1950 -y 810 -defaultsOSRD
+preplace port port-id_run_in_0 -pg 1 -lvl 0 -x 0 -y 590 -defaultsOSRD
+preplace port port-id_run_out_0 -pg 1 -lvl 6 -x 1950 -y 600 -defaultsOSRD
+preplace portBus GPIO_0 -pg 1 -lvl 6 -x 1950 -y 510 -defaultsOSRD
+preplace portBus leds_0 -pg 1 -lvl 6 -x 1950 -y 630 -defaultsOSRD
+preplace portBus switches_0 -pg 1 -lvl 0 -x 0 -y 770 -defaultsOSRD
+preplace inst CPU_0 -pg 1 -lvl 5 -x 1660 -y 650 -defaultsOSRD
+preplace inst axi_cdma_0 -pg 1 -lvl 3 -x 910 -y 400 -defaultsOSRD
+preplace inst axi_mem_intercon -pg 1 -lvl 4 -x 1280 -y 220 -defaultsOSRD
+preplace inst processing_system7_0 -pg 1 -lvl 5 -x 1660 -y 230 -defaultsOSRD
+preplace inst ps7_0_axi_periph -pg 1 -lvl 2 -x 570 -y 270 -defaultsOSRD
+preplace inst rst_ps7_0_100M -pg 1 -lvl 1 -x 210 -y 120 -defaultsOSRD
+preplace netloc CPU_0_leds 1 5 1 1890J 630n
+preplace netloc CPU_0_oled_dc 1 5 1 1920J 700n
+preplace netloc CPU_0_oled_res 1 5 1 1890J 720n
+preplace netloc CPU_0_oled_sclk 1 5 1 1900J 680n
+preplace netloc CPU_0_oled_sdin 1 5 1 NJ 660
+preplace netloc CPU_0_oled_vbat 1 5 1 1870J 740n
+preplace netloc CPU_0_oled_vdd 1 5 1 1860J 760n
+preplace netloc CPU_0_run_out 1 5 1 1930J 600n
+preplace netloc Net 1 5 1 1900J 510n
+preplace netloc Net1 1 5 1 1910J 540n
+preplace netloc Net2 1 5 1 1920J 570n
+preplace netloc axi_cdma_0_cdma_introut 1 3 2 1050 790 NJ
+preplace netloc btn_center_0_1 1 0 5 20J 730 NJ 730 NJ 730 NJ 730 NJ
+preplace netloc btn_down_0_1 1 0 5 NJ 650 NJ 650 NJ 650 NJ 650 1430J
+preplace netloc btn_left_0_1 1 0 5 NJ 680 NJ 680 NJ 680 NJ 680 1450J
+preplace netloc btn_right_0_1 1 0 5 NJ 710 NJ 710 NJ 710 NJ 710 NJ
+preplace netloc btn_up_0_1 1 0 5 NJ 620 NJ 620 NJ 620 NJ 620 1440J
+preplace netloc oled_select0_0_1 1 0 5 30J 770 NJ 770 NJ 770 NJ 770 NJ
+preplace netloc processing_system7_0_FCLK_CLK0 1 0 6 20 20 400 40 760 140 1130 430 1450 380 1880
+preplace netloc processing_system7_0_FCLK_CLK1 1 4 2 1460 390 1870
+preplace netloc processing_system7_0_FCLK_RESET0_N 1 0 6 20 490 NJ 490 NJ 490 1130J 450 NJ 450 1860
+preplace netloc rst_ps7_0_100M_peripheral_aresetn 1 1 4 390 50 740 160 1100 610 NJ
+preplace netloc run_in_0_1 1 0 5 NJ 590 NJ 590 NJ 590 NJ 590 1450J
+preplace netloc switches_0_1 1 0 5 20J 750 NJ 750 NJ 750 NJ 750 NJ
+preplace netloc CPU_0_M_AXI 1 3 3 1130 20 NJ 20 1890
+preplace netloc axi_cdma_0_M_AXI 1 3 1 1070 100n
+preplace netloc axi_cdma_0_M_AXI_SG 1 3 1 1110 120n
 preplace netloc axi_mem_intercon_M00_AXI 1 4 1 N 210
-preplace netloc axi_mem_intercon_M01_AXI 1 1 4 410 60 NJ 60 1110J 420 1450
-preplace netloc processing_system7_0_DDR 1 5 1 1910J 130n
+preplace netloc axi_mem_intercon_M01_AXI 1 1 4 420 60 NJ 60 1120J 420 1440
+preplace netloc processing_system7_0_DDR 1 5 1 1900J 130n
 preplace netloc processing_system7_0_FIXED_IO 1 5 1 NJ 160
-preplace netloc processing_system7_0_M_AXI_GP0 1 1 5 400 10 NJ 10 NJ 10 NJ 10 1870
-preplace netloc ps7_0_axi_periph_M00_AXI 1 2 3 760 290 1080J 530 NJ
-preplace netloc ps7_0_axi_periph_M01_AXI 1 2 3 740 300 1050J 550 NJ
-preplace netloc ps7_0_axi_periph_M02_AXI 1 2 3 720 310 1070J 510 NJ
-preplace netloc ps7_0_axi_periph_M03_AXI 1 2 1 710 300n
-levelinfo -pg 1 -50 200 560 900 1270 1670 2010
-pagesize -pg 1 -db -bbox -sgen -210 0 2150 850
+preplace netloc processing_system7_0_M_AXI_GP0 1 1 5 410 10 NJ 10 NJ 10 NJ 10 1860
+preplace netloc ps7_0_axi_periph_M00_AXI 1 2 3 770 290 1090J 530 NJ
+preplace netloc ps7_0_axi_periph_M01_AXI 1 2 3 750 300 1060J 550 NJ
+preplace netloc ps7_0_axi_periph_M02_AXI 1 2 3 730 310 1080J 510 NJ
+preplace netloc ps7_0_axi_periph_M03_AXI 1 2 1 720 300n
+levelinfo -pg 1 0 210 570 910 1280 1660 1950
+pagesize -pg 1 -db -bbox -sgen -160 0 2090 850
 "
 }
 
   # Restore current instance
   current_bd_instance $oldCurInst
 
+  validate_bd_design
   save_bd_design
-common::send_gid_msg -ssname BD::TCL -id 2050 -severity "WARNING" "This Tcl script was generated from a block design that has not been validated. It is possible that design <$design_name> may result in errors during validation."
-
   close_bd_design $design_name 
 }
 # End of cr_bd_top_level()
@@ -3483,6 +3482,7 @@ connect_bd_intf_net -intf_net [get_bd_intf_nets CPU_0_M_AXI] [get_bd_intf_pins C
   # Exclude Address Segments
   exclude_bd_addr_seg -offset 0x40080000 -range 0x00080000 -target_address_space [get_bd_addr_spaces CPU_0/M_AXI] [get_bd_addr_segs CPU_0/s_axi_btpu/reg0]
   exclude_bd_addr_seg -offset 0x40010000 -range 0x00010000 -target_address_space [get_bd_addr_spaces CPU_0/M_AXI] [get_bd_addr_segs CPU_0/s_axi_d/reg0]
+  exclude_bd_addr_seg -offset 0x40000000 -range 0x40000000 -target_address_space [get_bd_addr_spaces CPU_0/M_AXI] [get_bd_addr_segs processing_system7_0/S_AXI_GP0/GP0_M_AXI_GP0]
   exclude_bd_addr_seg -offset 0x40030000 -range 0x00010000 -target_address_space [get_bd_addr_spaces axi_cdma_0/Data] [get_bd_addr_segs axi_cdma_0/S_AXI_LITE/Reg]
   exclude_bd_addr_seg -offset 0x40000000 -range 0x40000000 -target_address_space [get_bd_addr_spaces axi_cdma_0/Data] [get_bd_addr_segs processing_system7_0/S_AXI_GP0/GP0_M_AXI_GP0]
   exclude_bd_addr_seg -offset 0x40030000 -range 0x00010000 -target_address_space [get_bd_addr_spaces axi_cdma_0/Data_SG] [get_bd_addr_segs axi_cdma_0/S_AXI_LITE/Reg]
@@ -3491,8 +3491,8 @@ connect_bd_intf_net -intf_net [get_bd_intf_nets CPU_0_M_AXI] [get_bd_intf_pins C
   # Perform GUI Layout
   regenerate_bd_layout -layout_string {
    "ActiveEmotionalView":"Default View",
-   "Default View_ScaleFactor":"0.468333",
-   "Default View_TopLeft":"-378,0",
+   "Default View_ScaleFactor":"1.23594",
+   "Default View_TopLeft":"1018,29",
    "ExpandedHierarchyInLayout":"",
    "guistr":"# # String gsaved with Nlview 7.0r4  2019-12-20 bk=1.5203 VDI=41 GEI=36 GUI=JA:10.0 TLS
 #  -string -flagsOSRD
@@ -3517,13 +3517,13 @@ preplace port port-id_run_out_0 -pg 1 -lvl 6 -x 1930 -y 480 -defaultsOSRD
 preplace portBus GPIO_0 -pg 1 -lvl 6 -x 1930 -y 390 -defaultsOSRD
 preplace portBus leds_0 -pg 1 -lvl 6 -x 1930 -y 510 -defaultsOSRD
 preplace portBus switches_0 -pg 1 -lvl 0 -x -50 -y 670 -defaultsOSRD
+preplace inst CPU_0 -pg 1 -lvl 5 -x 1620 -y 580 -defaultsOSRD
 preplace inst axi_cdma_0 -pg 1 -lvl 3 -x 880 -y 130 -defaultsOSRD
 preplace inst axi_mem_intercon -pg 1 -lvl 4 -x 1210 -y 230 -defaultsOSRD
 preplace inst processing_system7_0 -pg 1 -lvl 5 -x 1620 -y 200 -defaultsOSRD
 preplace inst ps7_0_axi_periph -pg 1 -lvl 2 -x 560 -y 330 -defaultsOSRD
 preplace inst rst_ps7_0_100M -pg 1 -lvl 1 -x 200 -y 200 -defaultsOSRD
 preplace inst system_ila_0 -pg 1 -lvl 4 -x 1210 -y 950 -defaultsOSRD
-preplace inst CPU_0 -pg 1 -lvl 5 -x 1620 -y 580 -defaultsOSRD
 preplace netloc CPU_0_CREG_CTR_dbg 1 3 1 N 1060
 preplace netloc CPU_0_M_WB_en_dbg 1 3 1 N 800
 preplace netloc CPU_0_M_WB_we_dbg 1 3 1 N 820
@@ -3585,9 +3585,8 @@ pagesize -pg 1 -db -bbox -sgen -210 0 2070 1200
   # Restore current instance
   current_bd_instance $oldCurInst
 
+  validate_bd_design
   save_bd_design
-common::send_gid_msg -ssname BD::TCL -id 2050 -severity "WARNING" "This Tcl script was generated from a block design that has not been validated. It is possible that design <$design_name> may result in errors during validation."
-
   close_bd_design $design_name 
 }
 # End of cr_bd_top_level_dbg()
@@ -3982,12 +3981,12 @@ preplace port port-id_run_out_0 -pg 1 -lvl 4 -x 1150 -y 480 -defaultsOSRD
 preplace portBus GPIO_0 -pg 1 -lvl 4 -x 1150 -y 390 -defaultsOSRD
 preplace portBus leds_0 -pg 1 -lvl 4 -x 1150 -y 510 -defaultsOSRD
 preplace portBus switches_0 -pg 1 -lvl 0 -x -50 -y 680 -defaultsOSRD
+preplace inst CPU_0 -pg 1 -lvl 3 -x 900 -y 580 -defaultsOSRD
 preplace inst axi_vip_0 -pg 1 -lvl 1 -x 210 -y 60 -defaultsOSRD
 preplace inst axi_vip_0_axi_periph -pg 1 -lvl 2 -x 580 -y 190 -defaultsOSRD
 preplace inst axi_vip_1 -pg 1 -lvl 1 -x 210 -y 280 -defaultsOSRD
 preplace inst rst_clk_in1_0_100M -pg 1 -lvl 1 -x 210 -y 460 -defaultsOSRD
 preplace inst xlconstant_0 -pg 1 -lvl 2 -x 580 -y 740 -defaultsOSRD
-preplace inst CPU_0 -pg 1 -lvl 3 -x 900 -y 580 -defaultsOSRD
 preplace netloc CPU_0_leds 1 3 1 1090J 510n
 preplace netloc CPU_0_oled_dc 1 3 1 1120J 600n
 preplace netloc CPU_0_oled_res 1 3 1 1130J 630n
@@ -4025,9 +4024,8 @@ pagesize -pg 1 -db -bbox -sgen -210 -10 1290 820
   # Restore current instance
   current_bd_instance $oldCurInst
 
+  validate_bd_design
   save_bd_design
-common::send_gid_msg -ssname BD::TCL -id 2050 -severity "WARNING" "This Tcl script was generated from a block design that has not been validated. It is possible that design <$design_name> may result in errors during validation."
-
   close_bd_design $design_name 
 }
 # End of cr_bd_test_design_axi_recursive()
@@ -4813,8 +4811,8 @@ proc cr_bd_test_design { parentCell } {
   # Perform GUI Layout
   regenerate_bd_layout -layout_string {
    "ActiveEmotionalView":"Default View",
-   "Default View_ScaleFactor":"0.159659",
-   "Default View_TopLeft":"-3965,-1322",
+   "Default View_ScaleFactor":"0.638636",
+   "Default View_TopLeft":"-376,0",
    "ExpandedHierarchyInLayout":"",
    "guistr":"# # String gsaved with Nlview 7.0r4  2019-12-20 bk=1.5203 VDI=41 GEI=36 GUI=JA:10.0 TLS
 #  -string -flagsOSRD
@@ -4840,11 +4838,11 @@ preplace port port-id_sys_clock -pg 1 -lvl 0 -x -40 -y 390 -defaultsOSRD
 preplace portBus GPIO_0 -pg 1 -lvl 4 -x 1210 -y 20 -defaultsOSRD
 preplace portBus leds_0 -pg 1 -lvl 4 -x 1210 -y 140 -defaultsOSRD
 preplace portBus switches_0 -pg 1 -lvl 0 -x -40 -y 280 -defaultsOSRD
+preplace inst CPU_0 -pg 1 -lvl 3 -x 960 -y 210 -defaultsOSRD
 preplace inst CPU_0_axi_periph -pg 1 -lvl 2 -x 530 -y 590 -defaultsOSRD
 preplace inst axi_cdma_0 -pg 1 -lvl 1 -x 180 -y 400 -defaultsOSRD
 preplace inst axi_vip_0 -pg 1 -lvl 1 -x 180 -y 570 -defaultsOSRD
 preplace inst axi_vip_1 -pg 1 -lvl 3 -x 960 -y 590 -defaultsOSRD
-preplace inst CPU_0 -pg 1 -lvl 3 -x 960 -y 210 -defaultsOSRD
 preplace netloc CPU_0_leds 1 3 1 1150J 140n
 preplace netloc CPU_0_oled_dc 1 3 1 1180J 230n
 preplace netloc CPU_0_oled_res 1 3 1 1190J 260n
