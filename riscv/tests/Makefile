@@ -22,7 +22,7 @@
 TESTS := test_Base test_BTPU test_BTPUvsSerial test_LoadStoreBTPU test_MatMul test_NewLib
 TESTS += test_PWM test_PWMSweep test_SerialCode test_TimerCapture test_TimerContinuous test_TimerContinuousOled
 # Tests in assembly
-TESTS += test_ALU test_AXI test_CPU test_I2C test_JumpBranch test_LoadStore test_Memory
+TESTS += test_ALU test_ANDI test_AXI test_CPU test_I2C test_JumpBranch test_LoadStore test_Memory
 
 OUT_DIR := ../../out/riscv/test
 
