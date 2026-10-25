@@ -515,6 +515,7 @@ set obj [get_filesets sim_1]
 set obj [get_filesets sim_1]
 set_property -name "top" -value "CPU" -objects $obj
 set_property -name "top_arch" -value "Behavioral" -objects $obj
+set_property -name "top_auto_set" -value "0" -objects $obj
 set_property -name "top_file" -value "src/hdl/cpu/CPU.vhd" -objects $obj
 set_property -name "top_lib" -value "xil_defaultlib" -objects $obj
 
