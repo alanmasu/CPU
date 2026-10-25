@@ -3,8 +3,10 @@
 
 # The testbenches include the RISC-V test programs as .svh files, generated
 # into out/riscv/test/sim/ by the build of riscv/tests: make sim builds them
-# first.
-sim: riscv-tests
+# first. make project and make sync need them too: if the headers are missing
+# when the project is created, Vivado cannot parse test_CPU_wh_AXI.sv,
+# disables it and picks another top for CPU_sim, without an error.
+sim project sync: riscv-tests
 
 riscv-tests:
 	$(MAKE) -C riscv/tests sim
