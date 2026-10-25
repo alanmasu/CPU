@@ -109,8 +109,18 @@ for name, component in platforms.items():
 
     # Hardware: the copy of the .xsa in hw/ of the platform is not
     # committed, so it is missing after a clone; after 'make xsa' it is old.
+    # The copy of the .xsa this platform was last repaired with (see
+    # hardware_repaired in vitis.sh): when the platform holds another .xsa
+    # than that, its hardware was changed outside the template, in the GUI;
+    # it is repaired the same way, with sw/hw/.
     copy = os.path.join(platform_dir, "hw", os.path.basename(xsa))
-    if not os.path.exists(copy) or not filecmp.cmp(xsa, copy, shallow=False):
+    repaired = os.path.join(ws, ".template-hw", name + ".xsa")
+    def same(a, b):
+        return os.path.exists(a) and os.path.exists(b) and filecmp.cmp(a, b, shallow=False)
+    new_hardware = not same(xsa, copy) or not same(xsa, repaired)
+    if os.path.exists(repaired) and os.path.exists(copy) and not same(copy, repaired):
+        step("WARNING: " + name + ": its hardware was changed outside the template (in the Vitis GUI?): repairing it with " + xsa)
+    if new_hardware:
         step(name + ": hardware from " + xsa)
         platform.update_hw(hw_design=xsa)
         for app, app_component in apps.items():
@@ -120,11 +130,36 @@ for name, component in platforms.items():
                 shutil.rmtree(ide)
 
     # BSPs: only their configuration and CMake files are committed;
-    # regenerate creates the sources in libsrc/ again.
+    # regenerate creates the sources in libsrc/ again. Also after new
+    # hardware: a BSP that already has its sources would keep the
+    # xparameters.h of the old hardware (seen with classic Vitis 2021.2,
+    # 24/10/2026), and the applications would be built with the old
+    # addresses. Regenerate is also the step that applies the options of
+    # bsp.yaml.
     for domain in component["configuration"]["domains"]:
-        if not os.path.isdir(os.path.join(bsp_dir(platform_dir, domain), "libsrc")):
+        if new_hardware or not os.path.isdir(os.path.join(bsp_dir(platform_dir, domain), "libsrc")):
             step(name + ": regenerating the BSP of " + domain["name"])
             platform.get_domain(name=domain["name"]).regenerate()
+
+    # The FSBL of the platform compiles its own copy of ps7_init.c and
+    # ps7_init.h, in zynq_fsbl/, made when the platform was created.
+    # update_hw writes the new ones only into hw_artifacts/ of the BSPs, so
+    # after new hardware the FSBL would still set up the PS of the old one
+    # (seen on 2025.1 with FCLK_CLK0 changed, 24/10/2026; classic Vitis
+    # rewrites them by itself): the new ones are copied over, as committed
+    # sources of the FSBL that change with the hardware.
+    fsbl_dir = os.path.join(platform_dir, "zynq_fsbl")
+    artifacts = os.path.join(fsbl_dir, "zynq_fsbl_bsp", "hw_artifacts")
+    if new_hardware and os.path.isdir(artifacts):
+        for name_init in ("ps7_init.c", "ps7_init.h"):
+            source = os.path.join(artifacts, name_init)
+            if os.path.exists(source) and os.path.exists(os.path.join(fsbl_dir, name_init)):
+                step(name + ": zynq_fsbl/" + name_init + " from the new hardware")
+                shutil.copyfile(source, os.path.join(fsbl_dir, name_init))
+
+    if new_hardware:
+        os.makedirs(os.path.dirname(repaired), exist_ok=True)
+        shutil.copyfile(xsa, repaired)
 
     if mode == "build":
         step(name + ": building the platform")

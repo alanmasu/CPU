@@ -63,6 +63,21 @@ proc vitis_update {build} {
     }
     set xsa [vitis_xsa $root]
 
+    # Vitis reads a platform from the copy of the .xsa in its hw/, and
+    # copies it again from sw/hw/ (platHandOff of platform.spr) only when
+    # the whole hw/ is missing, as in a fresh clone. With hw/ there but
+    # without the .xsa, opening the platform fails with "No Platform
+    # exists" (seen on 2021.2, 24/10/2026). hw/ is not committed and holds
+    # only what Vitis takes from the .xsa: it is deleted, so that Vitis
+    # makes it again as after a clone.
+    foreach platform $platforms {
+        set hw [file join $ws $platform hw]
+        if {[file isdirectory $hw] && ![file exists [file join $hw [file tail $xsa]]]} {
+            vitis_step "$platform: hw/ without its .xsa, deleted: Vitis copies it again from $xsa"
+            file delete -force $hw
+        }
+    }
+
     # A fresh clone has no .metadata/ yet: the projects in the directory are
     # not known to Vitis and are imported.
     set fresh [expr {![file exists [file join $ws .metadata]]}]
@@ -81,8 +96,17 @@ proc vitis_update {build} {
         # committed, so it is missing after a clone; after 'make xsa' it is
         # old. The file is checked here because 'platform config -updatehw'
         # only prints a message when it does not exist.
+        # The copy of the .xsa this platform was last repaired with (see
+        # hardware_repaired in vitis.sh): when the platform holds another
+        # .xsa than that, its hardware was changed outside the template,
+        # in the GUI; it is repaired the same way, with sw/hw/.
         set copy [file join $dir hw [file tail $xsa]]
-        if {![vitis_same_file $xsa $copy]} {
+        set repaired [file join $ws .template-hw $platform.xsa]
+        set new_hardware [expr {![vitis_same_file $xsa $copy] || ![vitis_same_file $xsa $repaired]}]
+        if {[file exists $repaired] && [file exists $copy] && ![vitis_same_file $copy $repaired]} {
+            vitis_step "WARNING: $platform: its hardware was changed outside the template (in the Vitis GUI?): repairing it with $xsa"
+        }
+        if {$new_hardware} {
             vitis_step "$platform: hardware from $xsa"
             platform config -updatehw $xsa
             foreach ide [glob -nocomplain -directory $ws -type d */_ide] {
@@ -92,7 +116,12 @@ proc vitis_update {build} {
         }
 
         # BSPs: one system.mss per domain; the sources next to it are not
-        # committed. The domain is the directory that contains bsp/, or
+        # committed. They are regenerated when they are missing, and always
+        # after new hardware: updatehw rewrites ps7_init of the FSBL, but a
+        # BSP that already has its sources keeps the xparameters.h of the
+        # old hardware, and the applications would be built with the old
+        # addresses (seen on 2021.2 with example_ip moved, 24/10/2026).
+        # The domain is the directory that contains bsp/, or
         # zynq_fsbl for the BSP of the FSBL. Regenerating a BSP makes its
         # domain the active one, which xsct saves into platform.spr: the
         # active domain is restored afterwards, so that the file does not
@@ -106,7 +135,7 @@ proc vitis_update {build} {
             } else {
                 set domain [file tail [file dirname $bsp]]
             }
-            if {[llength [glob -nocomplain -directory $bsp -type d */libsrc]] == 0} {
+            if {$new_hardware || [llength [glob -nocomplain -directory $bsp -type d */libsrc]] == 0} {
                 vitis_step "$platform: regenerating the BSP sources of $domain"
                 domain active $domain
                 bsp regenerate
@@ -115,6 +144,10 @@ proc vitis_update {build} {
         }
         if {$regenerated && $active ne ""} {
             domain active $active
+        }
+        if {$new_hardware} {
+            file mkdir [file dirname $repaired]
+            file copy -force $xsa $repaired
         }
 
         if {$build} {

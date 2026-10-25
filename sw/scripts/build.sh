@@ -61,6 +61,8 @@ die() {
 # The only file matching a glob in a directory, for example the .xsa in
 # sw/hw/. If there is none, the glob stays literal and the -f test fails.
 find_one() {
+    # $2 is a glob and must expand, so it is not quoted.
+    # shellcheck disable=SC2206
     local files=("$1"/$2)
     if [ ! -f "${files[0]}" ]; then
         die "no $2 in $1/ - $3"
@@ -353,14 +355,25 @@ step_modules() {
 }
 
 # The root filesystem is downloaded once from ROOTFS_URL and kept in out/sw/.
+# wget -O creates the file before the first byte arrives: the download goes
+# into a .part file, renamed only when complete, so that an interrupted one
+# is not taken as downloaded at the next run.
 step_sd() {
     local ko
     local rootfs
     header "SD card"
     rootfs=out/sw/rootfs/$(basename "$ROOTFS_URL")
-    if [ ! -f "$rootfs" ]; then
+    if [ ! -s "$rootfs" ]; then
         mkdir -p out/sw/rootfs
-        wget -O "$rootfs" "$ROOTFS_URL"
+        if ! wget --timeout=30 --tries=2 -O "$rootfs.part" "$ROOTFS_URL"; then
+            rm -f "$rootfs.part"
+            die "cannot download the root filesystem from $ROOTFS_URL: copy the image by hand to $rootfs, then run again"
+        fi
+        if [ ! -s "$rootfs.part" ]; then
+            rm -f "$rootfs.part"
+            die "the root filesystem downloaded from $ROOTFS_URL is empty: copy the image by hand to $rootfs, then run again"
+        fi
+        mv "$rootfs.part" "$rootfs"
     fi
     mkdir -p out/sd-card
     cp "$LINUX_BUILD/arch/arm/boot/uImage" out/sd-card/

@@ -18,12 +18,14 @@ proc ::prj::help {} {
   prj::sync ?-discard-local?   create hw/vivado/ again if the snapshot changed  [sync]
   prj::ip ?name? ?M.m?         repackage IPs, upgrade, export        [ip]
   prj::package_ip name ?M.m?   package one IP, nothing else
-  prj::release name ?M.m?      release an IP whose RTL is committed  [ip-release]
+  prj::release name ?M.m?      release an IP whose RTL is committed  [release]
   prj::sim ?simset?            simulate a simulation set (default the active one)  [sim]
-  prj::sim_ip ?name?           IP testbenches with xsim, without the project       [sim-ip]
-  prj::regen_pkg ?simset?      compile the VHDL packages of a simulation set  [regen-pkg]
+  prj::sim_all ?dir?           every simulation set, results in out/sim_all/  [sim_all]
+  prj::sim_ip ?name?           IP testbenches with xsim, without the project       [sim_ip]
+  prj::regen_pkg ?simset?      compile the VHDL packages of a simulation set  [regen_pkg]
   prj::build synth|bitstream|xsa                                     [synth, bitstream, xsa]
-  prj::check                   checks to run before a commit         [check]
+  prj::check ?-with-export?    checks to run before a commit; -with-export also
+                               exports into work/ to find changes not exported  [check]
   prj::get_commit              the commit on the board, through JTAG}
 }
 

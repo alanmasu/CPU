@@ -115,40 +115,61 @@ proc ::prj_priv::snapshot_changed {} {
 proc ::prj_priv::save_baseline {} {
     variable project_tcl
     variable snapshot_copy
-    variable baseline_dir
     if {[file exists $project_tcl]} {
         file copy -force $project_tcl $snapshot_copy
     } else {
         file delete $snapshot_copy
     }
+    save_baseline_files
+}
+
+# Only the files of .baseline/, leaving .snapshot as it is: for
+# prj::check -with-export, when the export of the project gives back
+# .snapshot, so that the project has no local changes but its files were
+# rewritten by a build. .snapshot stays the snapshot the project matches,
+# also when hw/src/vivado_project.tcl changed after a pull.
+proc ::prj_priv::save_baseline_files {} {
+    variable baseline_dir
     file delete -force $baseline_dir
     copy_project_state $baseline_dir
 }
 
 # The files of hw/vivado/ that hold the choices of the user, relative to it:
-# the .xpr and the files of *.srcs/ (block designs, their layout in ui/,
-# constraints and sources imported into the project, catalog IPs). Left out,
-# because Vivado rewrites them by itself (seen at the first build on 2021.2
-# and 2025.1, 12/10/2026):
-#  - bd/<name>/ip/, the configuration of each IP of a block design, and
-#    bd/<name>/<name>.bda: both are derived from the .bd;
-#  - utils_1/imports/, the checkpoint of incremental synthesis.
+# the .xpr and the files of *.srcs/ (block designs, constraints and sources
+# imported into the project, catalog IPs). Left out by state_file_ignored.
 # The other directories (.gen, .runs, .cache, .sim, .hw, .ip_user_files)
-# are all generated.
+# are all generated. hw/scripts/project-changes.sh chooses the same files,
+# for the pre-commit hook: keep the two in step.
 proc ::prj_priv::project_state_files {} {
     variable project_dir
     set files [glob -nocomplain -tails -directory $project_dir *.xpr]
     foreach path [all_files [glob -nocomplain -type d -directory $project_dir *.srcs]] {
         set relative [string range $path [string length $project_dir/] end]
-        if {[string match */utils_1/imports/* $relative]} {
-            continue
+        if {![state_file_ignored $relative]} {
+            lappend files $relative
         }
-        if {[string match */bd/*/ip/* $relative] || [string match *.bda $relative]} {
-            continue
-        }
-        lappend files $relative
     }
     return [lsort $files]
+}
+
+# Files of *.srcs/ that are not choices of the user:
+#  - rewritten by Vivado by itself (seen at the first build on 2021.2 and
+#    2025.1, 12/10/2026): bd/<name>/ip/, the configuration of each IP of a
+#    block design, and bd/<name>/<name>.bda, both derived from the .bd;
+#    utils_1/imports/, the checkpoint of incremental synthesis;
+#  - bd/<name>/ui/, the layout of the block design: positions of the
+#    blocks in the drawing, not hardware (decision of the user,
+#    25/10/2026), left out also from the comparison of the exported
+#    project (without_layout).
+# Also applied when comparing, so that a .baseline/ written before a rule
+# was added does not count its files as changes.
+proc ::prj_priv::state_file_ignored {relative} {
+    foreach pattern {*/utils_1/imports/* */bd/*/ip/* *.bda */bd/*/ui/*} {
+        if {[string match $pattern $relative]} {
+            return 1
+        }
+    }
+    return 0
 }
 
 proc ::prj_priv::all_files {dirs} {
@@ -201,6 +222,9 @@ proc ::prj_priv::project_files_changed {} {
     copy_project_state $now_dir
     set changed 0
     foreach name [lsort -unique [concat [all_relative $baseline_dir] [all_relative $now_dir]]] {
+        if {[state_file_ignored $name]} {
+            continue
+        }
         set before [file join $baseline_dir $name]
         set after [file join $now_dir $name]
         if {![file exists $before] || ![file exists $after] || [read_text $before] ne [read_text $after]} {
@@ -223,7 +247,26 @@ proc ::prj_priv::exported_changes {} {
     }
     puts "The files of the project changed after it was created or exported (a build, or a change in the GUI): exporting it to compare with its snapshot, which takes the time of an export"
     set exported [file join $root_dir work local-export.tcl]
+    # In the GUI (prj::check -with-export) the project is already open and
+    # stays open; in batch it is opened here and closed at the end.
+    set opened_here [expr {![project_is_open]}]
     open_project_if_needed
+    # A block design whose file is gone (deleted by hand, or left by a
+    # branch that was removed) cannot be opened, and open_bd_design would
+    # stop with a Vivado error (BD 41-1296, seen on 2021.2, 24/10/2026):
+    # the project cannot be compared, so it is reported as changed.
+    set missing {}
+    foreach bd [get_files -quiet *.bd] {
+        if {![file exists $bd]} {
+            lappend missing "    $bd"
+        }
+    }
+    if {[llength $missing] > 0} {
+        if {$opened_here} {
+            close_project
+        }
+        return "  the project cannot be exported to compare it, because the files of these block designs do not exist:\n[join $missing \n]"
+    }
     # Opened and saved as prj::export does: without save_bd_design, in batch
     # write_project_tcl leaves out the layout of the block design (the
     # regenerate_bd_layout block), and the export would differ from the
@@ -234,19 +277,55 @@ proc ::prj_priv::exported_changes {} {
         save_bd_design
     }
     set failed [catch {write_snapshot $exported} message]
-    close_project
+    if {$opened_here} {
+        close_project
+    }
     if {$failed} {
         return "  the export to compare the project failed: $message"
     }
-    if {[read_text $exported] eq [read_text $snapshot_copy]} {
-        puts "The exported project is the same as its snapshot: no local changes"
+    # Compared without the layout of the block designs (without_layout):
+    # the two copies are written into work/, and the diff is made of them.
+    set snapshot_compared [file join $root_dir work local-snapshot.nolayout.tcl]
+    set exported_compared [file join $root_dir work local-export.nolayout.tcl]
+    write_text $snapshot_compared [without_layout [read_text $snapshot_copy]]
+    write_text $exported_compared [without_layout [read_text $exported]]
+    if {[read_text $snapshot_compared] eq [read_text $exported_compared]} {
+        puts "The exported project is the same as its snapshot, the layout of the block designs left out: no local changes"
         return ""
     }
     set diff_file [file join $root_dir work local-changes.diff]
     # diff exits with 1 when the files differ, which exec takes for an
     # error: the output goes into the file anyway.
-    catch {exec diff -u -U12 $snapshot_copy $exported > $diff_file}
-    return "  the project, exported, differs from the snapshot it was created from or exported last:\n    code --diff $snapshot_copy $exported\n  the whole diff: $diff_file"
+    catch {exec diff -u -U12 $snapshot_compared $exported_compared > $diff_file}
+    return "  the project, exported, differs from the snapshot it was created from or exported last (the layout of the block designs left out):\n    code --diff $snapshot_compared $exported_compared\n  the whole diff: $diff_file"
+}
+
+# The text of a snapshot without the layout of its block designs: the
+# string of each regenerate_bd_layout, from its first line to the line that
+# closes it, a lone "}", is replaced by one line. The layout holds the
+# positions of the blocks in the drawing, not hardware, and changes without
+# any change to the design: the GUI writes the blocks in another order when
+# it draws a block design (seen on 2021.2, 25/10/2026), and moving a block
+# changes its coordinates. Leaving it out of the comparison was decided by
+# the user, 25/10/2026. The snapshot itself keeps it, as Vivado writes it.
+proc ::prj_priv::without_layout {text} {
+    set kept {}
+    set inside 0
+    foreach line [split $text "\n"] {
+        if {$inside} {
+            if {$line eq "\}"} {
+                set inside 0
+            }
+            continue
+        }
+        if {[string first "regenerate_bd_layout -layout_string \{" $line] >= 0} {
+            lappend kept "  regenerate_bd_layout (layout left out of the comparison)"
+            set inside 1
+            continue
+        }
+        lappend kept $line
+    }
+    return [join $kept "\n"]
 }
 
 proc ::prj_priv::all_relative {dir} {

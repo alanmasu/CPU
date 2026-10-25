@@ -2,17 +2,25 @@
 #  - this Vivado matches hw/VIVADO_VERSION
 #  - no block design has changes that were not exported
 #  - no committed file contains an absolute path of this machine
+#  - with -with-export, no change of the project is missing from the
+#    snapshot: the project is exported into work/ and compared with the
+#    snapshot it matches, which takes the time of an export (see
+#    exported_changes in sync.tcl). When they are the same, the files of
+#    the project were rewritten by a build only: .baseline/ is updated, so
+#    that the pre-commit hook, which compares the files without Vivado,
+#    lets the commit through.
 # It also warns, without failing:
 #  - about local IPs not released, or whose component.xml does not match
 #    their committed RTL (see prj::release);
 #  - when the namespace prj holds commands that are not of the template:
 #    procs of Vivado loaded while a command of prj was running.
 
-proc ::prj::check {} {
+proc ::prj::check {{option ""}} {
     namespace upvar ::prj_priv root_dir root_dir
     namespace upvar ::prj_priv project_dir project_dir
     namespace upvar ::prj_priv snapshot_copy snapshot_copy
 
+    set with_export [expr {[check_option $option {-with-export}] eq "-with-export"}]
     check_vivado_version
     set problems 0
 
@@ -26,6 +34,16 @@ proc ::prj::check {} {
         # is not the one in git.
         if {[file exists $snapshot_copy] && [snapshot_changed]} {
             puts "SNAPSHOT CHANGED: hw/src/vivado_project.tcl is not the snapshot this project matches; make vivado, synth, bitstream or xsa create the project again from it (see prj::sync)"
+        }
+        if {$with_export} {
+            set changes [exported_changes]
+            if {$changes ne ""} {
+                puts "NOT EXPORTED: the project has changes that are not in its snapshot (run prj::export to save them):\n$changes"
+                incr problems
+            } else {
+                save_baseline_files
+                puts "EXPORT: the project gives back its snapshot, so it has no changes to export; its files are now the reference of the pre-commit hook"
+            }
         }
     }
 
@@ -62,13 +80,13 @@ proc ::prj::check {} {
     foreach name [local_ips] {
         set ip_problems [ip_release_state $name]
         if {[llength $ip_problems] > 0} {
-            puts "IP $name [component_param [file join $root_dir hw ip $name component.xml] version]: [join $ip_problems {, }]: run make ip-release IP=$name when the RTL is ready"
+            puts "IP $name [component_param [file join $root_dir hw ip $name component.xml] version]: [join $ip_problems {, }]: run make release IP=$name when the RTL is ready"
         }
     }
 
     set foreign {}
     foreach command [lsort [info commands ::prj::*]] {
-        if {[namespace tail $command] ni {build check create export help ip get_commit package_ip regen_pkg release sim sim_ip sync}} {
+        if {[namespace tail $command] ni {build check create export help ip get_commit package_ip regen_pkg release sim sim_all sim_ip sync}} {
             lappend foreign [namespace tail $command]
         }
     }

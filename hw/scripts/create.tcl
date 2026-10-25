@@ -49,6 +49,7 @@ proc ::prj::create {} {
         puts "Pinned the project to Vivado [version -short] in hw/VIVADO_VERSION: commit this file"
     }
     mark_exported
+    write_final_xpr
     save_baseline
 }
 
@@ -72,6 +73,42 @@ proc ::prj_priv::create_from_snapshot {} {
     unset ::origin_dir_loc ::user_project_name
     if {$failed} {
         error "hw/src/vivado_project.tcl failed: $message"
+    }
+    resolve_top_files
+}
+
+# write_project_tcl writes the top_file of a fileset (seen for a simulation
+# set of the ported CPU project, 25/10/2026) as a path relative to hw/,
+# without $origin_dir. Vivado keeps it relative in the .xpr and resolves it
+# from the directory it runs in, work/, every time it reads it: the file
+# does not exist there, and every export wrote "../work/src/...", a change
+# that the snapshot never had. Running the snapshot from hw/ was not enough,
+# for the same reason. A top_file that does not exist, relative or under the
+# working directory, is set again to the same path under hw/, as a full
+# path: the project keeps a real file, and the export writes it relative to
+# hw/ again, as in the snapshot. The snapshot is left as Vivado writes it.
+proc ::prj_priv::resolve_top_files {} {
+    variable hw_dir
+    set work_dir [pwd]
+    foreach fileset [get_filesets -quiet] {
+        set top_file [get_property -quiet TOP_FILE $fileset]
+        if {$top_file eq "" || [file exists $top_file]} {
+            continue
+        }
+        if {[file pathtype $top_file] eq "relative"} {
+            set relative $top_file
+        } elseif {[string first $work_dir/ $top_file] == 0} {
+            set relative [string range $top_file [string length $work_dir/] end]
+        } else {
+            message 7 WARNING "the top_file of $fileset, $top_file, does not exist"
+            continue
+        }
+        set resolved [file normalize [file join $hw_dir $relative]]
+        if {![file exists $resolved]} {
+            message 7 WARNING "the top_file of $fileset, $top_file, does not exist, nor $resolved"
+            continue
+        }
+        set_property TOP_FILE $resolved $fileset
     }
 }
 
@@ -136,4 +173,29 @@ proc ::prj_priv::create_ip_simset {name dir} {
     add_to_fileset $fileset [find_files [file join $dir sim] $hdl_exts]
     set_property top ${name}_tb [get_filesets $fileset]
     set_property -name xsim.simulate.runtime -value all -objects [get_filesets $fileset]
+}
+
+# A project just created has its .xpr in a form that Vivado writes only in
+# the session that created it: the first time a later session saves the
+# project, for whatever reason (generating the products of an IP, a
+# simulation, a build), it rewrites the .xpr in its final form, with
+# shorter StratHandle elements and two more Filter lines, without any
+# change to the project (seen on 2021.2 and 2025.1, 25/10/2026). The copy of
+# .baseline/ taken before that would make the pre-commit hook see a change.
+# Setting a property to the value it already has does not make Vivado write
+# the .xpr, and changing it and setting it back in the session that created
+# the project writes it in the same first form: the project is closed and
+# opened again, then the language of the project is changed and set back,
+# and the .xpr is in its final form before the copy is taken.
+proc ::prj_priv::write_final_xpr {} {
+    close_project
+    open_project_if_needed
+    set project [current_project]
+    set language [get_property target_language $project]
+    if {$language eq "Verilog"} {
+        set_property target_language VHDL $project
+    } else {
+        set_property target_language Verilog $project
+    }
+    set_property target_language $language $project
 }

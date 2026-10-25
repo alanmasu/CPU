@@ -40,6 +40,8 @@
 # BSPs (their sources, headers and libraries). Rules for both IDEs: classic
 # Vitis (up to 2023.1) and Vitis Unified (from 2023.2).
 /sw/vitis/.metadata/
+# The .xsa each platform was last repaired with by the template (sw/scripts/vitis.sh)
+/sw/vitis/.template-hw/
 /sw/vitis/RemoteSystemsTempFiles/
 /sw/vitis/.analytics
 /sw/vitis/IDE.log

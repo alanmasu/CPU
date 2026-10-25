@@ -35,55 +35,63 @@ IP ?= all
 #   KEEP_LOCAL=1     go on with the local project, without the new snapshot
 EXPORT_OPTION := $(if $(DISCARD_LOCAL),-discard-local,$(if $(FORCE),-force))
 SYNC_OPTION := $(if $(DISCARD_LOCAL),-discard-local)
+# WITH_EXPORT=1 for make check: also export the project into work/ and
+# compare it with its snapshot, to find changes not exported.
+CHECK_OPTION := $(if $(WITH_EXPORT),-with-export)
 
-.PHONY: help hooks project sync vivado export ip ip-release sim sim-ip regen-pkg synth bitstream xsa update-xsa check clean clean-force
+.PHONY: help hooks project sync vivado export ip release sim sim_all sim_ip regen_pkg synth bitstream xsa update-xsa check diff clean clean-force
 .PHONY: linux-fsbl linux-dtb linux-uboot linux-boot linux-kernel linux-modules linux-sd linux-clean
 .PHONY: vitis vitis-build
 
 help:
-	@echo Vivado targets, each runs a prj:: command.
-	@echo In the GUI the same commands are available in the Tcl console: prj::help
-	@echo   hooks        make git run the checks of hooks/ before every commit
-	@echo   project      create hw/vivado/, installing the git hooks first
-	@echo   sync         create hw/vivado/ again if hw/src/vivado_project.tcl changed;
-	@echo                vivado, synth, bitstream and xsa run it first. With changes
-	@echo                not exported it stops: KEEP_LOCAL=1 goes on with them,
-	@echo                DISCARD_LOCAL=1 drops them, keeping them in hw/vivado.bak/
-	@echo   vivado       open the project in the Vivado GUI, with the prj:: commands loaded
-	@echo   export       save the project into hw/src/vivado_project.tcl; over a snapshot
-	@echo                that changed FORCE=1, or DISCARD_LOCAL=1 if not committed
-	@echo   ip           repackage the IPs of hw/ip/, upgrade and export the project
-	@echo                IP=name for one IP, VERSION=M.m to change its version
-	@echo   ip-release   IP=name: package the committed RTL as a release and commit it,
-	@echo                VERSION=M.m for a new version
-	@echo   sim          simulate a simulation set of the project, SIMSET=name, default the
-	@echo                active one; GUI=1 opens the GUI and simulates there, with the waves
-	@echo   sim-ip       the IP testbenches with xsim, without the project; IP=name for one
-	@echo   regen-pkg    compile the VHDL packages of a simulation set of the project, when a
-	@echo                SystemVerilog testbench that imports one stops; SIMSET=name, default the active one
-	@echo   synth        run synthesis
-	@echo   bitstream    build out/hw/PROJECT.bit
-	@echo   xsa          build out/hw/PROJECT.bit and out/hw/PROJECT.xsa
-	@echo   update-xsa   deliver out/hw/PROJECT.xsa to the software: copy it into sw/hw/,
-	@echo                which is committed; FORCE=1 also if built from uncommitted hw/
-	@echo   check        checks to run before a commit
-	@echo   clean        delete everything generated, refuses if not exported
-	@echo   clean-force  delete it anyway
+	@echo "Vivado targets, each runs a prj:: command."
+	@echo "In the GUI the same commands are available in the Tcl console: prj::help"
+	@echo "  hooks        make git run the checks of hooks/ before every commit"
+	@echo "  project      create hw/vivado/, installing the git hooks first"
+	@echo "  sync         create hw/vivado/ again if hw/src/vivado_project.tcl changed:"
+	@echo "               vivado, synth, bitstream and xsa run it first. With changes"
+	@echo "               not exported it stops: KEEP_LOCAL=1 goes on with them,"
+	@echo "               DISCARD_LOCAL=1 drops them, keeping them in hw/vivado.bak/"
+	@echo "  vivado       open the project in the Vivado GUI, with the prj:: commands loaded"
+	@echo "  export       save the project into hw/src/vivado_project.tcl, over a snapshot"
+	@echo "               that changed FORCE=1, or DISCARD_LOCAL=1 if not committed"
+	@echo "  ip           repackage the IPs of hw/ip/, upgrade and export the project"
+	@echo "               IP=name for one IP, VERSION=M.m to change its version"
+	@echo "  release      IP=name: package the committed RTL as a release and commit it,"
+	@echo "               VERSION=M.m for a new version"
+	@echo "  sim          simulate a simulation set of the project, SIMSET=name, default the"
+	@echo "               active one, GUI=1 opens the GUI and simulates there, with the waves"
+	@echo "  sim_all      simulate every simulation set of the project, with the log and the result"
+	@echo "               of each one in out/sim_all/ or RESULTS=dir, summary.txt among them"
+	@echo "  sim_ip       the IP testbenches with xsim, without the project, IP=name for one"
+	@echo "  regen_pkg    compile the VHDL packages of a simulation set of the project, when a"
+	@echo "               SystemVerilog testbench that imports one stops, SIMSET=name, default the active one"
+	@echo "  synth        run synthesis"
+	@echo "  bitstream    build out/hw/PROJECT.bit"
+	@echo "  xsa          build out/hw/PROJECT.bit and out/hw/PROJECT.xsa"
+	@echo "  update-xsa   deliver out/hw/PROJECT.xsa to the software: copy it into sw/hw/,"
+	@echo "               which is committed, FORCE=1 also if built from uncommitted hw/"
+	@echo "  check        checks to run before a commit; WITH_EXPORT=1 also exports the project"
+	@echo "               into work/ to find changes not exported (takes the time of an export)"
+	@echo "  diff         the files of the project changed after the last export, without Vivado:"
+	@echo "               diff in work/project-changes.diff, each file opened in VS Code (code --diff)"
+	@echo "  clean        delete everything generated, refuses if not exported"
+	@echo "  clean-force  delete it anyway"
 	@echo
-	@echo Linux targets, Linux hosts only, run sw/scripts/build.sh:
-	@echo   linux-fsbl     FSBL of the Linux boot, from sw/hw/PROJECT.xsa
-	@echo   linux-dtb      device tree from the .xsa and sw/dts/system-user.dtsi
-	@echo   linux-uboot    U-Boot, in the checkout of UBOOT_SRC
-	@echo   linux-boot     out/sd-card/BOOT.bin: FSBL, bitstream of sw/hw/PROJECT.xsa, U-Boot
-	@echo   linux-kernel   kernel uImage, built in out/sw/linux or LINUX_BUILD_DIR
-	@echo   linux-modules  the drivers in hw/ip/*/linux-driver/
-	@echo   linux-sd       everything above, collected in out/sd-card/
-	@echo   linux-clean    delete out/sw/ and out/sd-card/
+	@echo "Linux targets, Linux hosts only, run sw/scripts/build.sh:"
+	@echo "  linux-fsbl     FSBL of the Linux boot, from sw/hw/PROJECT.xsa"
+	@echo "  linux-dtb      device tree from the .xsa and sw/dts/system-user.dtsi"
+	@echo "  linux-uboot    U-Boot, in the checkout of UBOOT_SRC"
+	@echo "  linux-boot     out/sd-card/BOOT.bin: FSBL, bitstream of sw/hw/PROJECT.xsa, U-Boot"
+	@echo "  linux-kernel   kernel uImage, built in out/sw/linux or LINUX_BUILD_DIR"
+	@echo "  linux-modules  the drivers in hw/ip/*/linux-driver/"
+	@echo "  linux-sd       everything above, collected in out/sd-card/"
+	@echo "  linux-clean    delete out/sw/ and out/sd-card/"
 	@echo
-	@echo Vitis targets, bare-metal part in the workspace sw/vitis/:
-	@echo   vitis        open the workspace in the Vitis IDE, after repairing
-	@echo                what a clone or 'make xsa' left out of date (no build)
-	@echo   vitis-build  repair and build everything, a BOOT.bin included, without the GUI
+	@echo "Vitis targets, bare-metal part in the workspace sw/vitis/:"
+	@echo "  vitis        open the workspace in the Vitis IDE, after repairing"
+	@echo "               what a clone or make xsa left out of date, without building"
+	@echo "  vitis-build  repair and build everything, a BOOT.bin included, without the GUI"
 
 # Make git run hooks/vivado_consistency.pre_commit before every commit: see
 # hooks/install.sh.
@@ -104,9 +112,9 @@ export:
 ip:
 	$(RUN) ip $(IP) $(VERSION)
 
-ip-release:
+release:
 	@if [ "$(IP)" = all ]; then \
-		echo "make ip-release needs IP=name"; \
+		echo "make release needs IP=name"; \
 		exit 1; \
 	fi
 	$(RUN) release $(IP) $(VERSION)
@@ -125,13 +133,18 @@ sim:
 		$(RUN) sim $(SIMSET); \
 	fi
 
-sim-ip:
+# RESULTS is made absolute here: Vivado runs in work/, and a relative path
+# would start from there.
+sim_all:
+	$(RUN) sim_all $(if $(RESULTS),$(abspath $(RESULTS)))
+
+sim_ip:
 	$(RUN) sim_ip $(IP)
 
 # A SystemVerilog testbench that imports a VHDL package stops when the
 # simulation library is empty: see hw/scripts/regen_pkg.tcl. With the GUI
 # closed, because it opens the project.
-regen-pkg:
+regen_pkg:
 	$(RUN) regen_pkg $(SIMSET)
 
 synth:
@@ -149,7 +162,12 @@ update-xsa:
 	bash sw/scripts/update-xsa.sh $(if $(FORCE),--force)
 
 check:
-	$(RUN) check
+	$(RUN) check $(CHECK_OPTION)
+
+# No Vivado: the files of hw/vivado/ against hw/vivado/.baseline/, as the
+# pre-commit hook compares them (see hw/scripts/project-changes.sh).
+diff:
+	bash hw/scripts/project-changes.sh --diff
 
 # Bare-metal part, see sw/scripts/vitis.sh: the Vitis workspace is
 # sw/vitis/, committed without what Vitis recreates (see .gitignore).
@@ -160,7 +178,7 @@ vitis-build:
 	bash sw/scripts/vitis.sh build
 
 # Every target that starts Vivado needs work/ (vitis.sh creates it itself).
-project sync vivado export ip ip-release sim sim-ip regen-pkg synth bitstream xsa check: | $(WORK)
+project sync vivado export ip release sim sim_all sim_ip regen_pkg synth bitstream xsa check: | $(WORK)
 
 # The targets that use the project first bring it in step with the snapshot
 # (see hw/scripts/sync.tcl). The checks that need no Vivado are done here,
@@ -173,7 +191,7 @@ project sync vivado export ip ip-release sim sim-ip regen-pkg synth bitstream xs
 #    project again, or stops if it has changes that were not exported;
 #    with KEEP_LOCAL=1 Vivado is not started, only the warning is printed.
 # hw/vivado/.exported, written by prj::create, stands for the project.
-vivado sim regen-pkg synth bitstream xsa: sync
+vivado sim sim_all regen_pkg synth bitstream xsa: sync
 
 sync:
 	@if [ ! -f hw/vivado/.exported ]; then \

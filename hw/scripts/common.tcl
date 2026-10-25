@@ -31,7 +31,7 @@ namespace eval ::prj {
     # project.tcl create variables of this namespace and never touch a global
     # variable with the same name. The loop variable is removed afterwards,
     # because in a namespace eval it is a variable of the namespace.
-    foreach name {project_name part board_part target_language ip_vendor top jobs vivado_min} {
+    foreach name {project_name part board_part target_language ip_vendor top jobs vivado_min sim_result_lines} {
         variable $name
     }
     unset name

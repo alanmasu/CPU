@@ -48,6 +48,17 @@ if [ -d hw/vivado ]; then
     fi
 fi
 
+# 2b. The files of the project changed after the last export: a change made
+#     in the GUI and not exported would be missing from the commit. A build
+#     rewrites the .xpr too, without any change to the project, and only an
+#     export tells the two apart; the message gives both ways to find out.
+if [ -d hw/vivado ]; then
+    if ! changes=$(bash hw/scripts/project-changes.sh); then
+        echo "$changes"
+        fail "the Vivado project changed after the last export. If it was only a build, 'make check WITH_EXPORT=1' (prj::check -with-export in the GUI) exports it to compare, and when nothing is missing from the snapshot it lets the commit through. To look at the changes without Vivado, side by side in VS Code: 'make diff'. To save them: 'make export'."
+    fi
+fi
+
 # 3. Local IPs whose RTL is staged without their component.xml: the RTL was
 #    changed but the IP was not packaged again.
 for file in $staged; do

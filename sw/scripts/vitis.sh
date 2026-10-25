@@ -73,9 +73,24 @@ gui_is_open() {
     fuser -s "$lock" 2> /dev/null
 }
 
+# The hardware of a platform can be changed in the Vitis GUI too (Update
+# Hardware Specification, Switch XSA), which skips the repairs of the
+# template: BSPs regenerated (xparameters.h) and, with Vitis Unified, the
+# ps7_init of the FSBL copied. After each repair the scripts keep a copy of
+# the .xsa they used in sw/vitis/.template-hw/<platform>.xsa (not
+# committed): true when the platform was repaired with this .xsa, false
+# when the copy is missing or different, for example after 'make
+# update-xsa' followed by an update in the GUI.
+hardware_repaired() {
+    local dir=$1
+    local xsa=$2
+    cmp -s "$xsa" "$WS/.template-hw/$(basename "$dir").xsa"
+}
+
 # True when the workspace needs a repair by xsct: projects not imported, a
-# platform whose copy of the .xsa is missing or differs from sw/hw/, a BSP
-# without its sources. A workspace without platforms needs nothing.
+# platform whose copy of the .xsa is missing or differs from sw/hw/, or
+# whose hardware was not repaired by the template (see hardware_repaired),
+# a BSP without its sources. A workspace without platforms needs nothing.
 needs_update() {
     local spr
     local dir
@@ -87,6 +102,9 @@ needs_update() {
         dir=$(dirname "$spr")
         for xsa in sw/hw/*.xsa; do
             if ! cmp -s "$xsa" "$dir/hw/$(basename "$xsa")"; then
+                return 0
+            fi
+            if ! hardware_repaired "$dir" "$xsa"; then
                 return 0
             fi
         done
@@ -116,7 +134,8 @@ run_xsct() {
 
 # Vitis Unified: true when the workspace needs a repair: no _ide/version.ini
 # (a fresh clone), a platform whose copy of the .xsa is missing or differs
-# from sw/hw/, a BSP without its sources. A workspace without platforms
+# from sw/hw/ or whose hardware was not repaired by the template (see
+# hardware_repaired), a BSP without its sources. A workspace without platforms
 # needs nothing. The platforms are
 # the components whose vitis-comp.json has "type": "PLATFORM"; each BSP is a
 # directory with a bsp.yaml.
@@ -135,6 +154,9 @@ unified_needs_update() {
         dir=$(dirname "$comp")
         for xsa in sw/hw/*.xsa; do
             if ! cmp -s "$xsa" "$dir/hw/$(basename "$xsa")"; then
+                return 0
+            fi
+            if ! hardware_repaired "$dir" "$xsa"; then
                 return 0
             fi
         done

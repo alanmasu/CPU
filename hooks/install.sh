@@ -49,6 +49,9 @@ done
 hooks_dir=$(git rev-parse --git-path hooks)
 hook=$hooks_dir/pre-commit
 marker="vivado_consistency.pre_commit"
+# The text of the hook, written as it is: the $(...) must run when git
+# runs the hook, not here.
+# shellcheck disable=SC2016
 call='# Checks of the Vivado template, added by make hooks: see hooks/ in the repository.
 if ! bash "$(git rev-parse --show-toplevel)/hooks/vivado_consistency.pre_commit"; then
     exit 1
