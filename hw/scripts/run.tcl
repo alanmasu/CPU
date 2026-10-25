@@ -6,10 +6,18 @@
 source [file join [file dirname [file normalize [info script]]] prj.tcl]
 
 set command [lindex $argv 0]
+set ::prj_priv::batch 1
 if {[info commands ::prj::$command] eq ""} {
     error "Unknown command '$command': see prj::help"
 }
-::prj::$command {*}[lrange $argv 1 end]
+# An error is printed as "ERROR: prj::<command>: <message>", so that it can
+# be found in the long output of Vivado, followed by the Tcl stack.
+if {[catch {::prj::$command {*}[lrange $argv 1 end]} message]} {
+    puts "ERROR: prj::$command: $message"
+    # errorInfo starts with the message itself: only the stack after it.
+    puts [string range $::errorInfo [string length $message] end]
+    exit 1
+}
 
 if {[::prj_priv::project_is_open]} {
     close_project

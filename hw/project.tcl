@@ -24,3 +24,10 @@ set jobs            4
 # Oldest Vivado this template supports. The version actually used is pinned
 # in hw/VIVADO_VERSION when the project is created for the first time.
 set vivado_min      2019.2
+
+# prj::sim_all (make sim_all): a regular expression that matches the lines
+# the testbenches of the product print for each test. The testbenches of the
+# CPU print "Testing <block>", "Test <n>: OK" or "Test <n>: FAILED ..." (the
+# VHDL ones through report, so with a "Note: " in front) and, in
+# test_AXI_ctrl.sv, also "<name> test: OK".
+set sim_result_lines {^(Note: )?Test|: (OK|FAILED)}

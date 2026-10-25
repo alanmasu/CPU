@@ -12,12 +12,14 @@
 # xsim.dir/, because the compilation is incremental.
 # This command compiles only the VHDL packages, in the directory and the
 # library that the simulation uses. Run it by hand when a simulation stops
-# with that error, then launch the simulation again.
+# with that error, then launch the simulation again. Written and tested in
+# the ported CPU project (Vivado 2021.2, 12/10/2026).
 
 proc ::prj::regen_pkg {{simset ""}} {
     namespace upvar ::prj_priv project_dir project_dir
     variable project_name
 
+    check_vivado_version
     open_project_if_needed
     if {$simset eq ""} {
         set simset [current_fileset -simset]

@@ -7,7 +7,7 @@
 #   VITIS_ROOT  root of the product
 #   VITIS_MODE  update  repair what is missing, without building:
 #                       - a platform whose copy of the .xsa is missing (it is
-#                         not committed) or differs from out/hw/ (after
+#                         not committed) or differs from sw/hw/ (after
 #                         'make xsa'): update its hardware, and delete _ide/
 #                         of its applications, which would otherwise keep the
 #                         old bitstream;
@@ -30,6 +30,7 @@ import os
 import shutil
 import subprocess
 import sys
+import zipfile
 
 import vitis
 
@@ -77,9 +78,10 @@ if not platforms:
     step("no platform in " + ws + " yet: nothing to do, create one in the Vitis GUI")
     sys.exit(0)
 
-found = glob.glob(os.path.join(root, "out", "hw", "*.xsa"))
+# The hardware comes only from sw/hw/, the .xsa delivered by 'make update-xsa'.
+found = glob.glob(os.path.join(root, "sw", "hw", "*.xsa"))
 if len(found) != 1:
-    print("vitis: ERROR: expected one .xsa in out/hw/, found %d: run 'make xsa' first" % len(found), file=sys.stderr)
+    print("vitis: ERROR: expected one .xsa in sw/hw/, found %d: deliver the hardware with 'make update-xsa', after 'make xsa'" % len(found), file=sys.stderr)
     sys.exit(1)
 xsa = found[0]
 
@@ -107,8 +109,18 @@ for name, component in platforms.items():
 
     # Hardware: the copy of the .xsa in hw/ of the platform is not
     # committed, so it is missing after a clone; after 'make xsa' it is old.
+    # The copy of the .xsa this platform was last repaired with (see
+    # hardware_repaired in vitis.sh): when the platform holds another .xsa
+    # than that, its hardware was changed outside the template, in the GUI;
+    # it is repaired the same way, with sw/hw/.
     copy = os.path.join(platform_dir, "hw", os.path.basename(xsa))
-    if not os.path.exists(copy) or not filecmp.cmp(xsa, copy, shallow=False):
+    repaired = os.path.join(ws, ".template-hw", name + ".xsa")
+    def same(a, b):
+        return os.path.exists(a) and os.path.exists(b) and filecmp.cmp(a, b, shallow=False)
+    new_hardware = not same(xsa, copy) or not same(xsa, repaired)
+    if os.path.exists(repaired) and os.path.exists(copy) and not same(copy, repaired):
+        step("WARNING: " + name + ": its hardware was changed outside the template (in the Vitis GUI?): repairing it with " + xsa)
+    if new_hardware:
         step(name + ": hardware from " + xsa)
         platform.update_hw(hw_design=xsa)
         for app, app_component in apps.items():
@@ -118,11 +130,36 @@ for name, component in platforms.items():
                 shutil.rmtree(ide)
 
     # BSPs: only their configuration and CMake files are committed;
-    # regenerate creates the sources in libsrc/ again.
+    # regenerate creates the sources in libsrc/ again. Also after new
+    # hardware: a BSP that already has its sources would keep the
+    # xparameters.h of the old hardware (seen with classic Vitis 2021.2,
+    # 24/10/2026), and the applications would be built with the old
+    # addresses. Regenerate is also the step that applies the options of
+    # bsp.yaml.
     for domain in component["configuration"]["domains"]:
-        if not os.path.isdir(os.path.join(bsp_dir(platform_dir, domain), "libsrc")):
+        if new_hardware or not os.path.isdir(os.path.join(bsp_dir(platform_dir, domain), "libsrc")):
             step(name + ": regenerating the BSP of " + domain["name"])
             platform.get_domain(name=domain["name"]).regenerate()
+
+    # The FSBL of the platform compiles its own copy of ps7_init.c and
+    # ps7_init.h, in zynq_fsbl/, made when the platform was created.
+    # update_hw writes the new ones only into hw_artifacts/ of the BSPs, so
+    # after new hardware the FSBL would still set up the PS of the old one
+    # (seen on 2025.1 with FCLK_CLK0 changed, 24/10/2026; classic Vitis
+    # rewrites them by itself): the new ones are copied over, as committed
+    # sources of the FSBL that change with the hardware.
+    fsbl_dir = os.path.join(platform_dir, "zynq_fsbl")
+    artifacts = os.path.join(fsbl_dir, "zynq_fsbl_bsp", "hw_artifacts")
+    if new_hardware and os.path.isdir(artifacts):
+        for name_init in ("ps7_init.c", "ps7_init.h"):
+            source = os.path.join(artifacts, name_init)
+            if os.path.exists(source) and os.path.exists(os.path.join(fsbl_dir, name_init)):
+                step(name + ": zynq_fsbl/" + name_init + " from the new hardware")
+                shutil.copyfile(source, os.path.join(fsbl_dir, name_init))
+
+    if new_hardware:
+        os.makedirs(os.path.dirname(repaired), exist_ok=True)
+        shutil.copyfile(xsa, repaired)
 
     if mode == "build":
         step(name + ": building the platform")
@@ -163,9 +200,18 @@ if boot_app == "":
     boot_app = list(apps)[0]
 if boot_app not in apps:
     fail("VITIS_BOOT_APP=" + boot_app + " is not an application of the workspace")
-bits = glob.glob(os.path.join(root, "out", "hw", "*.bit"))
-if len(bits) != 1:
-    fail("expected one .bit in out/hw/, found %d: run 'make xsa' first" % len(bits))
+# The bitstream comes from the delivered .xsa, which holds it (an .xsa is a
+# zip), so that FSBL, application and bitstream match the same hardware.
+bit_dir = os.path.join(root, "out", "vitis", "bit")
+shutil.rmtree(bit_dir, ignore_errors=True)
+os.makedirs(bit_dir)
+with zipfile.ZipFile(xsa) as archive:
+    names = [n for n in archive.namelist() if n.endswith(".bit")]
+    if len(names) != 1:
+        fail("expected one .bit inside %s, found %d: write it with 'make xsa'" % (xsa, len(names)))
+    bits = [os.path.join(bit_dir, os.path.basename(names[0]))]
+    with open(bits[0], "wb") as f:
+        f.write(archive.read(names[0]))
 platform_name = apps[boot_app]["platform"]
 out_dir = os.path.join(root, "out", "vitis")
 os.makedirs(out_dir, exist_ok=True)

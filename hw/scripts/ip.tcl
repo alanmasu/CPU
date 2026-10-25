@@ -4,9 +4,9 @@
 #   prj::ip <name> [M.m]      one IP, optionally with a new version
 
 proc ::prj::ip {{target all} {new_version ""}} {
-    namespace upvar ::prj_priv project_dir project_dir
-
     check_vivado_version
+    # It ends with an export: stop now rather than after the packaging.
+    check_snapshot_unchanged ""
     if {$target eq "all"} {
         if {$new_version ne ""} {
             error "A new version needs a single IP: prj::ip <name> M.m"
@@ -26,11 +26,18 @@ proc ::prj::ip {{target all} {new_version ""}} {
         }
     }
 
+    update_ip_instances $names
+}
+
+# After a packaging: refresh the IP catalog of the project, upgrade the
+# instances of the IPs in names, and export the project. Nothing to do
+# without a project.
+proc ::prj_priv::update_ip_instances {names} {
+    variable project_dir
     if {![file exists $project_dir]} {
         puts "No project yet: 'make project' will use the new packages"
         return
     }
-
     open_project_if_needed
     global_eval update_ip_catalog -rebuild -scan_changes
     foreach bd [get_files -quiet *.bd] {
@@ -42,7 +49,13 @@ proc ::prj::ip {{target all} {new_version ""}} {
             global_eval upgrade_ip $instances
         }
     }
-    export
+    # upgrade_ip leaves the block designs not validated, and write_project_tcl
+    # would then drop validate_bd_design from the snapshot.
+    foreach bd [get_files -quiet *.bd] {
+        global_eval current_bd_design [file rootname [file tail $bd]]
+        global_eval validate_bd_design
+    }
+    ::prj::export
 }
 
 # Run one prj:: command in a separate Vivado in batch mode.

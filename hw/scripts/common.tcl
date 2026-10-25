@@ -15,6 +15,11 @@ namespace eval ::prj_priv {
     variable edit_dir    [file join $root_dir out ip_edit]
     variable pin_file    [file join $hw_dir VIVADO_VERSION]
     variable stamp_file  [file join $project_dir .exported]
+    variable snapshot_copy [file join $project_dir .snapshot]
+    variable baseline_dir  [file join $project_dir .baseline]
+    variable backup_dir    [file join $hw_dir vivado.bak]
+    # 1 when the command runs in a batch Vivado (set by run.tcl), 0 in the GUI.
+    variable batch 0
     variable project_tcl [file join $hw_dir src vivado_project.tcl]
     variable hdl_exts    {.v .sv .vh .svh .vhd .vhdl}
 }
@@ -26,7 +31,7 @@ namespace eval ::prj {
     # project.tcl create variables of this namespace and never touch a global
     # variable with the same name. The loop variable is removed afterwards,
     # because in a namespace eval it is a variable of the namespace.
-    foreach name {project_name part board_part target_language ip_vendor top jobs vivado_min} {
+    foreach name {project_name part board_part target_language ip_vendor top jobs vivado_min sim_result_lines} {
         variable $name
     }
     unset name
