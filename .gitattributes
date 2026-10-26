@@ -13,6 +13,6 @@ sw/vitis/**/*.spr filter=vitis-paths
 sw/vitis/**/*.prj filter=vitis-paths
 sw/vitis/**/*.sprj filter=vitis-paths
 
-# The hardware delivered to the software (make update-xsa): a zip, never
+# The hardware delivered to the software (make update_xsa): a zip, never
 # diffed or merged as text
 sw/hw/*.xsa binary

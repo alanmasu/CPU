@@ -57,7 +57,7 @@ proc ::prj::build {target} {
     if {$target eq "xsa"} {
         write_hw_platform -fixed -include_bit -force -file [file join $out_dir $project_name.xsa]
         # The USR_ACCESS value of the bitstream inside the .xsa, read by
-        # 'make update-xsa' when it delivers the .xsa to sw/hw/: the commit
+        # 'make update_xsa' when it delivers the .xsa to sw/hw/: the commit
         # it was built from.
         set value_file [file join $out_dir $project_name.usr_access]
         set saved [file join [get_property DIRECTORY $impl] usr_access.txt]
@@ -66,7 +66,7 @@ proc ::prj::build {target} {
         } else {
             file delete $value_file
         }
-        puts "Hardware platform: out/hw/$project_name.xsa (deliver it to the software with 'make update-xsa')"
+        puts "Hardware platform: out/hw/$project_name.xsa (deliver it to the software with 'make update_xsa')"
     }
 }
 
