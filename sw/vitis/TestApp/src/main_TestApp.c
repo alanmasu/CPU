@@ -55,23 +55,23 @@
 #include <stdint.h>
 
 // Including the headers of programs
-#include "programs/testProgram.h"
-#include "programs/testLoad.h"
+#include "test_CPU.h"
+#include "test_LoadStore.h"
 #include "programs/GPIOProgram.h"
 #include "programs/GPIOProgramMy.h"
-#include "programs/testAluProgram.h"
-#include "programs/testMemoryProgram.h"
+#include "test_ALU.h"
+#include "test_Memory.h"
 #include "programs/testMemoryAXI.h"
-#include "programs/testJumpBranchProgram.h"
-#include "programs/test_BTPU.h"
+#include "test_JumpBranch.h"
+#include "test_BTPU.h"
 #include "programs/test_BTPU_results.h"
-#include "programs/test_MatMul.h"
+#include "test_MatMul.h"
 #include "programs/test_MatMul_results.h"
 
-#include "programs/test_SerialCode.h"
-#include "programs/test_LoadStoreBTPU.h"
-#include "programs/test_TimerContinuous.h"
-#include "programs/test_TimerCapture.h"
+#include "test_SerialCode.h"
+#include "test_LoadStoreBTPU.h"
+#include "test_TimerContinuous.h"
+#include "test_TimerCapture.h"
 
 
 
@@ -171,7 +171,7 @@ void doTestCPU_test(){
 
     // Write the program to the program memory
     printf("Writing 'testProgram' to memory...\n");
-    writeProgramMemory(testProgram, programMemory, PROGMEM_SIZE);
+    writeProgramMemory(test_CPU_text, programMemory, PROGMEM_SIZE);
     controlRegister[0] = CPU_RESET; // Reset the CPU
     controlRegister[4] = controlRegister[4] | (0b11 << 24); //Turn ON 2 leds
     controlRegister[0] = CPU_RUN;   // Start the CPU
@@ -335,7 +335,7 @@ void doTestLOAD_test(){
 
     // Write the program to the program memory
     printf("Writing 'testLoad' to memory...\n");
-    writeProgramMemory(testLoad, programMemory, PROGMEM_SIZE);
+    writeProgramMemory(test_LoadStore_text, programMemory, PROGMEM_SIZE);
     // controlRegister[0] = CPU_RESET; // Reset the CPU
     uint32_t* addr = (uint32_t*)0x40011f5c;
     // if(addr == dataMemory_MAX-164){
@@ -437,7 +437,7 @@ void doTestAlu(){
 
     // Write the program to the program memory
     printf("Writing 'testAlu' to memory...\n");
-    writeProgramMemory(testAlu, programMemory, PROGMEM_SIZE);
+    writeProgramMemory(test_ALU_text, programMemory, PROGMEM_SIZE);
 
     //DELAY after the program is written
     for(int i = 0; i < DELAY_COUNT; ++i){
@@ -471,7 +471,7 @@ void doTestMemory(){
 
     // Write the program to the program memory
     printf("Writing 'testMemory' to memory...\n");
-    writeProgramMemory(testMemory, programMemory, PROGMEM_SIZE);
+    writeProgramMemory(test_Memory_text, programMemory, PROGMEM_SIZE);
 
     //DELAY after the program is written
     for(int i = 0; i < DELAY_COUNT; ++i){
@@ -558,7 +558,7 @@ void doTestJumpBranch(){
 
     // Write the program to the program memory
     printf("Writing 'testJumpBranch' to memory...\n");
-    writeProgramMemory(testJumpBranch, programMemory, PROGMEM_SIZE);
+    writeProgramMemory(test_JumpBranch_text, programMemory, PROGMEM_SIZE);
 
     //DELAY after the program is written
     for(int i = 0; i < DELAY_COUNT; ++i){
@@ -1124,15 +1124,15 @@ void doTimerContinuousTest(){
     // Wait for the CPU to finish
     while (controlRegister[3] != 0x0000006f);
 
-    #ifdef timerValue_ADDR  
-        uint64_t* timerMem = (uint64_t*)timerValue_ADDR;
+    #ifdef test_TimerContinuous_timerValue_ADDR  
+        uint64_t* timerMem = (uint64_t*)test_TimerContinuous_timerValue_ADDR;
         if(timerMem[0] == 10 * 4 + 4 * 4){
             printf("Test continuous mode: OK\n");
         }else{
             printf("Test continuous mode: FAILED -> timerMem = 0x%d\n", timerMem[0]);
         }
     #else
-        printf("Test continuous mode: SKIPPED -> timerValue_ADDR is not defined\n");
+        printf("Test continuous mode: SKIPPED -> test_TimerContinuous_timerValue_ADDR is not defined\n");
     #endif
     printf("End of 'testTimerContinuous' tests\n");
 
@@ -1174,8 +1174,8 @@ void doTimerCaptureTest(){
     // Wait for the CPU to finish
     while (controlRegister[3] != 0x0000006f);
 
-    #ifdef resultsTestCapture_ADDR  
-        uint64_t* timerMem = (uint64_t*)resultsTestCapture_ADDR;
+    #ifdef test_TimerCapture_resultsTestCapture_ADDR  
+        uint64_t* timerMem = (uint64_t*)test_TimerCapture_resultsTestCapture_ADDR;
         if(timerMem[0] == 6){
             printf("Test capture mode 1: OK\n");
         }else{
@@ -1187,7 +1187,7 @@ void doTimerCaptureTest(){
             printf("Test capture mode 2: FAILED -> timerMem = 0x%08x\n", timerMem[1]);
         }
     #else
-        printf("Test capture mode: SKIPPED -> timerValue_ADDR is not defined\n");
+        printf("Test capture mode: SKIPPED -> test_TimerCapture_resultsTestCapture_ADDR is not defined\n");
     #endif
 }
 

@@ -11,4 +11,12 @@ sim project sync: riscv-tests
 riscv-tests:
 	$(MAKE) -C riscv/tests sim
 
-.PHONY: riscv-tests
+# TestApp, the test suite of sw/vitis, includes the board build of the same
+# programs as .h files, generated into out/riscv/test/vitis/ (an include
+# directory of TestApp): the Vitis targets build them first.
+vitis vitis-build: riscv-tests-board
+
+riscv-tests-board:
+	$(MAKE) -C riscv/tests board
+
+.PHONY: riscv-tests riscv-tests-board
