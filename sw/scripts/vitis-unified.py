@@ -78,10 +78,10 @@ if not platforms:
     step("no platform in " + ws + " yet: nothing to do, create one in the Vitis GUI")
     sys.exit(0)
 
-# The hardware comes only from sw/hw/, the .xsa delivered by 'make update-xsa'.
+# The hardware comes only from sw/hw/, the .xsa delivered by 'make update_xsa'.
 found = glob.glob(os.path.join(root, "sw", "hw", "*.xsa"))
 if len(found) != 1:
-    print("vitis: ERROR: expected one .xsa in sw/hw/, found %d: deliver the hardware with 'make update-xsa', after 'make xsa'" % len(found), file=sys.stderr)
+    print("vitis: ERROR: expected one .xsa in sw/hw/, found %d: deliver the hardware with 'make update_xsa', after 'make xsa'" % len(found), file=sys.stderr)
     sys.exit(1)
 xsa = found[0]
 
@@ -166,7 +166,7 @@ for name, component in platforms.items():
         platform.build()
 
 if mode == "update":
-    step("workspace ready, not built: build from the GUI or with make vitis-build")
+    step("workspace ready, not built: build from the GUI or with make vitis_build")
     vitis.dispose()
     sys.exit(0)
 

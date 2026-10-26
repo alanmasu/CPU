@@ -41,6 +41,6 @@ JOBS=$(nproc)
 ROOTFS_URL=http://ati.ttu.ee/~kjans/soc_design/files/uramdisk.image.gz
 
 # Bare-metal part, Vitis Unified only: the application of sw/vitis/ that
-# make vitis-build puts into out/vitis/BOOT.bin. Empty when the workspace has
+# make vitis_build puts into out/vitis/BOOT.bin. Empty when the workspace has
 # only one application.
 VITIS_BOOT_APP=

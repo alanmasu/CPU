@@ -7,11 +7,11 @@
 #   vitis.sh build   bring the workspace up to date and build everything,
 #                    without the GUI
 #
-# Called by 'make vitis' and 'make vitis-build'. Only part of the workspace is
+# Called by 'make vitis' and 'make vitis_build'. Only part of the workspace is
 # committed (see .gitignore): after a clone the projects are not imported,
 # the platforms have no copy of the .xsa and the BSPs no sources; after
-# 'make update-xsa' the copy of the .xsa in the platforms is old. The
-# hardware comes only from sw/hw/, the .xsa delivered by 'make update-xsa'. The checks below
+# 'make update_xsa' the copy of the .xsa in the platforms is old. The
+# hardware comes only from sw/hw/, the .xsa delivered by 'make update_xsa'. The checks below
 # take a fraction of a second and need no Vitis tool: xsct, which is slow to
 # start, runs only when something has to be repaired, or for a build. The
 # repairs and the build are in sw/scripts/vitis-xsct.tcl.
@@ -21,7 +21,7 @@
 #            build in vitis-xsct.tcl, with xsct (tested with 2021.2)
 #   unified  from 2023.2, where it is the default: workspace of components;
 #            repairs and build in vitis-unified.py, with the Vitis Python API
-#            (tested with 2025.1). It has no system project: make vitis-build
+#            (tested with 2025.1). It has no system project: make vitis_build
 #            writes out/vitis/BOOT.bin with bootgen.
 
 set -euo pipefail
@@ -80,7 +80,7 @@ gui_is_open() {
 # the .xsa they used in sw/vitis/.template-hw/<platform>.xsa (not
 # committed): true when the platform was repaired with this .xsa, false
 # when the copy is missing or different, for example after 'make
-# update-xsa' followed by an update in the GUI.
+# update_xsa' followed by an update in the GUI.
 hardware_repaired() {
     local dir=$1
     local xsa=$2

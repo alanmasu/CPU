@@ -43,6 +43,9 @@
 # The .xsa each platform was last repaired with by the template (sw/scripts/vitis.sh)
 /sw/vitis/.template-hw/
 /sw/vitis/RemoteSystemsTempFiles/
+# Written by classic Vitis next to the workspace, not inside it: the CMSIS
+# Pack repositories of an Eclipse plug-in, not needed by the product
+/sw/Packages/
 /sw/vitis/.analytics
 /sw/vitis/IDE.log
 /sw/vitis/temp_xsdb_launch_script.tcl
