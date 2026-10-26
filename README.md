@@ -11,6 +11,7 @@ A 5-stage RISC-V soft core (RV32I) written in VHDL, with a binary neural network
 - [Architecture](#architecture)
 - [Simulation](#simulation)
 - [RISC-V software](#risc-v-software)
+- [Vitis applications](#vitis-applications)
 - [Branches](#branches)
 - [Known issues](#known-issues)
 
@@ -90,6 +91,8 @@ make xsa
 | `make -C riscv/tests` | build every RISC-V test for the board and for the simulation, and export them (see [RISC-V software](#risc-v-software)) |
 | `make sim_all [RESULTS=<dir>]` | run every simulation set in one session, with a summary of the outcomes in `out/sim_all/summary.txt` (see [Simulation](#simulation)) |
 | `make regen_pkg SIMSET=<name>` | compile the VHDL packages of a simulation set (see [Simulation](#simulation)) |
+| `make vitis` | open the Vitis workspace `sw/vitis/` in the GUI, after building the RISC-V programs it includes (see [Vitis applications](#vitis-applications)) |
+| `make update_xsa` | hand the `.xsa` of `out/hw/` over to the software, in `sw/hw/` (committed) |
 | `make check` | the checks run before a commit |
 | `make clean` | delete everything generated; refuses if the project has not been exported |
 
@@ -130,14 +133,28 @@ Testbenches that no longer match the RTL are in `hw/legacy/sim/`, out of the pro
 
 ## RISC-V software
 
-- `riscv/sdk/` is shared by every program: libraries of the peripherals (`GPIO`, `UART`, `I2C`, `Timer`, `OLED`, `BinaryMatMul` for the BTPU), `syscall` for newlib, the start-up code `start.S`, the linker script and `sdk.mk`, which a program's Makefile includes to get toolchain, flags and SDK objects. `SIMULATION=1` builds the simulation variant (shorter delays, no debug prints).
-- `riscv/tests/<test>/` holds one test program, with its own `Makefile` that only builds it into `bin/<test>.elf`: the tests in C with the SDK, the tests in assembly (`.S`, through the C preprocessor) with their own linker script.
-- `riscv/tests/Makefile` builds every test for the board and exports a `.h` into `out/riscv/test/vitis/`, then builds it for the simulation and exports a `.svh` into `out/riscv/test/sim/`, stopping at the first error. Every exported name starts with the test name (`test_BTPU_text`, `test_SerialCode_results_ADDR`). `make board` and `make sim` run one of the two halves.
+- `riscv/sdk/` is shared by every program: libraries of the peripherals (`GPIO`, `UART`, `I2C`, `Timer`, `OLED`, `BinaryMatMul` for the BTPU), `syscall` for newlib, the start-up code `start.S`, the linker script, `sdk.mk`, which a program's Makefile includes to get flags and SDK objects, and `program.mk`, the common part of every program's Makefile (toolchain, build folders, listings, export for the loader). `SIMULATION=1` builds the simulation variant (shorter delays, no debug prints).
+- `riscv/tests/<test>/` holds one test program, with its own `Makefile` that builds it into `bin/board/<test>.elf`, or `bin/sim/<test>.elf` with `SIMULATION=1`: the tests in C with the SDK, the tests in assembly (`.S`, through the C preprocessor) with their own linker script. The two builds have their own folders, so switching needs no clean. Next to the ELF goes the map of the linker (`<test>.map`), and `listing/<board|sim>/` gets `<test>.dump` (`objdump -d`: address, instruction in hex and in assembly on one line), `<test>.disas` (`objdump -D`, data sections too), `<test>.sections` (`readelf -S`) and `<test>.symbols` (`nm -n -S`).
+- `make` in the folder of a test, for the board, also exports it into `out/riscv/loader/program.h`, the program `LoaderApp` of `sw/vitis/` loads (every name starts with `loader_program`); the build of every test from `riscv/tests/Makefile` does not.
+- `riscv/tests/Makefile` builds every test for the board and exports a `.h` into `out/riscv/test/vitis/`, then builds it for the simulation and exports a `.svh` into `out/riscv/test/sim/`, stopping at the first error. Every exported name starts with the test name (`test_BTPU_text`, `test_SerialCode_results_ADDR`). `make board` and `make sim` run one of the two halves. The builds are incremental and a header is rewritten only when it changes, so the Vitis applications and the testbenches compile again only for the tests that changed.
 - `tools/elfexport.py` writes those files (`--format h`, `svh` or `coe`); it needs `pyelftools`, which `tools/activate` installs into `pyEnv/`.
 
 To add a test, create its folder with a `Makefile` (copy the one of a test in the same language) and add its name to `TESTS` in `riscv/tests/Makefile`.
 
 `riscv/apps/` and `riscv/asm/` still hold example and older programs, each with its own `Makefile` and linker script, out of date with respect to the memory sizes above. Applications with a life of their own live in their own repositories and include this one as a submodule, pinned to a tagged version, so that each application records the exact hardware and `sdk` it runs on.
+
+## Vitis applications
+
+`sw/vitis/` is the workspace of the classic Vitis 2021.2, with the platform `CPU_Platform` on the hardware in `sw/hw/CPU.xsa` (`make xsa`, then `make update_xsa`) and two standalone applications for the Cortex-A9, each with its system project:
+
+- `TestApp` loads every RISC-V test of `riscv/tests/` into the core, runs it and checks the results, printing `Test #n: OK` or `FAILED` on the UART. It includes the board build of the tests from `out/riscv/test/vitis/`; a pre-build step runs `make riscv_tests_board`, so that a build from the GUI also picks up the tests changed while the GUI was open.
+- `LoaderApp` loads one program, the one in `out/riscv/loader/program.h`, starts it with BTN UP and reports when it ends; BTN UP loads it again, any other button stops. To choose the program, run `make` in its folder (for example `make -C riscv/tests/test_ALU`), then build `LoaderApp`. After a clone the default program is `test_CPU`.
+
+`make vitis` opens the GUI and `make vitis_build` builds everything without it; both build the RISC-V programs first. With the GUI open, build from the GUI: `make vitis_build` refuses to run while the GUI holds the workspace.
+
+Two things to know when building from the GUI:
+- Eclipse ignores the errors of the pre-build step: if a test does not compile, the build of `TestApp` still ends, with the headers of the last good build. The error is at the top of the console of `TestApp`, or run `make riscv_tests_board` in a terminal.
+- An include directory outside the workspace goes in relative to it, as `${workspace_loc}/../../out/...`: an absolute path would not work on another machine, and the git hook refuses it.
 
 ## Branches
 

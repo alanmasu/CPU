@@ -86,6 +86,21 @@ def defines(prefix, sections, global_pointer, symbols):
     return result
 
 
+def write_if_changed(path, text):
+    """Write text to path only when the file does not hold it already.
+
+    A file rewritten with the same content gets a new date, and make, Vitis
+    and Vivado would compile again what includes it.
+    """
+    if os.path.exists(path):
+        with open(path) as f:
+            if f.read() == text:
+                return False
+    with open(path, 'w') as f:
+        f.write(text)
+    return True
+
+
 def write_h(path, prefix, sections, global_pointer, symbols):
     lines = ['#include <stdint.h>', '']
     for name, value in defines(prefix, sections, global_pointer, symbols):
@@ -104,8 +119,7 @@ def write_h(path, prefix, sections, global_pointer, symbols):
         lines.append('    0')
         lines.append('};')
         lines.append('')
-    with open(path, 'w') as f:
-        f.write('\n'.join(lines))
+    return write_if_changed(path, '\n'.join(lines))
 
 
 def write_svh(path, prefix, sections, global_pointer, symbols):
@@ -126,8 +140,7 @@ def write_svh(path, prefix, sections, global_pointer, symbols):
         lines.append("    32'h00000000")
         lines.append('};')
         lines.append('')
-    with open(path, 'w') as f:
-        f.write('\n'.join(lines))
+    return write_if_changed(path, '\n'.join(lines))
 
 
 def coe(data_words):
@@ -146,8 +159,7 @@ def write_coe(instr_path, data_path, sections, instr_base, data_base):
         raise ValueError('the ELF has no .text section')
     address, _, data = sections['.text']
     padding = (address - instr_base) // 4
-    with open(instr_path, 'w') as f:
-        f.write(coe(['00000000'] * padding + words(data)))
+    changed = write_if_changed(instr_path, coe(['00000000'] * padding + words(data)))
 
     image = b''
     for name in ['.const', '.data']:
@@ -158,8 +170,8 @@ def write_coe(instr_path, data_path, sections, instr_base, data_base):
         image += b'\0' * (address - data_base - len(image))
         image += data
     if image:
-        with open(data_path, 'w') as f:
-            f.write(coe(words(image)))
+        changed = write_if_changed(data_path, coe(words(image))) or changed
+    return changed
 
 
 def main():
@@ -180,17 +192,20 @@ def main():
     try:
         sections, global_pointer, symbols = read_elf(args.elf)
         if args.format == 'h':
-            write_h(args.output, prefix, sections, global_pointer, symbols)
+            changed = write_h(args.output, prefix, sections, global_pointer, symbols)
         elif args.format == 'svh':
-            write_svh(args.output, prefix, sections, global_pointer, symbols)
+            changed = write_svh(args.output, prefix, sections, global_pointer, symbols)
         else:
             if args.data_output is None:
                 raise ValueError('--format coe needs --data-output')
-            write_coe(args.output, args.data_output, sections, int(args.instr_base, 16), int(args.data_base, 16))
+            changed = write_coe(args.output, args.data_output, sections, int(args.instr_base, 16), int(args.data_base, 16))
     except (OSError, ValueError) as error:
         print(f'elfexport: {args.elf}: {error}', file=sys.stderr)
         sys.exit(1)
-    print(f'elfexport: {args.output}')
+    if changed:
+        print(f'elfexport: {args.output}')
+    else:
+        print(f'elfexport: {args.output} unchanged')
 
 
 if __name__ == '__main__':

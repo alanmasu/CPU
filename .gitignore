@@ -9,6 +9,7 @@
 # Build products of the RISC-V programs
 /riscv/tests/*/bin/
 /riscv/tests/*/obj/
+/riscv/tests/*/listing/
 .Xil/
 *.jou
 *.log

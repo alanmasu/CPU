@@ -1,42 +1,29 @@
-# test_Base: builds bin/test_Base.elf with the SDK of ../../sdk.
-# SIMULATION=1, exported by riscv/tests/Makefile, builds it for the simulation:
-# run "make clean" before switching between the two builds.
+# test_Base: builds bin/<variant>/test_Base.elf with the SDK of ../../sdk.
+# SIMULATION=1, exported by riscv/tests/Makefile, builds it for the
+# simulation. Build folders, listings and the export for the loader:
+# ../../sdk/program.mk.
 
-# Directory
-SRC_DIR = src
-INC_DIR = include
-OBJ_DIR = obj
-OUT_DIR = bin
+NAME = test_Base
+include ../../sdk/program.mk
 
-# Toolchain, flags, linker script and SDK objects, built into obj/sdk
+# Compiler and linker flags, linker script and SDK objects, built into
+# obj/<variant>/sdk
 SDK_BUILD_DIR = $(OBJ_DIR)/sdk
 include ../../sdk/sdk.mk
 
-# File
-OUT     = $(OUT_DIR)/test_Base.elf
-SRCS    = $(wildcard $(SRC_DIR)/*.c)
-OBJS    = $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(SRCS))
+SRCS    = $(wildcard src/*.c)
+OBJS    = $(patsubst src/%.c,$(OBJ_DIR)/%.o,$(SRCS))
 
-# Rules
 all: $(OUT)
 
 # Link the test with the SDK objects
 $(OUT): $(OBJS) $(SDK_OBJS)
 	@mkdir -p $(OUT_DIR)
-	$(CC) $(SDK_CFLAGS) -o $@ $^ $(SDK_LDFLAGS)
+	$(CC) $(SDK_CFLAGS) -o $@ $^ $(SDK_LDFLAGS) $(MAP_FLAGS)
 
 # Compile each C file of src/
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
+$(OBJ_DIR)/%.o: src/%.c
 	@mkdir -p $(OBJ_DIR)
-	$(CC) $(SDK_CFLAGS) -I$(INC_DIR) -c -o $@ $<
+	$(CC) $(SDK_CFLAGS) $(DEP_FLAGS) -Iinclude -c -o $@ $<
 
-dump: all
-	$(OBJDUMP) -d $(OUT)
-
-sections: all
-	$(READELF) -S $(OUT)
-
-clean:
-	rm -rf $(OBJ_DIR) $(OUT_DIR)
-
-.PHONY: all clean dump sections
+-include $(OBJS:.o=.d) $(SDK_OBJS:.o=.d)
