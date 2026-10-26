@@ -29,8 +29,8 @@ SDK_CFLAGS += -ffreestanding -Os --specs=nano.specs -ffunction-sections -fdata-s
 SDK_CFLAGS += -DMY_RISCV -Wstack-usage=8000
 
 # SIMULATION=1 builds for the simulation: shorter delays in the libraries and
-# no debug prints in the programs. The objects do not change name, so clean
-# before switching between the two builds.
+# no debug prints in the programs. With program.mk the two builds have their
+# own SDK_BUILD_DIR; without it, clean before switching between them.
 ifeq ($(SIMULATION),1)
 SDK_CFLAGS += -DSIMULATION
 endif
@@ -42,12 +42,16 @@ SDK_LDFLAGS := -T $(SDK_DIR)linker_script.ld -e main
 SDK_SRCS := $(foreach lib,$(SDK_LIBS),$(wildcard $(SDK_DIR)libraries/$(lib)/src/*.c))
 SDK_OBJS := $(patsubst $(SDK_DIR)%.c,$(SDK_BUILD_DIR)/%.o,$(SDK_SRCS)) $(SDK_BUILD_DIR)/start.o
 
+# -MMD -MP: a .d file next to each object lists the headers it includes; the
+# program's Makefile includes them after its default goal (-include
+# $(SDK_OBJS:.o=.d)), so that a changed header of the SDK rebuilds the
+# objects that use it
 $(SDK_BUILD_DIR)/%.o: $(SDK_DIR)%.c
 	@mkdir -p $(dir $@)
-	$(CC) $(SDK_CFLAGS) -c $< -o $@
+	$(CC) $(SDK_CFLAGS) -MMD -MP -c $< -o $@
 
 # Only pattern rules in this file: an explicit target here would become the
 # default goal of the Makefile that includes it
 $(SDK_BUILD_DIR)/%.o: $(SDK_DIR)%.S
 	@mkdir -p $(dir $@)
-	$(CC) $(SDK_CFLAGS) -c $< -o $@
+	$(CC) $(SDK_CFLAGS) -MMD -MP -c $< -o $@
