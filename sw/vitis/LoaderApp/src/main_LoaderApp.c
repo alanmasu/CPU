@@ -51,11 +51,10 @@
 #include "RISCProgramming.h"
 #include <inttypes.h>
 
-//Include programs
-#include "programs/simpleUART.h"
-#include "programs/uartGpioProgram.h"
-#include "programs/GPIOProgramMy.h"
-#include "programs/testLibProgram.h"
+// The program to load: out/riscv/loader/program.h, an include directory of
+// this application, written by make run in the folder of a RISC-V program
+// (see riscv/sdk/program.mk). Every name starts with loader_program.
+#include "program.h"
 
 typedef struct __attribute__((packed)) GPIOReg_t{
     unsigned int GPIO0 : 1;
@@ -142,28 +141,27 @@ int main(){
         wait(0);
 
         printf("Writing .text section...\n");
-        writeProgramMemory(LibProgram_text, (uint32_t*)RISC_INSTR_BASE, PROGMEM_SIZE);
+        writeProgramMemory(loader_program_text, (uint32_t*)loader_program_TEXT_ADDR, loader_program_TEXT_SIZE);
 
         wait(0);
-        #if defined( LibProgram_CONST_SIZE ) && LibProgram_CONST_SIZE > 0
+        #if defined(loader_program_CONST_SIZE) && loader_program_CONST_SIZE > 0
             printf("Writing .const section...\n");
-            writeDataMemory((uint8_t*)LibProgram_const, (uint8_t*)LibProgram_CONST_ADDR, LibProgram_CONST_SIZE);
+            writeDataMemory((uint8_t*)loader_program_const, (uint8_t*)loader_program_CONST_ADDR, loader_program_CONST_SIZE);
         #endif
 
-        #ifdef LibProgram_BSS_SIZE
+        #ifdef loader_program_BSS_SIZE
             printf("Cleaning .bss section...\n");
-            cleanMemory((uint32_t*)LibProgram_BSS_ADDR, LibProgram_BSS_SIZE);
+            cleanMemory((uint32_t*)loader_program_BSS_ADDR, loader_program_BSS_SIZE);
         #endif
 
-        #if defined(LibProgram_DATA_SIZE) && LibProgram_DATA_SIZE > 0
+        #if defined(loader_program_DATA_SIZE) && loader_program_DATA_SIZE > 0
             printf("Writing .data section...\n");
-            writeDataMemory((uint8_t*)LibProgram_data, (uint8_t*)LibProgram_DATA_ADDR, LibProgram_DATA_SIZE);
+            writeDataMemory((uint8_t*)loader_program_data, (uint8_t*)loader_program_DATA_ADDR, loader_program_DATA_SIZE);
         #endif
 
-        #ifdef GLOBAL_POINTER_VAL
-            printf("Writing global pointer...\n");
-            *(uint32_t*)RISC_RAM_BASE = GLOBAL_POINTER_VAL;
-        #endif
+        // The global pointer is not written: the start-up code of the program
+        // loads it into gp by itself, and the first two words of the data
+        // memory hold the size and the address of the heap (written above)
 
         
         printf("\nWaiting BTN UP to be pressed for startup the CPU...\n");
@@ -193,8 +191,10 @@ int main(){
         cregPtr->run = 1;
         cregIOPtr->led1 = 1;
         
-        while(cregFile->programCounter < 0x4000013c); //Wait CPU to go in loop
-
+        // No wait for a fixed address: the program may never end (an
+        // application) or end before any given address (a short test). The
+        // end of a program, the jump on itself (jal x0, 0), is reported in
+        // the loop below.
         wait(0);
 
         uint32_t cregIOState = *(uint32_t*)cregIOPtr;
@@ -203,9 +203,14 @@ int main(){
         oledData->value = 0;
         uint8_t printedResults = 0;
         uint64_t* timeResults = (uint64_t*)risc_v_heap;
+        uint8_t endReported = 0;
         do{
             cregIO = *(uint32_t*)cregIOPtr;
             cregIO &= 0xF; //Zero extended
+            if(cregFile->instruction == 0x0000006f && !endReported){
+                printf("Program ended (jal x0, 0) at PC 0x%08lx\n", (unsigned long)cregFile->programCounter);
+                endReported = 1;
+            }
             // oledData->data[0] = UARTSTReg->data[0];
             // oledData->data[3] = (UARTSTReg->data[0] & UART_RXEMPTY) >> 1;
 

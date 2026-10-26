@@ -22,7 +22,9 @@ void cleanMemory(uint32_t* mem, const uint32_t mem_size) {
 }
 
 void writeProgramMemory(const uint32_t* program, uint32_t* mem, const uint32_t mem_size) {
-	for (int i = 0; program[i] != 0 && i < mem_size / 4; ++i) {
+	// mem_size is the size of the section, from program.h: a zero word inside
+	// .text must not stop the copy
+	for (int i = 0; i < mem_size / 4; ++i) {
 		mem[i] = program[i];
 	}
 }

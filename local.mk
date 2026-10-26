@@ -19,4 +19,13 @@ vitis vitis_build: riscv_tests_board
 riscv_tests_board:
 	$(MAKE) -C riscv/tests board
 
+# LoaderApp includes out/riscv/loader/program.h, which make writes when run in
+# the folder of a RISC-V program. After a clone there is none, and the build
+# of LoaderApp would stop: test_CPU is exported as the default program. The
+# rule has no prerequisites, so it runs only when the header is missing.
+vitis vitis_build: out/riscv/loader/program.h
+
+out/riscv/loader/program.h:
+	$(MAKE) -C riscv/tests/test_CPU
+
 .PHONY: riscv_tests riscv_tests_board

@@ -66,11 +66,11 @@ void cleanMemory(uint32_t* mem, const uint32_t mem_size);
 
 /**!
  * @brief Write a program to the program memory
- * @details Start writing the program to the the address passed as argument until a 0 is found or MAX size is reached
+ * @details Copy mem_size bytes of the program, as 32-bit words, to the address passed as argument
  *
  * @param program [in] - The program to write
- * @param programMemory [in] - The memory to write the program to
- * @param PROGMEM_SIZE [in] - The size of the memory
+ * @param mem [in] - The memory to write the program to
+ * @param mem_size [in] - The size of the program in bytes (<prefix>_TEXT_SIZE of the exported header)
  *
 */
 void writeProgramMemory(const uint32_t* program, uint32_t* mem , const uint32_t mem_size);
