@@ -98,6 +98,3 @@ pyEnv
 *obj
 .vscode
 hw/ghdl/results/*
-# Written by the classic Vitis GUI next to its workspace (the repositories
-# of the CMSIS packs of Eclipse); asked to the template on 26/10/2026
-/sw/Packages/
