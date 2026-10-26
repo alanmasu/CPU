@@ -39,9 +39,9 @@ SYNC_OPTION := $(if $(DISCARD_LOCAL),-discard-local)
 # compare it with its snapshot, to find changes not exported.
 CHECK_OPTION := $(if $(WITH_EXPORT),-with-export)
 
-.PHONY: help hooks project sync vivado export ip release sim sim_all sim_ip regen_pkg synth bitstream xsa update-xsa check diff clean clean-force
-.PHONY: linux-fsbl linux-dtb linux-uboot linux-boot linux-kernel linux-modules linux-sd linux-clean
-.PHONY: vitis vitis-build
+.PHONY: help hooks project sync vivado export ip release sim sim_all sim_ip regen_pkg synth bitstream xsa update_xsa check check_paths diff clean clean_force
+.PHONY: linux_fsbl linux_dtb linux_uboot linux_boot linux_kernel linux_modules linux_sd linux_clean
+.PHONY: vitis vitis_build
 
 help:
 	@echo "Vivado targets, each runs a prj:: command."
@@ -69,29 +69,31 @@ help:
 	@echo "  synth        run synthesis"
 	@echo "  bitstream    build out/hw/PROJECT.bit"
 	@echo "  xsa          build out/hw/PROJECT.bit and out/hw/PROJECT.xsa"
-	@echo "  update-xsa   deliver out/hw/PROJECT.xsa to the software: copy it into sw/hw/,"
+	@echo "  update_xsa   deliver out/hw/PROJECT.xsa to the software: copy it into sw/hw/,"
 	@echo "               which is committed, FORCE=1 also if built from uncommitted hw/"
 	@echo "  check        checks to run before a commit; WITH_EXPORT=1 also exports the project"
 	@echo "               into work/ to find changes not exported (takes the time of an export)"
+	@echo "  check_paths  report the paths of all the files not ignored by git that would not work"
+	@echo "               on another machine: absolute, or relative and outside the product"
 	@echo "  diff         the files of the project changed after the last export, without Vivado:"
 	@echo "               diff in work/project-changes.diff, each file opened in VS Code (code --diff)"
 	@echo "  clean        delete everything generated, refuses if not exported"
-	@echo "  clean-force  delete it anyway"
+	@echo "  clean_force  delete it anyway"
 	@echo
 	@echo "Linux targets, Linux hosts only, run sw/scripts/build.sh:"
-	@echo "  linux-fsbl     FSBL of the Linux boot, from sw/hw/PROJECT.xsa"
-	@echo "  linux-dtb      device tree from the .xsa and sw/dts/system-user.dtsi"
-	@echo "  linux-uboot    U-Boot, in the checkout of UBOOT_SRC"
-	@echo "  linux-boot     out/sd-card/BOOT.bin: FSBL, bitstream of sw/hw/PROJECT.xsa, U-Boot"
-	@echo "  linux-kernel   kernel uImage, built in out/sw/linux or LINUX_BUILD_DIR"
-	@echo "  linux-modules  the drivers in hw/ip/*/linux-driver/"
-	@echo "  linux-sd       everything above, collected in out/sd-card/"
-	@echo "  linux-clean    delete out/sw/ and out/sd-card/"
+	@echo "  linux_fsbl     FSBL of the Linux boot, from sw/hw/PROJECT.xsa"
+	@echo "  linux_dtb      device tree from the .xsa and sw/dts/system-user.dtsi"
+	@echo "  linux_uboot    U-Boot, in the checkout of UBOOT_SRC"
+	@echo "  linux_boot     out/sd-card/BOOT.bin: FSBL, bitstream of sw/hw/PROJECT.xsa, U-Boot"
+	@echo "  linux_kernel   kernel uImage, built in out/sw/linux or LINUX_BUILD_DIR"
+	@echo "  linux_modules  the drivers in hw/ip/*/linux-driver/"
+	@echo "  linux_sd       everything above, collected in out/sd-card/"
+	@echo "  linux_clean    delete out/sw/ and out/sd-card/"
 	@echo
 	@echo "Vitis targets, bare-metal part in the workspace sw/vitis/:"
 	@echo "  vitis        open the workspace in the Vitis IDE, after repairing"
 	@echo "               what a clone or make xsa left out of date, without building"
-	@echo "  vitis-build  repair and build everything, a BOOT.bin included, without the GUI"
+	@echo "  vitis_build  repair and build everything, a BOOT.bin included, without the GUI"
 
 # Make git run hooks/vivado_consistency.pre_commit before every commit: see
 # hooks/install.sh.
@@ -158,11 +160,15 @@ xsa:
 
 # The software (Linux part and Vitis workspace) reads the hardware only from
 # sw/hw/, which is committed: see sw/scripts/update-xsa.sh.
-update-xsa:
+update_xsa:
 	bash sw/scripts/update-xsa.sh $(if $(FORCE),--force)
 
 check:
 	$(RUN) check $(CHECK_OPTION)
+
+# No Vivado, a report only (see hooks/check-paths.py).
+check_paths:
+	python3 hooks/check-paths.py
 
 # No Vivado: the files of hw/vivado/ against hw/vivado/.baseline/, as the
 # pre-commit hook compares them (see hw/scripts/project-changes.sh).
@@ -174,7 +180,7 @@ diff:
 vitis:
 	bash sw/scripts/vitis.sh gui
 
-vitis-build:
+vitis_build:
 	bash sw/scripts/vitis.sh build
 
 # Every target that starts Vivado needs work/ (vitis.sh creates it itself).
@@ -229,39 +235,39 @@ clean:
 		if [ -n "$$stale" ]; then \
 			echo "Block designs changed after the last export:"; \
 			echo "$$stale"; \
-			echo "Run 'make export' first, or 'make clean-force' to discard the changes"; \
+			echo "Run 'make export' first, or 'make clean_force' to discard the changes"; \
 			exit 1; \
 		fi; \
 	fi
 	rm -rf $(GENERATED)
 
-clean-force:
+clean_force:
 	rm -rf $(GENERATED)
 
 # Linux part: each target runs one step of sw/scripts/build.sh, after the
 # steps it needs. Kept apart from 'clean': the kernel build takes long.
-linux-fsbl:
+linux_fsbl:
 	$(SW) fsbl
 
-linux-dtb:
+linux_dtb:
 	$(SW) dtb
 
-linux-uboot:
+linux_uboot:
 	$(SW) uboot
 
-linux-boot: linux-fsbl linux-uboot
+linux_boot: linux_fsbl linux_uboot
 	$(SW) boot
 
-linux-kernel: linux-uboot
+linux_kernel: linux_uboot
 	$(SW) kernel
 
-linux-modules: linux-kernel
+linux_modules: linux_kernel
 	$(SW) modules
 
-linux-sd: linux-boot linux-dtb linux-modules
+linux_sd: linux_boot linux_dtb linux_modules
 	$(SW) sd
 
-linux-clean:
+linux_clean:
 	rm -rf out/sw out/sd-card
 
 # Rules of the product: local.mk, committed in the product and never

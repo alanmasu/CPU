@@ -74,7 +74,7 @@ proc ::prj::check {{option ""}} {
 
     set xsa_state [delivered_xsa_state]
     if {$xsa_state ne ""} {
-        puts "XSA: $xsa_state: run 'make xsa', then 'make update-xsa'"
+        puts "XSA: $xsa_state: run 'make xsa', then 'make update_xsa'"
     }
 
     foreach name [local_ips] {
@@ -100,7 +100,7 @@ proc ::prj::check {{option ""}} {
     puts "All checks passed"
 }
 
-# The .xsa delivered to the software in sw/hw/ (make update-xsa), against
+# The .xsa delivered to the software in sw/hw/ (make update_xsa), against
 # the commits: "" when it is fine or there is none, otherwise what is wrong.
 # Its commit comes from <project>.usr_access, the USR_ACCESS value of its
 # bitstream. Older than hw/ means that a commit after it changed hw/ (the

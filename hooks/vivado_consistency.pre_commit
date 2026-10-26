@@ -23,12 +23,16 @@ staged=$(git diff --cached --name-only --diff-filter=ACM)
 #    hardware sources and scripts, the files of the Linux part, and the
 #    project files of a Vitis workspace (the filter of
 #    hooks/vitis-paths.sh removes the path of the product from them: this
-#    catches a clone where it is not enabled, run make hooks there).
+#    catches a clone where it is not enabled, run make hooks there). The
+#    .cproject and .project of classic Vitis are not filtered, because
+#    Vitis writes them without absolute paths, but an include directory
+#    or a linked resource chosen in the GUI with "File system..." is
+#    written there as an absolute path.
 for file in $staged; do
     case "$file" in
         *.tcl | *.xdc | *.xci | *.xml | *.v | *.sv | *.vh | *.svh | *.vhd | *.vhdl | \
         *.sh | *.dts | *.dtsi | *.c | *.h | *.fragment | Makefile | */Makefile | \
-        *.yaml | *.json | *.spr | *.prj | *.sprj)
+        *.yaml | *.json | *.spr | *.prj | *.sprj | */.cproject | */.project)
             if git show ":$file" | grep -q -F -e "$PWD" -e "$HOME"; then
                 fail "$file contains an absolute path of this machine"
             fi

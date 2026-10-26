@@ -14,7 +14,7 @@
 # Settings in sw/config.sh, paths of the source checkouts in .env.
 # FSBL and device tree are made again only when the .xsa, their sources or
 # this script are newer; after changing a tag in sw/config.sh, run
-# 'make linux-clean'.
+# 'make linux_clean'.
 #
 # FSBL and device tree come from one of two backends, chosen by the Vivado
 # version of the project:
@@ -195,7 +195,7 @@ step_fsbl() {
     header "FSBL"
     check_versions
     be=$(backend)
-    xsa=$(find_one sw/hw '*.xsa' "deliver the hardware with 'make update-xsa', after 'make xsa'")
+    xsa=$(find_one sw/hw '*.xsa' "deliver the hardware with 'make update_xsa', after 'make xsa'")
     if is_up_to_date out/sw/fsbl/fsbl.elf "$xsa" sw/scripts/fsbl-xsct.tcl sw/scripts/fsbl-vitis.py sw/scripts/build.sh; then
         echo "FSBL up to date"
         return
@@ -242,7 +242,7 @@ step_dtb() {
     header "Device tree"
     check_versions
     be=$(backend)
-    xsa=$(find_one sw/hw '*.xsa' "deliver the hardware with 'make update-xsa', after 'make xsa'")
+    xsa=$(find_one sw/hw '*.xsa' "deliver the hardware with 'make update_xsa', after 'make xsa'")
     mkdir -p out/sd-card
     if is_up_to_date out/sw/dt/devicetree.dtb "$xsa" sw/dts/system-user.dtsi sw/scripts/devicetree-xsct.tcl sw/scripts/build.sh sw/config.sh; then
         echo "Device tree up to date"
@@ -298,12 +298,12 @@ step_uboot() {
 step_boot() {
     local bit
     header "BOOT.bin"
-    bit=$(xsa_bitstream "$(find_one sw/hw '*.xsa' "deliver the hardware with 'make update-xsa', after 'make xsa'")")
+    bit=$(xsa_bitstream "$(find_one sw/hw '*.xsa' "deliver the hardware with 'make update_xsa', after 'make xsa'")")
     if [ ! -f out/sw/fsbl/fsbl.elf ]; then
-        die "no FSBL: run 'make linux-fsbl' first"
+        die "no FSBL: run 'make linux_fsbl' first"
     fi
     if [ ! -f "$UBOOT_SRC/u-boot.elf" ]; then
-        die "no u-boot.elf: run 'make linux-uboot' first"
+        die "no u-boot.elf: run 'make linux_uboot' first"
     fi
     mkdir -p out/sd-card
     cat > out/sw/system.bif <<EOF
@@ -345,7 +345,7 @@ step_modules() {
     local dir
     header "Kernel modules"
     if [ ! -f "$LINUX_BUILD/Module.symvers" ]; then
-        die "no kernel build with its modules: run 'make linux-kernel' first"
+        die "no kernel build with its modules: run 'make linux_kernel' first"
     fi
     for dir in hw/ip/*/linux-driver; do
         if [ -f "$dir/Makefile" ]; then
