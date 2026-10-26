@@ -39,8 +39,10 @@ OBJDUMP = riscv32-unknown-elf-objdump
 READELF = riscv32-unknown-elf-readelf
 NM      = riscv32-unknown-elf-nm
 
-# Python with pyelftools: the environment that tools/activate creates
-PYTHON := $(ROOT_DIR)pyEnv/bin/python3
+# Python with pyelftools: the environment that tools/activate creates.
+# Without PYTHONHOME and PYTHONPATH: the Vitis GUI sets them to its own
+# Python 3.8, and the Python of pyEnv would load that standard library
+PYTHON := env -u PYTHONHOME -u PYTHONPATH $(ROOT_DIR)pyEnv/bin/python3
 
 ifeq ($(SIMULATION),1)
 VARIANT := sim

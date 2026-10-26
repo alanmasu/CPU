@@ -31,8 +31,11 @@ TESTS += test_ALU test_ANDI test_AXI test_CPU test_I2C test_JumpBranch test_Load
 
 OUT_DIR := ../../out/riscv/test
 
-# Python with pyelftools: the environment that tools/activate creates
-PYTHON := ../../pyEnv/bin/python3
+# Python with pyelftools: the environment that tools/activate creates.
+# Without PYTHONHOME and PYTHONPATH: the Vitis GUI sets them to its own
+# Python 3.8, and the Python of pyEnv would load that standard library and
+# stop with "SRE module mismatch" (pre-build step of TestApp)
+PYTHON := env -u PYTHONHOME -u PYTHONPATH ../../pyEnv/bin/python3
 TOOLS  := ../../tools
 
 # Building the tests from here does not export them for the loader of
