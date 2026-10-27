@@ -57,8 +57,7 @@
 // Including the headers of programs
 #include "test_CPU.h"
 #include "test_LoadStore.h"
-#include "programs/GPIOProgram.h"
-#include "programs/GPIOProgramMy.h"
+#include "example_GPIO_BlinkAsm.h"
 #include "test_ALU.h"
 #include "test_Memory.h"
 #include "programs/testMemoryAXI.h"
@@ -148,8 +147,9 @@ void doBlink(){
     clearProgramMemory(programMemory, PROGMEM_SIZE);
 
     // Write the program to the program memory
-    printf("Writing 'GPIO' to memory...\n");
-    writeProgramMemory(GPIO, programMemory, PROGMEM_SIZE);
+    // The assembly blink of riscv/examples: .text only, no data to load
+    printf("Writing 'example_GPIO_BlinkAsm' to memory...\n");
+    writeProgramMemory(example_GPIO_BlinkAsm_text, programMemory, PROGMEM_SIZE);
 
     //DELAY after the program is written
     for(int i = 0; i < DELAY_COUNT; ++i){

@@ -12,20 +12,25 @@ riscv_tests:
 	$(MAKE) -C riscv/tests sim
 
 # TestApp, the test suite of sw/vitis, includes the board build of the same
-# programs as .h files, generated into out/riscv/test/vitis/ (an include
-# directory of TestApp): the Vitis targets build them first.
-vitis vitis_build: riscv_tests_board
+# programs as .h files, generated into out/riscv/test/vitis/, and the blink
+# example from out/riscv/examples/vitis/ (both include directories of
+# TestApp): the Vitis targets build them first.
+vitis vitis_build: riscv_tests_board riscv_examples_board
 
 riscv_tests_board:
 	$(MAKE) -C riscv/tests board
 
+riscv_examples_board:
+	$(MAKE) -C riscv/examples
+
 # LoaderApp includes out/riscv/loader/program.h, which make writes when run in
 # the folder of a RISC-V program. After a clone there is none, and the build
-# of LoaderApp would stop: test_CPU is exported as the default program. The
-# rule has no prerequisites, so it runs only when the header is missing.
+# of LoaderApp would stop: example_GPIO_Blink is exported as the default
+# program. The rule has no prerequisites, so it runs only when the header is
+# missing.
 vitis vitis_build: out/riscv/loader/program.h
 
 out/riscv/loader/program.h:
-	$(MAKE) -C riscv/tests/test_CPU
+	$(MAKE) -C riscv/examples/example_GPIO_Blink
 
-.PHONY: riscv_tests riscv_tests_board
+.PHONY: riscv_tests riscv_tests_board riscv_examples_board

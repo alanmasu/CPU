@@ -11,7 +11,9 @@ SECTIONS
 {
 	. = 0x40000000;
 	. = ALIGN(4);
-	.text : {
+	.text : 
+	{
+		*(.text.main)
 		*(.text*)
 		_etext = .;
 		

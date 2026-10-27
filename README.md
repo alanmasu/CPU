@@ -40,11 +40,11 @@ A 5-stage RISC-V soft core (RV32I) written in VHDL, with a binary neural network
 ├── riscv/
 │   ├── sdk/                      linker script, start-up code and libraries shared by every program
 │   ├── tests/                    test programs, one folder per test (see RISC-V software)
-│   ├── apps/                     example programs, not yet moved to the new layout
+│   ├── examples/                 example programs, one folder per example (see RISC-V software)
 │   └── asm/                      older assembly programs, not yet moved to the new layout
 ├── sw/                           software of the Zynq ARM cores (Vitis, Linux), from the template
 ├── tools/                        elfexport.py, which exports an ELF for Vitis, the testbenches or a .coe,
-│                                 and the older scripts still used by riscv/apps and hw/ghdl
+│                                 and activate, which creates the Python environment pyEnv/
 ├── hooks/                        git hooks of the template
 ├── out/                          GENERATED: bitstream, .xsa, build products
 ├── local.mk                      rules of this product, read at the end of the template's Makefile
@@ -135,20 +135,21 @@ Testbenches that no longer match the RTL are in `hw/legacy/sim/`, out of the pro
 
 - `riscv/sdk/` is shared by every program: libraries of the peripherals (`GPIO`, `UART`, `I2C`, `Timer`, `OLED`, `BinaryMatMul` for the BTPU), `syscall` for newlib, the start-up code `start.S`, the linker script, `sdk.mk`, which a program's Makefile includes to get flags and SDK objects, and `program.mk`, the common part of every program's Makefile (toolchain, build folders, listings, export for the loader). `SIMULATION=1` builds the simulation variant (shorter delays, no debug prints).
 - `riscv/tests/<test>/` holds one test program, with its own `Makefile` that builds it into `bin/board/<test>.elf`, or `bin/sim/<test>.elf` with `SIMULATION=1`: the tests in C with the SDK, the tests in assembly (`.S`, through the C preprocessor) with their own linker script. The two builds have their own folders, so switching needs no clean. Next to the ELF goes the map of the linker (`<test>.map`), and `listing/<board|sim>/` gets `<test>.dump` (`objdump -d`: address, instruction in hex and in assembly on one line), `<test>.disas` (`objdump -D`, data sections too), `<test>.sections` (`readelf -S`) and `<test>.symbols` (`nm -n -S`).
-- `make` in the folder of a test, for the board, also exports it into `out/riscv/loader/program.h`, the program `LoaderApp` of `sw/vitis/` loads (every name starts with `loader_program`); the build of every test from `riscv/tests/Makefile` does not.
+- `riscv/examples/<example>/` holds one example program, built the same way, for the board only: `example_HelloWorld`, `example_GPIO_Blink` and `example_GPIO_BlinkAsm` (the LEDs LD4-LD7, in C and in assembly), `example_NewLibSupport` (the sections and `malloc` of newlib, input from the UART), `example_I2C_PB200` (a temperature sensor on I2C, shown on the OLED). `riscv/examples/Makefile` builds them all and exports a `.h` into `out/riscv/examples/vitis/`; `TestApp` takes `example_GPIO_BlinkAsm` from there.
+- `make` in the folder of a test or an example, for the board, also exports it into `out/riscv/loader/program.h`, the program `LoaderApp` of `sw/vitis/` loads (every name starts with `loader_program`); the builds of every program from `riscv/tests/Makefile` and `riscv/examples/Makefile` do not.
 - `riscv/tests/Makefile` builds every test for the board and exports a `.h` into `out/riscv/test/vitis/`, then builds it for the simulation and exports a `.svh` into `out/riscv/test/sim/`, stopping at the first error. Every exported name starts with the test name (`test_BTPU_text`, `test_SerialCode_results_ADDR`). `make board` and `make sim` run one of the two halves. The builds are incremental and a header is rewritten only when it changes, so the Vitis applications and the testbenches compile again only for the tests that changed.
 - `tools/elfexport.py` writes those files (`--format h`, `svh` or `coe`); it needs `pyelftools`, which `tools/activate` installs into `pyEnv/`.
 
-To add a test, create its folder with a `Makefile` (copy the one of a test in the same language) and add its name to `TESTS` in `riscv/tests/Makefile`.
+To add a test, create its folder with a `Makefile` (copy the one of a test in the same language) and add its name to `TESTS` in `riscv/tests/Makefile`; an example the same way, in `EXAMPLES` of `riscv/examples/Makefile`.
 
-`riscv/apps/` and `riscv/asm/` still hold example and older programs, each with its own `Makefile` and linker script, out of date with respect to the memory sizes above. Applications with a life of their own live in their own repositories and include this one as a submodule, pinned to a tagged version, so that each application records the exact hardware and `sdk` it runs on.
+`riscv/asm/` still holds older assembly programs, each with its own `Makefile` and linker script, out of date with respect to the memory sizes above. Applications with a life of their own live in their own repositories and include this one as a submodule, pinned to a tagged version, so that each application records the exact hardware and `sdk` it runs on.
 
 ## Vitis applications
 
 `sw/vitis/` is the workspace of the classic Vitis 2021.2, with the platform `CPU_Platform` on the hardware in `sw/hw/CPU.xsa` (`make xsa`, then `make update_xsa`) and two standalone applications for the Cortex-A9, each with its system project:
 
 - `TestApp` loads every RISC-V test of `riscv/tests/` into the core, runs it and checks the results, printing `Test #n: OK` or `FAILED` on the UART. It includes the board build of the tests from `out/riscv/test/vitis/`; a pre-build step runs `make riscv_tests_board`, so that a build from the GUI also picks up the tests changed while the GUI was open.
-- `LoaderApp` loads one program, the one in `out/riscv/loader/program.h`, starts it with BTN UP and reports when it ends; BTN UP loads it again, any other button stops. To choose the program, run `make` in its folder (for example `make -C riscv/tests/test_ALU`), then build `LoaderApp`. After a clone the default program is `test_CPU`.
+- `LoaderApp` loads one program, the one in `out/riscv/loader/program.h`, starts it with BTN UP and reports when it ends; BTN UP loads it again, any other button stops. To choose the program, run `make` in its folder (for example `make -C riscv/tests/test_ALU`), then build `LoaderApp`. After a clone the default program is `example_GPIO_Blink`.
 
 `make vitis` opens the GUI and `make vitis_build` builds everything without it; both build the RISC-V programs first. With the GUI open, build from the GUI: `make vitis_build` refuses to run while the GUI holds the workspace.
 

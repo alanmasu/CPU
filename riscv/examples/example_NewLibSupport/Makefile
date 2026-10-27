@@ -1,9 +1,7 @@
-# test_NewLib: builds bin/<variant>/test_NewLib.elf with the SDK of ../../sdk.
-# SIMULATION=1, exported by riscv/tests/Makefile, builds it for the
-# simulation. Build folders, listings and the export for the loader:
-# ../../sdk/program.mk.
+# example_NewLibSupport: builds bin/<variant>/example_NewLibSupport.elf with the SDK of ../../sdk.
+# Build folders, listings and the export for the loader: ../../sdk/program.mk.
 
-NAME = test_NewLib
+NAME = example_NewLibSupport
 include ../../sdk/program.mk
 
 # Compiler and linker flags, linker script and SDK objects, built into
@@ -16,7 +14,7 @@ OBJS    = $(patsubst src/%.c,$(OBJ_DIR)/%.o,$(SRCS))
 
 all: $(OUT)
 
-# Link the test with the SDK objects
+# Link the program with the SDK objects
 $(OUT): $(OBJS) $(SDK_OBJS)
 	@mkdir -p $(OUT_DIR)
 	$(CC) $(SDK_CFLAGS) -o $@ $^ $(SDK_LDFLAGS) $(MAP_FLAGS)
