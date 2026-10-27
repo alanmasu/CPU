@@ -44,3 +44,18 @@ void wait(uint32_t count){
     }
     for(uint32_t i = 0; i < count; i++);
 }
+
+void loadProgram(const RiscvProgram_t* program){
+    printf("Loading %s...\n", program->name);
+    cleanMemory((uint32_t*)RISC_INSTR_BASE, PROGMEM_SIZE);
+    writeProgramMemory(program->text, (uint32_t*)program->textAddr, program->textSize);
+    if(program->constSize > 0){
+        writeDataMemory((const uint8_t*)program->constData, (uint8_t*)program->constAddr, program->constSize);
+    }
+    if(program->bssSize > 0){
+        cleanMemory((uint32_t*)program->bssAddr, program->bssSize);
+    }
+    if(program->dataSize > 0){
+        writeDataMemory((const uint8_t*)program->data, (uint8_t*)program->dataAddr, program->dataSize);
+    }
+}

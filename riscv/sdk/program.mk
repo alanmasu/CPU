@@ -1,4 +1,5 @@
-# Common part of the Makefile of a RISC-V program (the tests of riscv/tests):
+# Common part of the Makefile of a RISC-V program (the tests of riscv/tests and
+# the examples of riscv/examples):
 # toolchain, build folders, the files that describe the ELF, and the export
 # for the loader of sw/vitis.
 #
@@ -10,7 +11,7 @@
 #   include ../../sdk/program.mk
 #   all: $(OUT)
 #
-# The Makefiles of riscv/tests/ are complete examples.
+# The Makefiles of riscv/tests/ and riscv/examples/ are complete examples.
 #
 # Build folders: the board build and the simulation build (SIMULATION=1) have
 # their own objects and ELF, so switching between them needs no clean:
@@ -25,8 +26,10 @@
 #
 # Export for the loader: make run from the folder of the program, for the
 # board, also writes out/riscv/loader/program.h, the program LoaderApp of
-# sw/vitis loads (every name starts with loader_program). riscv/tests/Makefile
-# exports RISCV_TESTS=1, so that building all the tests does not overwrite it.
+# sw/vitis loads (every name starts with loader_program). The Makefiles that
+# build every program of a folder (riscv/tests/Makefile,
+# riscv/examples/Makefile) export RISCV_BUILD_ALL=1, so that they do not
+# overwrite it.
 
 PROGRAM_MK_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
 ROOT_DIR := $(PROGRAM_MK_DIR)../../
@@ -66,7 +69,7 @@ LOADER_HEADER = $(ROOT_DIR)out/riscv/loader/program.h
 all: $(LISTINGS)
 
 ifeq ($(VARIANT),board)
-ifneq ($(RISCV_TESTS),1)
+ifneq ($(RISCV_BUILD_ALL),1)
 all: loader
 endif
 endif

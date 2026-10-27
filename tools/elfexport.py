@@ -12,6 +12,11 @@ the name of the ELF without extension):
   <prefix>_GLOBAL_POINTER_VAL       value of __global_pointer$
   <prefix>_<symbol>_ADDR            address of every data symbol of the program
   <prefix>_text, _const, _data      contents of the sections, in 32-bit words
+  <prefix>_PROGRAM                  (h only) an initializer of RiscvProgram_t of
+                                    the loaders (RISCProgramming.h of LoaderApp):
+                                    name of the ELF, then words, address and size of .text,
+                                    .const, .data, address and size of .bss;
+                                    0 for a missing section
 
 Examples:
   python3 elfexport.py test_BTPU.elf --format svh -o test_BTPU.svh
@@ -101,7 +106,7 @@ def write_if_changed(path, text):
     return True
 
 
-def write_h(path, prefix, sections, global_pointer, symbols):
+def write_h(path, prefix, sections, global_pointer, symbols, elf_name):
     lines = ['#include <stdint.h>', '']
     for name, value in defines(prefix, sections, global_pointer, symbols):
         if name.endswith('_SIZE'):
@@ -119,7 +124,31 @@ def write_h(path, prefix, sections, global_pointer, symbols):
         lines.append('    0')
         lines.append('};')
         lines.append('')
+    lines.append(program_initializer(prefix, sections, elf_name))
+    lines.append('')
     return write_if_changed(path, '\n'.join(lines))
+
+
+def program_initializer(prefix, sections, elf_name):
+    """The define of an initializer of RiscvProgram_t with every section.
+
+    A loader takes any program through it, without a #ifdef for each section
+    that may be missing. The name is the one of the ELF, not the prefix,
+    which for the loader is always loader_program.
+    """
+    fields = [f'"{elf_name}"']
+    for name in ['.text', '.const', '.data']:
+        if name in sections and sections[name][1] > 0:
+            address, size, _ = sections[name]
+            fields += [f'{prefix}_{name[1:]}', f'0x{address:08x}', str(size)]
+        else:
+            fields += ['0', '0', '0']
+    if '.bss' in sections and sections['.bss'][1] > 0:
+        address, size, _ = sections['.bss']
+        fields += [f'0x{address:08x}', str(size)]
+    else:
+        fields += ['0', '0']
+    return f'#define {prefix}_PROGRAM {{ ' + ', '.join(fields) + ' }'
 
 
 def write_svh(path, prefix, sections, global_pointer, symbols):
@@ -192,7 +221,8 @@ def main():
     try:
         sections, global_pointer, symbols = read_elf(args.elf)
         if args.format == 'h':
-            changed = write_h(args.output, prefix, sections, global_pointer, symbols)
+            elf_name = os.path.splitext(os.path.basename(args.elf))[0]
+            changed = write_h(args.output, prefix, sections, global_pointer, symbols, elf_name)
         elif args.format == 'svh':
             changed = write_svh(args.output, prefix, sections, global_pointer, symbols)
         else:

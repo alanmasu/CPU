@@ -29,7 +29,7 @@
             			
             <storageModule moduleId="cdtBuildSystem" version="4.0.0">
                 				
-                <configuration artifactExtension="elf" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="rm -rf" description="" id="xilinx.gnu.armv7.exe.debug.667955324" name="Debug" parent="xilinx.gnu.armv7.exe.debug" prebuildStep="a9-linaro-pre-build-step &amp;&amp; make -C ${workspace_loc}/../.. riscv_tests_board">
+                <configuration artifactExtension="elf" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="rm -rf" description="" id="xilinx.gnu.armv7.exe.debug.667955324" name="Debug" parent="xilinx.gnu.armv7.exe.debug" prebuildStep="a9-linaro-pre-build-step &amp;&amp; make -C ${workspace_loc}/../.. riscv_tests_board riscv_examples_board">
                     					
                     <folderInfo id="xilinx.gnu.armv7.exe.debug.667955324." name="/" resourcePath="">
                         						
@@ -62,6 +62,8 @@
                                 <option id="xilinx.gnu.compiler.dircategory.includes.1579404629" superClass="xilinx.gnu.compiler.dircategory.includes" useByScannerDiscovery="false" valueType="includePath">
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../out/riscv/test/vitis&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../out/riscv/examples/vitis&quot;"/>
                                     								
                                 </option>
                                 								
@@ -84,6 +86,8 @@
                                 <option id="xilinx.gnu.compiler.dircategory.includes.254279510" superClass="xilinx.gnu.compiler.dircategory.includes" valueType="includePath">
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../out/riscv/test/vitis&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../out/riscv/examples/vitis&quot;"/>
                                     								
                                 </option>
                                 							
@@ -185,7 +189,7 @@
             			
             <storageModule moduleId="cdtBuildSystem" version="4.0.0">
                 				
-                <configuration artifactExtension="elf" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release" cleanCommand="rm -rf" description="" id="xilinx.gnu.armv7.exe.release.1571125741" name="Release" parent="xilinx.gnu.armv7.exe.release" prebuildStep="a9-linaro-pre-build-step &amp;&amp; make -C ${workspace_loc}/../.. riscv_tests_board">
+                <configuration artifactExtension="elf" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release" cleanCommand="rm -rf" description="" id="xilinx.gnu.armv7.exe.release.1571125741" name="Release" parent="xilinx.gnu.armv7.exe.release" prebuildStep="a9-linaro-pre-build-step &amp;&amp; make -C ${workspace_loc}/../.. riscv_tests_board riscv_examples_board">
                     					
                     <folderInfo id="xilinx.gnu.armv7.exe.release.1571125741." name="/" resourcePath="">
                         						
@@ -218,6 +222,8 @@
                                 <option id="xilinx.gnu.compiler.dircategory.includes.1072789852" superClass="xilinx.gnu.compiler.dircategory.includes" valueType="includePath">
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../out/riscv/test/vitis&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../out/riscv/examples/vitis&quot;"/>
                                     								
                                 </option>
                                 								
@@ -240,6 +246,8 @@
                                 <option id="xilinx.gnu.compiler.dircategory.includes.1900582880" superClass="xilinx.gnu.compiler.dircategory.includes" valueType="includePath">
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../out/riscv/test/vitis&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../out/riscv/examples/vitis&quot;"/>
                                     								
                                 </option>
                                 							

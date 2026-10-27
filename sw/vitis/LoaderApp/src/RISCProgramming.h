@@ -23,6 +23,27 @@
 
 extern uint32_t* riscvRam;
 
+/**!
+ * @brief A RISC-V program to load: its sections, as exported by tools/elfexport.py
+ * @details Every C header exported by elfexport.py defines <prefix>_PROGRAM, an
+ * initializer of this structure in this field order; a missing section has
+ * a null pointer and size 0.
+ */
+typedef struct RiscvProgram_t{
+    const char*     name;       ///< Name of the ELF the program comes from
+    const uint32_t* text;       ///< Words of .text
+    uint32_t        textAddr;
+    uint32_t        textSize;   ///< Bytes
+    const uint32_t* constData;  ///< Words of .const
+    uint32_t        constAddr;
+    uint32_t        constSize;
+    const uint32_t* data;       ///< Words of .data
+    uint32_t        dataAddr;
+    uint32_t        dataSize;
+    uint32_t        bssAddr;    ///< .bss is only cleared
+    uint32_t        bssSize;
+} RiscvProgram_t;
+
 typedef struct  __attribute__((packed)) CREG_t{
     uint32_t run : 1;
     uint32_t reset : 1;
@@ -94,5 +115,15 @@ void writeDataMemory(const uint8_t* data, uint8_t* mem, const uint32_t mem_size)
 */
 
 void wait(uint32_t count);
+
+/**!
+ * @brief Load a program into the memories of the RISC-V core
+ * @details Clears the instruction memory, writes .text, .const and .data,
+ * clears .bss. The core must be stopped. The global pointer is not written:
+ * the start-up code of the program loads it.
+ *
+ * @param program [in] - The program to load
+ */
+void loadProgram(const RiscvProgram_t* program);
 
 #endif // __RISC_PROGRAMMING_H__

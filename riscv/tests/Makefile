@@ -24,7 +24,7 @@
 # A new test is a new folder plus its name in TESTS.
 
 # Tests in C
-TESTS := test_Base test_BTPU test_BTPUvsSerial test_LoadStoreBTPU test_MatMul test_NewLib
+TESTS := test_BTPU test_BTPUvsSerial test_LoadStoreBTPU test_MatMul
 TESTS += test_PWM test_PWMSweep test_SerialCode test_TimerCapture test_TimerContinuous test_TimerContinuousOled
 # Tests in assembly
 TESTS += test_ALU test_ANDI test_AXI test_CPU test_I2C test_JumpBranch test_LoadStore test_Memory
@@ -40,7 +40,7 @@ TOOLS  := ../../tools
 
 # Building the tests from here does not export them for the loader of
 # sw/vitis: only make run from the folder of one program does
-export RISCV_TESTS = 1
+export RISCV_BUILD_ALL = 1
 
 all:
 	$(MAKE) board

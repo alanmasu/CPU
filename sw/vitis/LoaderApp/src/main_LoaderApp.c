@@ -55,6 +55,18 @@
 // this application, written by make run in the folder of a RISC-V program
 // (see riscv/sdk/program.mk). Every name starts with loader_program.
 #include "program.h"
+// Every example of riscv/examples, for the menu: out/riscv/examples/vitis/,
+// an include directory of this application, written by riscv/examples/Makefile
+#include "examples.h"
+#include "xgpiops.h"
+#include "xil_cache.h"
+#include "xil_printf.h"
+#include <stdbool.h>
+
+// The button of the loader: BTN8 of the ZedBoard, on pin MIO50 of the PS, read
+// through the GPIO of the PS. The five buttons of the PL belong to the RISC-V
+// programs (control registers of the core), so the loader never stops them.
+#define START_BUTTON_MIO 50
 
 typedef struct __attribute__((packed)) GPIOReg_t{
     unsigned int GPIO0 : 1;
@@ -97,137 +109,128 @@ typedef union SmartPtr_t{
 	uint8_t data[4];
 }SmartPtr_t;
 
+static XGpioPs psGpio;
+
+static void initStartButton(void){
+    XGpioPs_Config* config = XGpioPs_LookupConfig(XPAR_XGPIOPS_0_DEVICE_ID);
+    XGpioPs_CfgInitialize(&psGpio, config, config->BaseAddr);
+    XGpioPs_SetDirectionPin(&psGpio, START_BUTTON_MIO, 0);
+}
+
+static bool startButtonPressed(void){
+    return XGpioPs_ReadPin(&psGpio, START_BUTTON_MIO) == 1;
+}
+
+// A whole press, down and up, so that one press is one action
+static void waitStartButton(void){
+    while(!startButtonPressed());
+    while(startButtonPressed());
+    wait(0);    // the bounces of the release
+}
+
+// The programs of the menu: 0 is the one exported by make in the folder of a
+// program (program.h), then every example
+static const RiscvProgram_t exportedProgram = loader_program_PROGRAM;
+static const RiscvProgram_t examples[] = EXAMPLES_TABLE;
+#define EXAMPLES_COUNT (sizeof(examples) / sizeof(examples[0]))
+
+// Reads a number from the UART, with echo, until Enter. The RISC-V core is
+// stopped while the menu waits, so no program reads the same UART.
+static const RiscvProgram_t* chooseProgram(void){
+    while(1){
+        printf("\nPrograms:\n");
+        printf("  %2u  %s (exported by make in its folder)\n", 0u, exportedProgram.name);
+        for(unsigned i = 0; i < EXAMPLES_COUNT; i++){
+            printf("  %2u  %s\n", i + 1, examples[i].name);
+        }
+        printf("Number, then Enter: ");
+        fflush(stdout);
+
+        unsigned choice = 0;
+        bool digits = false;
+        char c = inbyte();
+        while(c != '\r' && c != '\n'){
+            if(c >= '0' && c <= '9'){
+                outbyte(c);
+                choice = choice * 10 + (c - '0');
+                digits = true;
+            }
+            c = inbyte();
+        }
+        printf("\n");
+
+        if(digits && choice == 0){
+            return &exportedProgram;
+        }
+        if(digits && choice <= EXAMPLES_COUNT){
+            return &examples[choice - 1];
+        }
+        printf("No program %u\n", choice);
+    }
+}
+
 int main(){
 	volatile ControlRegister_t* cregFile = (ControlRegister_t*) (RISC_CONTROL_REG + 0);
 	volatile CREG_t*  	cregPtr   = (CREG_t*)   (RISC_CONTROL_REG) + 0;
 	volatile CREG_IO_t* cregIOPtr = (CREG_IO_t*)(RISC_CONTROL_REG) + 4;
 	volatile uint32_t*  oledCTR   = (uint32_t*) (RISC_CONTROL_REG) + 5;
 
-	volatile SmartPtr_t*  UARTSTReg = (SmartPtr_t*) (UART_STATUS_ADDR);
-	volatile SmartPtr_t*  oledData  = (SmartPtr_t*) (RISC_CONTROL_REG) + 6;
-
-	volatile uint32_t* BTPU_W_BASE = (uint32_t*) 0x40080000;
-	volatile uint32_t* BTPU_IO0_BASE = (uint32_t*) 0x400A0000;
-	volatile uint32_t* BTPU_IO1_BASE = (uint32_t*) 0x400C0000;
-
     init_platform();
     Xil_DCacheDisable();
+    initStartButton();
+
+    printf("\n\r\n\r===========================");
+    printf("\n\rRunning program at: %s\n\r\n\r", __TIME__);
 
     const uint32_t risc_v_heap_size = 1024*8;
-//    uint32_t* risc_v_heap = (uint32_t*) malloc(risc_v_heap_size);
     uint8_t risc_v_heap[risc_v_heap_size];
-	*((uint32_t**)(riscvRam + 1)) = risc_v_heap;
-    if (risc_v_heap != NULL){
-		riscvRam[0] = risc_v_heap_size;
-		printf("Allocation of heap in DDR OK: heapPtr: %p\n", risc_v_heap);
-    }else{
-    	riscvRam[0] = 0;
-    	printf("Allocation of heap in DDR FAILED\n");
-    }
+	*((uint32_t**)(riscvRam + 1)) = (uint32_t*)risc_v_heap;
+    riscvRam[0] = risc_v_heap_size;
+    printf("Heap of the RISC-V programs in DDR: %p, %lu bytes\n", risc_v_heap, (unsigned long)risc_v_heap_size);
 
-    /*Command for loop
-     *  0: stop
-     *  1: continue
-    */
-    uint8_t cmd = 0; //
-    do{
-    	cregPtr->reset = 0;
-    	cregPtr->run = 0;
+    while(1){
+        const RiscvProgram_t* program = chooseProgram();
 
-
-        xil_printf("Cleaning PROGMEM...\n");
-        cleanMemory((uint32_t*)RISC_INSTR_BASE, PROGMEM_SIZE);
-
+        // Stop the core before writing its memories
+        cregPtr->reset = 0;
+        cregPtr->run = 0;
         wait(0);
+        loadProgram(program);
 
-        printf("Writing .text section...\n");
-        writeProgramMemory(loader_program_text, (uint32_t*)loader_program_TEXT_ADDR, loader_program_TEXT_SIZE);
+        // The heap words are the first two of the data memory: a program may
+        // have changed them, write them again
+        *((uint32_t**)(riscvRam + 1)) = (uint32_t*)risc_v_heap;
+        riscvRam[0] = risc_v_heap_size;
 
-        wait(0);
-        #if defined(loader_program_CONST_SIZE) && loader_program_CONST_SIZE > 0
-            printf("Writing .const section...\n");
-            writeDataMemory((uint8_t*)loader_program_const, (uint8_t*)loader_program_CONST_ADDR, loader_program_CONST_SIZE);
-        #endif
-
-        #ifdef loader_program_BSS_SIZE
-            printf("Cleaning .bss section...\n");
-            cleanMemory((uint32_t*)loader_program_BSS_ADDR, loader_program_BSS_SIZE);
-        #endif
-
-        #if defined(loader_program_DATA_SIZE) && loader_program_DATA_SIZE > 0
-            printf("Writing .data section...\n");
-            writeDataMemory((uint8_t*)loader_program_data, (uint8_t*)loader_program_DATA_ADDR, loader_program_DATA_SIZE);
-        #endif
-
-        // The global pointer is not written: the start-up code of the program
-        // loads it into gp by itself, and the first two words of the data
-        // memory hold the size and the address of the heap (written above)
-
-        
-        printf("\nWaiting BTN UP to be pressed for startup the CPU...\n");
-
-        // *oledCTR = 0b01;
-        // cregPtr->reset = 1;
-        // cregPtr->run = 1;
-		// while(1){
-		// 	oledData->data[0] = *((uint32_t*)cregIOPtr) & 0xF;
-		// 	oledData->data[3] = cregIOPtr->btnUP | cregIOPtr->btnDOWN << 1 | cregIOPtr->btnRIGHT << 3 | cregIOPtr->btnLEFT << 2;
-		// 	*((uint32_t*)cregIOPtr) = *((uint32_t*)cregIOPtr) << 24;
-		// 	oledData->data[2] = *((uint8_t*)cregPtr);
-		// }
-
-       *oledCTR = 0b01;
+        printf("\nPress BTN8 (MIO50) to start %s\n", program->name);
+        *oledCTR = 0b01;
+        *(oledCTR + 1) = 0xAABBCCDD;
         cregIOPtr->led0 = 1;
-       *oledCTR = 0b01;
-       *(oledCTR + 1) = 0xAABBCCDD;
-        
-        while (cregIOPtr->btnUP == 0);
-
-        printf("After programm execution you can press:\n  BTN UP to continue\n  Others to stop...\n");
+        waitStartButton();
         cregIOPtr->led0 = 0;
 
-        wait(0);
+        printf("%s running: press BTN8 (MIO50) to stop it and go back to the menu\n\n", program->name);
         cregPtr->reset = 1;
         cregPtr->run = 1;
         cregIOPtr->led1 = 1;
-        
-        // No wait for a fixed address: the program may never end (an
-        // application) or end before any given address (a short test). The
-        // end of a program, the jump on itself (jal x0, 0), is reported in
-        // the loop below.
+
+        // The end of a program is the jump on itself (jal x0, 0); an
+        // application may never get there
+        bool endReported = false;
+        while(!startButtonPressed()){
+            if(cregFile->instruction == 0x0000006f && !endReported){
+                printf("\nProgram ended (jal x0, 0) at PC 0x%08lx\n", (unsigned long)cregFile->programCounter);
+                endReported = true;
+            }
+        }
+        while(startButtonPressed());
         wait(0);
 
-        uint32_t cregIOState = *(uint32_t*)cregIOPtr;
-        cregIOState &= 0xF; //Zero extended
-        uint32_t cregIO = 0;
-        oledData->value = 0;
-        uint8_t printedResults = 0;
-        uint64_t* timeResults = (uint64_t*)risc_v_heap;
-        uint8_t endReported = 0;
-        do{
-            cregIO = *(uint32_t*)cregIOPtr;
-            cregIO &= 0xF; //Zero extended
-            if(cregFile->instruction == 0x0000006f && !endReported){
-                printf("Program ended (jal x0, 0) at PC 0x%08lx\n", (unsigned long)cregFile->programCounter);
-                endReported = 1;
-            }
-            // oledData->data[0] = UARTSTReg->data[0];
-            // oledData->data[3] = (UARTSTReg->data[0] & UART_RXEMPTY) >> 1;
-
-//			if(cregFile->instruction == 0x0000006f && !printedResults){
-//				printf("Times\n");
-//				for(int i = 0; i < riscvRam[0]; ++i){
-//					printf("%" PRIu64 ",\n", timeResults[i]);
-//				}
-//				printedResults = 1;
-//			}
-        }while(cregIOState == cregIO);
-        cmd = cregIOPtr->btnUP;
-        printf("\n\n");
-    }while(cmd);
-
-    cregPtr->run = 0;
-    printf("CPU stopped\n");
+        cregPtr->run = 0;
+        cregPtr->reset = 0;
+        cregIOPtr->led1 = 0;
+        printf("\nCPU stopped\n");
+    }
 
     cleanup_platform();
     return 0;

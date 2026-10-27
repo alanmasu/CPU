@@ -10,6 +10,9 @@
 /riscv/tests/*/bin/
 /riscv/tests/*/obj/
 /riscv/tests/*/listing/
+/riscv/examples/*/bin/
+/riscv/examples/*/obj/
+/riscv/examples/*/listing/
 .Xil/
 *.jou
 *.log
