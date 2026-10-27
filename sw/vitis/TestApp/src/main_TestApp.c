@@ -52,6 +52,12 @@
 #include "xil_printf.h"
 #include "xparameters.h"
 #include "xil_cache.h"
+#include "xgpiops.h"
+
+// The button of the test suite: BTN8 of the ZedBoard, on pin MIO50 of the PS,
+// read through the GPIO of the PS. The five buttons of the PL belong to the
+// RISC-V programs (control registers of the core).
+#define START_BUTTON_MIO 50
 #include <stdint.h>
 
 // Including the headers of programs
@@ -1192,35 +1198,35 @@ void doTimerCaptureTest(){
 }
 
 
+static XGpioPs psGpio;
+
+static void initStartButton(void){
+    XGpioPs_Config* config = XGpioPs_LookupConfig(XPAR_XGPIOPS_0_DEVICE_ID);
+    XGpioPs_CfgInitialize(&psGpio, config, config->BaseAddr);
+    XGpioPs_SetDirectionPin(&psGpio, START_BUTTON_MIO, 0);
+}
+
+// A whole press, down and up, so that one press is one run
+static void waitStartButton(void){
+    while(XGpioPs_ReadPin(&psGpio, START_BUTTON_MIO) == 0);
+    while(XGpioPs_ReadPin(&psGpio, START_BUTTON_MIO) == 1);
+    for(int i = 0; i < DELAY_COUNT; ++i){
+        // the bounces of the release
+    }
+}
+
 int main(){
-    int finish = 0;
 	init_platform();
 	Xil_DCacheDisable( );
+    initStartButton();
 
     printf("\n\rRunning program at: %s\n\r", __TIME__);
-
-	printf("Testing PS-PL GPIO...\n\tIf you set the SW1 and you press Buttons you see on LEDs and OLED the state\n\t[DO NOT USE CENTRAL BUTTON that is OLED POWEROFF]\n\n");
-	controlRegister[5] = 1;                         // Set the CREG[5] LSB for getting CREG[6] as source for OLED
-	for(int i = 0; i < DELAY_COUNT/3; ++i){
-		uint32_t gpioState = controlRegister[4];
-		// printf("%d\n", gpioState &  1);
-		controlRegister[6] = gpioState &  1;        // Read the button, and write it to the OLED
-		controlRegister[4] = gpioState << 23;       // Write the button state to the LEDs
-	}
 	printf("\nPAY ATTENTION: To test correctly the CPU is necessary to SET all 4 switches[7:4] to 1\n");
+    printf("(The buttons of the PL are tested by the example example_GPIO_Buttons, with LoaderApp)\n");
 
-    do{
-        init_platform();
-        Xil_DCacheDisable( );
-
-        printf("Waiting USER to connect via Vivado to the ILA...\n");
-        printf("Press BTN Up to continue...\n");
-        while((controlRegister[4] & 0x1) == 0){
-            // Wait for the user to press the button
-        }
-        while((controlRegister[4] & 0x1) == 1){
-        	// Wait for the user to release the button
-        }
+    while(1){
+        printf("\nPress BTN8 (MIO50) to run the tests\n");
+        waitStartButton();
 
         doTestJumpBranch(); //Furder more investigation is needed to understand why the CPU
                             // does not pass this test if in a different order
@@ -1236,24 +1242,8 @@ int main(){
         doTimerContinuousTest();
         doTimerCaptureTest();
         doBlink();
+    }
 
-        printf("\nPress BTN Up to continue...\n");
-        printf("Press BTN Down to exit...\n");
-        // printf("0x%00000000x\n", (controlRegister[4] & 0x3));
-        do{
-            // for(int i = 0; i < DELAY_COUNT/3; ++i){}
-
-            if((controlRegister[4] & 0x1) == 1){
-                finish = 0;
-                printf("Restarting...\n");
-            }else if((controlRegister[4] & 0x2) == 2){
-                finish = 1;
-                printf("Exiting...\n");
-            }
-        }while((controlRegister[4] & 0x3) == 0);
-
-        cleanup_platform();
-    }while(!finish);
-
+    cleanup_platform();
     return 0;
 }

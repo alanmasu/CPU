@@ -62,6 +62,7 @@
                                 <option id="xilinx.gnu.compiler.dircategory.includes.1579404629" superClass="xilinx.gnu.compiler.dircategory.includes" useByScannerDiscovery="false" valueType="includePath">
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../out/riscv/test/vitis&quot;"/>
+                                    									
                                     <listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../out/riscv/examples/vitis&quot;"/>
                                     								
                                 </option>
@@ -85,6 +86,7 @@
                                 <option id="xilinx.gnu.compiler.dircategory.includes.254279510" superClass="xilinx.gnu.compiler.dircategory.includes" valueType="includePath">
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../out/riscv/test/vitis&quot;"/>
+                                    									
                                     <listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../out/riscv/examples/vitis&quot;"/>
                                     								
                                 </option>
@@ -220,6 +222,7 @@
                                 <option id="xilinx.gnu.compiler.dircategory.includes.1072789852" superClass="xilinx.gnu.compiler.dircategory.includes" valueType="includePath">
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../out/riscv/test/vitis&quot;"/>
+                                    									
                                     <listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../out/riscv/examples/vitis&quot;"/>
                                     								
                                 </option>
@@ -243,6 +246,7 @@
                                 <option id="xilinx.gnu.compiler.dircategory.includes.1900582880" superClass="xilinx.gnu.compiler.dircategory.includes" valueType="includePath">
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../out/riscv/test/vitis&quot;"/>
+                                    									
                                     <listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../out/riscv/examples/vitis&quot;"/>
                                     								
                                 </option>

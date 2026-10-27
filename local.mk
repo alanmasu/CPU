@@ -26,11 +26,15 @@ riscv_examples_board:
 # LoaderApp includes out/riscv/loader/program.h, which make writes when run in
 # the folder of a RISC-V program. After a clone there is none, and the build
 # of LoaderApp would stop: example_GPIO_Blink is exported as the default
-# program. The rule has no prerequisites, so it runs only when the header is
-# missing.
+# program. It runs only when the header is missing or older than
+# tools/elfexport.py: a header written by an older elfexport.py may lack what
+# LoaderApp needs (loader_program_PROGRAM), and then the program chosen
+# before is replaced by the default one. touch: elfexport.py leaves an
+# unchanged file with its old date, and the rule would run at every build.
 vitis vitis_build: out/riscv/loader/program.h
 
-out/riscv/loader/program.h:
+out/riscv/loader/program.h: tools/elfexport.py
 	$(MAKE) -C riscv/examples/example_GPIO_Blink
+	touch $@
 
 .PHONY: riscv_tests riscv_tests_board riscv_examples_board
