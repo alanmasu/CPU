@@ -11,9 +11,7 @@ export CPU_PYTHON_DIR
 export CPU_PYTHON_ENV
 export CPU_PYTHON_V_ENV
 
-alias executePython="source \"${CPU_PYTHON_DIR}/executePython\""
-
-# Creazione e attivazione dell'ambiente virtuale
+# Create the virtual environment and install the packages of tools/
 python3 -m venv "$CPU_PYTHON_ENV"
 source "$CPU_PYTHON_V_ENV"
 pip3 install pyelftools
