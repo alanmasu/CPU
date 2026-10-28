@@ -18,7 +18,13 @@
 #     ${workspace_loc} of classic Vitis (sw/vitis/), ${ProjDirPath} and
 #     ${PROJECT_LOC} of Eclipse (the directory of the file), $PPRDIR of
 #     the .xpr (hw/vivado/);
-#   - between quotes and starting with ../, from the directory of the file.
+#   - between quotes and starting with ../, from the directory of the file;
+#     in an HDL source also from the directory where xsim runs the
+#     simulation sets of the project, hw/vivado/<project>.sim/<set>/behav/
+#     xsim/, because a file that a testbench opens while it simulates is
+#     found from there (a false alarm found by the porting in the CPU
+#     project, 26/10/2026). Only the depth of that directory matters for
+#     ../, so its names are placeholders.
 # A path under a directory of .env (licensed IPs, sources of Linux and
 # U-Boot, kernel build) is accepted: it is outside the product on purpose,
 # and .env says where it is on this machine.
@@ -45,6 +51,11 @@ MAX_SIZE = 4 * 1024 * 1024
 # A path after a variable: the variable, then everything up to a character
 # that cannot be part of a path in these files.
 PREFIXED = re.compile(r"(\$\{origin_dir\}|\$origin_dir|@PRODUCT_ROOT@|\$\{workspace_loc(?::)?\}?|\$\{ProjDirPath\}|\$\{PROJECT_LOC\}|\$PPRDIR)(/?[^\s\"'<>;,)}\]]*)")
+
+# The sources that a simulator reads, and the directory where xsim runs a
+# simulation set of the project, four levels below hw/vivado/.
+HDL_EXTS = (".v", ".sv", ".vh", ".svh", ".vhd", ".vhdl")
+XSIM_DIR = os.path.join("hw", "vivado", "project.sim", "set", "behav", "xsim")
 
 # A relative path between quotes that goes up at least one directory.
 QUOTED = re.compile(r"[\"']((?:\.\./)+[^\"'\s]*)[\"']")
@@ -146,17 +157,23 @@ def main():
                 if needle.decode() in line:
                     findings.append((name, number, "absolute", needle.decode(), ""))
                     break
+            # Each candidate is the path as written and the directories it
+            # may start from: it is fine if it lands in the product, or under
+            # a directory of .env, from any of them.
             candidates = []
             for match in PREFIXED.finditer(line):
                 base = base_of(match.group(1), root, file_dir)
-                candidates.append((match.group(0), os.path.join(base, match.group(2).lstrip("/"))))
+                candidates.append((match.group(0), match.group(2).lstrip("/"), [base]))
             for match in QUOTED.finditer(line):
-                candidates.append((match.group(1), os.path.join(file_dir, match.group(1))))
-            for written, joined in candidates:
-                resolved = os.path.normpath(joined)
-                if inside(resolved, root) or any(inside(resolved, d) for d in allowed):
+                bases = [file_dir]
+                if name.endswith(HDL_EXTS):
+                    bases.append(os.path.join(root, XSIM_DIR))
+                candidates.append((match.group(1), match.group(1), bases))
+            for written, relative, bases in candidates:
+                resolved = [os.path.normpath(os.path.join(base, relative)) for base in bases]
+                if any(inside(r, root) or any(inside(r, d) for d in allowed) for r in resolved):
                     continue
-                findings.append((name, number, "outside", written, resolved))
+                findings.append((name, number, "outside", written, resolved[0]))
 
     for name, number, kind, written, resolved in findings:
         if kind == "absolute":

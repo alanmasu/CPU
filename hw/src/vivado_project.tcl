@@ -2226,12 +2226,12 @@ preplace port port-id_run_out_0 -pg 1 -lvl 6 -x 1950 -y 600 -defaultsOSRD
 preplace portBus GPIO_0 -pg 1 -lvl 6 -x 1950 -y 510 -defaultsOSRD
 preplace portBus leds_0 -pg 1 -lvl 6 -x 1950 -y 630 -defaultsOSRD
 preplace portBus switches_0 -pg 1 -lvl 0 -x 0 -y 770 -defaultsOSRD
-preplace inst CPU_0 -pg 1 -lvl 5 -x 1660 -y 650 -defaultsOSRD
 preplace inst axi_cdma_0 -pg 1 -lvl 3 -x 910 -y 400 -defaultsOSRD
 preplace inst axi_mem_intercon -pg 1 -lvl 4 -x 1280 -y 220 -defaultsOSRD
 preplace inst processing_system7_0 -pg 1 -lvl 5 -x 1660 -y 230 -defaultsOSRD
 preplace inst ps7_0_axi_periph -pg 1 -lvl 2 -x 570 -y 270 -defaultsOSRD
 preplace inst rst_ps7_0_100M -pg 1 -lvl 1 -x 210 -y 120 -defaultsOSRD
+preplace inst CPU_0 -pg 1 -lvl 5 -x 1660 -y 650 -defaultsOSRD
 preplace netloc CPU_0_leds 1 5 1 1890J 630n
 preplace netloc CPU_0_oled_dc 1 5 1 1920J 700n
 preplace netloc CPU_0_oled_res 1 5 1 1890J 720n
@@ -3493,7 +3493,7 @@ connect_bd_intf_net -intf_net [get_bd_intf_nets CPU_0_M_AXI] [get_bd_intf_pins C
   regenerate_bd_layout -layout_string {
    "ActiveEmotionalView":"Default View",
    "Default View_ScaleFactor":"1.23594",
-   "Default View_TopLeft":"1018,29",
+   "Default View_TopLeft":"1018,118",
    "ExpandedHierarchyInLayout":"",
    "guistr":"# # String gsaved with Nlview 7.0r4  2019-12-20 bk=1.5203 VDI=41 GEI=36 GUI=JA:10.0 TLS
 #  -string -flagsOSRD
@@ -3518,13 +3518,13 @@ preplace port port-id_run_out_0 -pg 1 -lvl 6 -x 1930 -y 480 -defaultsOSRD
 preplace portBus GPIO_0 -pg 1 -lvl 6 -x 1930 -y 390 -defaultsOSRD
 preplace portBus leds_0 -pg 1 -lvl 6 -x 1930 -y 510 -defaultsOSRD
 preplace portBus switches_0 -pg 1 -lvl 0 -x -50 -y 670 -defaultsOSRD
-preplace inst CPU_0 -pg 1 -lvl 5 -x 1620 -y 580 -defaultsOSRD
 preplace inst axi_cdma_0 -pg 1 -lvl 3 -x 880 -y 130 -defaultsOSRD
 preplace inst axi_mem_intercon -pg 1 -lvl 4 -x 1210 -y 230 -defaultsOSRD
 preplace inst processing_system7_0 -pg 1 -lvl 5 -x 1620 -y 200 -defaultsOSRD
 preplace inst ps7_0_axi_periph -pg 1 -lvl 2 -x 560 -y 330 -defaultsOSRD
 preplace inst rst_ps7_0_100M -pg 1 -lvl 1 -x 200 -y 200 -defaultsOSRD
 preplace inst system_ila_0 -pg 1 -lvl 4 -x 1210 -y 950 -defaultsOSRD
+preplace inst CPU_0 -pg 1 -lvl 5 -x 1620 -y 580 -defaultsOSRD
 preplace netloc CPU_0_CREG_CTR_dbg 1 3 1 N 1060
 preplace netloc CPU_0_M_WB_en_dbg 1 3 1 N 800
 preplace netloc CPU_0_M_WB_we_dbg 1 3 1 N 820
@@ -3943,7 +3943,7 @@ proc cr_bd_test_design_axi_recursive { parentCell } {
   connect_bd_net -net rst_clk_wiz_100M_peripheral_aresetn [get_bd_ports reset_0] [get_bd_pins CPU_0/res_in] [get_bd_pins axi_vip_0/aresetn] [get_bd_pins axi_vip_0_axi_periph/ARESETN] [get_bd_pins axi_vip_0_axi_periph/M00_ARESETN] [get_bd_pins axi_vip_0_axi_periph/M01_ARESETN] [get_bd_pins axi_vip_0_axi_periph/S00_ARESETN] [get_bd_pins axi_vip_0_axi_periph/S01_ARESETN] [get_bd_pins axi_vip_1/aresetn] [get_bd_pins rst_clk_in1_0_100M/ext_reset_in]
   connect_bd_net -net run_in_0_1 [get_bd_ports run_in_0] [get_bd_pins CPU_0/run_in]
   connect_bd_net -net switches_0_1 [get_bd_ports switches_0] [get_bd_pins CPU_0/switches]
-  connect_bd_net -net xlconstant_0_dout [get_bd_pins xlconstant_0/dout]
+  connect_bd_net -net xlconstant_0_dout [get_bd_pins CPU_0/cdma_interrupt] [get_bd_pins xlconstant_0/dout]
 
   # Create address segments
   assign_bd_address -offset 0x40010000 -range 0x00010000 -target_address_space [get_bd_addr_spaces CPU_0/M_AXI] [get_bd_addr_segs CPU_0/s_axi_d/reg0] -force
@@ -3957,7 +3957,7 @@ proc cr_bd_test_design_axi_recursive { parentCell } {
   regenerate_bd_layout -layout_string {
    "ActiveEmotionalView":"Default View",
    "Default View_ScaleFactor":"0.677108",
-   "Default View_TopLeft":"-347,-10",
+   "Default View_TopLeft":"-356,-10",
    "ExpandedHierarchyInLayout":"",
    "guistr":"# # String gsaved with Nlview 7.0r4  2019-12-20 bk=1.5203 VDI=41 GEI=36 GUI=JA:10.0 TLS
 #  -string -flagsOSRD
@@ -3982,12 +3982,12 @@ preplace port port-id_run_out_0 -pg 1 -lvl 4 -x 1150 -y 480 -defaultsOSRD
 preplace portBus GPIO_0 -pg 1 -lvl 4 -x 1150 -y 390 -defaultsOSRD
 preplace portBus leds_0 -pg 1 -lvl 4 -x 1150 -y 510 -defaultsOSRD
 preplace portBus switches_0 -pg 1 -lvl 0 -x -50 -y 680 -defaultsOSRD
-preplace inst CPU_0 -pg 1 -lvl 3 -x 900 -y 580 -defaultsOSRD
 preplace inst axi_vip_0 -pg 1 -lvl 1 -x 210 -y 60 -defaultsOSRD
 preplace inst axi_vip_0_axi_periph -pg 1 -lvl 2 -x 580 -y 190 -defaultsOSRD
 preplace inst axi_vip_1 -pg 1 -lvl 1 -x 210 -y 280 -defaultsOSRD
 preplace inst rst_clk_in1_0_100M -pg 1 -lvl 1 -x 210 -y 460 -defaultsOSRD
 preplace inst xlconstant_0 -pg 1 -lvl 2 -x 580 -y 740 -defaultsOSRD
+preplace inst CPU_0 -pg 1 -lvl 3 -x 900 -y 580 -defaultsOSRD
 preplace netloc CPU_0_leds 1 3 1 1090J 510n
 preplace netloc CPU_0_oled_dc 1 3 1 1120J 600n
 preplace netloc CPU_0_oled_res 1 3 1 1130J 630n
@@ -4010,7 +4010,7 @@ preplace netloc rst_clk_in1_0_100M_peripheral_aresetn 1 1 1 410 320n
 preplace netloc rst_clk_wiz_100M_peripheral_aresetn 1 0 3 20 560 400 540 NJ
 preplace netloc run_in_0_1 1 0 3 10J 570 430J 560 NJ
 preplace netloc switches_0_1 1 0 3 NJ 680 NJ 680 NJ
-preplace netloc xlconstant_0_dout 1 2 1 N 740
+preplace netloc xlconstant_0_dout 1 2 1 740 720n
 preplace netloc CPU_0_M_AXI 1 0 4 30 800 NJ 800 NJ 800 1040
 preplace netloc axi_vip_0_M_AXI 1 1 1 N 60
 preplace netloc axi_vip_0_axi_periph_M00_AXI 1 2 1 750 170n
@@ -4349,72 +4349,72 @@ proc cr_bd_mem_ctrl_test { parentCell } {
    "ExpandedHierarchyInLayout":"",
    "guistr":"# # String gsaved with Nlview 7.0r4  2019-12-20 bk=1.5203 VDI=41 GEI=36 GUI=JA:10.0 TLS
 #  -string -flagsOSRD
-preplace port port-id_clock_100mhz -pg 1 -lvl 0 -x -40 -y 610 -defaultsOSRD
-preplace port port-id_en_0 -pg 1 -lvl 0 -x -40 -y 490 -defaultsOSRD
-preplace port port-id_en_1 -pg 1 -lvl 0 -x -40 -y 740 -defaultsOSRD
-preplace port port-id_enb_0 -pg 1 -lvl 0 -x -40 -y 160 -defaultsOSRD
-preplace port port-id_pwm_0 -pg 1 -lvl 3 -x 740 -y 420 -defaultsOSRD
-preplace port port-id_reset_rtl -pg 1 -lvl 0 -x -40 -y 640 -defaultsOSRD
-preplace port port-id_stall_0 -pg 1 -lvl 3 -x 740 -y 690 -defaultsOSRD
-preplace port port-id_stall_1 -pg 1 -lvl 3 -x 740 -y 880 -defaultsOSRD
-preplace port port-id_timer_en_0 -pg 1 -lvl 0 -x -40 -y 390 -defaultsOSRD
-preplace portBus addra_0 -pg 1 -lvl 0 -x -40 -y 100 -defaultsOSRD
-preplace portBus addrb_0 -pg 1 -lvl 0 -x -40 -y 220 -defaultsOSRD
-preplace portBus address_0 -pg 1 -lvl 0 -x -40 -y 550 -defaultsOSRD
-preplace portBus address_1 -pg 1 -lvl 0 -x -40 -y 800 -defaultsOSRD
-preplace portBus cc_0 -pg 1 -lvl 0 -x -40 -y 460 -defaultsOSRD
-preplace portBus dina_0 -pg 1 -lvl 0 -x -40 -y 130 -defaultsOSRD
-preplace portBus dinb_0 -pg 1 -lvl 0 -x -40 -y 250 -defaultsOSRD
-preplace portBus douta_0 -pg 1 -lvl 3 -x 740 -y 130 -defaultsOSRD
-preplace portBus doutb_0 -pg 1 -lvl 3 -x 740 -y 160 -defaultsOSRD
-preplace portBus ena_0 -pg 1 -lvl 0 -x -40 -y 40 -defaultsOSRD
-preplace portBus read_data_0 -pg 1 -lvl 3 -x 740 -y 660 -defaultsOSRD
-preplace portBus read_data_1 -pg 1 -lvl 3 -x 740 -y 910 -defaultsOSRD
-preplace portBus timer_dout_0 -pg 1 -lvl 3 -x 740 -y 390 -defaultsOSRD
-preplace portBus we_0 -pg 1 -lvl 0 -x -40 -y 520 -defaultsOSRD
-preplace portBus we_1 -pg 1 -lvl 0 -x -40 -y 770 -defaultsOSRD
-preplace portBus wea_0 -pg 1 -lvl 0 -x -40 -y 70 -defaultsOSRD
-preplace portBus web_0 -pg 1 -lvl 0 -x -40 -y 190 -defaultsOSRD
-preplace portBus write_data_0 -pg 1 -lvl 0 -x -40 -y 580 -defaultsOSRD
-preplace portBus write_data_1 -pg 1 -lvl 0 -x -40 -y 830 -defaultsOSRD
-preplace inst AXISlaveInterface_0 -pg 1 -lvl 2 -x 560 -y 820 -defaultsOSRD
+preplace port port-id_clock_100mhz -pg 1 -lvl 0 -x -50 -y 610 -defaultsOSRD
+preplace port port-id_en_0 -pg 1 -lvl 0 -x -50 -y 490 -defaultsOSRD
+preplace port port-id_en_1 -pg 1 -lvl 0 -x -50 -y 740 -defaultsOSRD
+preplace port port-id_enb_0 -pg 1 -lvl 0 -x -50 -y 160 -defaultsOSRD
+preplace port port-id_pwm_0 -pg 1 -lvl 3 -x 760 -y 420 -defaultsOSRD
+preplace port port-id_reset_rtl -pg 1 -lvl 0 -x -50 -y 640 -defaultsOSRD
+preplace port port-id_stall_0 -pg 1 -lvl 3 -x 760 -y 690 -defaultsOSRD
+preplace port port-id_stall_1 -pg 1 -lvl 3 -x 760 -y 880 -defaultsOSRD
+preplace port port-id_timer_en_0 -pg 1 -lvl 0 -x -50 -y 390 -defaultsOSRD
+preplace portBus addra_0 -pg 1 -lvl 0 -x -50 -y 100 -defaultsOSRD
+preplace portBus addrb_0 -pg 1 -lvl 0 -x -50 -y 220 -defaultsOSRD
+preplace portBus address_0 -pg 1 -lvl 0 -x -50 -y 550 -defaultsOSRD
+preplace portBus address_1 -pg 1 -lvl 0 -x -50 -y 800 -defaultsOSRD
+preplace portBus cc_0 -pg 1 -lvl 0 -x -50 -y 460 -defaultsOSRD
+preplace portBus dina_0 -pg 1 -lvl 0 -x -50 -y 130 -defaultsOSRD
+preplace portBus dinb_0 -pg 1 -lvl 0 -x -50 -y 250 -defaultsOSRD
+preplace portBus douta_0 -pg 1 -lvl 3 -x 760 -y 130 -defaultsOSRD
+preplace portBus doutb_0 -pg 1 -lvl 3 -x 760 -y 160 -defaultsOSRD
+preplace portBus ena_0 -pg 1 -lvl 0 -x -50 -y 40 -defaultsOSRD
+preplace portBus read_data_0 -pg 1 -lvl 3 -x 760 -y 660 -defaultsOSRD
+preplace portBus read_data_1 -pg 1 -lvl 3 -x 760 -y 910 -defaultsOSRD
+preplace portBus timer_dout_0 -pg 1 -lvl 3 -x 760 -y 390 -defaultsOSRD
+preplace portBus we_0 -pg 1 -lvl 0 -x -50 -y 520 -defaultsOSRD
+preplace portBus we_1 -pg 1 -lvl 0 -x -50 -y 770 -defaultsOSRD
+preplace portBus wea_0 -pg 1 -lvl 0 -x -50 -y 70 -defaultsOSRD
+preplace portBus web_0 -pg 1 -lvl 0 -x -50 -y 190 -defaultsOSRD
+preplace portBus write_data_0 -pg 1 -lvl 0 -x -50 -y 580 -defaultsOSRD
+preplace portBus write_data_1 -pg 1 -lvl 0 -x -50 -y 830 -defaultsOSRD
+preplace inst AXISlaveInterface_0 -pg 1 -lvl 2 -x 580 -y 820 -defaultsOSRD
 preplace inst AXI_memory_controller_0 -pg 1 -lvl 1 -x 190 -y 590 -defaultsOSRD
 preplace inst AXI_memory_controller_1 -pg 1 -lvl 1 -x 190 -y 820 -defaultsOSRD
-preplace inst axi_vip_0 -pg 1 -lvl 2 -x 560 -y 590 -defaultsOSRD
-preplace inst btpu_wrapper_0 -pg 1 -lvl 2 -x 560 -y 150 -defaultsOSRD
-preplace inst timer_0 -pg 1 -lvl 2 -x 560 -y 410 -defaultsOSRD
-preplace netloc AXI_memory_controller_0_read_data 1 1 2 360J 670 720J
+preplace inst axi_vip_0 -pg 1 -lvl 2 -x 580 -y 590 -defaultsOSRD
+preplace inst btpu_wrapper_0 -pg 1 -lvl 2 -x 580 -y 150 -defaultsOSRD
+preplace inst timer_0 -pg 1 -lvl 2 -x 580 -y 410 -defaultsOSRD
+preplace netloc AXI_memory_controller_0_read_data 1 1 2 360J 670 740J
 preplace netloc AXI_memory_controller_0_stall 1 1 2 350J 690 NJ
 preplace netloc AXI_memory_controller_1_read_data 1 1 2 360J 910 NJ
-preplace netloc AXI_memory_controller_1_stall 1 1 2 350J 920 720J
-preplace netloc addra_0_1 1 0 2 10J 150 390
-preplace netloc addrb_0_1 1 0 2 10J 230 NJ
-preplace netloc address_0_1 1 0 1 -10J 550n
-preplace netloc address_1_1 1 0 1 -20J 800n
-preplace netloc btpu_wrapper_0_douta 1 2 1 720J 130n
+preplace netloc AXI_memory_controller_1_stall 1 1 2 350J 920 740J
+preplace netloc addra_0_1 1 0 2 NJ 100 410
+preplace netloc addrb_0_1 1 0 2 NJ 220 350J
+preplace netloc address_0_1 1 0 1 10J 550n
+preplace netloc address_1_1 1 0 1 -30J 800n
+preplace netloc btpu_wrapper_0_douta 1 2 1 740J 130n
 preplace netloc btpu_wrapper_0_doutb 1 2 1 NJ 160
-preplace netloc cc_0_1 1 0 2 0J 470 NJ
-preplace netloc clk_wiz_clk_out1 1 0 2 0 700 370
-preplace netloc dina_0_1 1 0 2 0J 170 360
+preplace netloc cc_0_1 1 0 2 NJ 460 380J
+preplace netloc clk_wiz_clk_out1 1 0 2 -10 470 370
+preplace netloc dina_0_1 1 0 2 NJ 130 360
 preplace netloc dinb_0_1 1 0 2 NJ 250 NJ
 preplace netloc en_0_1 1 0 1 30J 490n
-preplace netloc en_1_1 1 0 1 20J 740n
-preplace netloc ena_0_1 1 0 2 30J 110 NJ
-preplace netloc enb_0_1 1 0 2 -10J 190 NJ
-preplace netloc rst_clk_wiz_100M_peripheral_aresetn 1 0 2 30 710 380
-preplace netloc timer_0_dout 1 2 1 720J 390n
+preplace netloc en_1_1 1 0 1 -20J 740n
+preplace netloc ena_0_1 1 0 2 NJ 40 420J
+preplace netloc enb_0_1 1 0 2 NJ 160 420J
+preplace netloc rst_clk_wiz_100M_peripheral_aresetn 1 0 2 0 480 390
+preplace netloc timer_0_dout 1 2 1 740J 390n
 preplace netloc timer_0_pwm 1 2 1 NJ 420
 preplace netloc timer_en_0_1 1 0 2 NJ 390 NJ
-preplace netloc we_0_1 1 0 1 10J 520n
-preplace netloc we_1_1 1 0 1 -20J 770n
-preplace netloc wea_0_1 1 0 2 20J 130 400
-preplace netloc web_0_1 1 0 2 -20J 210 NJ
-preplace netloc write_data_0_1 1 0 1 -20J 580n
+preplace netloc we_0_1 1 0 1 20J 520n
+preplace netloc we_1_1 1 0 1 -30J 770n
+preplace netloc wea_0_1 1 0 2 NJ 70 380
+preplace netloc web_0_1 1 0 2 NJ 190 400J
+preplace netloc write_data_0_1 1 0 1 -30J 580n
 preplace netloc write_data_1_1 1 0 1 NJ 830
 preplace netloc AXI_memory_controller_0_M_AXI 1 1 1 N 570
 preplace netloc AXI_memory_controller_1_M_AXI 1 1 1 N 800
-levelinfo -pg 1 -40 190 560 740
-pagesize -pg 1 -db -bbox -sgen -220 -10 920 930
+levelinfo -pg 1 -50 190 580 760
+pagesize -pg 1 -db -bbox -sgen -230 -10 940 930
 "
 }
 
@@ -4813,7 +4813,7 @@ proc cr_bd_test_design { parentCell } {
   regenerate_bd_layout -layout_string {
    "ActiveEmotionalView":"Default View",
    "Default View_ScaleFactor":"0.638636",
-   "Default View_TopLeft":"-376,0",
+   "Default View_TopLeft":"-377,0",
    "ExpandedHierarchyInLayout":"",
    "guistr":"# # String gsaved with Nlview 7.0r4  2019-12-20 bk=1.5203 VDI=41 GEI=36 GUI=JA:10.0 TLS
 #  -string -flagsOSRD
@@ -4839,11 +4839,11 @@ preplace port port-id_sys_clock -pg 1 -lvl 0 -x -40 -y 390 -defaultsOSRD
 preplace portBus GPIO_0 -pg 1 -lvl 4 -x 1210 -y 20 -defaultsOSRD
 preplace portBus leds_0 -pg 1 -lvl 4 -x 1210 -y 140 -defaultsOSRD
 preplace portBus switches_0 -pg 1 -lvl 0 -x -40 -y 280 -defaultsOSRD
-preplace inst CPU_0 -pg 1 -lvl 3 -x 960 -y 210 -defaultsOSRD
 preplace inst CPU_0_axi_periph -pg 1 -lvl 2 -x 530 -y 590 -defaultsOSRD
 preplace inst axi_cdma_0 -pg 1 -lvl 1 -x 180 -y 400 -defaultsOSRD
 preplace inst axi_vip_0 -pg 1 -lvl 1 -x 180 -y 570 -defaultsOSRD
 preplace inst axi_vip_1 -pg 1 -lvl 3 -x 960 -y 590 -defaultsOSRD
+preplace inst CPU_0 -pg 1 -lvl 3 -x 960 -y 210 -defaultsOSRD
 preplace netloc CPU_0_leds 1 3 1 1150J 140n
 preplace netloc CPU_0_oled_dc 1 3 1 1180J 230n
 preplace netloc CPU_0_oled_res 1 3 1 1190J 260n

@@ -87,6 +87,10 @@ proc ::prj_priv::create_from_snapshot {} {
 # working directory, is set again to the same path under hw/, as a full
 # path: the project keeps a real file, and the export writes it relative to
 # hw/ again, as in the snapshot. The snapshot is left as Vivado writes it.
+# Setting top_file also makes the top of the fileset automatic again, and
+# Vivado then chooses another one (on 2021.2 sources_1 got blk_mem_gen_0
+# instead of system_wrapper, 26/10/2026): top and top_auto_set are set back
+# to what they were.
 proc ::prj_priv::resolve_top_files {} {
     variable hw_dir
     set work_dir [pwd]
@@ -108,7 +112,14 @@ proc ::prj_priv::resolve_top_files {} {
             message 7 WARNING "the top_file of $fileset, $top_file, does not exist, nor $resolved"
             continue
         }
+        set top [get_property -quiet TOP $fileset]
+        set top_auto_set [get_property -quiet TOP_AUTO_SET $fileset]
+        puts "$fileset: top_file $top_file set to $resolved"
         set_property TOP_FILE $resolved $fileset
+        if {$top ne ""} {
+            set_property TOP $top $fileset
+        }
+        set_property TOP_AUTO_SET $top_auto_set $fileset
     }
 }
 

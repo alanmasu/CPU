@@ -5,7 +5,12 @@
 # block designs. Before writing it:
 #  - catalog IPs left inside vivado/ are moved to hw/src/ip/;
 #  - the IP repository of .env is left out, because its path depends on the
-#    machine (prj::create adds it back).
+#    machine (prj::create adds it back);
+#  - every block design is validated, and the export stops if one is not
+#    valid: write_project_tcl writes validate_bd_design into the snapshot
+#    only for a block design that was validated, so a block design changed
+#    in the GUI and exported without Validate Design was created again
+#    without any check, and its errors showed up only at generation.
 # After writing it, the script is cleaned so that it has no absolute path.
 # It refuses to replace a snapshot that changed after the project was
 # created or exported last, unless -force (the snapshot is committed) or
@@ -25,10 +30,17 @@ proc ::prj::export {{option ""}} {
     move_local_ips
     warn_local_sources
     check_before_export
+    set invalid {}
     foreach bd [get_files -quiet *.bd] {
         global_eval open_bd_design $bd
+        if {[catch {global_eval validate_bd_design} message]} {
+            lappend invalid "  [file rootname [file tail $bd]]: $message"
+        }
         save_bd_design
         warn_automatic_crossbars
+    }
+    if {[llength $invalid] > 0} {
+        error "These block designs are not valid, see the errors of validate_bd_design above; fix them in the GUI (Validate Design), then export again:\n[join $invalid \n]"
     }
     write_snapshot $project_tcl
     puts "Exported the project to hw/src/vivado_project.tcl"
