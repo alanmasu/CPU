@@ -2561,14 +2561,29 @@ module test_AXI_ctrl( );
         #1;
         validating = 1'b0;
 
-        //Testing PWM Mode
+        // Testing PWM Mode: compare value n_clocks, terminal count 2 * n_clocks,
+        // so the output is high for n_clocks ticks, then low for n_clocks ticks,
+        // then high again in the next period. Each check is in the middle of a
+        // half period, away from the edges.
         testN = 10;
         op_class = 5'b01000; //Store
         en_in = 1'b1;
         we_in = 1'b1;
         mem_opcode = 3'b010; //SW
-        alu_resoult = 32'h40020060 + 5 * 4; //Timer PWM LSB Reg
+        alu_resoult = 32'h40020060 + 5 * 4; //Timer Compare LSB Reg
         rs2_value = n_clocks;
+        @ (posedge clock);
+        #1;
+        alu_resoult = 32'h40020060 + 6 * 4; //Timer Compare MSB Reg
+        rs2_value = 32'b0;
+        @ (posedge clock);
+        #1;
+        alu_resoult = 32'h40020060 + 3 * 4; //Timer Capture LSB Reg: terminal count of the PWM
+        rs2_value = 2 * n_clocks;
+        @ (posedge clock);
+        #1;
+        alu_resoult = 32'h40020060 + 4 * 4; //Timer Capture MSB Reg
+        rs2_value = 32'b0;
         @ (posedge clock);
         #1;
         alu_resoult = 32'h40020060 + 0 * 4; //Timer CS Reg
@@ -2581,7 +2596,8 @@ module test_AXI_ctrl( );
         #1;
         en_in = 1'b0;
         we_in = 1'b0;
-        for (int i = 0; i < n_clocks + 2; ++i) begin
+        // a: middle of the high half of the first period
+        for (int i = 0; i < n_clocks / 2; ++i) begin
             @(posedge clock);
             #1;
         end
@@ -2593,7 +2609,8 @@ module test_AXI_ctrl( );
         end
         #1;
         validating = 1'b0;
-        for (int i = 0; i < n_clocks + 2; ++i) begin
+        // b: middle of the low half
+        for (int i = 0; i < n_clocks; ++i) begin
             @(posedge clock);
             #1;
         end
@@ -2602,6 +2619,19 @@ module test_AXI_ctrl( );
             $display("Test #%0d-b: OK", testN);
         end else begin
             $display("Test #%0d-b: FAILED -> timer_pwm was %0b expected %0b", testN, timer_pwm, 1'b0);
+        end
+        #1;
+        validating = 1'b0;
+        // c: middle of the high half of the second period, after the terminal count
+        for (int i = 0; i < n_clocks; ++i) begin
+            @(posedge clock);
+            #1;
+        end
+        validating = 1'b1;
+        if(timer_pwm == 1'b1) begin
+            $display("Test #%0d-c: OK", testN);
+        end else begin
+            $display("Test #%0d-c: FAILED -> timer_pwm was %0b expected %0b", testN, timer_pwm, 1'b1);
         end
         #1;
         validating = 1'b0;

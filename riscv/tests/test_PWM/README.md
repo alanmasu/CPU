@@ -1,6 +1,6 @@
 # test_PWM
 
-Starts the timer in PWM mode, with compare value 66 and period 200 ticks, then stops in a loop. Today the PWM of the timer only toggles its output at the compare value (to be fixed in the RTL).
+Starts the timer in PWM mode, with compare value 66 and period 200 ticks, then stops in a loop.
 
 ## Where it runs
 

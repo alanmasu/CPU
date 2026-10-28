@@ -1,6 +1,6 @@
 # example_Timer_PWM
 
-Dims the LED LD1, driven by the output of the timer in PWM mode: BTNL fades it by itself, BTNR switches to manual, where BTNU and BTND change the duty cycle by 10%; the UART tells the mode and the duty cycle. It does not work yet, because the PWM of the timer only toggles its output at the compare value (to be fixed in the RTL).
+Dims the LED LD1, driven by the output of the timer in PWM mode: BTNL fades it by itself, BTNR switches to manual, where BTNU and BTND change the duty cycle by 10%; the UART tells the mode and the duty cycle.
 
 ## Run it on the board
 

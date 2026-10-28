@@ -232,10 +232,11 @@ begin
                     if stop = '1' then
                         timer_state <= timer_idle;
                         busy <= '0';
-                    elsif counter = compare then
-                        pwm_int <= not pwm_int; -- Inverte il segnale PWM quando il contatore supera il valore di confronto
                     elsif counter = unsigned(pwm_tc) then
-                        counter <= (others => '0'); -- Resetta il contatore quando raggiunge il valore di cattura
+                        counter <= (others => '0');
+                        pwm_int <= '1';
+                    elsif counter = compare then
+                        pwm_int <= '0';
                     end if;
                 when others =>
                     timer_state <= timer_idle; -- Default case
